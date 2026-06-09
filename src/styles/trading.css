@@ -1,0 +1,462 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #080c16;
+  color: white;
+  font-family: Inter, Arial, sans-serif;
+}
+
+button,
+select,
+input {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.trading-page {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #182033, #070a12 65%);
+  padding-bottom: 86px;
+  overflow-x: hidden;
+}
+
+.top-bar {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 18px;
+  background: #101626;
+  border-bottom: 1px solid #20283a;
+}
+
+.avatar {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  border-radius: 50%;
+  background: #0f9f5f;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+
+.payout-chip {
+  background: #143d29;
+  color: #43e38b;
+  border: 1px solid #2e9b62;
+  border-radius: 14px;
+  padding: 12px 20px;
+  font-weight: 800;
+}
+
+.account-box {
+  background: #0c111d;
+  border: 1px solid #263044;
+  color: white;
+  padding: 8px 22px;
+  border-radius: 16px;
+  min-width: 180px;
+  text-align: left;
+}
+
+.account-box span {
+  display: block;
+  color: #8c96aa;
+  font-size: 13px;
+}
+
+.account-box strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 15px;
+}
+
+.wallet-btn {
+  margin-left: auto;
+  background: #084f35;
+  color: #49e59a;
+  border: 0;
+  border-radius: 16px;
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+}
+
+.trading-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 18px;
+  padding: 18px;
+}
+
+.chart-section,
+.trade-panel {
+  background: #0d1321;
+  border: 1px solid #222b3f;
+  border-radius: 22px;
+  padding: 18px;
+}
+
+.asset-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.asset-row h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.asset-row p {
+  margin: 4px 0 0;
+  color: #8994aa;
+}
+
+select,
+input {
+  width: 100%;
+  margin-top: 8px;
+  background: #151d2e;
+  color: white;
+  border: 1px solid #2a3650;
+  border-radius: 12px;
+  padding: 13px;
+  outline: none;
+}
+
+select:focus,
+input:focus {
+  border-color: #0f9f5f;
+}
+
+.timeframes {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 18px 0;
+  padding-bottom: 4px;
+}
+
+.timeframes button,
+.account-switcher button {
+  background: #151d2e;
+  color: #aab3c7;
+  border: 1px solid #2a3650;
+  border-radius: 10px;
+  padding: 9px 14px;
+  white-space: nowrap;
+}
+
+.timeframes .active,
+.account-switcher .active {
+  background: #0f9f5f;
+  color: white;
+  border-color: #0f9f5f;
+}
+
+.fake-chart {
+  position: relative;
+  height: 480px;
+  background: #080d18;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid #162033;
+}
+
+.chart-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(#1c2638 1px, transparent 1px),
+    linear-gradient(90deg, #1c2638 1px, transparent 1px);
+  background-size: 80px 60px;
+  opacity: 0.45;
+}
+
+.price-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 48%;
+  height: 2px;
+  background: #3182ff;
+  box-shadow: 0 0 14px rgba(49, 130, 255, 0.55);
+}
+
+.candles {
+  position: absolute;
+  left: 30px;
+  right: 30px;
+  bottom: 80px;
+  height: 260px;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.candles span {
+  width: 12px;
+  border-radius: 5px;
+}
+
+.candles .green {
+  background: #16c784;
+  box-shadow: 0 0 10px rgba(22, 199, 132, 0.25);
+}
+
+.candles .red {
+  background: #ea3943;
+  box-shadow: 0 0 10px rgba(234, 57, 67, 0.25);
+}
+
+.trade-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.account-switcher {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.trade-panel label {
+  color: #9ca8bd;
+  font-size: 14px;
+}
+
+.expiry-unit-row {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.expiry-unit-row button {
+  border: 1px solid #2a3650;
+  background: #151d2e;
+  color: #9ca8bd;
+  border-radius: 10px;
+  padding: 10px 8px;
+}
+
+.expiry-unit-row button.active {
+  background: #0f9f5f;
+  color: white;
+  border-color: #0f9f5f;
+}
+
+.expiry-control {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 52px 1fr 52px;
+  align-items: center;
+  gap: 10px;
+}
+
+.expiry-control button {
+  height: 48px;
+  border: 1px solid #2a3650;
+  background: #151d2e;
+  color: white;
+  border-radius: 12px;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.expiry-control button:hover,
+.expiry-unit-row button:hover,
+.timeframes button:hover,
+.account-switcher button:hover {
+  border-color: #0f9f5f;
+}
+
+.expiry-control strong {
+  height: 48px;
+  display: grid;
+  place-items: center;
+  background: #151d2e;
+  border: 1px solid #2a3650;
+  border-radius: 12px;
+  font-size: 18px;
+  color: white;
+}
+
+.expiry-helper {
+  display: block;
+  margin-top: 8px;
+  color: #79869d;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.payout-box {
+  background: #090e19;
+  border: 1px solid #25304a;
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.payout-box div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.payout-box span {
+  color: #8d98ae;
+}
+
+.payout-box strong {
+  color: #43e38b;
+}
+
+.trade-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.trade-actions button {
+  border: 0;
+  border-radius: 16px;
+  color: white;
+  padding: 18px;
+  font-weight: 900;
+  font-size: 18px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.buy-btn {
+  background: linear-gradient(180deg, #19b96f, #087b49);
+}
+
+.sell-btn {
+  background: linear-gradient(180deg, #f05252, #a61e28);
+}
+
+.buy-btn:hover {
+  filter: brightness(1.08);
+}
+
+.sell-btn:hover {
+  filter: brightness(1.08);
+}
+
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 74px;
+  background: #101626;
+  border-top: 1px solid #20283a;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  z-index: 20;
+}
+
+.bottom-nav button {
+  background: transparent;
+  border: 0;
+  color: #8e99ad;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.bottom-nav button:hover {
+  color: #43e38b;
+}
+
+.bottom-nav svg {
+  width: 22px;
+}
+
+@media (max-width: 900px) {
+  .trading-main {
+    grid-template-columns: 1fr;
+  }
+
+  .fake-chart {
+    height: 420px;
+  }
+
+  .trade-panel {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 560px) {
+  .top-bar {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+
+  .payout-chip {
+    padding: 10px 14px;
+  }
+
+  .account-box {
+    min-width: 130px;
+    padding: 8px 12px;
+  }
+
+  .wallet-btn {
+    width: 46px;
+    height: 46px;
+  }
+
+  .trading-main {
+    padding: 10px;
+  }
+
+  .chart-section,
+  .trade-panel {
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  .asset-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fake-chart {
+    height: 360px;
+  }
+
+  .candles {
+    left: 16px;
+    right: 16px;
+    gap: 6px;
+  }
+
+  .candles span {
+    width: 8px;
+  }
+}

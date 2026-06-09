@@ -1,0 +1,73 @@
+export const languages = [
+  // Major International
+  { code: 'en', name: 'English' },
+  { code: 'fr', name: 'Français' },
+  { code: 'es', name: 'Español' },
+  { code: 'pt', name: 'Português' },
+  { code: 'de', name: 'Deutsch' },
+  { code: 'it', name: 'Italiano' },
+  { code: 'ru', name: 'Русский' },
+  { code: 'uk', name: 'Українська' },
+  { code: 'pl', name: 'Polski' },
+  { code: 'nl', name: 'Nederlands' },
+  { code: 'sv', name: 'Svenska' },
+  { code: 'no', name: 'Norsk' },
+  { code: 'da', name: 'Dansk' },
+  { code: 'fi', name: 'Suomi' },
+  { code: 'tr', name: 'Türkçe' },
+  { code: 'el', name: 'Ελληνικά' },
+
+  // Asia
+  { code: 'zh', name: '中文' },
+  { code: 'ja', name: '日本語' },
+  { code: 'ko', name: '한국어' },
+  { code: 'hi', name: 'हिन्दी' },
+  { code: 'bn', name: 'বাংলা' },
+  { code: 'ur', name: 'اردو' },
+  { code: 'ta', name: 'தமிழ்' },
+  { code: 'te', name: 'తెలుగు' },
+  { code: 'ml', name: 'മലയാളം' },
+  { code: 'gu', name: 'ગુજરાતી' },
+  { code: 'mr', name: 'मराठी' },
+  { code: 'pa', name: 'ਪੰਜਾਬੀ' },
+  { code: 'th', name: 'ไทย' },
+  { code: 'vi', name: 'Tiếng Việt' },
+  { code: 'id', name: 'Bahasa Indonesia' },
+  { code: 'ms', name: 'Bahasa Melayu' },
+  { code: 'fil', name: 'Filipino' },
+
+  // Middle East
+  { code: 'ar', name: 'العربية' },
+  { code: 'fa', name: 'فارسی' },
+  { code: 'he', name: 'עברית' },
+
+  // Africa
+  { code: 'sw', name: 'Kiswahili' },
+  { code: 'am', name: 'አማርኛ' },
+  { code: 'ha', name: 'Hausa' },
+  { code: 'yo', name: 'Yorùbá' },
+  { code: 'ig', name: 'Igbo' },
+  { code: 'zu', name: 'isiZulu' },
+  { code: 'xh', name: 'isiXhosa' },
+  { code: 'st', name: 'Sesotho' },
+  { code: 'tn', name: 'Setswana' },
+  { code: 'sn', name: 'Shona' },
+  { code: 'rw', name: 'Kinyarwanda' },
+  { code: 'lg', name: 'Luganda' },
+  { code: 'so', name: 'Soomaali' },
+  { code: 'om', name: 'Afaan Oromo' },
+
+  // Others
+  { code: 'cs', name: 'Čeština' },
+  { code: 'hu', name: 'Magyar' },
+  { code: 'ro', name: 'Română' },
+  { code: 'bg', name: 'Български' },
+  { code: 'sr', name: 'Српски' },
+  { code: 'hr', name: 'Hrvatski' },
+  { code: 'sk', name: 'Slovenčina' },
+  { code: 'sl', name: 'Slovenščina' },
+  { code: 'lt', name: 'Lietuvių' },
+  { code: 'lv', name: 'Latviešu' },
+  { code: 'et', name: 'Eesti'
+  }
+];
