@@ -1,18 +1,20 @@
-import type { ReactNode } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import type { ReactNode } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
-import AdminPage from './pages/AdminPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import LoginPage from './pages/LoginPage';
-import ProfilePage from './pages/ProfilePage';
-import RegisterPage from './pages/RegisterPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import SocialTradingPage from './pages/SocialTradingPage';
-import TradingPage from './pages/TradingPage';
-import WalletPage from './pages/WalletPage';
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import DeleteAccountPage from "./pages/DeleteAccountPage";
+import ProfilePage from "./pages/ProfilePage";
+import TradingPage from "./pages/TradingPage";
+import FinancePage from "./pages/FinancePage";
+import MarketPage from "./pages/MarketPage";
+import ChatPage from "./pages/ChatPage";
+import HelpPage from "./pages/HelpPage";
 
-function ProtectedRoute({ children }: { children: ReactNode }) {
-  const token = localStorage.getItem('accessToken');
+function RequireAuth({ children }: { children: ReactNode }) {
+  const token = localStorage.getItem("neurooption_token");
 
   if (!token) {
     return <Navigate to="/login" replace />;
@@ -28,54 +30,79 @@ export default function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
 
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signin" element={<Navigate to="/login" replace />} />
+
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/registration" element={<Navigate to="/register" replace />} />
+        <Route path="/signup" element={<Navigate to="/register" replace />} />
+
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         <Route
           path="/trading"
           element={
-            <ProtectedRoute>
+            <RequireAuth>
               <TradingPage />
-            </ProtectedRoute>
+            </RequireAuth>
           }
         />
 
         <Route
-          path="/wallet"
+          path="/finance"
           element={
-            <ProtectedRoute>
-              <WalletPage />
-            </ProtectedRoute>
+            <RequireAuth>
+              <FinancePage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/market"
+          element={
+            <RequireAuth>
+              <MarketPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/chat"
+          element={
+            <RequireAuth>
+              <ChatPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/help"
+          element={
+            <RequireAuth>
+              <HelpPage />
+            </RequireAuth>
           }
         />
 
         <Route
           path="/profile"
           element={
-            <ProtectedRoute>
+            <RequireAuth>
               <ProfilePage />
-            </ProtectedRoute>
+            </RequireAuth>
           }
         />
 
         <Route
-          path="/social-trading"
+          path="/delete-account"
           element={
-            <ProtectedRoute>
-              <SocialTradingPage />
-            </ProtectedRoute>
+            <RequireAuth>
+              <DeleteAccountPage />
+            </RequireAuth>
           }
         />
 
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute>
-              <AdminPage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );
