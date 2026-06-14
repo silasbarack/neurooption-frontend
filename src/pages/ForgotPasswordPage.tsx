@@ -1,68 +1,99 @@
-import { useState } from 'react';
-import type { FormEvent } from 'react';
-import { Link } from 'react-router-dom';
-import { authApi } from '../api';
-import './AuthPages.css';
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { Link } from "react-router-dom";
+import "./AuthPages.css";
+
+type ForgotPasswordResponse = {
+  message?: string;
+  data?: {
+    message?: string;
+  };
+};
+
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://neurooption-backend.onrender.com";
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
+
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
+  const [success, setSuccess] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError('');
-    setMessage('');
+
     setLoading(true);
+    setMessage("");
+    setSuccess(false);
 
     try {
-      const response = await authApi.forgotPassword({
-        email: email.trim().toLowerCase(),
+      const response = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+        }),
       });
 
-      setMessage(response.message || 'Password reset email sent successfully.');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not send reset email.');
+      const result: ForgotPasswordResponse = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || result.data?.message || "Password reset request failed"
+        );
+      }
+
+      setSuccess(true);
+      setMessage(
+        result.message ||
+          result.data?.message ||
+          "Password reset link sent. Please check your email."
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Cannot connect to backend";
+
+      setSuccess(false);
+      setMessage(errorMessage);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main className="auth-shell">
+    <main className="auth-page">
       <section className="auth-card">
-        <Link className="auth-back" to="/login">
-          ‹ Back to login
-        </Link>
-
-        <div className="auth-brand">
-          <div className="auth-logo">N</div>
-          <span>NeuroOption</span>
+        <div className="auth-logo">
+          <div className="auth-logo-icon">N</div>
+          <h1>NeuroOption</h1>
         </div>
 
-        <h1>Forgot Password</h1>
+        <h2>Forgot Password</h2>
+
         <p className="auth-subtitle">
-          Enter your email to receive a password reset link.
+          Remembered password? <Link to="/login">Sign in</Link>
         </p>
 
-        {error && <div className="auth-error">{error}</div>}
-        {message && <div className="auth-success">{message}</div>}
+        <form className="auth-form" onSubmit={handleSubmit}>
+          {message && (
+            <div className={success ? "auth-success" : "auth-error"}>{message}</div>
+          )}
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <label>
-            Email
-            <input
-              type="email"
-              value={email}
-              autoComplete="email"
-              onChange={(event) => setEmail(event.target.value)}
-              required
-            />
-          </label>
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
 
           <button type="submit" disabled={loading}>
-            {loading ? 'SENDING...' : 'SEND RESET LINK'}
+            {loading ? "SENDING..." : "SEND RESET LINK"}
           </button>
         </form>
       </section>

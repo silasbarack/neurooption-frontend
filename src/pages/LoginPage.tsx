@@ -1,93 +1,128 @@
-import { useState } from 'react';
-import type { FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { authApi } from '../api';
-import './AuthPages.css';
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "./AuthPages.css";
+
+type AuthUser = {
+  id?: string;
+  email?: string;
+  fullName?: string;
+};
+
+type AuthResponse = {
+  accessToken?: string;
+  token?: string;
+  user?: AuthUser;
+  message?: string;
+  data?: {
+    accessToken?: string;
+    token?: string;
+    user?: AuthUser;
+    message?: string;
+  };
+};
+
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://neurooption-backend.onrender.com";
 
 export default function LoginPage() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [message, setMessage] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError('');
+
     setLoading(true);
+    setMessage("");
 
     try {
-      const response = await authApi.login({
-        email: email.trim().toLowerCase(),
-        password,
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+        }),
       });
 
-      const token = response.accessToken || response.token;
+      const result: AuthResponse = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result.message || result.data?.message || "Login failed");
+      }
+
+      const cleanResult = result.data || result;
+      const token = cleanResult.accessToken || cleanResult.token;
 
       if (token) {
-        localStorage.setItem('neurooption_token', token);
-        localStorage.setItem('token', token);
+        localStorage.setItem("neurooption_token", token);
       }
 
-      if (response.user) {
-        localStorage.setItem('neurooption_user', JSON.stringify(response.user));
+      if (cleanResult.user) {
+        localStorage.setItem("neurooption_user", JSON.stringify(cleanResult.user));
       }
 
-      navigate('/trading');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Cannot connect to backend.');
+      navigate("/trading", { replace: true });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Cannot connect to backend";
+
+      setMessage(errorMessage);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main className="auth-shell">
+    <main className="auth-page">
       <section className="auth-card">
-        <div className="auth-brand">
-          <div className="auth-logo">N</div>
-          <span>NeuroOption</span>
+        <div className="auth-logo">
+          <div className="auth-logo-icon">N</div>
+          <h1>NeuroOption</h1>
         </div>
 
-        <h1>Sign in</h1>
+        <h2>Sign in</h2>
 
-        <p className="auth-switch">
+        <p className="auth-subtitle">
           New user? <Link to="/register">Registration</Link>
         </p>
 
-        {error && <div className="auth-error">{error}</div>}
+        <form className="auth-form" onSubmit={handleSubmit}>
+          {message && <div className="auth-error">{message}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <label>
-            Email
-            <input
-              type="email"
-              value={email}
-              autoComplete="email"
-              onChange={(event) => setEmail(event.target.value)}
-              required
-            />
-          </label>
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
 
-          <label>
-            Password
-            <input
-              type="password"
-              value={password}
-              autoComplete="current-password"
-              onChange={(event) => setPassword(event.target.value)}
-              required
-            />
-          </label>
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
 
-          <Link className="auth-small-link" to="/forgot-password">
+          <Link className="forgot-link" to="/forgot-password">
             Forgot Password?
           </Link>
 
           <button type="submit" disabled={loading}>
-            {loading ? 'SIGNING IN...' : 'SIGN IN'}
+            {loading ? "SIGNING IN..." : "SIGN IN"}
           </button>
         </form>
       </section>

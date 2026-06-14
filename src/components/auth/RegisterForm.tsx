@@ -1,141 +1,128 @@
-import axios from 'axios';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { authApi } from "../../api/auth.api";
+import "./AuthForms.css";
 
-import { authApi } from '../../api/auth.api';
-import '../../styles/auth.css';
+type AuthResponse = {
+  accessToken?: string;
+  token?: string;
+  message?: string;
+  user?: {
+    id?: string;
+    email?: string;
+    fullName?: string;
+    name?: string;
+  };
+  data?: {
+    accessToken?: string;
+    token?: string;
+    user?: {
+      id?: string;
+      email?: string;
+      fullName?: string;
+      name?: string;
+    };
+  };
+};
 
 export default function RegisterForm() {
   const navigate = useNavigate();
 
-  const [fullname, setFullname] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [promoCode, setPromoCode] = useState('50START');
-  const [accepted, setAccepted] = useState(false);
-  const [error, setError] = useState('');
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  function getErrorMessage(err: unknown) {
-    if (axios.isAxiosError(err)) {
-      const data = err.response?.data;
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
-      if (Array.isArray(data?.message)) {
-        return data.message.join(', ');
-      }
-
-      if (typeof data?.message === 'string') {
-        return data.message;
-      }
-
-      if (typeof data?.error === 'string') {
-        return data.error;
-      }
-
-      if (!err.response) {
-        return 'Cannot connect to backend. Make sure backend is running on port 3000.';
-      }
-    }
-
-    return 'Registration failed. Check your details.';
-  }
-
-  async function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError('');
-
-    if (!accepted) {
-      setError('Please accept the public offer agreement.');
-      return;
-    }
+    setMessage("");
+    setLoading(true);
 
     try {
-      const res = await authApi.register({
-        fullname: fullname.trim(),
-        email: email.trim().toLowerCase(),
-        phone: phone.trim() || undefined,
+      const response = (await authApi.register({
+        fullName,
+        email,
         password,
-      });
+      })) as AuthResponse;
 
-      localStorage.setItem('accessToken', res.data.accessToken);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
+      const token =
+        response.accessToken ||
+        response.token ||
+        response.data?.accessToken ||
+        response.data?.token;
 
-      navigate('/trading');
-    } catch (err) {
-      setError(getErrorMessage(err));
+      const user = response.user || response.data?.user;
+
+      if (token) {
+        localStorage.setItem("neurooption_token", token);
+        localStorage.setItem("neurooption_user", JSON.stringify(user || {}));
+        navigate("/trading");
+        return;
+      }
+
+      setMessage("Account created. Please sign in.");
+      setTimeout(() => navigate("/login"), 1200);
+    } catch (error) {
+      console.error("Registration error:", error);
+      setMessage("Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <form className="auth-card pocket-style" onSubmit={handleSubmit}>
-      <div className="brand">
-        <div className="brand-icon">N</div>
-        <span>
-          <strong>Neuro</strong>Option
-        </span>
-      </div>
+    <form className="auth-form" onSubmit={handleSubmit}>
+      {message && <div className="auth-alert">{message}</div>}
 
-      <h1>Registration</h1>
-
-      <p>
-        Already registered?{' '}
-        <button type="button" onClick={() => navigate('/login')}>
-          Sign in
-        </button>
-      </p>
-
-      {error && <div className="auth-error">{error}</div>}
-
+      <label className="auth-label" htmlFor="register-full-name">
+        Full name
+      </label>
       <input
-        placeholder="Full name *"
-        value={fullname}
-        onChange={(event) => setFullname(event.target.value)}
+        id="register-full-name"
+        className="auth-input"
+        type="text"
+        placeholder="Enter your full name"
+        value={fullName}
+        onChange={(event) => setFullName(event.target.value)}
         required
       />
 
+      <label className="auth-label" htmlFor="register-email">
+        Email
+      </label>
       <input
+        id="register-email"
+        className="auth-input"
         type="email"
-        placeholder="Email *"
+        placeholder="Enter your email"
         value={email}
         onChange={(event) => setEmail(event.target.value)}
         required
       />
 
+      <label className="auth-label" htmlFor="register-password">
+        Password
+      </label>
       <input
-        placeholder="Phone"
-        value={phone}
-        onChange={(event) => setPhone(event.target.value)}
-      />
-
-      <input
+        id="register-password"
+        className="auth-input"
         type="password"
-        placeholder="Password *"
+        placeholder="Create a password"
         value={password}
         onChange={(event) => setPassword(event.target.value)}
         required
-        minLength={6}
       />
 
-      <small>Enter promo code if you have one</small>
-
-      <input
-        placeholder="Promo code"
-        value={promoCode}
-        onChange={(event) => setPromoCode(event.target.value)}
-      />
-
-      <label className="agreement">
-        <input
-          type="checkbox"
-          checked={accepted}
-          onChange={(event) => setAccepted(event.target.checked)}
-        />
-        <span>I have read and accepted the public offer agreement</span>
-      </label>
-
-      <button className="primary-auth-btn" type="submit">
-        SIGN UP
+      <button className="auth-button" type="submit" disabled={loading}>
+        {loading ? "Creating account..." : "REGISTER"}
       </button>
+
+      <Link className="auth-small-link" to="/login">
+        Already have an account? Sign in
+      </Link>
     </form>
   );
 }

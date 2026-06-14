@@ -1,95 +1,112 @@
-import axios from 'axios';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { authApi } from "../../api/auth.api";
+import "./AuthForms.css";
 
-import { authApi } from '../../api/auth.api';
-import '../../styles/auth.css';
+type AuthResponse = {
+  accessToken?: string;
+  token?: string;
+  message?: string;
+  user?: {
+    id?: string;
+    email?: string;
+    fullName?: string;
+    name?: string;
+  };
+  data?: {
+    accessToken?: string;
+    token?: string;
+    user?: {
+      id?: string;
+      email?: string;
+      fullName?: string;
+      name?: string;
+    };
+  };
+};
 
 export default function LoginForm() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  function getErrorMessage(err: unknown) {
-    if (axios.isAxiosError(err)) {
-      const data = err.response?.data;
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
-      if (Array.isArray(data?.message)) return data.message.join(', ');
-      if (typeof data?.message === 'string') return data.message;
-      if (!err.response) return 'Cannot connect to backend on port 3000.';
-    }
-
-    return 'Invalid email or password';
-  }
-
-  async function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError('');
+    setMessage("");
+    setLoading(true);
 
     try {
-      const res = await authApi.login({
-        email: email.trim().toLowerCase(),
+      const response = (await authApi.login({
+        email,
         password,
-      });
+      })) as AuthResponse;
 
-      localStorage.setItem('accessToken', res.data.accessToken);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
+      const token =
+        response.accessToken ||
+        response.token ||
+        response.data?.accessToken ||
+        response.data?.token;
 
-      navigate('/trading');
-    } catch (err) {
-      setError(getErrorMessage(err));
+      const user = response.user || response.data?.user;
+
+      if (!token) {
+        setMessage("Login worked, but no token was returned by backend.");
+        return;
+      }
+
+      localStorage.setItem("neurooption_token", token);
+      localStorage.setItem("neurooption_user", JSON.stringify(user || {}));
+
+      navigate("/trading");
+    } catch (error) {
+      console.error("Login error:", error);
+      setMessage("Invalid email or password.");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <form className="auth-card pocket-style" onSubmit={handleSubmit}>
-      <div className="brand">
-        <div className="brand-icon">N</div>
-        <span>
-          <strong>Neuro</strong>Option
-        </span>
-      </div>
+    <form className="auth-form" onSubmit={handleSubmit}>
+      {message && <div className="auth-alert">{message}</div>}
 
-      <h1>Sign in</h1>
-
-      <p>
-        New user?{' '}
-        <button type="button" onClick={() => navigate('/register')}>
-          Registration
-        </button>
-      </p>
-
-      {error && <div className="auth-error">{error}</div>}
-
+      <label className="auth-label" htmlFor="login-email">
+        Email
+      </label>
       <input
+        id="login-email"
+        className="auth-input"
         type="email"
-        placeholder="Email *"
+        placeholder="Enter your email"
         value={email}
         onChange={(event) => setEmail(event.target.value)}
         required
       />
 
+      <label className="auth-label" htmlFor="login-password">
+        Password
+      </label>
       <input
+        id="login-password"
+        className="auth-input"
         type="password"
-        placeholder="Password *"
+        placeholder="Enter your password"
         value={password}
         onChange={(event) => setPassword(event.target.value)}
         required
-        minLength={6}
       />
 
-      <button
-        type="button"
-        className="forgot-link"
-        onClick={() => navigate('/forgot-password')}
-      >
+      <Link className="auth-small-link" to="/forgot-password">
         Forgot Password?
-      </button>
+      </Link>
 
-      <button className="primary-auth-btn" type="submit">
-        SIGN IN
+      <button className="auth-button" type="submit" disabled={loading}>
+        {loading ? "Signing in..." : "SIGN IN"}
       </button>
     </form>
   );

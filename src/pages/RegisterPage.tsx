@@ -1,148 +1,132 @@
-import { useState } from 'react';
-import type { FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { authApi } from '../api';
-import './AuthPages.css';
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "./AuthPages.css";
+
+type RegisterResponse = {
+  message?: string;
+  accessToken?: string;
+  token?: string;
+  user?: unknown;
+  data?: {
+    message?: string;
+    accessToken?: string;
+    token?: string;
+    user?: unknown;
+  };
+};
+
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://neurooption-backend.onrender.com";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
 
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [promoCode, setPromoCode] = useState('');
-  const [acceptedAgreement, setAcceptedAgreement] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError('');
-    setMessage('');
-
-    if (!acceptedAgreement) {
-      setError('You must accept the public offer agreement.');
-      return;
-    }
 
     setLoading(true);
+    setMessage("");
 
     try {
-      const response = await authApi.register({
-        fullName: fullName.trim(),
-        email: email.trim().toLowerCase(),
-        phone: phone.trim(),
-        password,
-        promoCode: promoCode.trim(),
-        acceptedAgreement,
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          email: email.trim(),
+          password,
+        }),
       });
 
-      const token = response.accessToken || response.token;
+      const result: RegisterResponse = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || result.data?.message || "Registration failed"
+        );
+      }
+
+      const cleanResult = result.data || result;
+      const token = cleanResult.accessToken || cleanResult.token;
 
       if (token) {
-        localStorage.setItem('neurooption_token', token);
-        localStorage.setItem('token', token);
+        localStorage.setItem("neurooption_token", token);
       }
 
-      if (response.user) {
-        localStorage.setItem('neurooption_user', JSON.stringify(response.user));
+      if (cleanResult.user) {
+        localStorage.setItem("neurooption_user", JSON.stringify(cleanResult.user));
       }
 
-      setMessage(response.message || 'Registration successful.');
-      setTimeout(() => navigate('/trading'), 800);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed.');
+      navigate("/trading", { replace: true });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Cannot connect to backend";
+
+      setMessage(errorMessage);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main className="auth-shell">
+    <main className="auth-page">
       <section className="auth-card">
-        <div className="auth-brand">
-          <div className="auth-logo">N</div>
-          <span>NeuroOption</span>
+        <div className="auth-logo">
+          <div className="auth-logo-icon">N</div>
+          <h1>NeuroOption</h1>
         </div>
 
-        <h1>Registration</h1>
+        <h2>Create account</h2>
 
-        <p className="auth-switch">
+        <p className="auth-subtitle">
           Already registered? <Link to="/login">Sign in</Link>
         </p>
 
-        {error && <div className="auth-error">{error}</div>}
-        {message && <div className="auth-success">{message}</div>}
+        <form className="auth-form" onSubmit={handleSubmit}>
+          {message && <div className="auth-error">{message}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <label>
-            Full name
-            <input
-              type="text"
-              value={fullName}
-              autoComplete="name"
-              onChange={(event) => setFullName(event.target.value)}
-              required
-            />
-          </label>
+          <label htmlFor="fullName">Full name</label>
+          <input
+            id="fullName"
+            type="text"
+            placeholder="Full name"
+            value={fullName}
+            onChange={(event) => setFullName(event.target.value)}
+            required
+          />
 
-          <label>
-            Email
-            <input
-              type="email"
-              value={email}
-              autoComplete="email"
-              onChange={(event) => setEmail(event.target.value)}
-              required
-            />
-          </label>
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
 
-          <label>
-            Phone
-            <input
-              type="tel"
-              value={phone}
-              autoComplete="tel"
-              onChange={(event) => setPhone(event.target.value)}
-            />
-          </label>
-
-          <label>
-            Password
-            <input
-              type="password"
-              value={password}
-              autoComplete="new-password"
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              minLength={6}
-            />
-          </label>
-
-          <label>
-            Promo code
-            <input
-              type="text"
-              value={promoCode}
-              onChange={(event) => setPromoCode(event.target.value)}
-              placeholder="Enter promo code if you have one"
-            />
-          </label>
-
-          <label className="auth-check">
-            <input
-              type="checkbox"
-              checked={acceptedAgreement}
-              onChange={(event) => setAcceptedAgreement(event.target.checked)}
-            />
-            <span>I have read and accepted the public offer agreement</span>
-          </label>
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
 
           <button type="submit" disabled={loading}>
-            {loading ? 'SIGNING UP...' : 'SIGN UP'}
+            {loading ? "CREATING ACCOUNT..." : "REGISTER"}
           </button>
         </form>
       </section>

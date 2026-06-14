@@ -1,613 +1,959 @@
 // frontend/src/pages/TradingPage.tsx
-import { useEffect, useMemo, useRef, useState } from 'react';
-import './TradingPage.css';
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties, WheelEvent } from "react";
+import { Link } from "react-router-dom";
 
 type Candle = {
-  time: number;
   open: number;
   high: number;
   low: number;
   close: number;
 };
 
-type Trade = {
+type TradeDirection = "BUY" | "SELL";
+type ChartType = "Candles" | "Line" | "Bars" | "Heikin Ashi";
+
+type OpenTrade = {
   id: string;
-  direction: 'BUY' | 'SELL';
+  direction: TradeDirection;
   amount: number;
-  entry: number;
+  entryPrice: number;
   expiryAt: number;
-  status: 'OPEN' | 'WON' | 'LOST';
-  profit: number;
+  payout: number;
 };
 
-const pairs = ['EUR/USD OTC', 'CAD/JPY OTC', 'GBP/USD OTC', 'USD/JPY OTC', 'AUD/USD OTC'];
-const timeframes = ['S5', 'S10', 'S15', 'S30', 'M1', 'M2', 'M3', 'M5', 'M10', 'M15', 'M30', 'H1'];
-const chartTypes = ['Candles', 'Line', 'Bars', 'Heikin Ashi'];
+type ClosedTrade = {
+  id: string;
+  direction: TradeDirection;
+  amount: number;
+  profit: number;
+  won: boolean;
+  closedAt: number;
+};
+
+const assets = [
+  "EUR/USD OTC",
+  "GBP/USD OTC",
+  "USD/JPY OTC",
+  "CAD/JPY OTC",
+  "AUD/USD OTC",
+  "USD/CAD OTC",
+  "EUR/JPY OTC",
+  "GBP/JPY OTC",
+  "BTC/USD OTC",
+  "ETH/USD OTC",
+];
+
+const timeframes = ["S5", "S10", "S15", "S30", "M1", "M2", "M3", "M5", "M10", "M15", "M30", "H1", "H4", "D1"];
+
 const indicators = [
-  'Alligator', 'Moving Average', 'Bollinger Bands', 'RSI', 'MACD', 'ADX', 'CCI', 'Aroon',
-  'ATR', 'Awesome Oscillator', 'Bears Power', 'Bulls Power', 'DeMarker', 'Fractal',
-  'Ichimoku Kinko Hyo', 'Momentum', 'Parabolic SAR', 'Stochastic Oscillator', 'SuperTrend',
-  'Volume', 'ZigZag', 'Williams %R', 'Rate of Change', 'OsMA', 'Envelopes',
-  'Donchian Channel', 'Keltner Channel', 'Vortex', 'Fractal Chaos Bands',
-  'Bollinger Bands Width', 'Schaff Trend Cycle', 'Accelerator Oscillator',
+  "Alligator",
+  "Moving Average",
+  "Bollinger Bands",
+  "RSI",
+  "MACD",
+  "Stochastic Oscillator",
+  "ADX",
+  "ATR",
+  "CCI",
+  "Momentum",
+  "Volume",
+  "Parabolic SAR",
+  "Ichimoku Kinko Hyo",
+  "SuperTrend",
+  "Fractal",
+  "ZigZag",
+  "Aroon",
+  "Awesome Oscillator",
+  "Bears Power",
+  "Bulls Power",
+  "DeMarker",
+  "Donchian Channel",
+  "Envelopes",
+  "Keltner Channel",
+  "Rate of Change",
+  "Vortex",
+  "Williams %R",
+  "OsMA",
+  "Accelerator Oscillator",
+  "Schaff Trend Cycle",
+  "Bollinger Bands Width",
+  "Fractal Chaos Bands",
+];
+
+const drawings = [
+  "Horizontal Line",
+  "Vertical Line",
+  "Ray",
+  "Trend Line",
+  "Parallel Channel",
+  "Rectangle",
+  "Fibonacci Retracement",
+  "Fibonacci Fan",
+  "Andrews Pitchfork",
 ];
 
 const currencies: Record<string, number> = {
   USD: 1,
-  KES: 130,
+  KES: 129,
   EUR: 0.92,
   GBP: 0.78,
-  NGN: 1500,
-  ZAR: 18.4,
-  UGX: 3800,
   TZS: 2600,
+  UGX: 3700,
   RWF: 1300,
-  GHS: 15,
-  EGP: 48,
+  NGN: 1500,
+  ZAR: 18,
+  CAD: 1.37,
+  AUD: 1.52,
+  JPY: 157,
+  CNY: 7.25,
+  INR: 83,
 };
 
-function formatMoney(amount: number, currency: string) {
-  return `${currency} ${amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-}
+function createCandles(asset: string, count = 90): Candle[] {
+  let seed = asset.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  let price = 1.18 + (seed % 40) / 1000;
 
-function secondsFromTimeframe(tf: string) {
-  if (tf.startsWith('S')) return Number(tf.slice(1));
-  if (tf.startsWith('M')) return Number(tf.slice(1)) * 60;
-  if (tf.startsWith('H')) return Number(tf.slice(1)) * 3600;
-  return 60;
-}
-
-function makeCandles(count = 120): Candle[] {
-  const candles: Candle[] = [];
-  let price = 1.2;
-
-  for (let i = 0; i < count; i++) {
+  return Array.from({ length: count }, (_, index) => {
+    const wave = Math.sin((index + seed) / 5) * 0.0016;
+    const noise = Math.sin((index + seed) * 1.7) * 0.0007;
     const open = price;
-    const drift = Math.sin(i / 9) * 0.00025;
-    const noise = (Math.random() - 0.5) * 0.0011;
-    const close = open + drift + noise;
-    const high = Math.max(open, close) + Math.random() * 0.00055;
-    const low = Math.min(open, close) - Math.random() * 0.00055;
-
-    candles.push({
-      time: Date.now() - (count - i) * 1000,
-      open,
-      high,
-      low,
-      close,
-    });
+    const close = Math.max(0.8, open + wave + noise);
+    const high = Math.max(open, close) + 0.0008 + Math.abs(Math.sin(index)) * 0.0008;
+    const low = Math.min(open, close) - 0.0008 - Math.abs(Math.cos(index)) * 0.0008;
 
     price = close;
-  }
 
-  return candles;
+    return { open, high, low, close };
+  });
 }
 
-// Performance optimization: Memoized Moving Average calculation
-function calculateMovingAverages(candles: Candle[]) {
-  const ma5: number[] = [];
-  const ma13: number[] = [];
-  const ma21: number[] = [];
-  let sum5 = 0, sum13 = 0, sum21 = 0;
+function formatMoney(amount: number, currency: string) {
+  return `${currency} ${amount.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
 
-  candles.forEach((candle, i) => {
-    sum5 += candle.close;
-    sum13 += candle.close;
-    sum21 += candle.close;
+function secondsToTime(totalSeconds: number) {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
 
-    if (i >= 5) sum5 -= candles[i - 5].close;
-    if (i >= 13) sum13 -= candles[i - 13].close;
-    if (i >= 21) sum21 -= candles[i - 21].close;
-
-    ma5[i] = sum5 / Math.min(i + 1, 5);
-    ma13[i] = sum13 / Math.min(i + 1, 13);
-    ma21[i] = sum21 / Math.min(i + 1, 21);
-  });
-
-  return { ma5, ma13, ma21 };
+  return [hours, minutes, seconds]
+    .map((value) => String(value).padStart(2, "0"))
+    .join(":");
 }
 
 export default function TradingPage() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const rafRef = useRef<number | null>(null);
-  const dataUpdateQueueRef = useRef<boolean>(false);
-  
-  const [candles, setCandles] = useState<Candle[]>(() => makeCandles());
-  const [pair, setPair] = useState('EUR/USD OTC');
-  const [timeframe, setTimeframe] = useState('M1');
-  const [chartType, setChartType] = useState('Candles');
-  const [selectedIndicators, setSelectedIndicators] = useState<string[]>(['Alligator']);
-  const [currency, setCurrency] = useState('USD');
-  const [accountType, setAccountType] = useState<'DEMO' | 'REAL'>('DEMO');
-  const [demoUsd, setDemoUsd] = useState(70000);
-  const [realUsd, setRealUsd] = useState(0);
+  const chartRef = useRef<HTMLDivElement | null>(null);
+
+  const [asset, setAsset] = useState("EUR/USD OTC");
+  const [timeframe, setTimeframe] = useState("M1");
+  const [chartType, setChartType] = useState<ChartType>("Candles");
+  const [indicator, setIndicator] = useState("Alligator");
+  const [drawing, setDrawing] = useState("Trend Line");
+
+  const [currency, setCurrency] = useState("USD");
+  const [demoBalanceUsd, setDemoBalanceUsd] = useState(70000);
+  const [realBalanceUsd] = useState(0);
+  const [accountMode, setAccountMode] = useState<"Demo" | "Real">("Demo");
+
   const [amount, setAmount] = useState(100);
   const [expirySeconds, setExpirySeconds] = useState(60);
-  const [activeTool, setActiveTool] = useState<'charts' | 'indicators' | 'drawings' | null>(null);
+  const [expiryUnit, setExpiryUnit] = useState<"Seconds" | "Minutes" | "Hours">("Seconds");
+
   const [zoom, setZoom] = useState(1);
-  const [trades, setTrades] = useState<Trade[]>([]);
-  const [recentResults, setRecentResults] = useState<Trade[]>([]);
+  const [candles, setCandles] = useState<Candle[]>(() => createCandles(asset));
+  const [openTrades, setOpenTrades] = useState<OpenTrade[]>([]);
+  const [closedTrades, setClosedTrades] = useState<ClosedTrade[]>([]);
+  const [menu, setMenu] = useState<"asset" | "chart" | "indicator" | "drawing" | null>(null);
+
   const payout = 0.85;
+  const payoutPercent = Math.round(payout * 100);
 
-  const balanceUsd = accountType === 'DEMO' ? demoUsd : realUsd;
-  const displayBalance = balanceUsd * currencies[currency];
+  const displayedBalance =
+    accountMode === "Demo"
+      ? demoBalanceUsd * currencies[currency]
+      : realBalanceUsd * currencies[currency];
 
-  const lastPrice = candles[candles.length - 1]?.close ?? 1.2;
+  const visibleCandles = useMemo(() => {
+    const visibleCount = Math.max(25, Math.floor(75 / zoom));
+    return candles.slice(-visibleCount);
+  }, [candles, zoom]);
 
-  // Memoize moving averages instead of recalculating every render
-  const mas = useMemo(() => 
-    calculateMovingAverages(candles),
-    [candles]
-  );
+  const latestPrice = visibleCandles[visibleCandles.length - 1]?.close || 1.2;
 
-  const currentAmountUsd = useMemo(() => {
-    return amount / currencies[currency];
-  }, [amount, currency]);
-
-  // Consolidate data updates into a single interval and use RAF for rendering
   useEffect(() => {
-    let candleInterval: number;
+    setCandles(createCandles(asset));
+    setOpenTrades([]);
+    setClosedTrades([]);
+  }, [asset]);
 
-    // Update candles less frequently - every 650ms
-    candleInterval = window.setInterval(() => {
-      setCandles(prev => {
-        const next = [...prev];
-        const last = next[next.length - 1];
-        const open = last.close;
-        const move = Math.sin(Date.now() / 1800) * 0.00012 + (Math.random() - 0.5) * 0.00055;
-        const close = open + move;
-        const high = Math.max(open, close) + Math.random() * 0.00025;
-        const low = Math.min(open, close) - Math.random() * 0.00025;
-
-        next.push({
-          time: Date.now(),
-          open,
-          high,
-          low,
-          close,
-        });
-
-        return next.slice(-160);
-      });
-      dataUpdateQueueRef.current = true;
-    }, 650);
-
-    return () => window.clearInterval(candleInterval);
-  }, []);
-
-  // Trade settlement check - separate from candle updates
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setTrades(prev => {
-        const now = Date.now();
-        const updated: Trade[] = [];
+      setCandles((current) => {
+        const previous = current[current.length - 1];
+        const movement = (Math.random() - 0.48) * 0.0018;
+        const open = previous.close;
+        const close = Math.max(0.8, open + movement);
+        const high = Math.max(open, close) + Math.random() * 0.001;
+        const low = Math.min(open, close) - Math.random() * 0.001;
 
-        for (const trade of prev) {
-          if (trade.status !== 'OPEN' || now < trade.expiryAt) {
-            updated.push(trade);
-            continue;
+        return [...current.slice(-120), { open, high, low, close }];
+      });
+
+      const now = Date.now();
+
+      setOpenTrades((trades) => {
+        const stillOpen: OpenTrade[] = [];
+
+        trades.forEach((trade) => {
+          if (trade.expiryAt > now) {
+            stillOpen.push(trade);
+            return;
           }
 
+          const currentPrice = latestPrice;
           const won =
-            trade.direction === 'BUY'
-              ? lastPrice > trade.entry
-              : lastPrice < trade.entry;
+            trade.direction === "BUY"
+              ? currentPrice > trade.entryPrice
+              : currentPrice < trade.entryPrice;
 
-          const profit = won ? trade.amount * payout : 0;
-
-          const closed: Trade = {
-            ...trade,
-            status: won ? 'WON' : 'LOST',
-            profit,
-          };
+          const profit = won ? trade.amount * trade.payout : 0;
 
           if (won) {
-            if (accountType === 'DEMO') setDemoUsd(v => v + trade.amount + profit);
-            else setRealUsd(v => v + trade.amount + profit);
+            setDemoBalanceUsd((balance) => balance + trade.amount + profit);
           }
 
-          setRecentResults(r => [...r, closed]);
-          setTimeout(() => {
-            setRecentResults(r => r.filter(x => x.id !== closed.id));
-          }, 10000);
-        }
-
-        return updated;
-      });
-    }, 300);
-
-    return () => window.clearInterval(timer);
-  }, [lastPrice, accountType]);
-
-  // Canvas rendering with requestAnimationFrame - optimized draw function
-  const drawChart = (
-    ctx: CanvasRenderingContext2D,
-    w: number,
-    h: number
-  ) => {
-    ctx.clearRect(0, 0, w, h);
-
-    const gradient = ctx.createLinearGradient(0, 0, w, h);
-    gradient.addColorStop(0, '#0b1223');
-    gradient.addColorStop(0.5, '#07101f');
-    gradient.addColorStop(1, '#030713');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.globalAlpha = 0.12;
-    ctx.fillStyle = '#4da3ff';
-    ctx.beginPath();
-    ctx.arc(w * 0.35, h * 0.2, 180, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-
-    const visibleCount = Math.max(16, Math.round(95 / zoom));
-    const visible = candles.slice(-visibleCount);
-    const highs = visible.map(c => c.high);
-    const lows = visible.map(c => c.low);
-    const max = Math.max(...highs);
-    const min = Math.min(...lows);
-    const range = max - min || 1;
-    const pad = 48;
-
-    const y = (price: number) => h - pad - ((price - min) / range) * (h - pad * 2);
-    const candleW = Math.max(4, (w - 110) / visible.length * 0.58);
-
-    // Draw grid - optimized
-    ctx.strokeStyle = 'rgba(255,255,255,.07)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 10; i++) {
-      const x = 50 + (i * (w - 100)) / 9;
-      ctx.beginPath();
-      ctx.moveTo(x, 30);
-      ctx.lineTo(x, h - 40);
-      ctx.stroke();
-    }
-
-    for (let i = 0; i < 7; i++) {
-      const gy = 35 + (i * (h - 70)) / 6;
-      ctx.beginPath();
-      ctx.moveTo(45, gy);
-      ctx.lineTo(w - 45, gy);
-      ctx.stroke();
-    }
-
-    // Draw chart type
-    if (chartType === 'Line') {
-      ctx.strokeStyle = '#65e4c0';
-      ctx.lineWidth = 2.2;
-      ctx.beginPath();
-      visible.forEach((c, i) => {
-        const x = 55 + (i * (w - 110)) / visible.length;
-        const yy = y(c.close);
-        if (i === 0) ctx.moveTo(x, yy);
-        else ctx.lineTo(x, yy);
-      });
-      ctx.stroke();
-    } else {
-      visible.forEach((c, i) => {
-        const x = 55 + (i * (w - 110)) / visible.length;
-        const up = c.close >= c.open;
-        const color = up ? '#63f2c6' : '#ff735f';
-
-        ctx.strokeStyle = color;
-        ctx.fillStyle = color;
-        ctx.lineWidth = 1.4;
-
-        ctx.beginPath();
-        ctx.moveTo(x, y(c.high));
-        ctx.lineTo(x, y(c.low));
-        ctx.stroke();
-
-        if (chartType === 'Bars') {
-          ctx.beginPath();
-          ctx.moveTo(x - candleW / 2, y(c.open));
-          ctx.lineTo(x, y(c.open));
-          ctx.moveTo(x, y(c.close));
-          ctx.lineTo(x + candleW / 2, y(c.close));
-          ctx.stroke();
-        } else {
-          const top = y(Math.max(c.open, c.close));
-          const bottom = y(Math.min(c.open, c.close));
-          ctx.fillRect(x - candleW / 2, top, candleW, Math.max(2, bottom - top));
-        }
-      });
-    }
-
-    // Draw indicators using pre-calculated moving averages
-    if (selectedIndicators.includes('Alligator') || selectedIndicators.includes('Moving Average')) {
-      const drawMA = (ma: number[], color: string) => {
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-
-        const startIdx = Math.max(0, candles.length - visibleCount);
-        ma.slice(startIdx).forEach((avg, i) => {
-          const x = 55 + (i * (w - 110)) / visible.length;
-          const yy = y(avg);
-          if (i === 0) ctx.moveTo(x, yy);
-          else ctx.lineTo(x, yy);
+          setClosedTrades((closed) => [
+            ...closed,
+            {
+              id: trade.id,
+              direction: trade.direction,
+              amount: trade.amount,
+              profit,
+              won,
+              closedAt: Date.now(),
+            },
+          ]);
         });
 
-        ctx.stroke();
-      };
+        return stillOpen;
+      });
 
-      drawMA(mas.ma5, '#9be15d');
-      drawMA(mas.ma13, '#ff8a4c');
-      drawMA(mas.ma21, '#4da3ff');
+      setClosedTrades((trades) =>
+        trades.filter((trade) => Date.now() - trade.closedAt < 10000)
+      );
+    }, 700);
+
+    return () => window.clearInterval(timer);
+  }, [latestPrice]);
+
+  function updateExpiry(delta: number) {
+    const step = expiryUnit === "Seconds" ? 1 : expiryUnit === "Minutes" ? 60 : 3600;
+    const next = expirySeconds + delta * step;
+    setExpirySeconds(Math.min(18000, Math.max(5, next)));
+  }
+
+  function placeTrade(direction: TradeDirection) {
+    if (accountMode !== "Demo") {
+      alert("Real account trading should only be enabled after full payment, KYC, compliance, and admin approval.");
+      return;
     }
 
-    // Draw price line
-    const priceY = y(lastPrice);
-    ctx.strokeStyle = '#5fb5ff';
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(45, priceY);
-    ctx.lineTo(w - 45, priceY);
-    ctx.stroke();
+    if (amount <= 0) {
+      alert("Enter a valid amount.");
+      return;
+    }
 
-    ctx.fillStyle = '#5fb5ff';
-    ctx.fillRect(w - 96, priceY - 15, 84, 30);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '12px Roboto, sans-serif';
-    ctx.fillText(lastPrice.toFixed(5), w - 88, priceY + 5);
+    if (amount > demoBalanceUsd) {
+      alert("Insufficient demo balance.");
+      return;
+    }
 
-    // Draw expiration line
-    const expiryX = w * 0.74;
-    ctx.strokeStyle = '#9fd6ff';
-    ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    ctx.moveTo(expiryX, 22);
-    ctx.lineTo(expiryX, h - 40);
-    ctx.stroke();
+    setDemoBalanceUsd((balance) => balance - amount);
 
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '13px Roboto, sans-serif';
-    ctx.fillText('Expiration', expiryX + 10, 44);
-
-    // Draw open trades
-    trades.forEach(trade => {
-      if (trade.status !== 'OPEN') return;
-      const secondsLeft = Math.max(0, Math.ceil((trade.expiryAt - Date.now()) / 1000));
-      const boxY = y(trade.entry) - 24;
-      const color = trade.direction === 'BUY' ? '#2fca73' : '#ff5b4f';
-
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.roundRect(expiryX - 92, boxY, 82, 42, 10);
-      ctx.fill();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 13px Roboto, sans-serif';
-      ctx.fillText(`${trade.direction === 'BUY' ? '▲' : '▼'} ${formatMoney(trade.amount * currencies[currency], currency)}`, expiryX - 80, boxY + 18);
-      ctx.font = '12px Roboto, sans-serif';
-      ctx.fillText(`00:${String(secondsLeft).padStart(2, '0')}`, expiryX - 70, boxY + 35);
-    });
-
-    // Draw recent results
-    recentResults.forEach((trade, index) => {
-      const boxY = 72 + index * 42;
-      const won = trade.status === 'WON';
-
-      ctx.fillStyle = won ? '#19c875' : '#ff554d';
-      ctx.beginPath();
-      ctx.roundRect(w - 180, boxY, 140, 38, 18);
-      ctx.fill();
-
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 14px Roboto, sans-serif';
-      ctx.fillText(won ? `+${formatMoney(trade.profit * currencies[currency], currency)}` : `${formatMoney(0, currency)}`, w - 168, boxY + 24);
-      ctx.fillText('✓✓', w - 72, boxY + 24);
-    });
-  };
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const animate = () => {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = Math.floor(rect.width * dpr);
-      canvas.height = Math.floor(rect.height * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      const w = rect.width;
-      const h = rect.height;
-
-      drawChart(ctx, w, h);
-      rafRef.current = requestAnimationFrame(animate);
-    };
-
-    rafRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, [candles, chartType, selectedIndicators, trades, recentResults, zoom, currency, lastPrice, mas]);
-
-  function placeTrade(direction: 'BUY' | 'SELL') {
-    if (currentAmountUsd <= 0 || currentAmountUsd > balanceUsd) return;
-
-    const trade: Trade = {
+    const trade: OpenTrade = {
       id: crypto.randomUUID(),
       direction,
-      amount: currentAmountUsd,
-      entry: lastPrice,
+      amount,
+      entryPrice: latestPrice,
       expiryAt: Date.now() + expirySeconds * 1000,
-      status: 'OPEN',
-      profit: 0,
+      payout,
     };
 
-    if (accountType === 'DEMO') setDemoUsd(v => v - currentAmountUsd);
-    else setRealUsd(v => v - currentAmountUsd);
-
-    setTrades(prev => [...prev, trade]);
+    setOpenTrades((trades) => [...trades, trade]);
   }
 
-  function changeExpiry(delta: number) {
-    setExpirySeconds(prev => Math.min(18000, Math.max(5, prev + delta)));
+  function handleWheel(event: WheelEvent<HTMLDivElement>) {
+    event.preventDefault();
+    const nextZoom = event.deltaY < 0 ? zoom + 0.12 : zoom - 0.12;
+    setZoom(Math.min(2.5, Math.max(0.6, nextZoom)));
   }
 
-  function formatExpiry(sec: number) {
-    const h = Math.floor(sec / 3600);
-    const m = Math.floor((sec % 3600) / 60);
-    const s = sec % 60;
-    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+      chartRef.current?.requestFullscreen().catch(() => undefined);
+    } else {
+      document.exitFullscreen().catch(() => undefined);
+    }
   }
 
   return (
-    <main className="trading-page">
-      <aside className="side-nav">
-        <div className="brand-badge">N</div>
-        <button>📈<span>Trading</span></button>
-        <button>💵<span>Finance</span></button>
-        <button>👤<span>Profile</span></button>
-        <button>🛒<span>Market</span></button>
-        <button>💬<span>Chat</span></button>
-        <button>❔<span>Help</span></button>
+    <main style={styles.page}>
+      <aside style={styles.sidebar}>
+        <div style={styles.logoCircle}>N</div>
+        <Link style={styles.navLink} to="/trading">Trading</Link>
+        <Link style={styles.navLink} to="/finance">Finance</Link>
+        <Link style={styles.navLink} to="/profile">Profile</Link>
+        <Link style={styles.navLink} to="/market">Market</Link>
+        <Link style={styles.navLink} to="/chat">Chat</Link>
+        <Link style={styles.navLink} to="/help">Help</Link>
       </aside>
 
-      <section className="trade-shell">
-        <header className="trade-header">
-          <div className="brand-title">NeuroOption</div>
-          <div className="balance-pill">
-            QT {accountType === 'DEMO' ? 'Demo' : 'Real'} {formatMoney(displayBalance, currency)}
-          </div>
-          <button className="topup">TOP UP</button>
+      <section style={styles.mainPanel} ref={chartRef}>
+        <header style={styles.topBar}>
+          <div style={styles.brand}>NeuroOption</div>
+
+          <button style={styles.balancePill}>
+            QT {accountMode} {formatMoney(displayedBalance, currency)}
+          </button>
+
+          <button style={styles.topUp}>TOP UP</button>
+
+          <button
+            style={accountMode === "Demo" ? styles.modeActive : styles.modeButton}
+            onClick={() => setAccountMode("Demo")}
+          >
+            Demo
+          </button>
+
+          <button
+            style={accountMode === "Real" ? styles.modeActive : styles.modeButton}
+            onClick={() => setAccountMode("Real")}
+          >
+            Real
+          </button>
         </header>
 
-        <div className="toolbar">
-          <select value={pair} onChange={e => setPair(e.target.value)}>
-            {pairs.map(p => <option key={p}>{p}</option>)}
-          </select>
+        <div style={styles.workspace}>
+          <section style={styles.chartArea} onWheel={handleWheel}>
+            <div style={styles.toolbar}>
+              <button style={styles.selector} onClick={() => setMenu(menu === "asset" ? null : "asset")}>
+                {asset} ▾
+              </button>
 
-          <button onClick={() => setActiveTool(activeTool === 'charts' ? null : 'charts')}>▥</button>
-          <button onClick={() => setActiveTool(activeTool === 'indicators' ? null : 'indicators')}>☷</button>
-          <button onClick={() => setActiveTool(activeTool === 'drawings' ? null : 'drawings')}>✎</button>
+              <button style={styles.toolButton} onClick={() => setMenu(menu === "chart" ? null : "chart")}>
+                📊 {chartType}
+              </button>
 
-          {timeframes.map(t => (
-            <button
-              key={t}
-              className={timeframe === t ? 'active' : ''}
-              onClick={() => {
-                setTimeframe(t);
-                setExpirySeconds(secondsFromTimeframe(t));
-              }}
-            >
-              {t}
-            </button>
-          ))}
+              <button style={styles.toolButton} onClick={() => setMenu(menu === "indicator" ? null : "indicator")}>
+                ⚙ {indicator}
+              </button>
 
-          <button onClick={() => setZoom(z => Math.min(2.4, z + 0.15))}>＋</button>
-          <button onClick={() => setZoom(z => Math.max(0.65, z - 0.15))}>－</button>
-          <button onClick={() => document.documentElement.requestFullscreen()}>⛶</button>
-        </div>
+              <button style={styles.toolButton} onClick={() => setMenu(menu === "drawing" ? null : "drawing")}>
+                ✎ {drawing}
+              </button>
 
-        <div className="chart-area">
-          {activeTool === 'charts' && (
-            <div className="floating-panel charts-panel">
-              <h3>Chart types</h3>
-              <div className="grid-four">
-                {chartTypes.map(type => (
-                  <button
-                    key={type}
-                    className={chartType === type ? 'active' : ''}
-                    onClick={() => setChartType(type)}
-                  >
-                    {type}
+              <button style={styles.toolButton} onClick={toggleFullScreen}>
+                ⛶ Full Screen
+              </button>
+            </div>
+
+            {menu === "asset" && (
+              <div style={styles.dropdown}>
+                {assets.map((item) => (
+                  <button key={item} style={styles.dropdownItem} onClick={() => { setAsset(item); setMenu(null); }}>
+                    {item}
                   </button>
                 ))}
               </div>
-            </div>
-          )}
+            )}
 
-          {activeTool === 'indicators' && (
-            <div className="floating-panel indicators-panel">
-              <h3>Indicators</h3>
-              <div className="indicator-grid">
-                {indicators.map(ind => (
-                  <button
-                    key={ind}
-                    className={selectedIndicators.includes(ind) ? 'active' : ''}
-                    onClick={() =>
-                      setSelectedIndicators(prev =>
-                        prev.includes(ind)
-                          ? prev.filter(x => x !== ind)
-                          : [...prev, ind],
-                      )
-                    }
-                  >
-                    ☆ {ind}
+            {menu === "chart" && (
+              <div style={styles.dropdownWide}>
+                {(["Candles", "Line", "Bars", "Heikin Ashi"] as ChartType[]).map((item) => (
+                  <button key={item} style={styles.dropdownItem} onClick={() => { setChartType(item); setMenu(null); }}>
+                    {item}
+                  </button>
+                ))}
+
+                <div style={styles.timeframes}>
+                  {timeframes.map((item) => (
+                    <button
+                      key={item}
+                      style={item === timeframe ? styles.timeframeActive : styles.timeframe}
+                      onClick={() => setTimeframe(item)}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {menu === "indicator" && (
+              <div style={styles.indicatorPanel}>
+                {indicators.map((item) => (
+                  <button key={item} style={styles.dropdownItem} onClick={() => { setIndicator(item); setMenu(null); }}>
+                    ☆ {item}
                   </button>
                 ))}
               </div>
-            </div>
-          )}
+            )}
 
-          {activeTool === 'drawings' && (
-            <div className="floating-panel drawings-panel">
-              {['Horizontal Line', 'Vertical Line', 'Ray', 'Trend Line', 'Fibonacci Retracement', 'Rectangle', 'Parallel Channel'].map(d => (
-                <button key={d}>{d}</button>
+            {menu === "drawing" && (
+              <div style={styles.dropdownWide}>
+                {drawings.map((item) => (
+                  <button key={item} style={styles.dropdownItem} onClick={() => { setDrawing(item); setMenu(null); }}>
+                    {item}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div style={styles.timeframeRow}>
+              {timeframes.slice(0, 9).map((item) => (
+                <button
+                  key={item}
+                  style={item === timeframe ? styles.timeframeActive : styles.timeframe}
+                  onClick={() => setTimeframe(item)}
+                >
+                  {item}
+                </button>
               ))}
             </div>
-          )}
 
-          <canvas
-            ref={canvasRef}
-            className="trading-canvas"
-            onWheel={e => {
-              e.preventDefault();
-              setZoom(z => e.deltaY < 0 ? Math.min(2.4, z + 0.08) : Math.max(0.65, z - 0.08));
-            }}
-          />
+            <h3 style={styles.indicatorTitle}>{indicator} 13 8 5</h3>
+
+            <Chart
+              candles={visibleCandles}
+              chartType={chartType}
+              latestPrice={latestPrice}
+              openTrades={openTrades}
+              closedTrades={closedTrades}
+              expirySeconds={expirySeconds}
+              currency={currency}
+            />
+          </section>
+
+          <aside style={styles.tradePanel}>
+            <label style={styles.panelLabel}>Currency</label>
+            <select style={styles.input} value={currency} onChange={(event) => setCurrency(event.target.value)}>
+              {Object.keys(currencies).map((item) => (
+                <option key={item} value={item}>{item}</option>
+              ))}
+            </select>
+
+            <label style={styles.panelLabel}>Time</label>
+            <div style={styles.expiryTabs}>
+              {(["Seconds", "Minutes", "Hours"] as const).map((item) => (
+                <button
+                  key={item}
+                  style={expiryUnit === item ? styles.expiryActive : styles.expiryTab}
+                  onClick={() => setExpiryUnit(item)}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+
+            <div style={styles.expiryBox}>
+              <button style={styles.stepButton} onClick={() => updateExpiry(-1)}>-</button>
+              <strong>{secondsToTime(expirySeconds)}</strong>
+              <button style={styles.stepButton} onClick={() => updateExpiry(1)}>+</button>
+            </div>
+
+            <label style={styles.panelLabel}>Amount</label>
+            <input
+              style={styles.input}
+              type="number"
+              min={1}
+              value={amount}
+              onChange={(event) => setAmount(Number(event.target.value))}
+            />
+
+            <div style={styles.payoutBox}>
+              <div><span>Payout</span><strong>+{payoutPercent}%</strong></div>
+              <div><span>Profit</span><strong>{formatMoney(amount * payout * currencies[currency], currency)}</strong></div>
+              <div><span>Return if won</span><strong>{formatMoney(amount * (1 + payout) * currencies[currency], currency)}</strong></div>
+            </div>
+
+            <button style={styles.buyButton} onClick={() => placeTrade("BUY")}>↗ BUY</button>
+            <button style={styles.sellButton} onClick={() => placeTrade("SELL")}>↘ SELL</button>
+          </aside>
         </div>
       </section>
-
-      <aside className="trade-panel">
-        <div className="account-tabs">
-          <button className={accountType === 'DEMO' ? 'active' : ''} onClick={() => setAccountType('DEMO')}>Demo</button>
-          <button className={accountType === 'REAL' ? 'active' : ''} onClick={() => setAccountType('REAL')}>Real</button>
-        </div>
-
-        <label>Currency</label>
-        <select value={currency} onChange={e => setCurrency(e.target.value)}>
-          {Object.keys(currencies).map(c => <option key={c}>{c}</option>)}
-        </select>
-
-        <label>Time</label>
-        <div className="time-tabs">
-          <button onClick={() => changeExpiry(1)}>Seconds</button>
-          <button onClick={() => changeExpiry(60)}>Minutes</button>
-          <button onClick={() => changeExpiry(3600)}>Hours</button>
-        </div>
-
-        <div className="stepper">
-          <button onClick={() => changeExpiry(-1)}>-</button>
-          <strong>{formatExpiry(expirySeconds)}</strong>
-          <button onClick={() => changeExpiry(1)}>+</button>
-        </div>
-
-        <label>Amount</label>
-        <input
-          value={amount}
-          type="number"
-          min={1}
-          onChange={e => setAmount(Number(e.target.value))}
-        />
-
-        <div className="payout-box">
-          <p><span>Payout</span><b>+85%</b></p>
-          <p><span>Profit</span><b>{formatMoney(amount * payout, currency)}</b></p>
-          <p><span>Return if won</span><b>{formatMoney(amount + amount * payout, currency)}</b></p>
-        </div>
-
-        <button className="buy" onClick={() => placeTrade('BUY')}>↑ BUY</button>
-        <button className="sell" onClick={() => placeTrade('SELL')}>↓ SELL</button>
-      </aside>
     </main>
   );
 }
+
+function Chart(props: {
+  candles: Candle[];
+  chartType: ChartType;
+  latestPrice: number;
+  openTrades: OpenTrade[];
+  closedTrades: ClosedTrade[];
+  expirySeconds: number;
+  currency: string;
+}) {
+  const { candles, chartType, latestPrice, openTrades, closedTrades, currency } = props;
+
+  const width = 950;
+  const height = 520;
+  const padding = 35;
+
+  const highs = candles.map((candle) => candle.high);
+  const lows = candles.map((candle) => candle.low);
+  const max = Math.max(...highs);
+  const min = Math.min(...lows);
+  const range = max - min || 1;
+
+  function y(price: number) {
+    return padding + ((max - price) / range) * (height - padding * 2);
+  }
+
+  const candleWidth = Math.max(5, (width - padding * 2) / candles.length - 4);
+
+  const linePath = candles
+    .map((candle, index) => {
+      const x = padding + index * ((width - padding * 2) / candles.length);
+      return `${index === 0 ? "M" : "L"} ${x} ${y(candle.close)}`;
+    })
+    .join(" ");
+
+  return (
+    <div style={styles.svgWrap}>
+      <svg viewBox={`0 0 ${width} ${height}`} style={styles.svg}>
+        <defs>
+          <linearGradient id="chartBg" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stopColor="#101827" />
+            <stop offset="100%" stopColor="#050914" />
+          </linearGradient>
+        </defs>
+
+        <rect width={width} height={height} fill="url(#chartBg)" rx="18" />
+
+        {Array.from({ length: 12 }).map((_, index) => (
+          <line
+            key={`v-${index}`}
+            x1={(index * width) / 12}
+            x2={(index * width) / 12}
+            y1={0}
+            y2={height}
+            stroke="rgba(255,255,255,0.06)"
+          />
+        ))}
+
+        {Array.from({ length: 8 }).map((_, index) => (
+          <line
+            key={`h-${index}`}
+            x1={0}
+            x2={width}
+            y1={(index * height) / 8}
+            y2={(index * height) / 8}
+            stroke="rgba(255,255,255,0.06)"
+          />
+        ))}
+
+        <line x1={0} x2={width} y1={y(latestPrice)} y2={y(latestPrice)} stroke="#5fb7ff" strokeWidth="1.5" />
+
+        {chartType === "Line" ? (
+          <path d={linePath} fill="none" stroke="#73f4ba" strokeWidth="2.5" />
+        ) : (
+          candles.map((candle, index) => {
+            const x = padding + index * ((width - padding * 2) / candles.length);
+            const up = candle.close >= candle.open;
+            const color = up ? "#72f2b0" : "#ff7763";
+            const bodyTop = y(Math.max(candle.open, candle.close));
+            const bodyBottom = y(Math.min(candle.open, candle.close));
+
+            if (chartType === "Bars") {
+              return (
+                <g key={index}>
+                  <line x1={x} x2={x} y1={y(candle.high)} y2={y(candle.low)} stroke={color} strokeWidth="2" />
+                  <line x1={x - 5} x2={x} y1={y(candle.open)} y2={y(candle.open)} stroke={color} strokeWidth="2" />
+                  <line x1={x} x2={x + 5} y1={y(candle.close)} y2={y(candle.close)} stroke={color} strokeWidth="2" />
+                </g>
+              );
+            }
+
+            return (
+              <g key={index}>
+                <line x1={x} x2={x} y1={y(candle.high)} y2={y(candle.low)} stroke={color} strokeWidth="1.4" />
+                <rect
+                  x={x - candleWidth / 2}
+                  y={bodyTop}
+                  width={candleWidth}
+                  height={Math.max(3, bodyBottom - bodyTop)}
+                  rx="1.5"
+                  fill={color}
+                />
+              </g>
+            );
+          })
+        )}
+
+        <path
+          d={linePath}
+          fill="none"
+          stroke="#4f9cff"
+          strokeWidth="2"
+          opacity="0.75"
+        />
+
+        <text x={width - 95} y={y(latestPrice) - 8} fill="#cfeeff" fontSize="13">
+          {latestPrice.toFixed(5)}
+        </text>
+
+        {openTrades.map((trade, index) => {
+          const secondsLeft = Math.max(0, Math.ceil((trade.expiryAt - Date.now()) / 1000));
+          const boxColor = trade.direction === "BUY" ? "#37d983" : "#ff5f4f";
+
+          return (
+            <g key={trade.id}>
+              <rect x={width - 250} y={100 + index * 42} width={105} height={34} rx="8" fill={boxColor} />
+              <text x={width - 240} y={122 + index * 42} fill="#fff" fontSize="14" fontWeight="700">
+                {trade.direction === "BUY" ? "▲" : "▼"} ${trade.amount}
+              </text>
+              <text x={width - 170} y={122 + index * 42} fill="#fff" fontSize="12">
+                {secondsLeft}s
+              </text>
+            </g>
+          );
+        })}
+
+        {closedTrades.map((trade, index) => (
+          <g key={trade.id}>
+            <rect
+              x={width - 250}
+              y={245 + index * 42}
+              width={130}
+              height={34}
+              rx="9"
+              fill={trade.won ? "#1ed760" : "#ff4d4d"}
+              opacity="0.95"
+            />
+            <text x={width - 238} y={267 + index * 42} fill="#fff" fontSize="14" fontWeight="700">
+              {trade.won ? `+$${trade.profit.toFixed(2)} ✓✓` : "$0 ✓✓"}
+            </text>
+          </g>
+        ))}
+
+        <text x={45} y={height - 22} fill="#93a4bd" fontSize="13">
+          Mouse wheel / touchpad: zoom in and out
+        </text>
+
+        <text x={width - 185} y={height - 22} fill="#93a4bd" fontSize="13">
+          Currency: {currency}
+        </text>
+      </svg>
+    </div>
+  );
+}
+
+const styles: Record<string, CSSProperties> = {
+  page: {
+    minHeight: "100vh",
+    background:
+      "radial-gradient(circle at top left, #17233d 0%, #060914 45%, #03040a 100%)",
+    color: "#ffffff",
+    fontFamily: "Roboto, sans-serif",
+    display: "grid",
+    gridTemplateColumns: "86px 1fr",
+  },
+  sidebar: {
+    background: "rgba(6,10,19,0.95)",
+    borderRight: "1px solid rgba(255,255,255,0.08)",
+    padding: "18px 10px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "16px",
+  },
+  logoCircle: {
+    width: "46px",
+    height: "46px",
+    borderRadius: "50%",
+    background: "linear-gradient(135deg,#6bf0a1,#39a7ff)",
+    display: "grid",
+    placeItems: "center",
+    fontWeight: 800,
+  },
+  navLink: {
+    color: "#b9c7dd",
+    textDecoration: "none",
+    fontSize: "13px",
+  },
+  mainPanel: {
+    overflow: "hidden",
+  },
+  topBar: {
+    height: "72px",
+    display: "flex",
+    alignItems: "center",
+    gap: "18px",
+    padding: "0 22px",
+    background: "rgba(5,8,16,0.72)",
+    borderBottom: "1px solid rgba(255,255,255,0.08)",
+  },
+  brand: {
+    fontSize: "24px",
+    fontWeight: 800,
+    marginRight: "auto",
+  },
+  balancePill: {
+    background: "#17223a",
+    color: "#fff",
+    border: "1px solid rgba(255,255,255,0.1)",
+    borderRadius: "14px",
+    padding: "12px 18px",
+    fontWeight: 800,
+  },
+  topUp: {
+    background: "#5ce39c",
+    color: "#061011",
+    border: "0",
+    borderRadius: "14px",
+    padding: "12px 18px",
+    fontWeight: 900,
+  },
+  modeButton: {
+    background: "#111827",
+    color: "#d3d9e6",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: "14px",
+    padding: "12px 22px",
+    cursor: "pointer",
+  },
+  modeActive: {
+    background: "#62e6a2",
+    color: "#071010",
+    border: "0",
+    borderRadius: "14px",
+    padding: "12px 22px",
+    fontWeight: 900,
+    cursor: "pointer",
+  },
+  workspace: {
+    display: "grid",
+    gridTemplateColumns: "1fr 330px",
+    height: "calc(100vh - 72px)",
+  },
+  chartArea: {
+    position: "relative",
+    padding: "18px",
+    overflow: "hidden",
+  },
+  toolbar: {
+    display: "flex",
+    gap: "10px",
+    marginBottom: "10px",
+    flexWrap: "wrap",
+  },
+  selector: {
+    background: "#17223a",
+    color: "#fff",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: "10px",
+    padding: "10px 14px",
+    fontWeight: 800,
+    cursor: "pointer",
+  },
+  toolButton: {
+    background: "#1b2945",
+    color: "#dbe8ff",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: "10px",
+    padding: "10px 12px",
+    cursor: "pointer",
+  },
+  dropdown: {
+    position: "absolute",
+    zIndex: 20,
+    top: "64px",
+    left: "18px",
+    width: "220px",
+    background: "#142039",
+    border: "1px solid rgba(255,255,255,0.12)",
+    borderRadius: "14px",
+    padding: "10px",
+    boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
+  },
+  dropdownWide: {
+    position: "absolute",
+    zIndex: 20,
+    top: "64px",
+    left: "220px",
+    width: "520px",
+    background: "#142039",
+    border: "1px solid rgba(255,255,255,0.12)",
+    borderRadius: "14px",
+    padding: "14px",
+    boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
+  },
+  indicatorPanel: {
+    position: "absolute",
+    zIndex: 20,
+    top: "64px",
+    left: "340px",
+    width: "680px",
+    maxHeight: "420px",
+    overflow: "auto",
+    background: "#142039",
+    border: "1px solid rgba(255,255,255,0.12)",
+    borderRadius: "14px",
+    padding: "14px",
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "6px",
+    boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
+  },
+  dropdownItem: {
+    background: "transparent",
+    color: "#e7eefc",
+    border: "0",
+    textAlign: "left",
+    padding: "10px",
+    borderRadius: "10px",
+    cursor: "pointer",
+  },
+  timeframes: {
+    display: "flex",
+    gap: "8px",
+    flexWrap: "wrap",
+    marginTop: "12px",
+  },
+  timeframeRow: {
+    display: "flex",
+    gap: "9px",
+    margin: "10px 0",
+    flexWrap: "wrap",
+  },
+  timeframe: {
+    background: "#17223a",
+    color: "#dbe8ff",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: "10px",
+    padding: "8px 13px",
+    cursor: "pointer",
+  },
+  timeframeActive: {
+    background: "#62e6a2",
+    color: "#061011",
+    border: "0",
+    borderRadius: "10px",
+    padding: "8px 13px",
+    fontWeight: 900,
+    cursor: "pointer",
+  },
+  indicatorTitle: {
+    textAlign: "center",
+    fontSize: "18px",
+    margin: "8px 0 12px",
+  },
+  svgWrap: {
+    height: "calc(100vh - 210px)",
+    minHeight: "420px",
+  },
+  svg: {
+    width: "100%",
+    height: "100%",
+    display: "block",
+    borderRadius: "18px",
+    boxShadow: "0 25px 90px rgba(0,0,0,0.45)",
+  },
+  tradePanel: {
+    background: "rgba(5,8,16,0.86)",
+    borderLeft: "1px solid rgba(255,255,255,0.08)",
+    padding: "22px",
+    overflowY: "auto",
+  },
+  panelLabel: {
+    display: "block",
+    color: "#e5edf8",
+    fontSize: "14px",
+    margin: "18px 0 8px",
+  },
+  input: {
+    width: "100%",
+    background: "#17223a",
+    color: "#fff",
+    border: "1px solid rgba(255,255,255,0.1)",
+    borderRadius: "12px",
+    padding: "12px",
+    outline: "none",
+  },
+  expiryTabs: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "8px",
+  },
+  expiryTab: {
+    background: "#111827",
+    color: "#dbe8ff",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: "10px",
+    padding: "10px",
+    cursor: "pointer",
+  },
+  expiryActive: {
+    background: "#62e6a2",
+    color: "#061011",
+    border: "0",
+    borderRadius: "10px",
+    padding: "10px",
+    fontWeight: 900,
+    cursor: "pointer",
+  },
+  expiryBox: {
+    marginTop: "12px",
+    display: "grid",
+    gridTemplateColumns: "50px 1fr 50px",
+    alignItems: "center",
+    gap: "8px",
+    textAlign: "center",
+    fontSize: "20px",
+  },
+  stepButton: {
+    background: "#17223a",
+    color: "#fff",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: "12px",
+    padding: "12px",
+    cursor: "pointer",
+  },
+  payoutBox: {
+    background: "#0c1221",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: "16px",
+    padding: "14px",
+    margin: "18px 0",
+    display: "grid",
+    gap: "8px",
+  },
+  buyButton: {
+    width: "100%",
+    background: "#5ce39c",
+    color: "#061011",
+    border: "0",
+    borderRadius: "14px",
+    padding: "16px",
+    fontWeight: 900,
+    fontSize: "16px",
+    cursor: "pointer",
+    marginBottom: "12px",
+  },
+  sellButton: {
+    width: "100%",
+    background: "#ff665a",
+    color: "#fff",
+    border: "0",
+    borderRadius: "14px",
+    padding: "16px",
+    fontWeight: 900,
+    fontSize: "16px",
+    cursor: "pointer",
+  },
+};
