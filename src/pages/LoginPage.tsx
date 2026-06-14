@@ -1,119 +1,96 @@
-import axios from 'axios';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-import { authApi } from '../api/auth.api';
-import { languages } from '../data/languages';
-import '../styles/auth.css';
+import type { FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { authApi } from '../api';
+import './AuthPages.css';
 
 export default function LoginPage() {
   const navigate = useNavigate();
 
-  const [language, setLanguage] = useState('English');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  function getErrorMessage(err: unknown) {
-    if (axios.isAxiosError(err)) {
-      const data = err.response?.data;
-
-      if (Array.isArray(data?.message)) return data.message.join(', ');
-      if (typeof data?.message === 'string') return data.message;
-      if (!err.response) return 'Cannot connect to backend.';
-    }
-
-    return 'Login failed.';
-  }
-
-  async function handleLogin(event: React.FormEvent) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
+    setLoading(true);
 
     try {
-      const res = await authApi.login({
+      const response = await authApi.login({
         email: email.trim().toLowerCase(),
         password,
       });
 
-      localStorage.setItem('accessToken', res.data.accessToken);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
+      const token = response.accessToken || response.token;
+
+      if (token) {
+        localStorage.setItem('neurooption_token', token);
+        localStorage.setItem('token', token);
+      }
+
+      if (response.user) {
+        localStorage.setItem('neurooption_user', JSON.stringify(response.user));
+      }
 
       navigate('/trading');
     } catch (err) {
-      setError(getErrorMessage(err));
+      setError(err instanceof Error ? err.message : 'Cannot connect to backend.');
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <main className="auth-page light">
-      <div className="auth-top">
-        <button type="button" onClick={() => navigate('/')}>
-          ‹ To home page
-        </button>
-
-        <select
-          className="language-select"
-          value={language}
-          onChange={(event) => setLanguage(event.target.value)}
-        >
-          {languages.map((item) => (
-            <option key={item.code} value={item.name}>
-              {item.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <form className="auth-card pocket-style" onSubmit={handleLogin}>
-        <div className="brand">
-          <div className="brand-icon">N</div>
-          <span>
-            <strong>Neuro</strong>Option
-          </span>
+    <main className="auth-shell">
+      <section className="auth-card">
+        <div className="auth-brand">
+          <div className="auth-logo">N</div>
+          <span>NeuroOption</span>
         </div>
 
         <h1>Sign in</h1>
 
-        <p>
-          New user?{' '}
-          <button type="button" onClick={() => navigate('/register')}>
-            Registration
-          </button>
+        <p className="auth-switch">
+          New user? <Link to="/register">Registration</Link>
         </p>
 
         {error && <div className="auth-error">{error}</div>}
 
-        <input
-          type="email"
-          placeholder="Email *"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          required
-        />
+        <form onSubmit={handleSubmit} className="auth-form">
+          <label>
+            Email
+            <input
+              type="email"
+              value={email}
+              autoComplete="email"
+              onChange={(event) => setEmail(event.target.value)}
+              required
+            />
+          </label>
 
-        <input
-          type="password"
-          placeholder="Password *"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          required
-          minLength={6}
-        />
+          <label>
+            Password
+            <input
+              type="password"
+              value={password}
+              autoComplete="current-password"
+              onChange={(event) => setPassword(event.target.value)}
+              required
+            />
+          </label>
 
-        <button
-          type="button"
-          className="forgot-link"
-          onClick={() => navigate('/forgot-password')}
-        >
-          Forgot Password?
-        </button>
+          <Link className="auth-small-link" to="/forgot-password">
+            Forgot Password?
+          </Link>
 
-        <button className="primary-auth-btn" type="submit">
-          SIGN IN
-        </button>
-      </form>
+          <button type="submit" disabled={loading}>
+            {loading ? 'SIGNING IN...' : 'SIGN IN'}
+          </button>
+        </form>
+      </section>
     </main>
   );
 }

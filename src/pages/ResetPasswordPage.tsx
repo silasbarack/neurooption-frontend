@@ -1,43 +1,32 @@
-import axios from 'axios';
-import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-
-import { authApi } from '../api/auth.api';
-import { languages } from '../data/languages';
-import '../styles/auth.css';
+import { useMemo, useState } from 'react';
+import type { FormEvent } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { authApi } from '../api';
+import './AuthPages.css';
 
 export default function ResetPasswordPage() {
+  const location = useLocation();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
-  const token = searchParams.get('token') ?? '';
+  const token = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('token') || '';
+  }, [location.search]);
 
-  const [language, setLanguage] = useState('English');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
-  function getErrorMessage(err: unknown) {
-    if (axios.isAxiosError(err)) {
-      const data = err.response?.data;
-
-      if (Array.isArray(data?.message)) return data.message.join(', ');
-      if (typeof data?.message === 'string') return data.message;
-      if (!err.response) return 'Cannot connect to backend.';
-    }
-
-    return 'Password reset failed.';
-  }
-
-  async function handleResetPassword(event: React.FormEvent) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setMessage('');
     setError('');
+    setMessage('');
 
     if (!token) {
-      setError('Reset token is missing. Open the link from your email again.');
+      setError('Reset token is missing.');
       return;
     }
 
@@ -46,77 +35,70 @@ export default function ResetPasswordPage() {
       return;
     }
 
+    setLoading(true);
+
     try {
-      const res = await authApi.resetPassword({
+      const response = await authApi.resetPassword({
         token,
         password,
       });
 
-      setMessage(res.data.message || 'Password reset successful.');
-
-      setTimeout(() => {
-        navigate('/login');
-      }, 1500);
+      setMessage(response.message || 'Password reset successful.');
+      setTimeout(() => navigate('/login'), 1200);
     } catch (err) {
-      setError(getErrorMessage(err));
+      setError(err instanceof Error ? err.message : 'Password reset failed.');
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <main className="auth-page light">
-      <div className="auth-top">
-        <button type="button" onClick={() => navigate('/login')}>
+    <main className="auth-shell">
+      <section className="auth-card">
+        <Link className="auth-back" to="/login">
           ‹ Back to login
-        </button>
+        </Link>
 
-        <select
-          className="language-select"
-          value={language}
-          onChange={(event) => setLanguage(event.target.value)}
-        >
-          {languages.map((item) => (
-            <option key={item.code} value={item.name}>
-              {item.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <form className="auth-card pocket-style" onSubmit={handleResetPassword}>
-        <div className="brand">
-          <div className="brand-icon">N</div>
-          <span>
-            <strong>Neuro</strong>Option
-          </span>
+        <div className="auth-brand">
+          <div className="auth-logo">N</div>
+          <span>NeuroOption</span>
         </div>
 
         <h1>Reset Password</h1>
 
-        {message && <div className="auth-success">{message}</div>}
         {error && <div className="auth-error">{error}</div>}
+        {message && <div className="auth-success">{message}</div>}
 
-        <input
-          type="password"
-          placeholder="New password *"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          required
-          minLength={6}
-        />
+        <form onSubmit={handleSubmit} className="auth-form">
+          <label>
+            New password
+            <input
+              type="password"
+              value={password}
+              autoComplete="new-password"
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              minLength={6}
+            />
+          </label>
 
-        <input
-          type="password"
-          placeholder="Confirm new password *"
-          value={confirmPassword}
-          onChange={(event) => setConfirmPassword(event.target.value)}
-          required
-          minLength={6}
-        />
+          <label>
+            Confirm password
+            <input
+              type="password"
+              value={confirmPassword}
+              autoComplete="new-password"
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              required
+              minLength={6}
+            />
+          </label>
 
-        <button className="primary-auth-btn" type="submit">
-          RESET PASSWORD
-        </button>
-      </form>
+          <button type="submit" disabled={loading}>
+            {loading ? 'RESETTING...' : 'RESET PASSWORD'}
+          </button>
+        </form>
+      </section>
     </main>
   );
 }

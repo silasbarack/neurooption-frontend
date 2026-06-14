@@ -1,10 +1,26 @@
 import { api } from './api';
 
+export type AuthUser = {
+  id: string;
+  email: string;
+  fullName?: string;
+  phone?: string;
+};
+
+export type AuthResponse = {
+  accessToken?: string;
+  token?: string;
+  user?: AuthUser;
+  message?: string;
+};
+
 export type RegisterPayload = {
-  fullname: string;
+  fullName: string;
   email: string;
   phone?: string;
   password: string;
+  promoCode?: string;
+  acceptedAgreement: boolean;
 };
 
 export type LoginPayload = {
@@ -22,13 +38,16 @@ export type ResetPasswordPayload = {
 };
 
 export const authApi = {
-  register: (data: RegisterPayload) => api.post('/auth/register', data),
+  register: (data: RegisterPayload) =>
+    api.post<AuthResponse>('/auth/register', data),
 
-  login: (data: LoginPayload) => api.post('/auth/login', data),
+  login: (data: LoginPayload) => api.post<AuthResponse>('/auth/login', data),
 
   forgotPassword: (data: ForgotPasswordPayload) =>
-    api.post('/auth/forgot-password', data),
+    api.post<{ message: string }>('/auth/forgot-password', data),
 
   resetPassword: (data: ResetPasswordPayload) =>
-    api.post('/auth/reset-password', data),
+    api.post<{ message: string }>('/auth/reset-password', data),
+
+  me: () => api.get<AuthUser>('/auth/me'),
 };

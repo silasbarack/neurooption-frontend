@@ -1,95 +1,71 @@
-import axios from 'axios';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-import { authApi } from '../api/auth.api';
-import { languages } from '../data/languages';
-import '../styles/auth.css';
+import type { FormEvent } from 'react';
+import { Link } from 'react-router-dom';
+import { authApi } from '../api';
+import './AuthPages.css';
 
 export default function ForgotPasswordPage() {
-  const navigate = useNavigate();
-
-  const [language, setLanguage] = useState('English');
   const [email, setEmail] = useState('');
-
-  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
-  function getErrorMessage(err: unknown) {
-    if (axios.isAxiosError(err)) {
-      const data = err.response?.data;
-
-      if (Array.isArray(data?.message)) return data.message.join(', ');
-      if (typeof data?.message === 'string') return data.message;
-      if (!err.response) return 'Cannot connect to backend.';
-    }
-
-    return 'Email could not be sent. Check SMTP settings.';
-  }
-
-  async function handleForgotPassword(event: React.FormEvent) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setMessage('');
     setError('');
+    setMessage('');
+    setLoading(true);
 
     try {
-      const res = await authApi.forgotPassword({
+      const response = await authApi.forgotPassword({
         email: email.trim().toLowerCase(),
       });
 
-      setMessage(res.data.message || 'Reset link sent. Check your email.');
+      setMessage(response.message || 'Password reset email sent successfully.');
     } catch (err) {
-      setError(getErrorMessage(err));
+      setError(err instanceof Error ? err.message : 'Could not send reset email.');
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <main className="auth-page light">
-      <div className="auth-top">
-        <button type="button" onClick={() => navigate('/login')}>
+    <main className="auth-shell">
+      <section className="auth-card">
+        <Link className="auth-back" to="/login">
           ‹ Back to login
-        </button>
+        </Link>
 
-        <select
-          className="language-select"
-          value={language}
-          onChange={(event) => setLanguage(event.target.value)}
-        >
-          {languages.map((item) => (
-            <option key={item.code} value={item.name}>
-              {item.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <form className="auth-card pocket-style" onSubmit={handleForgotPassword}>
-        <div className="brand">
-          <div className="brand-icon">N</div>
-          <span>
-            <strong>Neuro</strong>Option
-          </span>
+        <div className="auth-brand">
+          <div className="auth-logo">N</div>
+          <span>NeuroOption</span>
         </div>
 
         <h1>Forgot Password</h1>
+        <p className="auth-subtitle">
+          Enter your email to receive a password reset link.
+        </p>
 
-        <p>Enter your email to receive a password reset link.</p>
-
-        {message && <div className="auth-success">{message}</div>}
         {error && <div className="auth-error">{error}</div>}
+        {message && <div className="auth-success">{message}</div>}
 
-        <input
-          type="email"
-          placeholder="Email *"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          required
-        />
+        <form onSubmit={handleSubmit} className="auth-form">
+          <label>
+            Email
+            <input
+              type="email"
+              value={email}
+              autoComplete="email"
+              onChange={(event) => setEmail(event.target.value)}
+              required
+            />
+          </label>
 
-        <button className="primary-auth-btn" type="submit">
-          SEND RESET LINK
-        </button>
-      </form>
+          <button type="submit" disabled={loading}>
+            {loading ? 'SENDING...' : 'SEND RESET LINK'}
+          </button>
+        </form>
+      </section>
     </main>
   );
 }
