@@ -2,90 +2,82 @@
   box-sizing: border-box;
 }
 
-html,
-body,
-#root {
-  width: 100%;
-  min-height: 100%;
-  margin: 0;
-}
-
-body {
-  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
-  background: #0b1222;
-}
-
 .nt-screen {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  position: fixed;
+  inset: 0;
   display: grid;
   grid-template-columns: 82px minmax(0, 1fr);
   background: #0b1222;
   color: #eef5ff;
+  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  overflow: hidden;
 }
 
 .nt-leftbar {
-  background: rgba(9, 17, 34, 0.98);
-  border-right: 1px solid rgba(130, 170, 255, 0.14);
+  background: rgba(8, 15, 31, 0.98);
+  border-right: 1px solid rgba(140, 170, 230, 0.14);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 7px;
-  gap: 4px;
+  padding: 10px 7px;
+  gap: 3px;
 }
 
-.nt-logo {
+.nt-app-icon,
+.nt-brand-icon {
   position: relative;
-  width: 54px;
-  height: 34px;
-  margin-bottom: 8px;
+  width: 46px;
+  height: 30px;
 }
 
-.nt-logo span {
+.nt-app-icon span,
+.nt-brand-icon span {
   position: absolute;
-  width: 32px;
-  height: 28px;
-  border-radius: 10px;
-  background: #3c9dff;
+  width: 28px;
+  height: 24px;
+  border-radius: 9px;
+  background: #3d9cff;
 }
 
-.nt-logo span:nth-child(2) {
-  left: 20px;
+.nt-app-icon span:nth-child(2),
+.nt-brand-icon span:nth-child(2) {
+  left: 18px;
   opacity: 0.68;
 }
 
 .nt-leftbar button {
   width: 66px;
-  min-height: 51px;
+  min-height: 50px;
   border: 0;
   border-radius: 12px;
   background: transparent;
-  color: #b6c5e4;
+  color: #b8c8e7;
   cursor: pointer;
   display: grid;
   place-items: center;
-  font-size: 17px;
+  font-size: 16px;
 }
 
 .nt-leftbar button small {
   display: block;
-  font-size: 10.5px;
-  margin-top: 2px;
+  font-size: 10px;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .nt-leftbar button.active,
 .nt-leftbar button:hover {
-  background: rgba(73, 138, 255, 0.16);
+  background: rgba(65, 135, 255, 0.18);
   color: white;
 }
 
 .nt-promo {
   margin-top: auto;
-  width: 64px;
-  height: 48px;
+  width: 62px;
+  height: 47px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #30c85d, #13351d);
+  background: linear-gradient(135deg, #38cc61, #113b22);
+  color: white;
   display: grid;
   place-items: center;
   font-size: 11px;
@@ -97,87 +89,79 @@ body {
   height: 100vh;
   display: grid;
   grid-template-rows: 54px minmax(0, 1fr);
-  background: #101a30;
+  background: #111b31;
 }
 
 .nt-topbar {
+  min-width: 0;
+  height: 54px;
+  padding: 0 13px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
-  background: rgba(24, 33, 58, 0.94);
-  border-bottom: 1px solid rgba(130, 170, 255, 0.14);
+  background: rgba(25, 34, 59, 0.98);
+  border-bottom: 1px solid rgba(140, 170, 230, 0.14);
 }
 
 .nt-brand,
 .nt-account {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 9px;
 }
 
-.nt-brand-logo {
-  position: relative;
-  width: 48px;
-  height: 30px;
-}
-
-.nt-brand-logo span {
-  position: absolute;
-  width: 29px;
-  height: 25px;
-  border-radius: 9px;
-  background: #3c9dff;
-}
-
-.nt-brand-logo span:nth-child(2) {
-  left: 18px;
-  opacity: 0.68;
-}
-
 .nt-brand strong {
-  font-size: 19px;
-  letter-spacing: -0.035em;
+  font-size: 18px;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
 }
 
-.nt-brand button,
+.nt-star,
 .nt-fullscreen {
-  border: 0;
   width: 34px;
   height: 34px;
+  border: 0;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.08);
-  color: #dce9ff;
+  color: #dfeaff;
   cursor: pointer;
 }
 
 .nt-account select {
-  background: transparent;
+  max-width: 94px;
   border: 0;
-  color: #eaf3ff;
-  font-weight: 800;
   outline: 0;
+  background: transparent;
+  color: white;
+  font-weight: 800;
 }
 
 .nt-account select option {
-  background: #111a30;
+  background: #111b31;
+}
+
+.nt-account strong {
+  white-space: nowrap;
+  font-size: 15px;
 }
 
 .nt-topup {
   height: 38px;
   border: 0;
   border-radius: 10px;
-  padding: 0 15px;
-  background: linear-gradient(135deg, #42db72, #1da34c);
+  background: linear-gradient(135deg, #45da75, #20a94e);
   color: white;
   font-weight: 900;
+  padding: 0 15px;
 }
 
 .nt-avatar {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #67c6ff, #5467ff);
+  background: linear-gradient(135deg, #65c8ff, #5266ff);
+  color: white;
   display: grid;
   place-items: center;
   font-size: 12px;
@@ -185,40 +169,42 @@ body {
 }
 
 .nt-terminal {
+  min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 244px 72px;
-  background:
-    linear-gradient(rgba(14, 25, 48, 0.72), rgba(7, 12, 24, 0.9)),
-    radial-gradient(circle at 45% 40%, rgba(73, 111, 180, 0.25), transparent 48%);
+  grid-template-columns: minmax(0, 1fr) 260px 76px;
+  background: #111b31;
 }
 
-.nt-chart-section {
+.nt-chart-area {
   min-width: 0;
   min-height: 0;
   position: relative;
   display: grid;
   grid-template-rows: 54px 28px minmax(0, 1fr) 38px;
-  background: #111c33;
+  background: #12203b;
 }
 
 .nt-toolbar {
+  min-width: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  z-index: 20;
+  gap: 7px;
+  padding: 8px 10px;
 }
 
 .nt-toolbar button {
   height: 38px;
   border: 0;
   border-radius: 9px;
-  background: rgba(62, 83, 127, 0.76);
-  color: #edf5ff;
+  background: rgba(63, 84, 126, 0.78);
+  color: white;
+  font-size: 12px;
   font-weight: 800;
   cursor: pointer;
-  padding: 0 12px;
+  padding: 0 11px;
+  white-space: nowrap;
 }
 
 .nt-toolbar button:hover,
@@ -226,37 +212,69 @@ body {
   background: linear-gradient(135deg, #3b9cff, #2067db);
 }
 
-.nt-asset-btn {
-  min-width: 160px;
+.nt-asset-button {
+  min-width: 150px;
   text-align: left;
 }
 
-.nt-chart-types {
+.nt-chart-switches {
   margin-left: auto;
   display: flex;
+  align-items: center;
   gap: 7px;
 }
 
-.nt-chart-types button {
-  font-size: 12px;
-}
-
-.nt-clock-row {
+.nt-subbar {
+  padding-left: 78px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding-left: 86px;
-  color: #b9c7e6;
+  gap: 12px;
+  color: #c1d0ee;
   font-size: 12px;
 }
 
-.nt-clock-row button {
+.nt-subbar button {
   border: 0;
   background: transparent;
-  color: #cbd8f2;
+  color: #d7e5ff;
 }
 
-.nt-chart-holder {
+.nt-subbar strong {
+  font-size: 11px;
+  color: #83c8ff;
+  white-space: nowrap;
+}
+
+.nt-notice {
+  position: absolute;
+  top: 92px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  min-width: 320px;
+  max-width: 520px;
+  padding: 11px 42px 11px 16px;
+  border-radius: 12px;
+  background: rgba(7, 12, 24, 0.9);
+  border: 1px solid rgba(120, 170, 255, 0.25);
+  color: white;
+  font-weight: 800;
+  text-align: center;
+}
+
+.nt-notice button {
+  position: absolute;
+  right: 11px;
+  top: 8px;
+  border: 0;
+  background: transparent;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.nt-chart-wrap {
+  min-width: 0;
   min-height: 0;
 }
 
@@ -266,58 +284,21 @@ body {
   display: block;
 }
 
-.nt-mountain {
-  fill: rgba(210, 225, 255, 0.08);
+.nt-chart-mountain {
+  fill: rgba(210, 225, 255, 0.09);
   stroke: rgba(255, 255, 255, 0.06);
   stroke-width: 2;
 }
 
-.nt-grid {
-  stroke: rgba(200, 220, 255, 0.15);
+.nt-grid-line {
+  stroke: rgba(215, 231, 255, 0.16);
   stroke-width: 1;
-}
-
-.nt-price-line {
-  stroke: rgba(105, 194, 255, 0.95);
-  stroke-width: 1.5;
-  stroke-dasharray: 7 7;
-}
-
-.nt-price-label {
-  fill: #73a9e8;
-}
-
-.nt-price-label-text,
-.nt-axis-text,
-.nt-expiry-text {
-  fill: white;
-  font-weight: 800;
-}
-
-.nt-price-label-text {
-  font-size: 12px;
-}
-
-.nt-axis-text {
-  font-size: 13px;
 }
 
 .nt-line-chart {
   fill: none;
-  stroke: #72d7ff;
+  stroke: #77dcff;
   stroke-width: 3;
-}
-
-.nt-candle-up,
-.nt-wick-up {
-  fill: #67e4e6;
-  stroke: #67e4e6;
-}
-
-.nt-candle-down,
-.nt-wick-down {
-  fill: #ff705c;
-  stroke: #ff705c;
 }
 
 .nt-wick-up,
@@ -325,8 +306,47 @@ body {
   stroke-width: 2;
 }
 
+.nt-candle-up,
+.nt-wick-up {
+  fill: #6de4e7;
+  stroke: #6de4e7;
+}
+
+.nt-candle-down,
+.nt-wick-down {
+  fill: #ff705d;
+  stroke: #ff705d;
+}
+
+.nt-current-price-line {
+  stroke: rgba(108, 203, 255, 0.95);
+  stroke-width: 1.5;
+  stroke-dasharray: 7 7;
+}
+
+.nt-current-price-box {
+  fill: #75aeee;
+}
+
+.nt-current-price-text,
+.nt-axis-price,
+.nt-expiry-label,
+.nt-position-text,
+.nt-result-text {
+  fill: white;
+  font-weight: 900;
+}
+
+.nt-current-price-text {
+  font-size: 12px;
+}
+
+.nt-axis-price {
+  font-size: 13px;
+}
+
 .nt-expiry-line {
-  stroke: rgba(255, 255, 255, 0.82);
+  stroke: rgba(255, 255, 255, 0.9);
   stroke-width: 1.4;
 }
 
@@ -334,52 +354,90 @@ body {
   fill: white;
 }
 
-.nt-expiry-text {
+.nt-expiry-label {
+  font-size: 12px;
+}
+
+.nt-position-line {
+  stroke: rgba(255, 255, 255, 0.75);
+  stroke-width: 1.3;
+  stroke-dasharray: 5 5;
+}
+
+.nt-position-buy {
+  fill: rgba(70, 220, 102, 0.9);
+}
+
+.nt-position-sell {
+  fill: rgba(244, 83, 73, 0.9);
+}
+
+.nt-position-text {
   font-size: 13px;
 }
 
-.nt-bottom-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 14px;
-  background: rgba(5, 11, 24, 0.38);
-  color: #b8c8e8;
+.nt-result-win {
+  fill: rgba(60, 220, 97, 0.95);
 }
 
-.nt-bottom-row button {
+.nt-result-loss {
+  fill: rgba(235, 68, 59, 0.95);
+}
+
+.nt-result-text {
+  font-size: 16px;
+}
+
+.nt-chart-footer {
+  height: 38px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(5, 10, 22, 0.36);
+}
+
+.nt-chart-footer button {
   height: 28px;
   border: 0;
   border-radius: 8px;
-  background: rgba(62, 83, 127, 0.76);
+  background: rgba(63, 84, 126, 0.78);
   color: white;
   padding: 0 12px;
 }
 
+.nt-chart-footer span {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .nt-trade-panel {
-  min-width: 244px;
+  min-width: 260px;
   display: grid;
-  grid-template-columns: 22px 1fr;
-  background: rgba(18, 27, 49, 0.98);
-  border-left: 1px solid rgba(130, 170, 255, 0.14);
+  grid-template-columns: 24px minmax(0, 1fr);
+  background: rgba(18, 27, 50, 0.99);
+  border-left: 1px solid rgba(140, 170, 230, 0.14);
 }
 
 .nt-meter {
-  padding: 16px 0;
+  padding: 12px 0;
   display: grid;
   grid-template-rows: 24px minmax(0, 1fr) 24px;
   justify-items: center;
-  color: #78f28f;
+  color: #79f08d;
   font-size: 10px;
   font-weight: 900;
 }
 
 .nt-meter div {
-  width: 10px;
-  border-radius: 20px;
-  background: linear-gradient(to top, #ef4d45, #ff704d, #4bea76);
-  overflow: hidden;
   position: relative;
+  width: 10px;
+  border-radius: 999px;
+  background: linear-gradient(to top, #ef4d45, #ff7b4b, #52f078);
+  overflow: hidden;
 }
 
 .nt-meter i {
@@ -387,57 +445,67 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(120, 255, 140, 0.35);
+  background: rgba(115, 255, 140, 0.35);
 }
 
-.nt-trade-controls {
-  padding: 16px 12px;
+.nt-trade-box {
+  min-width: 0;
+  padding: 12px 12px;
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 8px;
 }
 
-.nt-trade-controls label {
-  color: #c3d2ee;
+.nt-trade-box label {
+  color: #cbd8ef;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
-.nt-expiry {
+.nt-expiry-control {
   display: grid;
-  grid-template-columns: 40px 1fr 40px;
+  grid-template-columns: 42px minmax(0, 1fr) 42px;
   gap: 8px;
   height: 44px;
 }
 
-.nt-expiry button {
+.nt-expiry-control button {
   border: 0;
   border-radius: 10px;
-  background: rgba(62, 137, 255, 0.58);
+  background: rgba(65, 139, 255, 0.64);
   color: white;
   font-size: 22px;
   font-weight: 900;
   cursor: pointer;
 }
 
-.nt-expiry strong {
+.nt-expiry-control strong {
+  min-width: 0;
   border-radius: 10px;
-  background: #0c1220;
+  background: #0b111f;
   display: grid;
   place-items: center;
   font-size: 16px;
+  white-space: nowrap;
 }
 
-.nt-amount {
+.nt-expiry-range {
+  color: #8394b8;
+  font-size: 11px;
+  text-align: center;
+}
+
+.nt-amount-box {
   height: 44px;
-  border-radius: 10px;
-  background: #0c1220;
-  overflow: hidden;
   display: grid;
-  grid-template-columns: 1fr 46px;
+  grid-template-columns: minmax(0, 1fr) 52px;
+  border-radius: 10px;
+  background: #0b111f;
+  overflow: hidden;
 }
 
-.nt-amount input {
+.nt-amount-box input {
+  min-width: 0;
   border: 0;
   outline: 0;
   background: transparent;
@@ -447,102 +515,123 @@ body {
   padding-left: 12px;
 }
 
-.nt-amount span {
+.nt-amount-box span {
   display: grid;
   place-items: center;
-  color: #c0ceea;
+  color: #b9c8e5;
   font-weight: 900;
 }
 
-.nt-profit {
-  border-radius: 10px;
-  background: #0c1220;
-  padding: 10px;
+.nt-calculation {
   display: grid;
-  gap: 3px;
+  gap: 6px;
+  border-radius: 10px;
+  background: #0b111f;
+  padding: 10px;
 }
 
-.nt-profit strong {
-  color: #75f28d;
-  text-align: right;
+.nt-calculation div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.nt-calculation span {
+  color: #aebedf;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.nt-calculation strong {
+  color: #79f08d;
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .nt-buy,
 .nt-ai,
 .nt-sell {
-  height: 46px;
+  height: 44px;
   border: 0;
   border-radius: 10px;
   color: white;
   font-weight: 900;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .nt-buy {
-  background: linear-gradient(135deg, #69ea78, #2dbc52);
+  background: linear-gradient(135deg, #68e978, #2fbd54);
 }
 
 .nt-ai {
-  background: linear-gradient(135deg, #87e7ff, #3e9eff);
+  background: linear-gradient(135deg, #87e7ff, #409dff);
 }
 
 .nt-ai b {
   display: inline-grid;
   place-items: center;
-  width: 38px;
-  height: 28px;
-  margin-right: 5px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.36);
+  width: 34px;
+  height: 26px;
+  border-radius: 999px;
+  margin-right: 4px;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .nt-sell {
-  background: linear-gradient(135deg, #ff776e, #e34538);
+  background: linear-gradient(135deg, #ff7c72, #e5483b);
 }
 
 .nt-rightbar {
-  background: rgba(14, 22, 40, 0.99);
-  border-left: 1px solid rgba(130, 170, 255, 0.14);
-  padding: 10px 5px;
+  min-width: 76px;
+  padding: 8px 5px;
+  background: rgba(14, 22, 41, 0.99);
+  border-left: 1px solid rgba(140, 170, 230, 0.14);
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 5px;
 }
 
 .nt-rightbar button {
-  min-height: 56px;
+  min-height: 54px;
   border: 0;
   border-radius: 10px;
   background: transparent;
-  color: #b9c7e5;
+  color: #b8c8e7;
   display: grid;
   place-items: center;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .nt-rightbar button small {
+  max-width: 66px;
+  overflow: visible;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.05;
   font-size: 9.5px;
 }
 
 .nt-rightbar button:hover {
-  background: rgba(73, 138, 255, 0.16);
+  background: rgba(65, 135, 255, 0.18);
   color: white;
 }
 
 .nt-popover {
   position: absolute;
+  z-index: 50;
   top: 56px;
-  left: 104px;
-  z-index: 100;
-  width: min(560px, calc(100% - 130px));
-  max-height: calc(100vh - 125px);
+  left: 92px;
+  width: min(600px, calc(100% - 130px));
+  max-height: calc(100vh - 130px);
   overflow: auto;
   border-radius: 14px;
-  border: 1px solid rgba(130, 170, 255, 0.2);
-  background: rgba(12, 20, 38, 0.98);
+  border: 1px solid rgba(140, 170, 230, 0.22);
+  background: rgba(10, 18, 35, 0.98);
   padding: 12px;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.58);
 }
 
 .nt-popover h3 {
@@ -559,9 +648,9 @@ body {
 .nt-tabs button,
 .nt-assets-list button,
 .nt-tool-grid button {
-  border: 1px solid rgba(130, 170, 255, 0.18);
-  background: rgba(37, 57, 98, 0.75);
-  color: #dbe8ff;
+  border: 1px solid rgba(140, 170, 230, 0.18);
+  background: rgba(38, 58, 100, 0.78);
+  color: #e1ecff;
   border-radius: 10px;
   cursor: pointer;
 }
@@ -574,7 +663,6 @@ body {
 .nt-assets-list button.active,
 .nt-tool-grid button.active {
   background: linear-gradient(135deg, #3b9cff, #2067db);
-  color: white;
 }
 
 .nt-assets-list {
@@ -588,11 +676,19 @@ body {
   padding: 8px 10px;
   display: flex;
   justify-content: space-between;
-  font-weight: 800;
+  gap: 10px;
+  font-weight: 900;
+}
+
+.nt-assets-list span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nt-assets-list small {
-  color: #72f08b;
+  color: #76f190;
+  white-space: nowrap;
 }
 
 .nt-tool-grid {
@@ -607,13 +703,13 @@ body {
   font-size: 12px;
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 1150px) {
   .nt-screen {
-    grid-template-columns: 68px minmax(0, 1fr);
+    grid-template-columns: 72px minmax(0, 1fr);
   }
 
   .nt-leftbar button {
-    width: 52px;
+    width: 56px;
   }
 
   .nt-leftbar button small {
@@ -621,14 +717,15 @@ body {
   }
 
   .nt-terminal {
-    grid-template-columns: minmax(0, 1fr) 230px;
+    grid-template-columns: minmax(0, 1fr) 248px 66px;
   }
 
-  .nt-rightbar {
-    display: none;
+  .nt-chart-switches button {
+    padding: 0 8px;
+    font-size: 11px;
   }
 
-  .nt-chart-types {
-    display: none;
+  .nt-account strong {
+    font-size: 13px;
   }
 }
