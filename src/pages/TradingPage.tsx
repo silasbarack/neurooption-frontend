@@ -54,11 +54,11 @@ type TradePosition = {
   openedAt: number;
   expiresAt: number;
   rateAtOpen: number;
+  accountType: AccountType;
 };
 
 type ResultFlash = {
   id: string;
-  direction: Direction;
   entryPrice: number;
   won: boolean;
   amount: number;
@@ -101,7 +101,7 @@ const CURRENCIES: CurrencyCode[] = [
 ];
 
 const ASSETS: Asset[] = [
-  { symbol: "AUD/CAD OTC", name: "Australian Dollar / Canadian Dollar", category: "Currencies", payout: 92, basePrice: 0.82205 },
+  { symbol: "AUD/CAD OTC", name: "Australian Dollar / Canadian Dollar", category: "Currencies", payout: 92, basePrice: 0.84217 },
   { symbol: "EUR/USD OTC", name: "Euro / US Dollar", category: "Currencies", payout: 91, basePrice: 1.08345 },
   { symbol: "USD/JPY OTC", name: "US Dollar / Japanese Yen", category: "Currencies", payout: 90, basePrice: 157.32 },
   { symbol: "GBP/USD OTC", name: "British Pound / US Dollar", category: "Currencies", payout: 88, basePrice: 1.2712 },
@@ -145,12 +145,21 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
+function makeId() {
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 function formatExpiry(totalSeconds: number) {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  return {
+    hours,
+    minutes,
+    seconds,
+    label: `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`,
+  };
 }
 
 function formatMoney(value: number, currency: CurrencyCode) {
@@ -386,7 +395,7 @@ export default function TradingPage() {
   const currentPriceRef = useRef<number>(ASSETS[0].basePrice);
 
   const [accountType, setAccountType] = useState<AccountType>("DEMO");
-  const [currency, setCurrency] = useState<CurrencyCode>("JPY");
+  const [currency, setCurrency] = useState<CurrencyCode>("USD");
   const [demoBalanceUsd, setDemoBalanceUsd] = useState(DEMO_START_USD);
   const [realBalanceUsd] = useState(REAL_START_USD);
 
@@ -412,6 +421,8 @@ export default function TradingPage() {
 
   const payoutProfit = amount * (asset.payout / 100);
   const totalReturn = amount + payoutProfit;
+
+  const expiry = useMemo(() => formatExpiry(expirySeconds), [expirySeconds]);
 
   const filteredAssets = useMemo(
     () => ASSETS.filter((item) => item.category === category),
@@ -481,13 +492,12 @@ export default function TradingPage() {
           ? position.stake + position.stake * (position.payoutPercent / 100)
           : 0;
 
-        if (won && accountType === "DEMO") {
+        if (won && position.accountType === "DEMO") {
           setDemoBalanceUsd((current) => current + payoutAmount / position.rateAtOpen);
         }
 
         const flash: ResultFlash = {
-          id: crypto.randomUUID(),
-          direction: position.direction,
+          id: makeId(),
           entryPrice: position.entryPrice,
           won,
           amount: payoutAmount,
@@ -505,10 +515,11 @@ export default function TradingPage() {
     }, 300);
 
     return () => window.clearInterval(timer);
-  }, [positions, accountType]);
+  }, [positions]);
 
-  function updateExpiry(delta: number) {
-    setExpirySeconds((current) => clamp(current + delta, 5, 18000));
+  function updateExpiryBy(unit: "hours" | "minutes" | "seconds", delta: number) {
+    const multiplier = unit === "hours" ? 3600 : unit === "minutes" ? 60 : 1;
+    setExpirySeconds((current) => clamp(current + delta * multiplier, 5, 18000));
   }
 
   function toggleIndicator(indicator: string) {
@@ -554,7 +565,7 @@ export default function TradingPage() {
     const entryPrice = currentPriceRef.current;
 
     const position: TradePosition = {
-      id: crypto.randomUUID(),
+      id: makeId(),
       direction,
       entryPrice,
       stake,
@@ -563,6 +574,7 @@ export default function TradingPage() {
       openedAt: Date.now(),
       expiresAt: Date.now() + expirySeconds * 1000,
       rateAtOpen: rate,
+      accountType,
     };
 
     setPositions((current) => [...current, position]);
@@ -760,12 +772,31 @@ export default function TradingPage() {
 
             <div className="nt-trade-box">
               <label>Time ⓘ</label>
-              <div className="nt-expiry-control">
-                <button onClick={() => updateExpiry(-1)}>-</button>
-                <strong>{formatExpiry(expirySeconds)}</strong>
-                <button onClick={() => updateExpiry(1)}>+</button>
+
+              <div className="nt-hms-expiry">
+                <div className="nt-hms-column">
+                  <button onClick={() => updateExpiryBy("hours", 1)}>+</button>
+                  <strong>{String(expiry.hours).padStart(2, "0")}</strong>
+                  <span>Hours</span>
+                  <button onClick={() => updateExpiryBy("hours", -1)}>-</button>
+                </div>
+
+                <div className="nt-hms-column">
+                  <button onClick={() => updateExpiryBy("minutes", 1)}>+</button>
+                  <strong>{String(expiry.minutes).padStart(2, "0")}</strong>
+                  <span>Minutes</span>
+                  <button onClick={() => updateExpiryBy("minutes", -1)}>-</button>
+                </div>
+
+                <div className="nt-hms-column">
+                  <button onClick={() => updateExpiryBy("seconds", 1)}>+</button>
+                  <strong>{String(expiry.seconds).padStart(2, "0")}</strong>
+                  <span>Seconds</span>
+                  <button onClick={() => updateExpiryBy("seconds", -1)}>-</button>
+                </div>
               </div>
 
+              <div className="nt-expiry-preview">{expiry.label}</div>
               <small className="nt-expiry-range">Min 00:00:05 · Max 05:00:00</small>
 
               <label>Amount ⓘ</label>
