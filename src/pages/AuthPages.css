@@ -329,3 +329,34 @@ body {
     flex-direction: column;
   }
 }
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  overflow-y: auto;
+}
+
+.auth-page,
+.auth-screen,
+.auth-shell,
+.auth-wrapper {
+  min-height: 100vh;
+  overflow-y: auto;
+  padding-top: 28px;
+  padding-bottom: 70px;
+}
+
+.auth-card,
+.login-card,
+.register-card {
+  margin-top: 24px;
+  margin-bottom: 60px;
+}
+
+.auth-footer {
+  margin-top: 42px;
+  padding-bottom: 48px;
+}
