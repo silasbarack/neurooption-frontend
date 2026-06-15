@@ -2,280 +2,290 @@
   box-sizing: border-box;
 }
 
-.nt-screen {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  grid-template-columns: 82px minmax(0, 1fr);
-  background: #0b1222;
-  color: #eef5ff;
-  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
   overflow: hidden;
 }
 
-.nt-leftbar {
-  background: rgba(8, 15, 31, 0.98);
-  border-right: 1px solid rgba(140, 170, 230, 0.14);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 7px;
-  gap: 3px;
+body {
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  background: #101827;
 }
 
-.nt-app-icon,
-.nt-brand-icon {
-  position: relative;
-  width: 46px;
-  height: 30px;
+button,
+select,
+input {
+  font-family: inherit;
 }
 
-.nt-app-icon span,
-.nt-brand-icon span {
-  position: absolute;
-  width: 28px;
-  height: 24px;
-  border-radius: 9px;
-  background: #3d9cff;
-}
-
-.nt-app-icon span:nth-child(2),
-.nt-brand-icon span:nth-child(2) {
-  left: 18px;
-  opacity: 0.68;
-}
-
-.nt-leftbar button {
-  width: 66px;
-  min-height: 50px;
-  border: 0;
-  border-radius: 12px;
-  background: transparent;
-  color: #b8c8e7;
+button {
   cursor: pointer;
-  display: grid;
-  place-items: center;
-  font-size: 16px;
 }
 
-.nt-leftbar button small {
-  display: block;
-  font-size: 10px;
-  line-height: 1.1;
-  white-space: nowrap;
-}
-
-.nt-leftbar button.active,
-.nt-leftbar button:hover {
-  background: rgba(65, 135, 255, 0.18);
-  color: white;
-}
-
-.nt-promo {
-  margin-top: auto;
-  width: 62px;
-  height: 47px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #38cc61, #113b22);
-  color: white;
-  display: grid;
-  place-items: center;
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.nt-main {
-  min-width: 0;
+.nt-screen {
+  width: 100vw;
   height: 100vh;
-  display: grid;
-  grid-template-rows: 54px minmax(0, 1fr);
-  background: #111b31;
+  overflow: hidden;
+  background: #111827;
+  color: #ffffff;
 }
 
 .nt-topbar {
-  min-width: 0;
-  height: 54px;
-  padding: 0 13px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(25, 34, 59, 0.98);
-  border-bottom: 1px solid rgba(140, 170, 230, 0.14);
+  padding: 0 14px;
+  background: #1b243b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.nt-brand,
-.nt-account {
-  min-width: 0;
+.nt-brand {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
+  min-width: 0;
+}
+
+.nt-logo-dot {
+  width: 34px;
+  height: 26px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1db8ff, #2c68ff);
+  display: inline-block;
+}
+
+.nt-logo-dot.second {
+  width: 28px;
+  margin-left: -20px;
+  opacity: 0.78;
 }
 
 .nt-brand strong {
   font-size: 18px;
-  letter-spacing: -0.04em;
-  white-space: nowrap;
+  font-weight: 900;
+  letter-spacing: -0.4px;
 }
 
 .nt-star,
 .nt-fullscreen {
-  width: 34px;
-  height: 34px;
   border: 0;
-  border-radius: 10px;
+  color: #d9e7ff;
   background: rgba(255, 255, 255, 0.08);
-  color: #dfeaff;
-  cursor: pointer;
 }
 
-.nt-account select {
-  max-width: 94px;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: white;
+.nt-star {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+}
+
+.nt-account {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nt-account select,
+.nt-account strong {
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #17213a;
+  color: #ffffff;
+  padding: 0 10px;
   font-weight: 800;
-}
-
-.nt-account select option {
-  background: #111b31;
 }
 
 .nt-account strong {
-  white-space: nowrap;
-  font-size: 15px;
+  min-width: 108px;
+  display: grid;
+  place-items: center;
 }
 
 .nt-topup {
-  height: 38px;
+  height: 42px;
+  border-radius: 12px;
   border: 0;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #45da75, #20a94e);
+  padding: 0 18px;
   color: white;
-  font-weight: 900;
-  padding: 0 15px;
+  font-weight: 950;
+  background: linear-gradient(135deg, #48df73, #1aa84e);
+}
+
+.nt-fullscreen {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  font-size: 20px;
 }
 
 .nt-avatar {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #65c8ff, #5266ff);
-  color: white;
   display: grid;
   place-items: center;
-  font-size: 12px;
   font-weight: 900;
+  background: #6ab7ff;
+}
+
+.nt-leftbar {
+  position: fixed;
+  left: 0;
+  top: 64px;
+  bottom: 0;
+  width: 76px;
+  z-index: 40;
+  display: grid;
+  grid-auto-rows: 62px;
+  align-content: start;
+  gap: 2px;
+  padding: 8px 6px;
+  background: #10192c;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nt-leftbar button {
+  border: 0;
+  border-radius: 12px;
+  color: #b8c8e7;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  gap: 2px;
+}
+
+.nt-leftbar button span {
+  font-size: 22px;
+}
+
+.nt-leftbar button small {
+  font-size: 11px;
+}
+
+.nt-leftbar button.active {
+  color: #ffffff;
+  background: #253657;
+}
+
+.nt-leftbar .nt-promo {
+  margin-top: 16px;
+  height: 42px;
+  color: white;
+  font-size: 10px;
+  font-weight: 900;
+  background: #1fb252;
 }
 
 .nt-terminal {
-  min-width: 0;
-  min-height: 0;
+  position: fixed;
+  left: 76px;
+  right: 0;
+  top: 64px;
+  bottom: 0;
+  overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px 76px;
-  background: #111b31;
+  grid-template-columns: minmax(0, 1fr) 280px 76px;
+  background: #111a2f;
 }
 
 .nt-chart-area {
-  min-width: 0;
-  min-height: 0;
   position: relative;
-  display: grid;
-  grid-template-rows: 54px 28px minmax(0, 1fr) 38px;
-  background: #12203b;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .nt-toolbar {
-  min-width: 0;
-  z-index: 10;
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  right: 16px;
+  z-index: 25;
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 8px 10px;
+  gap: 8px;
 }
 
 .nt-toolbar button {
-  height: 38px;
+  height: 44px;
   border: 0;
-  border-radius: 9px;
-  background: rgba(63, 84, 126, 0.78);
-  color: white;
-  font-size: 12px;
-  font-weight: 800;
-  cursor: pointer;
-  padding: 0 11px;
-  white-space: nowrap;
-}
-
-.nt-toolbar button:hover,
-.nt-toolbar button.active {
-  background: linear-gradient(135deg, #3b9cff, #2067db);
+  border-radius: 11px;
+  color: #ffffff;
+  background: rgba(43, 59, 94, 0.94);
+  font-weight: 900;
+  padding: 0 14px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
 }
 
 .nt-asset-button {
-  min-width: 150px;
+  width: 170px;
   text-align: left;
-}
-
-.nt-chart-switches {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.nt-subbar {
-  padding-left: 78px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #c1d0ee;
-  font-size: 12px;
-}
-
-.nt-subbar button {
-  border: 0;
-  background: transparent;
-  color: #d7e5ff;
-}
-
-.nt-subbar strong {
-  font-size: 11px;
-  color: #83c8ff;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.nt-notice {
-  position: absolute;
-  top: 92px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 30;
-  min-width: 320px;
-  max-width: 520px;
-  padding: 11px 42px 11px 16px;
-  border-radius: 12px;
-  background: rgba(7, 12, 24, 0.9);
-  border: 1px solid rgba(120, 170, 255, 0.25);
-  color: white;
-  font-weight: 800;
-  text-align: center;
+.nt-timeframe-main {
+  min-width: 58px;
+  background: linear-gradient(135deg, #2aa7ff, #2472e9) !important;
 }
 
-.nt-notice button {
+.nt-chart-switches {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.nt-chart-switches button.active {
+  background: linear-gradient(135deg, #35b7ff, #236dff);
+}
+
+.nt-subbar {
   position: absolute;
-  right: 11px;
-  top: 8px;
+  top: 70px;
+  left: 22px;
+  z-index: 20;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  color: #c8d7f3;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.nt-floating-tools {
+  position: absolute;
+  top: 126px;
+  left: 18px;
+  z-index: 24;
+  display: grid;
+  gap: 10px;
+}
+
+.nt-floating-tools button {
+  width: 44px;
+  height: 44px;
   border: 0;
-  background: transparent;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 21px;
+  background: rgba(43, 59, 94, 0.88);
 }
 
 .nt-chart-wrap {
-  min-width: 0;
-  min-height: 0;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
 }
 
 .nt-chart-svg {
@@ -284,1252 +294,823 @@
   display: block;
 }
 
-.nt-chart-mountain {
-  fill: rgba(210, 225, 255, 0.09);
-  stroke: rgba(255, 255, 255, 0.06);
-  stroke-width: 2;
-}
-
 .nt-grid-line {
-  stroke: rgba(215, 231, 255, 0.16);
+  stroke: rgba(174, 204, 255, 0.17);
   stroke-width: 1;
 }
 
+.nt-wick.bullish,
+.nt-bar-line.bullish {
+  stroke: #67e9ef;
+}
+
+.nt-wick.bearish,
+.nt-bar-line.bearish {
+  stroke: #ff755f;
+}
+
+.nt-wick {
+  stroke-width: 2.1;
+}
+
+.nt-bar-line {
+  stroke-width: 2.4;
+}
+
+.nt-candle.bullish {
+  fill: #67e9ef;
+}
+
+.nt-candle.bearish {
+  fill: #ff755f;
+}
+
 .nt-line-chart {
-  fill: none;
-  stroke: #77dcff;
+  stroke: #62d6ff;
   stroke-width: 3;
 }
 
-.nt-wick-up,
-.nt-wick-down {
-  stroke-width: 2;
-}
-
-.nt-candle-up,
-.nt-wick-up {
-  fill: #6de4e7;
-  stroke: #6de4e7;
-}
-
-.nt-candle-down,
-.nt-wick-down {
-  fill: #ff705d;
-  stroke: #ff705d;
-}
-
-.nt-current-price-line {
-  stroke: rgba(108, 203, 255, 0.95);
-  stroke-width: 1.5;
-  stroke-dasharray: 7 7;
-}
-
-.nt-current-price-box {
-  fill: #75aeee;
-}
-
-.nt-current-price-text,
-.nt-axis-price,
-.nt-expiry-label,
-.nt-position-text,
-.nt-result-text {
-  fill: white;
-  font-weight: 900;
+.nt-current-line {
+  stroke: #86d8ff;
+  stroke-width: 1.3;
+  stroke-dasharray: 6 6;
 }
 
 .nt-current-price-text {
-  font-size: 12px;
+  fill: #ffffff;
+  font-size: 14px;
+  font-weight: 900;
 }
 
 .nt-axis-price {
+  fill: #d9e7ff;
   font-size: 13px;
+  font-weight: 800;
 }
 
 .nt-expiry-line {
-  stroke: rgba(255, 255, 255, 0.9);
-  stroke-width: 1.4;
-}
-
-.nt-expiry-flag {
-  fill: white;
+  stroke: #ffffff;
+  stroke-width: 1.5;
 }
 
 .nt-expiry-label {
-  font-size: 12px;
-}
-
-.nt-position-line {
-  stroke: rgba(255, 255, 255, 0.75);
-  stroke-width: 1.3;
-  stroke-dasharray: 5 5;
-}
-
-.nt-position-buy {
-  fill: rgba(70, 220, 102, 0.9);
-}
-
-.nt-position-sell {
-  fill: rgba(244, 83, 73, 0.9);
-}
-
-.nt-position-text {
+  fill: #ffffff;
   font-size: 13px;
+  font-weight: 800;
 }
 
-.nt-result-win {
-  fill: rgba(60, 220, 97, 0.95);
+.nt-entry-line {
+  stroke: #59e879;
+  stroke-width: 1.4;
+  stroke-dasharray: 4 4;
 }
 
-.nt-result-loss {
-  fill: rgba(235, 68, 59, 0.95);
+.nt-entry-badge {
+  fill: #3ed467;
 }
 
+.nt-position-text,
 .nt-result-text {
-  font-size: 16px;
+  fill: #ffffff;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.nt-result-badge.win {
+  fill: #27d861;
+}
+
+.nt-result-badge.lose {
+  fill: #ff4b45;
 }
 
 .nt-chart-footer {
-  height: 38px;
-  padding: 0 12px;
+  position: absolute;
+  left: 18px;
+  bottom: 12px;
+  z-index: 20;
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: rgba(5, 10, 22, 0.36);
+  gap: 8px;
 }
 
-.nt-chart-footer button {
-  height: 28px;
-  border: 0;
-  border-radius: 8px;
-  background: rgba(63, 84, 126, 0.78);
-  color: white;
-  padding: 0 12px;
-}
-
+.nt-chart-footer button,
 .nt-chart-footer span {
-  min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  color: #ffffff;
+  background: rgba(43, 59, 94, 0.95);
+  padding: 0 16px;
+  font-weight: 800;
+}
+
+.nt-popover {
+  position: absolute;
+  top: 66px;
+  left: 16px;
+  z-index: 90;
+  width: 420px;
+  max-height: 520px;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(18, 27, 48, 0.98);
+  border: 1px solid rgba(118, 171, 255, 0.18);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+}
+
+.nt-popover h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.nt-tabs,
+.nt-timeframe-grid,
+.nt-tool-grid,
+.nt-indicator-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.nt-tabs {
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 10px;
+}
+
+.nt-tabs button,
+.nt-timeframe-grid button,
+.nt-tool-grid button,
+.nt-indicator-grid button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 10px;
+  color: #d9e7ff;
+  background: #263657;
+  font-weight: 800;
+}
+
+.nt-tabs button.active,
+.nt-timeframe-grid button.active,
+.nt-tool-grid button.active,
+.nt-indicator-grid button.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #32afff, #286ef0);
+}
+
+.nt-assets-list {
+  display: grid;
+  gap: 8px;
+}
+
+.nt-assets-list button {
+  min-height: 54px;
+  border: 0;
+  border-radius: 12px;
+  color: #ffffff;
+  background: #16223b;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  text-align: left;
+  padding: 8px 10px;
+}
+
+.nt-assets-list small {
+  color: #aebcda;
+}
+
+.nt-assets-list b {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: center;
+  color: #5bea76;
+}
+
+.nt-small-panel {
+  width: 300px;
+}
+
+.nt-timeframe-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.nt-tool-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.nt-indicator-panel {
+  width: 520px;
+}
+
+.nt-indicator-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.nt-indicator-grid button {
+  font-size: 12px;
 }
 
 .nt-trade-panel {
-  min-width: 260px;
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
-  background: rgba(18, 27, 50, 0.99);
-  border-left: 1px solid rgba(140, 170, 230, 0.14);
+  position: relative;
+  padding: 16px 14px;
+  background: #15213a;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
 }
 
 .nt-meter {
-  padding: 12px 0;
   display: grid;
-  grid-template-rows: 24px minmax(0, 1fr) 24px;
-  justify-items: center;
-  color: #79f08d;
-  font-size: 10px;
-  font-weight: 900;
+  grid-template-columns: 42px 1fr 42px;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 14px;
+  color: #66dd73;
+  font-weight: 950;
 }
 
 .nt-meter div {
-  position: relative;
-  width: 10px;
+  height: 12px;
   border-radius: 999px;
-  background: linear-gradient(to top, #ef4d45, #ff7b4b, #52f078);
-  overflow: hidden;
-}
-
-.nt-meter i {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(115, 255, 140, 0.35);
+  background: linear-gradient(90deg, #2fd25e 0%, #2fd25e 50%, #ff3434 50%, #ff3434 100%);
 }
 
 .nt-trade-box {
-  min-width: 0;
-  padding: 12px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  gap: 10px;
 }
 
 .nt-trade-box label {
-  color: #cbd8ef;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.nt-expiry-control {
-  display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) 42px;
-  gap: 8px;
-  height: 44px;
-}
-
-.nt-expiry-control button {
-  border: 0;
-  border-radius: 10px;
-  background: rgba(65, 139, 255, 0.64);
-  color: white;
-  font-size: 22px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.nt-expiry-control strong {
-  min-width: 0;
-  border-radius: 10px;
-  background: #0b111f;
-  display: grid;
-  place-items: center;
-  font-size: 16px;
-  white-space: nowrap;
-}
-
-.nt-expiry-range {
-  color: #8394b8;
-  font-size: 11px;
+  color: #c6d4ef;
+  font-weight: 850;
   text-align: center;
 }
 
-.nt-amount-box {
-  height: 44px;
+.nt-hms-expiry {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 52px;
-  border-radius: 10px;
-  background: #0b111f;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.nt-hms-column {
+  display: grid;
+  grid-template-columns: 34px 1fr 34px;
+  align-items: center;
+  gap: 4px;
+  border-radius: 12px;
+  background: #10182c;
+  padding: 6px;
+}
+
+.nt-hms-column button {
+  height: 34px;
+  border: 0;
+  border-radius: 9px;
+  color: #ffffff;
+  font-weight: 950;
+  background: #2d9fff;
+}
+
+.nt-hms-column strong {
+  text-align: center;
+  font-size: 20px;
+}
+
+.nt-hms-column span {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 10px;
+  color: #98a8c6;
+  font-weight: 900;
+}
+
+.nt-expiry-preview {
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 950;
+  background: #0e1527;
+}
+
+.nt-amount-box {
+  height: 62px;
+  display: grid;
+  grid-template-columns: 1fr 74px;
   overflow: hidden;
+  border-radius: 14px;
+  background: #0e1527;
 }
 
 .nt-amount-box input {
-  min-width: 0;
+  width: 100%;
   border: 0;
   outline: 0;
+  color: #ffffff;
   background: transparent;
-  color: white;
-  font-size: 18px;
-  font-weight: 900;
-  padding-left: 12px;
+  padding: 0 18px;
+  font-size: 26px;
+  font-weight: 950;
 }
 
 .nt-amount-box span {
   display: grid;
   place-items: center;
-  color: #b9c8e5;
-  font-weight: 900;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 950;
 }
 
 .nt-calculation {
   display: grid;
-  gap: 6px;
-  border-radius: 10px;
-  background: #0b111f;
-  padding: 10px;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #0e1527;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
 }
 
 .nt-calculation div {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
 }
 
 .nt-calculation span {
-  color: #aebedf;
-  font-size: 12px;
-  white-space: nowrap;
+  color: #9eabc5;
 }
 
 .nt-calculation strong {
-  color: #79f08d;
-  font-size: 13px;
-  white-space: nowrap;
+  color: #63e77b;
 }
 
 .nt-buy,
 .nt-ai,
 .nt-sell {
-  height: 44px;
+  height: 54px;
   border: 0;
-  border-radius: 10px;
-  color: white;
-  font-weight: 900;
-  cursor: pointer;
-  white-space: nowrap;
+  border-radius: 14px;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 950;
 }
 
 .nt-buy {
-  background: linear-gradient(135deg, #68e978, #2fbd54);
+  background: linear-gradient(135deg, #58e873, #27bf50);
 }
 
 .nt-ai {
-  background: linear-gradient(135deg, #87e7ff, #409dff);
-}
-
-.nt-ai b {
-  display: inline-grid;
-  place-items: center;
-  width: 34px;
-  height: 26px;
-  border-radius: 999px;
-  margin-right: 4px;
-  background: rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, #62d9ff, #168cf8);
 }
 
 .nt-sell {
-  background: linear-gradient(135deg, #ff7c72, #e5483b);
+  background: linear-gradient(135deg, #ff7b6d, #f03d34);
 }
 
 .nt-rightbar {
-  min-width: 76px;
-  padding: 8px 5px;
-  background: rgba(14, 22, 41, 0.99);
-  border-left: 1px solid rgba(140, 170, 230, 0.14);
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  padding: 12px 6px;
+  background: #111a2f;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  display: grid;
+  align-content: start;
+  gap: 8px;
 }
 
 .nt-rightbar button {
-  min-height: 54px;
+  min-height: 62px;
   border: 0;
-  border-radius: 10px;
-  background: transparent;
+  border-radius: 12px;
   color: #b8c8e7;
+  background: transparent;
   display: grid;
   place-items: center;
-  cursor: pointer;
-  font-size: 15px;
+}
+
+.nt-rightbar button span {
+  font-size: 22px;
 }
 
 .nt-rightbar button small {
-  max-width: 66px;
-  overflow: visible;
-  white-space: normal;
-  text-align: center;
-  line-height: 1.05;
-  font-size: 9.5px;
+  font-size: 11px;
 }
 
-.nt-rightbar button:hover {
-  background: rgba(65, 135, 255, 0.18);
-  color: white;
-}
-
-.nt-popover {
-  position: absolute;
-  z-index: 50;
-  top: 56px;
-  left: 92px;
-  width: min(600px, calc(100% - 130px));
-  max-height: calc(100vh - 130px);
-  overflow: auto;
-  border-radius: 14px;
-  border: 1px solid rgba(140, 170, 230, 0.22);
-  background: rgba(10, 18, 35, 0.98);
-  padding: 12px;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.58);
-}
-
-.nt-popover h3 {
-  margin: 0 0 10px;
-}
-
-.nt-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.nt-tabs button,
-.nt-assets-list button,
-.nt-tool-grid button {
-  border: 1px solid rgba(140, 170, 230, 0.18);
-  background: rgba(38, 58, 100, 0.78);
-  color: #e1ecff;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.nt-tabs button {
-  padding: 8px 10px;
-}
-
-.nt-tabs button.active,
-.nt-assets-list button.active,
-.nt-tool-grid button.active {
-  background: linear-gradient(135deg, #3b9cff, #2067db);
-}
-
-.nt-assets-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.nt-assets-list button {
-  min-height: 42px;
-  padding: 8px 10px;
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  font-weight: 900;
-}
-
-.nt-assets-list span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.nt-assets-list small {
-  color: #76f190;
-  white-space: nowrap;
-}
-
-.nt-tool-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.nt-tool-grid button {
-  min-height: 34px;
-  padding: 8px;
-  font-size: 12px;
-}
-
-@media (max-width: 1150px) {
-  .nt-screen {
-    grid-template-columns: 72px minmax(0, 1fr);
-  }
-
-  .nt-leftbar button {
-    width: 56px;
-  }
-
-  .nt-leftbar button small {
-    font-size: 9px;
-  }
-
-  .nt-terminal {
-    grid-template-columns: minmax(0, 1fr) 248px 66px;
-  }
-
-  .nt-chart-switches button {
-    padding: 0 8px;
-    font-size: 11px;
-  }
-
-  .nt-account strong {
-    font-size: 13px;
-  }
-}
-.nt-hms-expiry {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 7px;
-}
-
-.nt-hms-column {
-  min-width: 0;
-  border-radius: 12px;
-  background: rgba(7, 13, 26, 0.82);
-  border: 1px solid rgba(125, 170, 255, 0.13);
-  padding: 6px;
-  display: grid;
-  grid-template-rows: 30px 34px 17px 30px;
-  align-items: center;
-  justify-items: center;
-}
-
-.nt-hms-column button {
-  width: 100%;
-  height: 28px;
-  border: 0;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #55bfff, #2678dd);
-  color: white;
-  font-size: 18px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.nt-hms-column strong {
-  font-size: 20px;
-  font-weight: 950;
-  color: #ffffff;
-  line-height: 1;
-}
-
-.nt-hms-column span {
-  font-size: 9px;
-  color: #b8c8e7;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-}
-
-.nt-expiry-preview {
-  height: 34px;
-  border-radius: 10px;
-  background: #0b111f;
-  display: grid;
-  place-items: center;
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 950;
-  letter-spacing: 0.03em;
-}
-/* =====================================================
-   NEUROOPTION MOBILE TRADING SCREEN - FINAL FIX
-   PocketOption-style compact mobile layout
-   ===================================================== */
-
+/* Mobile layout */
 @media (max-width: 768px) {
-  html,
-  body,
-  #root {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-    background: #111827;
-  }
-
   .nt-screen {
-    width: 100vw;
     height: 100svh;
-    overflow: hidden;
-    background: #111827;
-    color: #fff;
-    font-family: Inter, Arial, Helvetica, sans-serif;
   }
 
-  .nt-main {
-    width: 100vw;
-    height: 100svh;
-    overflow: hidden;
-    position: relative;
-  }
-
-  /* TOP ACCOUNT BAR */
   .nt-topbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 76px;
-    z-index: 100;
-    display: grid;
-    grid-template-columns: 74px 1fr;
-    align-items: center;
-    gap: 4px;
-    padding: 7px 6px;
-    background: #171d2f;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    height: 66px;
+    padding: 4px 6px;
   }
 
-  .nt-brand {
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    overflow: hidden;
-  }
-
-  .nt-brand strong {
-    max-width: 46px;
-    overflow: hidden;
-    font-size: 10px;
-    white-space: nowrap;
-    text-overflow: clip;
-  }
-
-  .nt-brand-icon {
-    width: 42px;
-    height: 30px;
-    flex: 0 0 auto;
-    transform: scale(0.78);
-    transform-origin: left center;
-  }
-
+  .nt-brand strong,
   .nt-star {
     display: none;
   }
 
-  .nt-account {
-    min-width: 0;
-    display: grid;
-    grid-template-columns: 88px 58px minmax(84px, 1fr) 70px 38px;
-    gap: 5px;
-    align-items: center;
+  .nt-logo-dot {
+    width: 34px;
+    height: 28px;
   }
 
-  .nt-account select,
-  .nt-account strong,
-  .nt-topup,
-  .nt-fullscreen {
-    height: 48px;
-    border-radius: 13px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: #1d263f;
-    color: #fff;
-    font-weight: 900;
+  .nt-account {
+    gap: 5px;
   }
 
   .nt-account select {
-    width: 100%;
-    padding: 0 8px;
-    font-size: 12px;
-    outline: none;
+    width: 72px;
+    height: 38px;
+    font-size: 11px;
+    padding: 0 4px;
   }
 
   .nt-account strong {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 5px;
-    font-size: 13px;
-    white-space: nowrap;
+    width: 92px;
+    min-width: 92px;
+    height: 38px;
+    font-size: 12px;
     overflow: hidden;
+    white-space: nowrap;
     text-overflow: ellipsis;
   }
 
   .nt-topup {
-    background: linear-gradient(180deg, #35d77b, #1faf5d);
-    font-size: 11px;
+    width: 54px;
+    height: 38px;
     padding: 0;
+    font-size: 0;
+  }
+
+  .nt-topup::after {
+    content: "💳";
+    font-size: 20px;
   }
 
   .nt-fullscreen {
-    font-size: 17px;
-    padding: 0;
+    width: 38px;
+    height: 38px;
   }
 
   .nt-avatar {
     display: none;
   }
 
-  /* LEFT ICON BAR */
   .nt-leftbar {
-    position: fixed;
-    left: 0;
-    top: 76px;
-    bottom: 56px;
+    top: 66px;
+    bottom: 58px;
     width: 42px;
-    z-index: 90;
-    display: grid;
-    grid-auto-rows: 46px;
-    align-content: start;
-    gap: 3px;
-    padding: 5px 3px;
-    overflow: hidden;
-    background: #10182b;
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    grid-auto-rows: 51px;
+    padding: 4px;
   }
 
-  .nt-leftbar .nt-app-icon,
+  .nt-leftbar button {
+    width: 34px;
+    min-height: 44px;
+    border-radius: 10px;
+  }
+
+  .nt-leftbar button span {
+    font-size: 21px;
+  }
+
+  .nt-leftbar button small,
   .nt-leftbar .nt-promo {
     display: none;
   }
 
-  .nt-leftbar button {
-    width: 36px;
-    height: 42px;
-    padding: 0;
-    border-radius: 10px;
-    display: grid;
-    place-items: center;
-    font-size: 19px;
-    background: transparent;
-  }
-
-  .nt-leftbar button small {
-    display: none;
-  }
-
-  .nt-leftbar button.active {
-    background: rgba(42, 145, 255, 0.25);
-  }
-
-  /* MAIN CHART TERMINAL */
   .nt-terminal {
-    position: fixed;
-    top: 76px;
+    top: 66px;
     left: 42px;
+    bottom: 58px;
     right: 0;
-    bottom: 56px;
-    overflow: hidden;
-    background: #10182b;
+    display: block;
   }
 
   .nt-chart-area {
     position: absolute;
     inset: 0;
-    overflow: hidden;
-    background: #111a30;
-    border-radius: 0;
   }
 
-  /* CHART TOP TOOLS */
   .nt-toolbar {
-    position: absolute;
-    top: 8px;
-    left: 7px;
-    right: 7px;
-    height: 42px;
-    z-index: 40;
-    display: grid;
-    grid-template-columns: 112px 42px 42px 42px 42px 1fr;
-    gap: 5px;
-    align-items: center;
-    overflow: hidden;
+    top: 24px;
+    left: 10px;
+    right: 10px;
+    gap: 6px;
+    overflow: visible;
   }
 
   .nt-toolbar button {
-    height: 42px;
-    min-width: 0;
-    border-radius: 11px;
-    padding: 0 6px;
+    height: 44px;
+    border-radius: 9px;
+    padding: 0 10px;
     font-size: 13px;
-    font-weight: 900;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    background: rgba(54, 72, 111, 0.9);
   }
 
   .nt-asset-button {
-    width: 112px;
-    max-width: 112px;
-    justify-content: center;
-    font-size: 14px !important;
+    width: 160px;
+    font-size: 18px !important;
+  }
+
+  .nt-timeframe-main {
+    width: 58px;
+    min-width: 58px;
+    font-size: 15px !important;
   }
 
   .nt-chart-switches {
-    min-width: 0;
+    position: absolute;
+    top: 0;
+    left: 286px;
+    right: 0;
     display: flex;
-    gap: 5px;
-    justify-content: flex-end;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .nt-chart-switches::-webkit-scrollbar {
-    display: none;
+    overflow: hidden;
   }
 
   .nt-chart-switches button {
-    flex: 0 0 auto;
-    width: 62px;
-    height: 42px;
-    font-size: 10px;
-    padding: 0 5px;
-    border-radius: 11px;
-  }
-
-  .nt-chart-switches button:nth-child(1)::after {
-    content: "";
+    min-width: 86px;
+    font-size: 11px;
   }
 
   .nt-subbar {
-    position: absolute;
-    top: 55px;
+    top: 92px;
     left: 12px;
-    right: 12px;
-    z-index: 35;
-    height: 22px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    color: #b7c4df;
-    overflow: hidden;
-    white-space: nowrap;
+    font-size: 13px;
   }
 
   .nt-subbar strong {
     display: none;
   }
 
-  /* CHART HEIGHT FIX */
+  .nt-floating-tools {
+    top: 126px;
+    left: 12px;
+  }
+
+  .nt-floating-tools button {
+    width: 44px;
+    height: 44px;
+  }
+
   .nt-chart-wrap {
-    position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    bottom: 245px;
-    overflow: hidden;
-  }
-
-  .nt-chart-svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-
-  .nt-axis-price,
-  .nt-current-price-text,
-  .nt-expiry-label {
-    font-size: 10px;
+    bottom: 350px;
   }
 
   .nt-chart-footer {
-    position: absolute;
-    left: 8px;
-    right: 8px;
-    bottom: 248px;
-    z-index: 45;
-    height: 34px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    left: 14px;
+    right: 14px;
+    bottom: 352px;
     overflow: hidden;
   }
 
-  .nt-chart-footer button,
   .nt-chart-footer span {
-    height: 32px;
-    border-radius: 10px;
-    font-size: 12px;
-  }
-
-  .nt-chart-footer span {
-    max-width: 210px;
-    padding: 0 10px;
+    max-width: 260px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    background: rgba(27, 39, 68, 0.88);
   }
 
-  /* BOTTOM TRADE PANEL */
+  .nt-popover {
+    top: 76px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-height: 46svh;
+  }
+
+  .nt-indicator-panel {
+    width: auto;
+  }
+
+  .nt-indicator-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .nt-trade-panel {
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 245px;
-    z-index: 60;
-    padding: 0 8px 8px;
+    height: 350px;
+    z-index: 30;
+    padding: 0 10px 8px;
     background: linear-gradient(
       180deg,
-      rgba(15, 23, 42, 0.1),
-      rgba(15, 23, 42, 0.98) 14%,
-      #10182b
+      rgba(17, 26, 47, 0.08),
+      rgba(17, 26, 47, 0.96) 12%,
+      #111a2f
     );
+    border-left: 0;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .nt-meter {
-    height: 28px;
-    display: grid;
-    grid-template-columns: 44px 1fr 44px;
-    gap: 6px;
-    align-items: center;
+    height: 30px;
     margin: 0;
-  }
-
-  .nt-meter span {
-    font-size: 13px;
-    font-weight: 900;
-  }
-
-  .nt-meter > div {
-    height: 14px;
-    border-radius: 99px;
-    background: linear-gradient(
-      90deg,
-      #35ca5f 0%,
-      #35ca5f 17%,
-      #f02835 17%,
-      #f02835 100%
-    );
-  }
-
-  .nt-meter > div i {
-    display: none;
+    grid-template-columns: 42px 1fr 42px;
   }
 
   .nt-trade-box {
-    height: 209px;
-    display: grid;
+    height: 312px;
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
       "timeLabel amountLabel"
       "time amount"
       "preview preview"
-      "calc calc"
+      "payout payout"
       "buttons buttons";
-    gap: 5px 8px;
-    padding: 0;
-    border: 0;
-    background: transparent;
+    gap: 6px 10px;
   }
 
-  .nt-trade-box label {
-    height: 19px;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    color: #aebbd8;
-    font-size: 13px;
-    font-weight: 800;
-  }
-
-  .nt-trade-box > label:nth-of-type(1) {
+  .nt-trade-box label:nth-of-type(1) {
     grid-area: timeLabel;
   }
 
-  .nt-trade-box > label:nth-of-type(2) {
+  .nt-trade-box label:nth-of-type(2) {
     grid-area: amountLabel;
   }
 
-  .nt-trade-box > label:nth-of-type(3) {
+  .nt-trade-box label:nth-of-type(3) {
     display: none;
   }
 
-  /* FIXED H:M:S EXPIRY CONTROLS */
+  .nt-trade-box label {
+    height: 22px;
+    text-align: left;
+    padding-left: 4px;
+  }
+
   .nt-hms-expiry {
     grid-area: time;
-    height: 48px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
-    padding: 0;
-    background: transparent;
+    height: 78px;
+    gap: 5px;
   }
 
   .nt-hms-column {
-    min-width: 0;
-    height: 48px;
-    display: grid;
-    grid-template-columns: 20px 1fr 20px;
-    align-items: center;
+    height: 78px;
+    grid-template-columns: 22px 1fr 22px;
     gap: 2px;
-    padding: 0 2px;
-    border-radius: 12px;
-    background: #141c31;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 4px;
   }
 
   .nt-hms-column button {
-    width: 20px;
     height: 34px;
-    border-radius: 8px;
-    padding: 0;
-    font-size: 14px;
-    font-weight: 900;
-    background: linear-gradient(180deg, #35a7ff, #1d78d8);
+    font-size: 15px;
   }
 
   .nt-hms-column strong {
-    min-width: 0;
-    text-align: center;
     font-size: 16px;
-    font-weight: 950;
-    color: #fff;
-    line-height: 1;
   }
 
   .nt-hms-column span {
-    display: none;
+    font-size: 9px;
   }
 
   .nt-expiry-preview {
     grid-area: preview;
-    height: 19px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    font-size: 12px;
-    font-weight: 900;
-    color: #c9d6ef;
-  }
-
-  .nt-expiry-range {
-    display: none;
+    height: 36px;
+    font-size: 18px;
   }
 
   .nt-amount-box {
     grid-area: amount;
-    height: 48px;
-    display: grid;
-    grid-template-columns: 1fr 52px;
-    overflow: hidden;
-    border-radius: 12px;
-    background: #141c31;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    height: 78px;
+    grid-template-columns: 1fr 56px;
   }
 
   .nt-amount-box input {
-    min-width: 0;
-    width: 100%;
-    height: 48px;
+    font-size: 26px;
     padding: 0 12px;
-    border: 0;
-    outline: none;
-    background: transparent;
-    color: #fff;
-    font-size: 21px;
-    font-weight: 950;
   }
 
   .nt-amount-box span {
-    height: 48px;
-    display: grid;
-    place-items: center;
-    color: #d8e4fb;
-    font-size: 15px;
-    font-weight: 950;
+    font-size: 18px;
   }
 
   .nt-calculation {
-    grid-area: calc;
-    height: 58px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 5px;
-    padding: 7px 8px;
-    border-radius: 13px;
-    background: rgba(9, 15, 29, 0.78);
-    border: 1px dashed rgba(255, 255, 255, 0.1);
+    grid-area: payout;
+    height: 78px;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
   }
 
   .nt-calculation div {
-    min-width: 0;
     display: grid;
-    align-content: center;
-    gap: 3px;
+    gap: 4px;
+    justify-items: center;
+    text-align: center;
   }
 
   .nt-calculation span {
-    color: #aebbd8;
-    font-size: 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 12px;
   }
 
   .nt-calculation strong {
-    color: #61e57b;
-    font-size: 14px;
-    font-weight: 950;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 16px;
   }
 
   .nt-buy,
   .nt-ai,
   .nt-sell {
     grid-area: buttons;
-    height: 50px;
-    border-radius: 14px;
-    font-size: 13px;
-    font-weight: 950;
+    height: 72px;
+    align-self: end;
   }
 
   .nt-buy {
-    width: 30%;
+    width: 28%;
     justify-self: start;
   }
 
   .nt-ai {
-    width: 34%;
+    width: 42%;
     justify-self: center;
   }
 
   .nt-sell {
-    width: 30%;
+    width: 28%;
     justify-self: end;
   }
 
-  /* BOTTOM RIGHT MENU */
   .nt-rightbar {
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 56px;
-    z-index: 120;
+    height: 58px;
+    z-index: 60;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 3px;
+    gap: 4px;
     padding: 4px;
-    background: #131b2f;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: #1b243b;
   }
 
   .nt-rightbar button {
-    height: 48px;
-    padding: 2px;
-    display: grid;
-    place-items: center;
+    min-height: 50px;
     border-radius: 9px;
-    font-size: 17px;
-    background: rgba(43, 55, 86, 0.9);
+    background: #263657;
+  }
+
+  .nt-rightbar button span {
+    font-size: 18px;
   }
 
   .nt-rightbar button small {
-    display: block;
     max-width: 100%;
-    font-size: 9px;
-    overflow: hidden;
+    font-size: 10px;
     white-space: nowrap;
+    overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .nt-rightbar button:nth-child(n + 6) {
     display: none;
   }
-
-  /* MODALS / POPUPS */
-  .nt-popover {
-    position: absolute;
-    top: 56px;
-    left: 8px;
-    right: 8px;
-    z-index: 200;
-    max-height: 48svh;
-    overflow: auto;
-    border-radius: 14px;
-    background: rgba(14, 21, 38, 0.98);
-    border: 1px solid rgba(83, 157, 255, 0.18);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
-  }
-
-  .nt-tabs {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-  }
-
-  .nt-tabs button {
-    height: 34px;
-    font-size: 11px;
-  }
-
-  .nt-assets-list {
-    max-height: 220px;
-    overflow: auto;
-  }
-
-  .nt-assets-list button {
-    height: 40px;
-  }
-
-  .nt-tool-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-  }
-
-  .nt-tool-grid button {
-    height: 34px;
-    font-size: 10px;
-  }
-
-  .nt-notice {
-    position: absolute;
-    left: 8px;
-    right: 8px;
-    top: 86px;
-    z-index: 250;
-    border-radius: 12px;
-    font-size: 12px;
-  }
-
-  .nt-position-text,
-  .nt-result-text {
-    font-size: 11px;
-  }
 }
 
-/* Small Android phones */
-@media (max-width: 390px) {
-  .nt-topbar {
-    height: 70px;
-    grid-template-columns: 62px 1fr;
-  }
-
-  .nt-account {
-    grid-template-columns: 74px 50px minmax(72px, 1fr) 58px 34px;
-    gap: 4px;
-  }
-
-  .nt-account select,
-  .nt-account strong,
-  .nt-topup,
-  .nt-fullscreen {
-    height: 42px;
-    border-radius: 11px;
-    font-size: 10px;
-  }
-
-  .nt-terminal {
-    top: 70px;
-    left: 38px;
-  }
-
-  .nt-leftbar {
-    top: 70px;
-    width: 38px;
-  }
-
-  .nt-leftbar button {
-    width: 32px;
-    height: 40px;
-    font-size: 17px;
-  }
-
-  .nt-toolbar {
-    grid-template-columns: 96px 38px 38px 38px 38px 1fr;
+@media (max-width: 430px) {
+  .nt-chart-switches {
+    display: none;
   }
 
   .nt-asset-button {
-    width: 96px;
-    max-width: 96px;
-    font-size: 12px !important;
+    width: 164px;
   }
 
-  .nt-chart-switches button {
-    width: 52px;
-    font-size: 9px;
-  }
-
-  .nt-trade-panel {
-    height: 238px;
+  .nt-toolbar {
+    top: 22px;
   }
 
   .nt-chart-wrap {
-    bottom: 238px;
+    bottom: 344px;
   }
 
   .nt-chart-footer {
-    bottom: 240px;
+    bottom: 346px;
   }
 
-  .nt-hms-column strong {
-    font-size: 14px;
+  .nt-trade-panel {
+    height: 344px;
   }
 
-  .nt-hms-column button {
-    width: 18px;
-    font-size: 13px;
+  .nt-trade-box {
+    height: 306px;
   }
 
   .nt-calculation strong {
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .nt-buy,
   .nt-ai,
   .nt-sell {
-    height: 46px;
+    height: 64px;
   }
 }
