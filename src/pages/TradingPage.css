@@ -12,8 +12,8 @@ body,
 }
 
 body {
-  font-family: Inter, Arial, Helvetica, sans-serif;
-  background: #101827;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: #111827;
 }
 
 button,
@@ -22,16 +22,13 @@ input {
   font-family: inherit;
 }
 
-button {
-  cursor: pointer;
-}
-
 .nt-screen {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: #111827;
-  color: #ffffff;
+  background: #11182b;
+  color: #f7fbff;
+  position: relative;
 }
 
 .nt-topbar {
@@ -39,53 +36,51 @@ button {
   top: 0;
   left: 0;
   right: 0;
-  height: 64px;
-  z-index: 50;
+  height: 54px;
+  z-index: 60;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
-  background: #1b243b;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0 14px 0 10px;
+  background: linear-gradient(180deg, #25324f, #1b2540);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .nt-brand {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 0;
 }
 
-.nt-logo-dot {
-  width: 34px;
-  height: 26px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #1db8ff, #2c68ff);
-  display: inline-block;
-}
-
-.nt-logo-dot.second {
-  width: 28px;
-  margin-left: -20px;
-  opacity: 0.78;
+.nt-brand-mark {
+  width: 36px;
+  height: 28px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #24b7ff, #2575ff);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  font-weight: 950;
+  color: white;
 }
 
 .nt-brand strong {
-  font-size: 18px;
-  font-weight: 900;
+  font-size: 17px;
+  font-weight: 850;
   letter-spacing: -0.4px;
 }
 
 .nt-star,
 .nt-fullscreen {
   border: 0;
-  color: #d9e7ff;
+  color: #dbeafe;
   background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
 }
 
 .nt-star {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 9px;
 }
 
@@ -97,76 +92,78 @@ button {
 
 .nt-account select,
 .nt-account strong {
-  height: 42px;
+  height: 38px;
   border-radius: 12px;
+  background: rgba(11, 18, 33, 0.55);
+  color: #f8fbff;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: #17213a;
-  color: #ffffff;
   padding: 0 10px;
   font-weight: 800;
 }
 
 .nt-account strong {
-  min-width: 108px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  min-width: 122px;
 }
 
 .nt-topup {
-  height: 42px;
-  border-radius: 12px;
+  height: 38px;
   border: 0;
-  padding: 0 18px;
-  color: white;
+  border-radius: 12px;
+  padding: 0 16px;
+  color: #fff;
   font-weight: 950;
-  background: linear-gradient(135deg, #48df73, #1aa84e);
+  background: linear-gradient(135deg, #38d666, #179f50);
+  cursor: pointer;
 }
 
 .nt-fullscreen {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   border-radius: 12px;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .nt-avatar {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-weight: 900;
-  background: #6ab7ff;
+  background: #5aa8ff;
+  font-weight: 950;
 }
 
 .nt-leftbar {
   position: fixed;
   left: 0;
-  top: 64px;
+  top: 54px;
   bottom: 0;
-  width: 76px;
-  z-index: 40;
-  display: grid;
-  grid-auto-rows: 62px;
-  align-content: start;
-  gap: 2px;
-  padding: 8px 6px;
-  background: #10192c;
+  width: 78px;
+  z-index: 50;
+  padding: 8px 8px;
+  background: #10192d;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .nt-leftbar button {
+  height: 52px;
   border: 0;
   border-radius: 12px;
-  color: #b8c8e7;
   background: transparent;
+  color: #b7c5df;
   display: grid;
   place-items: center;
   gap: 2px;
+  cursor: pointer;
 }
 
 .nt-leftbar button span {
-  font-size: 22px;
+  font-size: 18px;
 }
 
 .nt-leftbar button small {
@@ -174,221 +171,211 @@ button {
 }
 
 .nt-leftbar button.active {
-  color: #ffffff;
-  background: #253657;
+  background: rgba(63, 145, 255, 0.18);
+  color: #fff;
 }
 
-.nt-leftbar .nt-promo {
-  margin-top: 16px;
-  height: 42px;
-  color: white;
-  font-size: 10px;
-  font-weight: 900;
-  background: #1fb252;
+.nt-leftbar .promo {
+  margin-top: auto;
+  background: linear-gradient(135deg, rgba(45, 205, 95, 0.35), rgba(20, 90, 40, 0.5));
 }
 
 .nt-terminal {
   position: fixed;
-  left: 76px;
-  right: 0;
-  top: 64px;
+  top: 54px;
+  left: 78px;
+  right: 84px;
   bottom: 0;
+  background: #15203a;
   overflow: hidden;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px 76px;
-  background: #111a2f;
 }
 
 .nt-chart-area {
-  position: relative;
-  min-width: 0;
+  position: absolute;
+  inset: 0 282px 0 0;
   overflow: hidden;
+  background: #17223d;
+}
+
+.nt-chart-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .nt-toolbar {
   position: absolute;
   top: 14px;
-  left: 16px;
-  right: 16px;
-  z-index: 25;
+  left: 14px;
+  right: 296px;
+  z-index: 35;
+  height: 46px;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .nt-toolbar button {
-  height: 44px;
+  height: 42px;
   border: 0;
-  border-radius: 11px;
-  color: #ffffff;
-  background: rgba(43, 59, 94, 0.94);
-  font-weight: 900;
-  padding: 0 14px;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+  border-radius: 12px;
+  color: #fff;
+  background: rgba(43, 58, 91, 0.92);
+  font-weight: 850;
+  cursor: pointer;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
 }
 
 .nt-asset-button {
-  width: 170px;
+  width: 164px;
   text-align: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  padding: 0 14px;
+  font-size: 15px;
 }
 
-.nt-timeframe-main {
-  min-width: 58px;
-  background: linear-gradient(135deg, #2aa7ff, #2472e9) !important;
+.nt-tool-btn {
+  min-width: 52px;
+  padding: 0 12px;
 }
 
 .nt-chart-switches {
-  display: flex;
-  gap: 8px;
   margin-left: auto;
+  display: flex;
+  gap: 7px;
+}
+
+.nt-chart-switches button {
+  min-width: 78px;
+  background: #263957;
 }
 
 .nt-chart-switches button.active {
-  background: linear-gradient(135deg, #35b7ff, #236dff);
+  background: linear-gradient(135deg, #4fc3ff, #2376ff);
 }
 
 .nt-subbar {
   position: absolute;
-  top: 70px;
-  left: 22px;
-  z-index: 20;
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  color: #c8d7f3;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.nt-floating-tools {
-  position: absolute;
-  top: 126px;
+  top: 68px;
   left: 18px;
-  z-index: 24;
-  display: grid;
-  gap: 10px;
+  right: 300px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #c2d1eb;
+  font-size: 12px;
 }
 
-.nt-floating-tools button {
-  width: 44px;
-  height: 44px;
+.nt-subbar .ok {
+  color: #5ee27f;
+}
+
+.nt-subbar .bad {
+  color: #ff766b;
+}
+
+.nt-popover {
+  position: absolute;
+  top: 66px;
+  left: 14px;
+  z-index: 100;
+  background: rgba(19, 29, 52, 0.98);
+  border: 1px solid rgba(116, 168, 255, 0.22);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.45);
+}
+
+.nt-assets-panel {
+  width: 420px;
+}
+
+.nt-tabs,
+.nt-grid-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.nt-tabs button,
+.nt-grid-buttons button,
+.nt-indicator-grid button {
+  height: 36px;
   border: 0;
   border-radius: 10px;
-  color: #ffffff;
-  font-size: 21px;
-  background: rgba(43, 59, 94, 0.88);
+  background: #202d4a;
+  color: #dbeafe;
+  font-weight: 800;
+  cursor: pointer;
 }
 
-.nt-chart-wrap {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
+.nt-tabs button.active,
+.nt-grid-buttons button.active,
+.nt-indicator-grid button.active {
+  background: linear-gradient(135deg, #4fc3ff, #2376ff);
+  color: #fff;
 }
 
-.nt-chart-svg {
-  width: 100%;
-  height: 100%;
+.nt-assets-list {
+  margin-top: 10px;
+  max-height: 310px;
+  overflow: auto;
+  display: grid;
+  gap: 7px;
+}
+
+.nt-assets-list button {
+  min-height: 46px;
+  border: 0;
+  border-radius: 12px;
+  background: #111a30;
+  color: #fff;
+  text-align: left;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.nt-assets-list span {
   display: block;
+  font-weight: 950;
 }
 
-.nt-grid-line {
-  stroke: rgba(174, 204, 255, 0.17);
-  stroke-width: 1;
+.nt-assets-list small {
+  display: block;
+  color: #aabbd8;
 }
 
-.nt-wick.bullish,
-.nt-bar-line.bullish {
-  stroke: #67e9ef;
+.nt-small-panel {
+  width: 310px;
 }
 
-.nt-wick.bearish,
-.nt-bar-line.bearish {
-  stroke: #ff755f;
-}
-
-.nt-wick {
-  stroke-width: 2.1;
-}
-
-.nt-bar-line {
-  stroke-width: 2.4;
-}
-
-.nt-candle.bullish {
-  fill: #67e9ef;
-}
-
-.nt-candle.bearish {
-  fill: #ff755f;
-}
-
-.nt-line-chart {
-  stroke: #62d6ff;
-  stroke-width: 3;
-}
-
-.nt-current-line {
-  stroke: #86d8ff;
-  stroke-width: 1.3;
-  stroke-dasharray: 6 6;
-}
-
-.nt-current-price-text {
-  fill: #ffffff;
-  font-size: 14px;
-  font-weight: 900;
-}
-
-.nt-axis-price {
-  fill: #d9e7ff;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.nt-expiry-line {
-  stroke: #ffffff;
-  stroke-width: 1.5;
-}
-
-.nt-expiry-label {
-  fill: #ffffff;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.nt-entry-line {
-  stroke: #59e879;
-  stroke-width: 1.4;
-  stroke-dasharray: 4 4;
-}
-
-.nt-entry-badge {
-  fill: #3ed467;
-}
-
-.nt-position-text,
-.nt-result-text {
-  fill: #ffffff;
+.nt-small-panel h3,
+.nt-indicator-panel h3 {
+  margin: 0 0 10px;
   font-size: 15px;
-  font-weight: 900;
 }
 
-.nt-result-badge.win {
-  fill: #27d861;
+.nt-indicator-panel {
+  width: 620px;
 }
 
-.nt-result-badge.lose {
-  fill: #ff4b45;
+.nt-indicator-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.nt-indicator-grid button {
+  font-size: 12px;
 }
 
 .nt-chart-footer {
   position: absolute;
   left: 18px;
   bottom: 12px;
-  z-index: 20;
+  z-index: 30;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -396,143 +383,54 @@ button {
 
 .nt-chart-footer button,
 .nt-chart-footer span {
-  height: 36px;
+  height: 34px;
   border: 0;
   border-radius: 10px;
-  color: #ffffff;
-  background: rgba(43, 59, 94, 0.95);
+  background: rgba(42, 58, 94, 0.9);
+  color: #fff;
   padding: 0 16px;
-  font-weight: 800;
+  font-weight: 850;
 }
 
-.nt-popover {
-  position: absolute;
-  top: 66px;
-  left: 16px;
-  z-index: 90;
-  width: 420px;
-  max-height: 520px;
-  overflow: auto;
-  padding: 12px;
-  border-radius: 18px;
-  background: rgba(18, 27, 48, 0.98);
-  border: 1px solid rgba(118, 171, 255, 0.18);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
-}
-
-.nt-popover h3 {
-  margin: 0 0 10px;
-  font-size: 15px;
-}
-
-.nt-tabs,
-.nt-timeframe-grid,
-.nt-tool-grid,
-.nt-indicator-grid {
-  display: grid;
-  gap: 8px;
-}
-
-.nt-tabs {
-  grid-template-columns: repeat(2, 1fr);
-  margin-bottom: 10px;
-}
-
-.nt-tabs button,
-.nt-timeframe-grid button,
-.nt-tool-grid button,
-.nt-indicator-grid button {
-  min-height: 38px;
-  border: 0;
-  border-radius: 10px;
-  color: #d9e7ff;
-  background: #263657;
-  font-weight: 800;
-}
-
-.nt-tabs button.active,
-.nt-timeframe-grid button.active,
-.nt-tool-grid button.active,
-.nt-indicator-grid button.active {
-  color: #ffffff;
-  background: linear-gradient(135deg, #32afff, #286ef0);
-}
-
-.nt-assets-list {
-  display: grid;
-  gap: 8px;
-}
-
-.nt-assets-list button {
-  min-height: 54px;
-  border: 0;
-  border-radius: 12px;
-  color: #ffffff;
-  background: #16223b;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2px 8px;
-  text-align: left;
-  padding: 8px 10px;
-}
-
-.nt-assets-list small {
-  color: #aebcda;
-}
-
-.nt-assets-list b {
-  grid-row: 1 / span 2;
-  grid-column: 2;
-  align-self: center;
-  color: #5bea76;
-}
-
-.nt-small-panel {
-  width: 300px;
-}
-
-.nt-timeframe-grid {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.nt-tool-grid {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.nt-indicator-panel {
-  width: 520px;
-}
-
-.nt-indicator-grid {
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.nt-indicator-grid button {
-  font-size: 12px;
+.nt-chart-footer span {
+  display: flex;
+  align-items: center;
+  min-width: 260px;
 }
 
 .nt-trade-panel {
-  position: relative;
-  padding: 16px 14px;
-  background: #15213a;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 282px;
+  z-index: 25;
+  background: #19233e;
   border-left: 1px solid rgba(255, 255, 255, 0.08);
-  overflow: hidden;
+  padding: 70px 12px 12px;
 }
 
 .nt-meter {
   display: grid;
-  grid-template-columns: 42px 1fr 42px;
+  grid-template-columns: 38px 1fr 38px;
   gap: 8px;
   align-items: center;
-  margin-bottom: 14px;
-  color: #66dd73;
+  margin-bottom: 18px;
+}
+
+.nt-meter span {
   font-weight: 950;
+  color: #61e37f;
+}
+
+.nt-meter span:last-child {
+  color: #ff5650;
 }
 
 .nt-meter div {
   height: 12px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #2fd25e 0%, #2fd25e 50%, #ff3434 50%, #ff3434 100%);
+  background: linear-gradient(90deg, #30d15d 0%, #30d15d 50%, #ef3029 50%, #ef3029 100%);
 }
 
 .nt-trade-box {
@@ -541,7 +439,7 @@ button {
 }
 
 .nt-trade-box label {
-  color: #c6d4ef;
+  color: #c8d5ed;
   font-weight: 850;
   text-align: center;
 }
@@ -553,97 +451,95 @@ button {
 }
 
 .nt-hms-column {
-  display: grid;
-  grid-template-columns: 34px 1fr 34px;
-  align-items: center;
-  gap: 4px;
-  border-radius: 12px;
-  background: #10182c;
+  background: #121b31;
+  border-radius: 14px;
   padding: 6px;
+  display: grid;
+  grid-template-columns: 28px 1fr 28px;
+  gap: 4px;
+  align-items: center;
 }
 
 .nt-hms-column button {
-  height: 34px;
+  height: 30px;
   border: 0;
   border-radius: 9px;
-  color: #ffffff;
+  background: linear-gradient(135deg, #4cc3ff, #1f79ff);
+  color: white;
+  font-size: 18px;
   font-weight: 950;
-  background: #2d9fff;
+  cursor: pointer;
 }
 
 .nt-hms-column strong {
   text-align: center;
-  font-size: 20px;
+  font-size: 19px;
 }
 
 .nt-hms-column span {
   grid-column: 1 / -1;
   text-align: center;
+  color: #9fb1d2;
   font-size: 10px;
-  color: #98a8c6;
-  font-weight: 900;
 }
 
 .nt-expiry-preview {
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  color: #ffffff;
-  font-size: 22px;
-  font-weight: 950;
-  background: #0e1527;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: #b9c8e5;
+  font-size: 12px;
 }
 
 .nt-amount-box {
-  height: 62px;
-  display: grid;
-  grid-template-columns: 1fr 74px;
-  overflow: hidden;
+  height: 58px;
   border-radius: 14px;
-  background: #0e1527;
+  background: #10182b;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 66px;
 }
 
 .nt-amount-box input {
   width: 100%;
   border: 0;
   outline: 0;
-  color: #ffffff;
   background: transparent;
-  padding: 0 18px;
-  font-size: 26px;
+  color: white;
+  font-size: 24px;
   font-weight: 950;
+  padding: 0 16px;
 }
 
 .nt-amount-box span {
   display: grid;
   place-items: center;
-  color: #ffffff;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 950;
+  color: #dbeafe;
 }
 
 .nt-calculation {
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  background: rgba(9, 14, 27, 0.62);
+  padding: 12px;
   display: grid;
   gap: 8px;
-  padding: 12px;
-  border-radius: 14px;
-  background: #0e1527;
-  border: 1px dashed rgba(255, 255, 255, 0.1);
 }
 
 .nt-calculation div {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
 }
 
 .nt-calculation span {
-  color: #9eabc5;
+  color: #b5c3dd;
 }
 
 .nt-calculation strong {
-  color: #63e77b;
+  color: #62e67d;
 }
 
 .nt-buy,
@@ -652,59 +548,82 @@ button {
   height: 54px;
   border: 0;
   border-radius: 14px;
-  color: #ffffff;
+  color: white;
   font-size: 17px;
   font-weight: 950;
+  cursor: pointer;
 }
 
 .nt-buy {
-  background: linear-gradient(135deg, #58e873, #27bf50);
+  background: linear-gradient(135deg, #39dc63, #23a64d);
 }
 
 .nt-ai {
-  background: linear-gradient(135deg, #62d9ff, #168cf8);
+  background: linear-gradient(135deg, #6bdcff, #1599ee);
 }
 
 .nt-sell {
-  background: linear-gradient(135deg, #ff7b6d, #f03d34);
+  background: linear-gradient(135deg, #ff766d, #ef3a32);
 }
 
 .nt-rightbar {
-  padding: 12px 6px;
-  background: #111a2f;
+  position: fixed;
+  top: 54px;
+  right: 0;
+  bottom: 0;
+  width: 84px;
+  z-index: 50;
+  background: #121b31;
   border-left: 1px solid rgba(255, 255, 255, 0.08);
   display: grid;
-  align-content: start;
-  gap: 8px;
+  grid-auto-rows: 74px;
+  padding: 8px 7px;
+  gap: 4px;
 }
 
 .nt-rightbar button {
-  min-height: 62px;
   border: 0;
   border-radius: 12px;
-  color: #b8c8e7;
   background: transparent;
+  color: #b9c8e4;
   display: grid;
   place-items: center;
+  cursor: pointer;
 }
 
-.nt-rightbar button span {
-  font-size: 22px;
+.nt-rightbar span {
+  font-size: 20px;
 }
 
-.nt-rightbar button small {
+.nt-rightbar small {
   font-size: 11px;
 }
 
-/* Mobile layout */
+.nt-notice {
+  position: absolute;
+  top: 74px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 120;
+  background: rgba(255, 95, 95, 0.94);
+  color: white;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: 850;
+}
+
+/* ======================
+   MOBILE VERSION
+   ====================== */
+
 @media (max-width: 768px) {
   .nt-screen {
     height: 100svh;
   }
 
   .nt-topbar {
-    height: 66px;
-    padding: 4px 6px;
+    height: 72px;
+    padding: 7px 8px;
   }
 
   .nt-brand strong,
@@ -712,212 +631,230 @@ button {
     display: none;
   }
 
-  .nt-logo-dot {
-    width: 34px;
-    height: 28px;
+  .nt-brand-mark {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
   }
 
   .nt-account {
-    gap: 5px;
+    margin-left: auto;
+    gap: 6px;
   }
 
   .nt-account select {
     width: 72px;
-    height: 38px;
-    font-size: 11px;
-    padding: 0 4px;
+    height: 42px;
+    font-size: 12px;
+    padding: 0 5px;
   }
 
   .nt-account strong {
-    width: 92px;
-    min-width: 92px;
-    height: 38px;
+    width: 88px;
+    min-width: 88px;
+    height: 42px;
     font-size: 12px;
+    padding: 0 6px;
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+  }
+
+  .nt-account select:first-child {
+    width: 82px;
   }
 
   .nt-topup {
     width: 54px;
-    height: 38px;
+    height: 48px;
     padding: 0;
     font-size: 0;
+    border-radius: 13px;
   }
 
-  .nt-topup::after {
+  .nt-topup::before {
     content: "💳";
-    font-size: 20px;
+    font-size: 24px;
   }
 
-  .nt-fullscreen {
-    width: 38px;
-    height: 38px;
-  }
-
+  .nt-fullscreen,
   .nt-avatar {
     display: none;
   }
 
   .nt-leftbar {
-    top: 66px;
-    bottom: 58px;
+    top: 72px;
+    bottom: 74px;
     width: 42px;
-    grid-auto-rows: 51px;
-    padding: 4px;
+    padding: 5px 4px;
+    gap: 4px;
   }
 
   .nt-leftbar button {
     width: 34px;
-    min-height: 44px;
-    border-radius: 10px;
+    height: 54px;
+    padding: 0;
+  }
+
+  .nt-leftbar button small {
+    display: none;
   }
 
   .nt-leftbar button span {
-    font-size: 21px;
+    font-size: 22px;
   }
 
-  .nt-leftbar button small,
-  .nt-leftbar .nt-promo {
+  .nt-leftbar .promo {
     display: none;
   }
 
   .nt-terminal {
-    top: 66px;
+    top: 72px;
     left: 42px;
-    bottom: 58px;
     right: 0;
-    display: block;
+    bottom: 74px;
   }
 
   .nt-chart-area {
-    position: absolute;
-    inset: 0;
+    inset: 0 0 246px 0;
   }
 
   .nt-toolbar {
     top: 24px;
-    left: 10px;
+    left: 14px;
     right: 10px;
-    gap: 6px;
-    overflow: visible;
+    height: 48px;
+    gap: 8px;
   }
 
   .nt-toolbar button {
-    height: 44px;
+    height: 46px;
     border-radius: 9px;
-    padding: 0 10px;
-    font-size: 13px;
   }
 
   .nt-asset-button {
-    width: 160px;
-    font-size: 18px !important;
+    width: 178px;
+    font-size: 18px;
+    padding: 0 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  .nt-timeframe-main {
-    width: 58px;
-    min-width: 58px;
-    font-size: 15px !important;
+  .nt-tool-btn {
+    min-width: 54px;
+    max-width: 54px;
+    padding: 0;
+    font-size: 0;
+  }
+
+  .nt-tool-btn:nth-of-type(2)::before {
+    content: "📊 " attr(title);
+    font-size: 0;
+  }
+
+  .nt-tool-btn:nth-of-type(2) {
+    font-size: 14px;
+  }
+
+  .nt-tool-btn:nth-of-type(3)::before {
+    content: "☷";
+    font-size: 26px;
+  }
+
+  .nt-tool-btn:nth-of-type(4)::before {
+    content: "✎";
+    font-size: 22px;
+  }
+
+  .nt-tool-btn:nth-of-type(5)::before {
+    content: "⋮";
+    font-size: 28px;
   }
 
   .nt-chart-switches {
-    position: absolute;
-    top: 0;
-    left: 286px;
-    right: 0;
-    display: flex;
-    overflow: hidden;
-  }
-
-  .nt-chart-switches button {
-    min-width: 86px;
-    font-size: 11px;
-  }
-
-  .nt-subbar {
-    top: 92px;
-    left: 12px;
-    font-size: 13px;
-  }
-
-  .nt-subbar strong {
     display: none;
   }
 
-  .nt-floating-tools {
-    top: 126px;
-    left: 12px;
-  }
-
-  .nt-floating-tools button {
-    width: 44px;
-    height: 44px;
-  }
-
-  .nt-chart-wrap {
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 350px;
-  }
-
-  .nt-chart-footer {
+  .nt-subbar {
+    top: 84px;
     left: 14px;
-    right: 14px;
-    bottom: 352px;
-    overflow: hidden;
+    right: 10px;
+    font-size: 15px;
   }
 
-  .nt-chart-footer span {
-    max-width: 260px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+  .nt-subbar strong,
+  .nt-subbar span:nth-child(3) {
+    display: none;
   }
 
   .nt-popover {
-    top: 76px;
-    left: 8px;
-    right: 8px;
-    width: auto;
-    max-height: 46svh;
+    top: 78px;
+    left: 14px;
+    right: 10px;
+    max-height: 45svh;
+    overflow: auto;
   }
 
+  .nt-assets-panel,
+  .nt-small-panel,
   .nt-indicator-panel {
     width: auto;
   }
 
-  .nt-indicator-grid {
+  .nt-tabs {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .nt-indicator-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-height: 330px;
+  }
+
+  .nt-chart-footer {
+    left: 12px;
+    bottom: 4px;
+    max-width: calc(100vw - 62px);
+  }
+
+  .nt-chart-footer button {
+    height: 44px;
+    min-width: 72px;
+    border-radius: 13px;
+    font-size: 18px;
+  }
+
+  .nt-chart-footer span {
+    height: 44px;
+    min-width: 0;
+    max-width: 260px;
+    font-size: 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .nt-trade-panel {
-    position: absolute;
+    top: auto;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 350px;
-    z-index: 30;
-    padding: 0 10px 8px;
-    background: linear-gradient(
-      180deg,
-      rgba(17, 26, 47, 0.08),
-      rgba(17, 26, 47, 0.96) 12%,
-      #111a2f
-    );
+    width: auto;
+    height: 246px;
+    padding: 0 10px 10px;
+    background: linear-gradient(180deg, rgba(18, 27, 49, 0.18), rgba(18, 27, 49, 0.98) 18%);
     border-left: 0;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .nt-meter {
     height: 30px;
-    margin: 0;
-    grid-template-columns: 42px 1fr 42px;
+    margin: 0 0 2px;
+  }
+
+  .nt-meter div {
+    height: 10px;
   }
 
   .nt-trade-box {
-    height: 312px;
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
       "timeLabel amountLabel"
@@ -928,87 +865,82 @@ button {
     gap: 6px 10px;
   }
 
+  .nt-trade-box label {
+    text-align: left;
+    font-size: 16px;
+  }
+
   .nt-trade-box label:nth-of-type(1) {
     grid-area: timeLabel;
+  }
+
+  .nt-hms-expiry {
+    grid-area: time;
+    height: 54px;
+  }
+
+  .nt-hms-column {
+    height: 54px;
+    padding: 4px;
+    grid-template-columns: 22px 1fr 22px;
+  }
+
+  .nt-hms-column button {
+    width: 22px;
+    height: 34px;
+    font-size: 17px;
+  }
+
+  .nt-hms-column strong {
+    font-size: 18px;
+  }
+
+  .nt-hms-column span {
+    font-size: 8px;
+  }
+
+  .nt-expiry-preview {
+    grid-area: preview;
+    font-size: 12px;
   }
 
   .nt-trade-box label:nth-of-type(2) {
     grid-area: amountLabel;
   }
 
+  .nt-amount-box {
+    grid-area: amount;
+    height: 54px;
+  }
+
+  .nt-amount-box input {
+    height: 54px;
+    font-size: 26px;
+  }
+
+  .nt-amount-box span {
+    height: 54px;
+    font-size: 20px;
+  }
+
   .nt-trade-box label:nth-of-type(3) {
     display: none;
   }
 
-  .nt-trade-box label {
-    height: 22px;
-    text-align: left;
-    padding-left: 4px;
-  }
-
-  .nt-hms-expiry {
-    grid-area: time;
-    height: 78px;
-    gap: 5px;
-  }
-
-  .nt-hms-column {
-    height: 78px;
-    grid-template-columns: 22px 1fr 22px;
-    gap: 2px;
-    padding: 4px;
-  }
-
-  .nt-hms-column button {
-    height: 34px;
-    font-size: 15px;
-  }
-
-  .nt-hms-column strong {
-    font-size: 16px;
-  }
-
-  .nt-hms-column span {
-    font-size: 9px;
-  }
-
-  .nt-expiry-preview {
-    grid-area: preview;
-    height: 36px;
-    font-size: 18px;
-  }
-
-  .nt-amount-box {
-    grid-area: amount;
-    height: 78px;
-    grid-template-columns: 1fr 56px;
-  }
-
-  .nt-amount-box input {
-    font-size: 26px;
-    padding: 0 12px;
-  }
-
-  .nt-amount-box span {
-    font-size: 18px;
-  }
-
   .nt-calculation {
     grid-area: payout;
-    height: 78px;
-    grid-template-columns: repeat(3, 1fr);
-    align-items: center;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    padding: 8px 12px;
   }
 
   .nt-calculation div {
     display: grid;
-    gap: 4px;
-    justify-items: center;
-    text-align: center;
+    gap: 3px;
   }
 
   .nt-calculation span {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .nt-calculation strong {
@@ -1019,98 +951,86 @@ button {
   .nt-ai,
   .nt-sell {
     grid-area: buttons;
-    height: 72px;
-    align-self: end;
+    height: 56px;
+    border-radius: 14px;
   }
 
   .nt-buy {
-    width: 28%;
+    width: 29%;
     justify-self: start;
   }
 
   .nt-ai {
-    width: 42%;
+    width: 44%;
     justify-self: center;
   }
 
   .nt-sell {
-    width: 28%;
+    width: 29%;
     justify-self: end;
   }
 
   .nt-rightbar {
-    position: fixed;
+    top: auto;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 58px;
-    z-index: 60;
-    display: grid;
+    width: auto;
+    height: 74px;
     grid-template-columns: repeat(5, 1fr);
-    gap: 4px;
-    padding: 4px;
-    background: #1b243b;
+    grid-auto-rows: 62px;
+    padding: 6px;
   }
 
   .nt-rightbar button {
-    min-height: 50px;
-    border-radius: 9px;
-    background: #263657;
-  }
-
-  .nt-rightbar button span {
-    font-size: 18px;
-  }
-
-  .nt-rightbar button small {
-    max-width: 100%;
-    font-size: 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    height: 62px;
+    background: rgba(43, 58, 91, 0.85);
   }
 
   .nt-rightbar button:nth-child(n + 6) {
     display: none;
   }
+
+  .nt-rightbar span {
+    font-size: 22px;
+  }
+
+  .nt-rightbar small {
+    font-size: 11px;
+    max-width: 68px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
-@media (max-width: 430px) {
-  .nt-chart-switches {
-    display: none;
-  }
-
+@media (max-width: 390px) {
   .nt-asset-button {
-    width: 164px;
+    width: 146px;
+    font-size: 15px;
   }
 
-  .nt-toolbar {
-    top: 22px;
-  }
-
-  .nt-chart-wrap {
-    bottom: 344px;
-  }
-
-  .nt-chart-footer {
-    bottom: 346px;
+  .nt-tool-btn {
+    min-width: 44px;
+    max-width: 44px;
   }
 
   .nt-trade-panel {
-    height: 344px;
+    height: 238px;
   }
 
-  .nt-trade-box {
-    height: 306px;
+  .nt-chart-area {
+    inset: 0 0 238px 0;
   }
 
   .nt-calculation strong {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .nt-buy,
   .nt-ai,
   .nt-sell {
-    height: 64px;
+    height: 50px;
+    font-size: 13px;
   }
 }
