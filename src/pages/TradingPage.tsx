@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import "./TradingPage.css";
 
 type AccountType = "Demo" | "Real";
+
 type CurrencyCode =
   | "USD"
   | "KES"
@@ -17,19 +19,30 @@ type CurrencyCode =
   | "ZAR"
   | "BRL";
 
-type AssetCategory = "Currencies" | "Cryptocurrencies" | "Stocks" | "Indices" | "Commodities";
-type Direction = "BUY" | "SELL";
+type AssetCategory =
+  | "Currencies"
+  | "Cryptocurrencies"
+  | "Stocks"
+  | "Indices"
+  | "Commodities";
+
 type ChartType = "Candlesticks" | "Heiken Ashi" | "Bars" | "Line";
-type ToolMode = "Cursor" | "Trend Line" | "Horizontal Line" | "Brush" | "Text" | "Levels";
+type TradeDirection = "BUY" | "SELL";
+
+type CurrencyMeta = {
+  code: CurrencyCode;
+  symbol: string;
+  rate: number;
+};
 
 type Asset = {
-  symbol: string;
+  id: string;
   name: string;
+  displayName: string;
   category: AssetCategory;
+  market: "OTC" | "Real";
   basePrice: number;
-  volatility: number;
   payout: number;
-  decimals: number;
 };
 
 type Candle = {
@@ -40,123 +53,361 @@ type Candle = {
   close: number;
 };
 
-type TradeResult = {
+type PendingTrade = {
   id: string;
-  direction: Direction;
+  direction: TradeDirection;
+  accountType: AccountType;
+  currency: CurrencyCode;
+  amount: number;
   entryPrice: number;
-  exitPrice?: number;
+  entryTime: number;
+  expiryAt: number;
+  payout: number;
+  expectedProfit: number;
+  expectedReturn: number;
+};
+
+type ResultMarker = {
+  id: string;
+  direction: TradeDirection;
+  currency: CurrencyCode;
   amount: number;
   profit: number;
-  payout: number;
-  openedAt: number;
-  expiresAt: number;
-  status: "OPEN" | "WIN" | "LOSS";
+  price: number;
+  won: boolean;
 };
+
+const CHART_WIDTH = 1000;
+const CHART_HEIGHT = 520;
+const MIN_EXPIRY_SECONDS = 5;
+const MAX_EXPIRY_SECONDS = 5 * 60 * 60;
+
+const CURRENCIES: CurrencyMeta[] = [
+  { code: "USD", symbol: "$", rate: 1 },
+  { code: "KES", symbol: "KES ", rate: 129 },
+  { code: "UGX", symbol: "UGX ", rate: 3700 },
+  { code: "TZS", symbol: "TZS ", rate: 2600 },
+  { code: "NGN", symbol: "₦", rate: 1500 },
+  { code: "XOF", symbol: "XOF ", rate: 600 },
+  { code: "EUR", symbol: "€", rate: 0.92 },
+  { code: "CAD", symbol: "CAD ", rate: 1.37 },
+  { code: "JPY", symbol: "¥", rate: 157 },
+  { code: "CNY", symbol: "¥", rate: 7.25 },
+  { code: "AOA", symbol: "Kz ", rate: 900 },
+  { code: "ZAR", symbol: "R ", rate: 18.2 },
+  { code: "BRL", symbol: "R$ ", rate: 5.45 },
+];
+
+const EXCHANGE_RATES: Record<CurrencyCode, number> = CURRENCIES.reduce(
+  (rates, currency) => {
+    rates[currency.code] = currency.rate;
+    return rates;
+  },
+  {} as Record<CurrencyCode, number>,
+);
+
+const CURRENCY_SYMBOLS: Record<CurrencyCode, string> = CURRENCIES.reduce(
+  (symbols, currency) => {
+    symbols[currency.code] = currency.symbol;
+    return symbols;
+  },
+  {} as Record<CurrencyCode, string>,
+);
 
 const ASSETS: Asset[] = [
-  { symbol: "AUD/CAD OTC", name: "Australian Dollar / Canadian Dollar", category: "Currencies", basePrice: 0.84217, volatility: 0.00018, payout: 92, decimals: 5 },
-  { symbol: "EUR/USD OTC", name: "Euro / US Dollar", category: "Currencies", basePrice: 1.13351, volatility: 0.00022, payout: 92, decimals: 5 },
-  { symbol: "USD/JPY OTC", name: "US Dollar / Japanese Yen", category: "Currencies", basePrice: 157.41, volatility: 0.035, payout: 88, decimals: 3 },
-  { symbol: "GBP/USD OTC", name: "British Pound / US Dollar", category: "Currencies", basePrice: 1.26812, volatility: 0.00028, payout: 90, decimals: 5 },
-  { symbol: "USD/KES OTC", name: "US Dollar / Kenyan Shilling", category: "Currencies", basePrice: 129.2, volatility: 0.04, payout: 84, decimals: 2 },
-
-  { symbol: "BTC/USD OTC", name: "Bitcoin / US Dollar", category: "Cryptocurrencies", basePrice: 66250, volatility: 95, payout: 86, decimals: 2 },
-  { symbol: "ETH/USD OTC", name: "Ethereum / US Dollar", category: "Cryptocurrencies", basePrice: 3520, volatility: 8.5, payout: 85, decimals: 2 },
-  { symbol: "BNB/USD OTC", name: "BNB / US Dollar", category: "Cryptocurrencies", basePrice: 605, volatility: 1.7, payout: 82, decimals: 2 },
-
-  { symbol: "AAPL OTC", name: "Apple Inc.", category: "Stocks", basePrice: 212.4, volatility: 0.24, payout: 80, decimals: 2 },
-  { symbol: "TSLA OTC", name: "Tesla Inc.", category: "Stocks", basePrice: 178.9, volatility: 0.55, payout: 82, decimals: 2 },
-  { symbol: "NVDA OTC", name: "NVIDIA Corporation", category: "Stocks", basePrice: 126.6, volatility: 0.3, payout: 83, decimals: 2 },
-
-  { symbol: "US100 OTC", name: "Nasdaq 100", category: "Indices", basePrice: 19888.46, volatility: 16, payout: 85, decimals: 2 },
-  { symbol: "US500 OTC", name: "S&P 500", category: "Indices", basePrice: 5434.15, volatility: 4.5, payout: 84, decimals: 2 },
-  { symbol: "GER40 OTC", name: "Germany 40", category: "Indices", basePrice: 18450.8, volatility: 12, payout: 83, decimals: 2 },
-
-  { symbol: "XAU/USD OTC", name: "Gold / US Dollar", category: "Commodities", basePrice: 2326.5, volatility: 2.8, payout: 88, decimals: 2 },
-  { symbol: "XAG/USD OTC", name: "Silver / US Dollar", category: "Commodities", basePrice: 29.42, volatility: 0.07, payout: 82, decimals: 3 },
-  { symbol: "BRENT OTC", name: "Brent Crude Oil", category: "Commodities", basePrice: 82.35, volatility: 0.18, payout: 81, decimals: 2 },
+  {
+    id: "aud-cad-otc",
+    name: "AUD/CAD OTC",
+    displayName: "Australian Dollar / Canadian Dollar",
+    category: "Currencies",
+    market: "OTC",
+    basePrice: 0.84217,
+    payout: 92,
+  },
+  {
+    id: "eur-usd-otc",
+    name: "EUR/USD OTC",
+    displayName: "Euro / United States Dollar",
+    category: "Currencies",
+    market: "OTC",
+    basePrice: 1.13351,
+    payout: 91,
+  },
+  {
+    id: "usd-jpy-otc",
+    name: "USD/JPY OTC",
+    displayName: "United States Dollar / Japanese Yen",
+    category: "Currencies",
+    market: "OTC",
+    basePrice: 157.42,
+    payout: 88,
+  },
+  {
+    id: "gbp-usd-otc",
+    name: "GBP/USD OTC",
+    displayName: "British Pound / United States Dollar",
+    category: "Currencies",
+    market: "OTC",
+    basePrice: 1.2748,
+    payout: 90,
+  },
+  {
+    id: "btc-usd-otc",
+    name: "BTC/USD OTC",
+    displayName: "Bitcoin / United States Dollar",
+    category: "Cryptocurrencies",
+    market: "OTC",
+    basePrice: 65200,
+    payout: 86,
+  },
+  {
+    id: "eth-usd-otc",
+    name: "ETH/USD OTC",
+    displayName: "Ethereum / United States Dollar",
+    category: "Cryptocurrencies",
+    market: "OTC",
+    basePrice: 3420,
+    payout: 84,
+  },
+  {
+    id: "apple-otc",
+    name: "Apple OTC",
+    displayName: "Apple Inc.",
+    category: "Stocks",
+    market: "OTC",
+    basePrice: 213.45,
+    payout: 82,
+  },
+  {
+    id: "tesla-otc",
+    name: "Tesla OTC",
+    displayName: "Tesla Inc.",
+    category: "Stocks",
+    market: "OTC",
+    basePrice: 182.32,
+    payout: 83,
+  },
+  {
+    id: "us100-otc",
+    name: "US100 OTC",
+    displayName: "Nasdaq 100",
+    category: "Indices",
+    market: "OTC",
+    basePrice: 19888.46,
+    payout: 85,
+  },
+  {
+    id: "sp500-otc",
+    name: "SP500 OTC",
+    displayName: "S&P 500 Index",
+    category: "Indices",
+    market: "OTC",
+    basePrice: 5420.12,
+    payout: 84,
+  },
+  {
+    id: "gold-otc",
+    name: "Gold OTC",
+    displayName: "Gold",
+    category: "Commodities",
+    market: "OTC",
+    basePrice: 2325.8,
+    payout: 87,
+  },
+  {
+    id: "oil-otc",
+    name: "Oil OTC",
+    displayName: "Crude Oil",
+    category: "Commodities",
+    market: "OTC",
+    basePrice: 78.35,
+    payout: 81,
+  },
 ];
 
-const TIMEFRAMES = ["S5", "S15", "S30", "M1", "M2", "M5", "M15", "M30", "H1", "H3", "H4", "D1"];
+const LEFT_NAV_ITEMS = [
+  { label: "Trading", icon: "📈" },
+  { label: "Finance", icon: "$" },
+  { label: "Profile", icon: "👤" },
+  { label: "Market", icon: "🛒" },
+  { label: "Achievements", icon: "💎" },
+  { label: "Tournaments", icon: "🏆" },
+  { label: "Chat", icon: "💬" },
+  { label: "Help", icon: "?" },
+  { label: "Promo", icon: "PROMO" },
+  { label: "Autotrading", icon: "🤖" },
+];
+
+const RAIL_ITEMS = [
+  { label: "Trades", icon: "↻" },
+  { label: "Signals", icon: "📡" },
+  { label: "Social Trading", icon: "👥" },
+  { label: "Express Trades", icon: "◎" },
+  { label: "Pending Trades", icon: "⏳" },
+  { label: "Hotkeys", icon: "⌨" },
+  { label: "Full screen", icon: "⛶" },
+];
+
+const CHART_TYPES: ChartType[] = ["Candlesticks", "Heiken Ashi", "Bars", "Line"];
+
+const QUICK_PRESETS = [
+  5,
+  15,
+  30,
+  60,
+  5 * 60,
+  15 * 60,
+  30 * 60,
+  60 * 60,
+  5 * 60 * 60,
+];
 
 const INDICATORS = [
-  "Moving Average", "EMA", "SMA", "WMA", "Bollinger Bands", "RSI", "MACD", "Stochastic",
-  "ADX", "ATR", "CCI", "Parabolic SAR", "Ichimoku", "Momentum", "Williams %R", "ROC",
-  "Awesome Oscillator", "Alligator", "Fractals", "ZigZag", "Envelopes", "Keltner Channel",
-  "Donchian Channel", "Pivot Points", "SuperTrend", "VWAP", "Volume", "OBV", "MFI",
-  "Aroon", "DeMarker", "Standard Deviation", "Heikin Signal", "Trend Strength", "Price Channel",
-  "MA Cross", "Binary Pulse", "Support Resistance", "Volatility Index", "Candle Pattern",
-  "Session High Low", "OTC Rhythm",
+  "SMA",
+  "EMA",
+  "WMA",
+  "RSI",
+  "MACD",
+  "Bollinger Bands",
+  "Stochastic",
+  "ATR",
+  "ADX",
+  "CCI",
+  "Momentum",
+  "Williams %R",
+  "Ichimoku",
+  "Parabolic SAR",
+  "VWAP",
+  "Volume",
+  "OBV",
+  "MFI",
+  "ROC",
+  "Pivot Points",
+  "Fibonacci",
+  "ZigZag",
+  "SuperTrend",
+  "Donchian Channel",
+  "Keltner Channel",
+  "Envelopes",
+  "Alligator",
+  "Fractals",
+  "Awesome Oscillator",
+  "DeMarker",
+  "TRIX",
+  "DPO",
+  "Aroon",
+  "Elder Ray",
+  "Force Index",
+  "Chaikin Oscillator",
+  "Accumulation/Distribution",
+  "Standard Deviation",
+  "Linear Regression",
+  "Moving Average Ribbon",
+  "Price Channel",
+  "Heiken Ashi Signal",
 ];
 
-const DRAWING_TOOLS: ToolMode[] = ["Cursor", "Trend Line", "Horizontal Line", "Brush", "Text", "Levels"];
+const DRAWING_TOOLS = [
+  "Cursor",
+  "Trend Line",
+  "Horizontal Line",
+  "Vertical Line",
+  "Ray",
+  "Rectangle",
+  "Brush",
+  "Text",
+  "Fibonacci",
+  "Arrow",
+  "Measure",
+  "Eraser",
+];
 
-const CURRENCIES: CurrencyCode[] = ["USD", "KES", "UGX", "TZS", "NGN", "XOF", "EUR", "CAD", "JPY", "CNY", "AOA", "ZAR", "BRL"];
-
-const FALLBACK_RATES: Record<CurrencyCode, number> = {
-  USD: 1,
-  KES: 129,
-  UGX: 3720,
-  TZS: 2600,
-  NGN: 1500,
-  XOF: 610,
-  EUR: 0.92,
-  CAD: 1.37,
-  JPY: 157,
-  CNY: 7.25,
-  AOA: 870,
-  ZAR: 18.2,
-  BRL: 5.4,
-};
-
-function formatSeconds(total: number) {
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+function makeId(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function timeframeSeconds(tf: string) {
-  if (tf.startsWith("S")) return Number(tf.slice(1));
-  if (tf.startsWith("M")) return Number(tf.slice(1)) * 60;
-  if (tf.startsWith("H")) return Number(tf.slice(1)) * 3600;
-  return 86400;
+function clampExpiry(value: number) {
+  return Math.min(MAX_EXPIRY_SECONDS, Math.max(MIN_EXPIRY_SECONDS, value));
 }
 
-function clamp(value: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, value));
+function splitExpiry(totalSeconds: number) {
+  const seconds = clampExpiry(Math.floor(totalSeconds));
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+
+  return {
+    hours,
+    minutes,
+    seconds: remainingSeconds,
+  };
 }
 
-function money(value: number, currency: CurrencyCode) {
-  const digits = ["JPY", "XOF", "UGX", "TZS"].includes(currency) ? 0 : 2;
-  return new Intl.NumberFormat("en-US", {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  }).format(value);
+function formatExpiry(totalSeconds: number) {
+  const parts = splitExpiry(totalSeconds);
+  const h = String(parts.hours).padStart(2, "0");
+  const m = String(parts.minutes).padStart(2, "0");
+  const s = String(parts.seconds).padStart(2, "0");
+
+  return `${h}:${m}:${s}`;
 }
 
-function randomId() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+function formatMoney(value: number, currency: CurrencyCode) {
+  const symbol = CURRENCY_SYMBOLS[currency];
+  const fractionDigits = currency === "JPY" || currency === "XOF" ? 0 : 2;
+
+  return `${symbol}${value.toLocaleString("en-US", {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  })}`;
 }
 
-function makeInitialCandles(asset: Asset, tfSeconds: number): Candle[] {
-  const now = Date.now();
+function formatPrice(price: number) {
+  if (price >= 1000) {
+    return price.toFixed(2);
+  }
+
+  if (price >= 100) {
+    return price.toFixed(3);
+  }
+
+  return price.toFixed(5);
+}
+
+function getVolatility(asset: Asset) {
+  if (asset.category === "Cryptocurrencies") {
+    return Math.max(asset.basePrice * 0.0018, 1);
+  }
+
+  if (asset.category === "Stocks" || asset.category === "Indices") {
+    return Math.max(asset.basePrice * 0.0009, 0.5);
+  }
+
+  if (asset.category === "Commodities") {
+    return Math.max(asset.basePrice * 0.0008, 0.05);
+  }
+
+  return Math.max(asset.basePrice * 0.00055, 0.00018);
+}
+
+function generateInitialCandles(asset: Asset): Candle[] {
   const candles: Candle[] = [];
   let price = asset.basePrice;
+  const volatility = getVolatility(asset);
 
-  for (let i = 130; i >= 0; i -= 1) {
+  for (let i = 0; i < 90; i += 1) {
     const open = price;
-    const wave = Math.sin(i / 7) * asset.volatility * 2.8;
-    const noise = (Math.random() - 0.5) * asset.volatility * 5;
-    const close = Math.max(0.00001, open + wave + noise);
-    const high = Math.max(open, close) + Math.random() * asset.volatility * 4;
-    const low = Math.min(open, close) - Math.random() * asset.volatility * 4;
+    const direction = Math.sin(i / 5) * volatility * 1.4;
+    const noise = (Math.random() - 0.5) * volatility * 2;
+    const close = Math.max(asset.basePrice * 0.05, open + direction + noise);
+    const high = Math.max(open, close) + Math.random() * volatility * 1.6;
+    const low = Math.min(open, close) - Math.random() * volatility * 1.6;
 
     candles.push({
-      time: now - i * tfSeconds * 1000,
+      time: Date.now() - (90 - i) * 1000,
       open,
       high,
-      low: Math.max(0.00001, low),
+      low: Math.max(asset.basePrice * 0.01, low),
       close,
     });
 
@@ -166,755 +417,911 @@ function makeInitialCandles(asset: Asset, tfSeconds: number): Candle[] {
   return candles;
 }
 
-function heikenAshi(candles: Candle[]) {
-  const result: Candle[] = [];
+function appendNextCandle(previous: Candle[], asset: Asset): Candle[] {
+  const fallback: Candle = {
+    time: Date.now(),
+    open: asset.basePrice,
+    high: asset.basePrice,
+    low: asset.basePrice,
+    close: asset.basePrice,
+  };
 
-  candles.forEach((candle, index) => {
+  const last = previous[previous.length - 1] ?? fallback;
+  const volatility = getVolatility(asset);
+  const open = last.close;
+  const wave = Math.sin(Date.now() / 5000) * volatility;
+  const noise = (Math.random() - 0.5) * volatility * 2.4;
+  const close = Math.max(asset.basePrice * 0.05, open + wave + noise);
+  const high = Math.max(open, close) + Math.random() * volatility * 1.5;
+  const low = Math.max(
+    asset.basePrice * 0.01,
+    Math.min(open, close) - Math.random() * volatility * 1.5,
+  );
+
+  return [
+    ...previous.slice(-110),
+    {
+      time: Date.now(),
+      open,
+      high,
+      low,
+      close,
+    },
+  ];
+}
+
+function getHeikenAshiCandles(candles: Candle[]) {
+  const heikenCandles: Candle[] = [];
+
+  candles.forEach((candle) => {
     const close = (candle.open + candle.high + candle.low + candle.close) / 4;
-    const open = index === 0 ? (candle.open + candle.close) / 2 : (result[index - 1].open + result[index - 1].close) / 2;
-    const high = Math.max(candle.high, open, close);
-    const low = Math.min(candle.low, open, close);
-    result.push({ ...candle, open, high, low, close });
+    const previous = heikenCandles[heikenCandles.length - 1];
+    const open = previous
+      ? (previous.open + previous.close) / 2
+      : (candle.open + candle.close) / 2;
+
+    heikenCandles.push({
+      time: candle.time,
+      open,
+      close,
+      high: Math.max(candle.high, open, close),
+      low: Math.min(candle.low, open, close),
+    });
   });
 
-  return result;
+  return heikenCandles;
 }
 
 export default function TradingPage() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const animationRef = useRef<number | null>(null);
+  const terminalRef = useRef<HTMLDivElement | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
   const lastTickRef = useRef<number>(0);
-  const candlesRef = useRef<Candle[]>([]);
-  const tradesRef = useRef<TradeResult[]>([]);
+  const priceRef = useRef<number>(ASSETS[0].basePrice);
+  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
+  const [selectedAssetId, setSelectedAssetId] = useState(ASSETS[0].id);
   const [accountType, setAccountType] = useState<AccountType>("Demo");
   const [currency, setCurrency] = useState<CurrencyCode>("USD");
-  const [rates, setRates] = useState<Record<CurrencyCode, number>>(FALLBACK_RATES);
-  const [balanceUsd, setBalanceUsd] = useState(() => Number(localStorage.getItem("neuro_demo_balance_usd") || "70000"));
-
-  const [asset, setAsset] = useState<Asset>(ASSETS[0]);
-  const [category, setCategory] = useState<AssetCategory>("Currencies");
   const [chartType, setChartType] = useState<ChartType>("Candlesticks");
-  const [timeframe, setTimeframe] = useState("M1");
-  const [selectedIndicators, setSelectedIndicators] = useState<string[]>(["Moving Average"]);
-  const [tool, setTool] = useState<ToolMode>("Cursor");
-
   const [expirySeconds, setExpirySeconds] = useState(30 * 60);
   const [amount, setAmount] = useState(100);
-  const [activeMenu, setActiveMenu] = useState<"assets" | "timeframes" | "indicators" | "drawings" | null>(null);
-  const [status, setStatus] = useState<"Connected" | "Disconnected">("Connected");
-  const [notice, setNotice] = useState<string>("");
-  const [resultFlash, setResultFlash] = useState<TradeResult | null>(null);
-  const [openTrades, setOpenTrades] = useState<TradeResult[]>([]);
+  const [balancesUsd, setBalancesUsd] = useState<Record<AccountType, number>>({
+    Demo: 70000,
+    Real: 0,
+  });
 
-  const displayedBalance = accountType === "Real" ? 0 : balanceUsd * rates[currency];
-  const displayedAmount = amount;
-  const expectedProfit = displayedAmount * (asset.payout / 100);
-  const expectedReturn = displayedAmount + expectedProfit;
-  const tfSeconds = timeframeSeconds(timeframe);
-
-  const selectedChartCandles = useMemo(() => {
-    if (chartType === "Heiken Ashi") return heikenAshi(candlesRef.current);
-    return candlesRef.current;
-  }, [chartType, asset, timeframe, openTrades, resultFlash]);
-
-  const resetCandles = useCallback((nextAsset: Asset, nextTimeframe: string) => {
-    candlesRef.current = makeInitialCandles(nextAsset, timeframeSeconds(nextTimeframe));
-  }, []);
-
-  useEffect(() => {
-    resetCandles(asset, timeframe);
-  }, [asset, timeframe, resetCandles]);
-
-  useEffect(() => {
-    localStorage.setItem("neuro_demo_balance_usd", String(balanceUsd));
-  }, [balanceUsd]);
-
-  useEffect(() => {
-    let alive = true;
-
-    async function loadRates() {
-      try {
-        const res = await fetch("https://open.er-api.com/v6/latest/USD");
-        const data = await res.json();
-
-        if (!alive || !data?.rates) return;
-
-        setRates({
-          USD: 1,
-          KES: data.rates.KES ?? FALLBACK_RATES.KES,
-          UGX: data.rates.UGX ?? FALLBACK_RATES.UGX,
-          TZS: data.rates.TZS ?? FALLBACK_RATES.TZS,
-          NGN: data.rates.NGN ?? FALLBACK_RATES.NGN,
-          XOF: data.rates.XOF ?? FALLBACK_RATES.XOF,
-          EUR: data.rates.EUR ?? FALLBACK_RATES.EUR,
-          CAD: data.rates.CAD ?? FALLBACK_RATES.CAD,
-          JPY: data.rates.JPY ?? FALLBACK_RATES.JPY,
-          CNY: data.rates.CNY ?? FALLBACK_RATES.CNY,
-          AOA: data.rates.AOA ?? FALLBACK_RATES.AOA,
-          ZAR: data.rates.ZAR ?? FALLBACK_RATES.ZAR,
-          BRL: data.rates.BRL ?? FALLBACK_RATES.BRL,
-        });
-      } catch {
-        setRates(FALLBACK_RATES);
-      }
-    }
-
-    loadRates();
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  const convertToUsd = useCallback(
-    (value: number) => value / rates[currency],
-    [rates, currency]
+  const [candles, setCandles] = useState<Candle[]>(() =>
+    generateInitialCandles(ASSETS[0]),
   );
 
-  const changeExpiry = (unit: "hours" | "minutes" | "seconds", delta: number) => {
-    setExpirySeconds((prev) => {
-      let next = prev;
+  const [assetMenuOpen, setAssetMenuOpen] = useState(false);
+  const [indicatorMenuOpen, setIndicatorMenuOpen] = useState(false);
+  const [drawingMenuOpen, setDrawingMenuOpen] = useState(false);
+  const [activeIndicators, setActiveIndicators] = useState<string[]>([]);
+  const [activeTool, setActiveTool] = useState("Cursor");
+  const [message, setMessage] = useState("");
+  const [pendingTrades, setPendingTrades] = useState<PendingTrade[]>([]);
+  const [resultMarkers, setResultMarkers] = useState<ResultMarker[]>([]);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-      if (unit === "hours") next += delta * 3600;
-      if (unit === "minutes") next += delta * 60;
-      if (unit === "seconds") next += delta;
+  const selectedAsset = useMemo(() => {
+    return ASSETS.find((asset) => asset.id === selectedAssetId) ?? ASSETS[0];
+  }, [selectedAssetId]);
 
-      return clamp(next, 5, 5 * 3600);
-    });
-  };
-
-  const setExpiryPart = (unit: "hours" | "minutes" | "seconds", value: number) => {
-    setExpirySeconds((prev) => {
-      const h = Math.floor(prev / 3600);
-      const m = Math.floor((prev % 3600) / 60);
-      const s = prev % 60;
-
-      const nextH = unit === "hours" ? value : h;
-      const nextM = unit === "minutes" ? value : m;
-      const nextS = unit === "seconds" ? value : s;
-
-      return clamp(nextH * 3600 + nextM * 60 + nextS, 5, 5 * 3600);
-    });
-  };
-
-  const currentPrice = candlesRef.current[candlesRef.current.length - 1]?.close ?? asset.basePrice;
-
-  const placeTrade = (direction: Direction) => {
-    if (accountType === "Real") {
-      setNotice("Real account balance is 0. Use Demo until deposits are connected.");
-      setTimeout(() => setNotice(""), 4000);
-      return;
-    }
-
-    if (amount <= 0) {
-      setNotice("Enter a valid amount.");
-      setTimeout(() => setNotice(""), 3000);
-      return;
-    }
-
-    if (amount > displayedBalance) {
-      setNotice("Insufficient demo balance.");
-      setTimeout(() => setNotice(""), 3000);
-      return;
-    }
-
-    const amountUsd = convertToUsd(amount);
-    setBalanceUsd((prev) => Math.max(0, prev - amountUsd));
-
-    const trade: TradeResult = {
-      id: randomId(),
-      direction,
-      entryPrice: currentPrice,
-      amount,
-      profit: expectedProfit,
-      payout: asset.payout,
-      openedAt: Date.now(),
-      expiresAt: Date.now() + expirySeconds * 1000,
-      status: "OPEN",
+  const assetsByCategory = useMemo<Record<AssetCategory, Asset[]>>(() => {
+    const groups: Record<AssetCategory, Asset[]> = {
+      Currencies: [],
+      Cryptocurrencies: [],
+      Stocks: [],
+      Indices: [],
+      Commodities: [],
     };
 
-    tradesRef.current = [...tradesRef.current, trade];
-    setOpenTrades([...tradesRef.current.filter((item) => item.status === "OPEN")]);
-  };
+    ASSETS.forEach((asset) => {
+      groups[asset.category].push(asset);
+    });
 
-  const resolveTrades = useCallback(() => {
-    const now = Date.now();
-    let changed = false;
-    let balanceBonusUsd = 0;
-    const price = candlesRef.current[candlesRef.current.length - 1]?.close ?? asset.basePrice;
+    return groups;
+  }, []);
 
-    tradesRef.current = tradesRef.current.map((trade) => {
-      if (trade.status !== "OPEN" || now < trade.expiresAt) return trade;
+  const visibleCandles = useMemo(() => {
+    const latest = candles.slice(-76);
 
-      const won = trade.direction === "BUY" ? price > trade.entryPrice : price < trade.entryPrice;
-      const resolved: TradeResult = {
-        ...trade,
-        exitPrice: price,
-        status: won ? "WIN" : "LOSS",
-      };
+    if (chartType === "Heiken Ashi") {
+      return getHeikenAshiCandles(latest);
+    }
 
-      if (won) {
-        balanceBonusUsd += convertToUsd(trade.amount + trade.profit);
+    return latest;
+  }, [candles, chartType]);
+
+  const chartStats = useMemo(() => {
+    const highs = visibleCandles.map((candle) => candle.high);
+    const lows = visibleCandles.map((candle) => candle.low);
+
+    const high = highs.length ? Math.max(...highs) : selectedAsset.basePrice * 1.01;
+    const low = lows.length ? Math.min(...lows) : selectedAsset.basePrice * 0.99;
+    const padding = Math.max((high - low) * 0.18, selectedAsset.basePrice * 0.0005);
+    const min = low - padding;
+    const max = high + padding;
+    const range = Math.max(max - min, selectedAsset.basePrice * 0.001);
+    const labels = Array.from({ length: 6 }, (_, index) => {
+      return max - (range / 5) * index;
+    });
+
+    return {
+      min,
+      max,
+      range,
+      labels,
+    };
+  }, [selectedAsset.basePrice, visibleCandles]);
+
+  const expiryParts = splitExpiry(expirySeconds);
+  const selectedRate = EXCHANGE_RATES[currency];
+  const balance = balancesUsd[accountType] * selectedRate;
+  const expectedProfit = amount * (selectedAsset.payout / 100);
+  const expectedReturn = amount + expectedProfit;
+  const currentPrice = priceRef.current;
+
+  const linePath = useMemo(() => {
+    if (visibleCandles.length === 0) {
+      return "";
+    }
+
+    const step = CHART_WIDTH / Math.max(visibleCandles.length - 1, 1);
+
+    return visibleCandles
+      .map((candle, index) => {
+        const x = index * step;
+        const y =
+          CHART_HEIGHT -
+          ((candle.close - chartStats.min) / chartStats.range) * CHART_HEIGHT;
+
+        return `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`;
+      })
+      .join(" ");
+  }, [chartStats.min, chartStats.range, visibleCandles]);
+
+  const priceToSvgY = useCallback(
+    (price: number) => {
+      return (
+        CHART_HEIGHT -
+        ((price - chartStats.min) / chartStats.range) * CHART_HEIGHT
+      );
+    },
+    [chartStats.min, chartStats.range],
+  );
+
+  const priceToTopPercent = useCallback(
+    (price: number) => {
+      const y = priceToSvgY(price);
+      return Math.min(96, Math.max(4, (y / CHART_HEIGHT) * 100));
+    },
+    [priceToSvgY],
+  );
+
+  const showMessage = useCallback((text: string) => {
+    setMessage(text);
+
+    const timer = setTimeout(() => {
+      setMessage("");
+    }, 3500);
+
+    timeoutsRef.current.push(timer);
+  }, []);
+
+  const updateExpiryUnit = useCallback(
+    (unit: "hours" | "minutes" | "seconds", delta: number) => {
+      setExpirySeconds((previous) => {
+        const parts = splitExpiry(previous);
+        const nextHours = unit === "hours" ? parts.hours + delta : parts.hours;
+        const nextMinutes =
+          unit === "minutes" ? parts.minutes + delta : parts.minutes;
+        const nextSeconds =
+          unit === "seconds" ? parts.seconds + delta : parts.seconds;
+
+        const nextValue = nextHours * 3600 + nextMinutes * 60 + nextSeconds;
+        return clampExpiry(nextValue);
+      });
+    },
+    [],
+  );
+
+  const toggleIndicator = useCallback((indicator: string) => {
+    setActiveIndicators((previous) => {
+      if (previous.includes(indicator)) {
+        return previous.filter((item) => item !== indicator);
       }
 
-      changed = true;
-      setResultFlash(resolved);
-      setTimeout(() => setResultFlash(null), 10000);
-
-      return resolved;
+      return [...previous, indicator];
     });
+  }, []);
 
-    if (balanceBonusUsd > 0) setBalanceUsd((prev) => prev + balanceBonusUsd);
-    if (changed) setOpenTrades([...tradesRef.current.filter((item) => item.status === "OPEN")]);
-  }, [asset.basePrice, convertToUsd]);
+  const resolveTrade = useCallback(
+    (trade: PendingTrade) => {
+      const exitPrice = priceRef.current;
+      const won =
+        trade.direction === "BUY"
+          ? exitPrice > trade.entryPrice
+          : exitPrice < trade.entryPrice;
 
-  const tickPrice = useCallback(() => {
-    const candles = candlesRef.current;
-    if (!candles.length) return;
+      if (won) {
+        setBalancesUsd((previous) => ({
+          ...previous,
+          [trade.accountType]:
+            previous[trade.accountType] +
+            trade.expectedReturn / EXCHANGE_RATES[trade.currency],
+        }));
+      }
 
-    const now = Date.now();
-    const last = candles[candles.length - 1];
-    const nextCandleDue = now - last.time >= tfSeconds * 1000;
+      const result: ResultMarker = {
+        id: makeId("result"),
+        direction: trade.direction,
+        currency: trade.currency,
+        amount: trade.amount,
+        profit: won ? trade.expectedProfit : 0,
+        price: exitPrice,
+        won,
+      };
 
-    const drift = Math.sin(now / 4500) * asset.volatility * 0.55;
-    const microMove = (Math.random() - 0.5) * asset.volatility * 2.8;
-    const meanRevert = (asset.basePrice - last.close) * 0.0012;
-    const nextPrice = Math.max(0.00001, last.close + drift + microMove + meanRevert);
+      setPendingTrades((previous) =>
+        previous.filter((pendingTrade) => pendingTrade.id !== trade.id),
+      );
 
-    if (nextCandleDue) {
-      candles.push({
-        time: now,
-        open: last.close,
-        high: Math.max(last.close, nextPrice),
-        low: Math.min(last.close, nextPrice),
-        close: nextPrice,
-      });
+      setResultMarkers((previous) => [...previous, result]);
 
-      if (candles.length > 170) candles.shift();
-    } else {
-      last.close = nextPrice;
-      last.high = Math.max(last.high, nextPrice);
-      last.low = Math.min(last.low, nextPrice);
+      const removeTimer = setTimeout(() => {
+        setResultMarkers((previous) =>
+          previous.filter((marker) => marker.id !== result.id),
+        );
+      }, 10000);
+
+      timeoutsRef.current.push(removeTimer);
+    },
+    [],
+  );
+
+  const placeTrade = useCallback(
+    (direction: TradeDirection) => {
+      const stake = Number(amount);
+
+      if (!Number.isFinite(stake) || stake <= 0) {
+        showMessage("Enter a valid trade amount.");
+        return;
+      }
+
+      const stakeUsd = stake / EXCHANGE_RATES[currency];
+
+      if (stakeUsd > balancesUsd[accountType]) {
+        showMessage("Insufficient account balance.");
+        return;
+      }
+
+      const entryPrice = priceRef.current || selectedAsset.basePrice;
+
+      const trade: PendingTrade = {
+        id: makeId("trade"),
+        direction,
+        accountType,
+        currency,
+        amount: stake,
+        entryPrice,
+        entryTime: Date.now(),
+        expiryAt: Date.now() + expirySeconds * 1000,
+        payout: selectedAsset.payout,
+        expectedProfit,
+        expectedReturn,
+      };
+
+      setBalancesUsd((previous) => ({
+        ...previous,
+        [accountType]: Math.max(0, previous[accountType] - stakeUsd),
+      }));
+
+      setPendingTrades((previous) => [...previous, trade]);
+      showMessage(`${direction} trade placed at ${formatPrice(entryPrice)}.`);
+
+      const expiryTimer = setTimeout(() => {
+        resolveTrade(trade);
+      }, expirySeconds * 1000);
+
+      timeoutsRef.current.push(expiryTimer);
+    },
+    [
+      accountType,
+      amount,
+      balancesUsd,
+      currency,
+      expectedProfit,
+      expectedReturn,
+      expirySeconds,
+      resolveTrade,
+      selectedAsset.basePrice,
+      selectedAsset.payout,
+      showMessage,
+    ],
+  );
+
+  const handleFullscreen = useCallback(async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await terminalRef.current?.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch {
+      showMessage("Full screen is not supported on this browser.");
     }
-
-    resolveTrades();
-  }, [asset, tfSeconds, resolveTrades]);
-
-  const drawCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const parent = canvas.parentElement;
-    if (!parent) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const width = parent.clientWidth;
-    const height = parent.clientHeight;
-
-    if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-    }
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, width, height);
-
-    const gradient = ctx.createLinearGradient(0, 0, 0, height);
-    gradient.addColorStop(0, "#263958");
-    gradient.addColorStop(1, "#141c31");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-
-    ctx.globalAlpha = 0.17;
-    ctx.fillStyle = "#d8e9ff";
-    ctx.beginPath();
-    ctx.moveTo(0, height * 0.62);
-    ctx.lineTo(width * 0.16, height * 0.42);
-    ctx.lineTo(width * 0.34, height * 0.72);
-    ctx.lineTo(width * 0.56, height * 0.38);
-    ctx.lineTo(width * 0.74, height * 0.66);
-    ctx.lineTo(width, height * 0.44);
-    ctx.lineTo(width, height);
-    ctx.lineTo(0, height);
-    ctx.closePath();
-    ctx.fill();
-    ctx.globalAlpha = 1;
-
-    const candles = chartType === "Heiken Ashi" ? heikenAshi(candlesRef.current) : candlesRef.current;
-    const visible = candles.slice(-82);
-    if (visible.length < 2) return;
-
-    const highs = visible.map((c) => c.high);
-    const lows = visible.map((c) => c.low);
-    const max = Math.max(...highs);
-    const min = Math.min(...lows);
-    const pad = (max - min) * 0.14 || asset.volatility * 10;
-    const top = max + pad;
-    const bottom = min - pad;
-
-    const y = (price: number) => height - ((price - bottom) / (top - bottom)) * height;
-    const chartLeft = 18;
-    const chartRight = width - 54;
-    const chartTop = 8;
-    const chartBottom = height - 28;
-    const chartWidth = chartRight - chartLeft;
-    const chartHeight = chartBottom - chartTop;
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(chartLeft, chartTop, chartWidth, chartHeight);
-    ctx.clip();
-
-    ctx.strokeStyle = "rgba(160,190,235,0.16)";
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= 8; i += 1) {
-      const gx = chartLeft + (chartWidth / 8) * i;
-      ctx.beginPath();
-      ctx.moveTo(gx, chartTop);
-      ctx.lineTo(gx, chartBottom);
-      ctx.stroke();
-    }
-
-    for (let i = 0; i <= 7; i += 1) {
-      const gy = chartTop + (chartHeight / 7) * i;
-      ctx.beginPath();
-      ctx.moveTo(chartLeft, gy);
-      ctx.lineTo(chartRight, gy);
-      ctx.stroke();
-    }
-
-    const candleGap = chartWidth / visible.length;
-    const candleWidth = Math.max(3, Math.min(10, candleGap * 0.58));
-
-    if (chartType === "Line") {
-      ctx.strokeStyle = "#61dce6";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      visible.forEach((c, i) => {
-        const x = chartLeft + i * candleGap + candleGap / 2;
-        const py = y(c.close);
-        if (i === 0) ctx.moveTo(x, py);
-        else ctx.lineTo(x, py);
-      });
-      ctx.stroke();
-    } else {
-      visible.forEach((c, i) => {
-        const x = chartLeft + i * candleGap + candleGap / 2;
-        const openY = y(c.open);
-        const closeY = y(c.close);
-        const highY = y(c.high);
-        const lowY = y(c.low);
-        const up = c.close >= c.open;
-        const color = up ? "#63e6de" : "#ff695f";
-
-        ctx.strokeStyle = color;
-        ctx.fillStyle = color;
-        ctx.lineWidth = chartType === "Bars" ? 2 : 1;
-
-        ctx.beginPath();
-        ctx.moveTo(x, highY);
-        ctx.lineTo(x, lowY);
-        ctx.stroke();
-
-        if (chartType === "Bars") {
-          ctx.beginPath();
-          ctx.moveTo(x - candleWidth / 2, openY);
-          ctx.lineTo(x, openY);
-          ctx.moveTo(x, closeY);
-          ctx.lineTo(x + candleWidth / 2, closeY);
-          ctx.stroke();
-        } else {
-          const bodyTop = Math.min(openY, closeY);
-          const bodyHeight = Math.max(2, Math.abs(closeY - openY));
-          ctx.fillRect(x - candleWidth / 2, bodyTop, candleWidth, bodyHeight);
-        }
-      });
-    }
-
-    const lastPrice = visible[visible.length - 1].close;
-    const priceY = y(lastPrice);
-
-    ctx.strokeStyle = "rgba(102,210,255,0.9)";
-    ctx.setLineDash([5, 4]);
-    ctx.beginPath();
-    ctx.moveTo(chartLeft, priceY);
-    ctx.lineTo(chartRight, priceY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    const expiryX = chartRight - 78;
-    ctx.strokeStyle = "rgba(255,255,255,0.95)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(expiryX, chartTop);
-    ctx.lineTo(expiryX, chartBottom);
-    ctx.stroke();
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "700 11px Inter, Arial";
-    ctx.fillText("Expiration time", expiryX + 8, chartTop + 26);
-
-    openTrades.forEach((trade, index) => {
-      const tradeY = y(trade.entryPrice);
-      ctx.fillStyle = trade.direction === "BUY" ? "#42e472" : "#ff5d55";
-      ctx.fillRect(chartLeft + 8, tradeY - 15 - index * 18, 84, 22);
-      ctx.fillStyle = "#fff";
-      ctx.font = "800 10px Inter, Arial";
-      ctx.fillText(`${trade.direction} ${money(trade.amount, currency)}`, chartLeft + 14, tradeY - index * 18);
-    });
-
-    if (resultFlash) {
-      const resultY = y(resultFlash.exitPrice ?? lastPrice);
-      ctx.fillStyle = resultFlash.status === "WIN" ? "rgba(46,214,99,0.96)" : "rgba(240,70,70,0.96)";
-      ctx.fillRect(chartLeft + 10, resultY - 18, 118, 28);
-      ctx.fillStyle = "#fff";
-      ctx.font = "900 12px Inter, Arial";
-      const text = resultFlash.status === "WIN"
-        ? `✓ +${money(resultFlash.profit, currency)}`
-        : `✓ ${currency} 0`;
-      ctx.fillText(text, chartLeft + 18, resultY + 1);
-    }
-
-    ctx.restore();
-
-    ctx.fillStyle = "#aebbd8";
-    ctx.font = "700 11px Inter, Arial";
-    for (let i = 0; i <= 5; i += 1) {
-      const price = bottom + ((top - bottom) / 5) * i;
-      ctx.fillText(price.toFixed(asset.decimals), width - 50, y(price) + 4);
-    }
-
-    ctx.fillStyle = "#dce8ff";
-    ctx.font = "800 12px Inter, Arial";
-    ctx.fillText(`${timeframe}`, width - 100, priceY - 9);
-    ctx.fillText(`${formatSeconds(Math.max(0, Math.floor((Date.now() % (tfSeconds * 1000)) / 1000)))}`, width - 100, priceY + 11);
-  }, [asset, chartType, currency, openTrades, resultFlash, tfSeconds, timeframe]);
+  }, [showMessage]);
 
   useEffect(() => {
-    const loop = (timestamp: number) => {
-      if (timestamp - lastTickRef.current > 240) {
-        tickPrice();
+    const freshCandles = generateInitialCandles(selectedAsset);
+    setCandles(freshCandles);
+    priceRef.current =
+      freshCandles[freshCandles.length - 1]?.close ?? selectedAsset.basePrice;
+  }, [selectedAsset]);
+
+  useEffect(() => {
+    const animate = (timestamp: number) => {
+      if (timestamp - lastTickRef.current >= 700) {
+        setCandles((previous) => {
+          const nextCandles = appendNextCandle(previous, selectedAsset);
+          priceRef.current =
+            nextCandles[nextCandles.length - 1]?.close ?? selectedAsset.basePrice;
+          return nextCandles;
+        });
+
         lastTickRef.current = timestamp;
       }
 
-      drawCanvas();
-      animationRef.current = requestAnimationFrame(loop);
+      animationFrameRef.current = requestAnimationFrame(animate);
     };
 
-    animationRef.current = requestAnimationFrame(loop);
+    animationFrameRef.current = requestAnimationFrame(animate);
 
     return () => {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     };
-  }, [drawCanvas, tickPrice]);
+  }, [selectedAsset]);
 
   useEffect(() => {
-    const online = () => setStatus("Connected");
-    const offline = () => setStatus("Disconnected");
+    const updateFullscreenState = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
 
-    window.addEventListener("online", online);
-    window.addEventListener("offline", offline);
+    document.addEventListener("fullscreenchange", updateFullscreenState);
 
     return () => {
-      window.removeEventListener("online", online);
-      window.removeEventListener("offline", offline);
+      document.removeEventListener("fullscreenchange", updateFullscreenState);
     };
   }, []);
 
-  const toggleIndicator = (name: string) => {
-    setSelectedIndicators((prev) =>
-      prev.includes(name) ? prev.filter((item) => item !== name) : [...prev, name]
-    );
-  };
+  useEffect(() => {
+    return () => {
+      timeoutsRef.current.forEach((timer) => clearTimeout(timer));
+    };
+  }, []);
 
   return (
-    <main className="nt-screen">
-      <header className="nt-topbar">
-        <div className="nt-brand">
-          <span className="nt-brand-mark">N</span>
+    <main
+      ref={terminalRef}
+      className={`trading-terminal ${isFullscreen ? "is-fullscreen" : ""}`}
+    >
+      <header className="trading-topbar">
+        <div className="brand-block">
+          <div className="brand-icon">N</div>
           <strong>NeuroOption</strong>
-          <button className="nt-star" type="button">★</button>
+          <button type="button" className="favorite-button">
+            ★
+          </button>
         </div>
 
-        <div className="nt-account">
-          <select value={accountType} onChange={(e) => setAccountType(e.target.value as AccountType)}>
+        <div className="account-block">
+          <select
+            value={accountType}
+            onChange={(event) => setAccountType(event.target.value as AccountType)}
+            aria-label="Account type"
+          >
             <option value="Demo">QT Demo</option>
             <option value="Real">QT Real</option>
           </select>
 
-          <select value={currency} onChange={(e) => setCurrency(e.target.value as CurrencyCode)}>
+          <select
+            value={currency}
+            onChange={(event) => setCurrency(event.target.value as CurrencyCode)}
+            aria-label="Currency"
+          >
             {CURRENCIES.map((item) => (
-              <option key={item} value={item}>{item}</option>
+              <option key={item.code} value={item.code}>
+                {item.code}
+              </option>
             ))}
           </select>
 
-          <strong>{currency} {money(displayedBalance, currency)}</strong>
-          <button className="nt-topup" type="button">TOP UP</button>
-          <button className="nt-fullscreen" type="button" onClick={() => document.documentElement.requestFullscreen?.()}>
+          <strong className="balance-display">{formatMoney(balance, currency)}</strong>
+
+          <button type="button" className="top-up-button">
+            TOP UP
+          </button>
+
+          <button
+            type="button"
+            className="fullscreen-button"
+            onClick={handleFullscreen}
+          >
             ⛶
           </button>
-          <span className="nt-avatar">SM</span>
+
+          <button type="button" className="profile-button">
+            SM
+          </button>
         </div>
       </header>
 
-      <aside className="nt-leftbar">
-        <button className="active" type="button"><span>📈</span><small>Trading</small></button>
-        <button type="button"><span>$</span><small>Finance</small></button>
-        <button type="button"><span>👤</span><small>Profile</small></button>
-        <button type="button"><span>🛒</span><small>Market</small></button>
-        <button type="button"><span>💎</span><small>Achievements</small></button>
-        <button type="button"><span>🏆</span><small>Tournaments</small></button>
-        <button type="button"><span>💬</span><small>Chat</small></button>
-        <button type="button"><span>?</span><small>Help</small></button>
-        <button className="promo" type="button"><span>🎁</span><small>Promo</small></button>
-        <button type="button"><span>🤖</span><small>Autotrading</small></button>
-      </aside>
+      <div className="trading-shell">
+        <aside className="left-sidebar">
+          {LEFT_NAV_ITEMS.map((item) => (
+            <button
+              type="button"
+              key={item.label}
+              className={item.label === "Trading" ? "active" : ""}
+            >
+              <span>{item.icon}</span>
+              <small>{item.label}</small>
+            </button>
+          ))}
+        </aside>
 
-      <section className="nt-terminal">
-        {notice && <div className="nt-notice">{notice}</div>}
+        <section className="chart-section">
+          <div className="chart-toolbar">
+            <button
+              type="button"
+              className="asset-button"
+              onClick={() => setAssetMenuOpen((value) => !value)}
+            >
+              {selectedAsset.name} <span>⌄</span>
+            </button>
 
-        <div className="nt-toolbar">
-          <button className="nt-asset-button" type="button" onClick={() => setActiveMenu(activeMenu === "assets" ? null : "assets")}>
-            {asset.symbol} ▾
-          </button>
+            <button type="button" className="toolbar-pill">
+              M1
+            </button>
 
-          <button
-            className="nt-tool-btn"
-            type="button"
-            title="Candlestick timeframe"
-            onClick={() => setActiveMenu(activeMenu === "timeframes" ? null : "timeframes")}
-          >
-            📊 {timeframe}
-          </button>
+            <button
+              type="button"
+              className="toolbar-pill"
+              onClick={() => setIndicatorMenuOpen((value) => !value)}
+            >
+              📊
+            </button>
 
-          <button
-            className="nt-tool-btn"
-            type="button"
-            title="Indicators"
-            onClick={() => setActiveMenu(activeMenu === "indicators" ? null : "indicators")}
-          >
-            sliders
-          </button>
+            <button
+              type="button"
+              className="toolbar-pill"
+              onClick={() => setDrawingMenuOpen((value) => !value)}
+            >
+              ✎
+            </button>
 
-          <button
-            className="nt-tool-btn"
-            type="button"
-            title="Drawing tools"
-            onClick={() => setActiveMenu(activeMenu === "drawings" ? null : "drawings")}
-          >
-            ✎
-          </button>
+            <button type="button" className="toolbar-pill">
+              ⋯
+            </button>
 
-          <button className="nt-tool-btn" type="button">•••</button>
+            <div className="chart-type-group">
+              {CHART_TYPES.map((type) => (
+                <button
+                  type="button"
+                  key={type}
+                  className={chartType === type ? "selected" : ""}
+                  onClick={() => setChartType(type)}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
 
-          <div className="nt-chart-switches">
-            {(["Candlesticks", "Heiken Ashi", "Bars", "Line"] as ChartType[]).map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={chartType === item ? "active" : ""}
-                onClick={() => setChartType(item)}
+          {assetMenuOpen && (
+            <div className="floating-panel asset-menu">
+              {Object.entries(assetsByCategory).map(([category, assets]) => (
+                <div key={category} className="asset-category">
+                  <h4>{category}</h4>
+                  {assets.map((asset) => (
+                    <button
+                      type="button"
+                      key={asset.id}
+                      className={asset.id === selectedAsset.id ? "selected" : ""}
+                      onClick={() => {
+                        setSelectedAssetId(asset.id);
+                        setAssetMenuOpen(false);
+                      }}
+                    >
+                      <span>{asset.name}</span>
+                      <small>{asset.payout}%</small>
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {indicatorMenuOpen && (
+            <div className="floating-panel indicators-panel">
+              <h4>Indicators</h4>
+              <div className="grid-list">
+                {INDICATORS.map((indicator) => (
+                  <button
+                    type="button"
+                    key={indicator}
+                    className={activeIndicators.includes(indicator) ? "selected" : ""}
+                    onClick={() => toggleIndicator(indicator)}
+                  >
+                    {indicator}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {drawingMenuOpen && (
+            <div className="floating-panel drawing-panel">
+              <h4>Drawing tools</h4>
+              <div className="grid-list">
+                {DRAWING_TOOLS.map((tool) => (
+                  <button
+                    type="button"
+                    key={tool}
+                    className={activeTool === tool ? "selected" : ""}
+                    onClick={() => {
+                      setActiveTool(tool);
+                      setDrawingMenuOpen(false);
+                    }}
+                  >
+                    {tool}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="chart-card">
+            <div className="chart-meta">
+              <span>{new Date().toLocaleTimeString()} UTC+3</span>
+              <span>Tool: {activeTool}</span>
+              {activeIndicators.length > 0 && (
+                <span>Indicators: {activeIndicators.slice(0, 3).join(", ")}</span>
+              )}
+            </div>
+
+            <div className="chart-canvas">
+              <svg
+                viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+                preserveAspectRatio="none"
+                className="chart-svg"
+                role="img"
+                aria-label="Trading chart"
               >
-                {item}
-              </button>
-            ))}
-          </div>
-        </div>
+                <defs>
+                  <linearGradient id="mountainFill" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stopColor="#5f85c8" stopOpacity="0.18" />
+                    <stop offset="100%" stopColor="#0f1b35" stopOpacity="0.12" />
+                  </linearGradient>
+                </defs>
 
-        <div className="nt-subbar">
-          <span>{new Date().toLocaleTimeString()} UTC+3</span>
-          <span>⚙</span>
-          <span>Tool: {tool}</span>
-          <strong className={status === "Connected" ? "ok" : "bad"}>● {status}</strong>
-        </div>
+                <rect width={CHART_WIDTH} height={CHART_HEIGHT} rx="18" />
 
-        {activeMenu === "assets" && (
-          <div className="nt-popover nt-assets-panel">
-            <div className="nt-tabs">
-              {(["Currencies", "Cryptocurrencies", "Stocks", "Indices", "Commodities"] as AssetCategory[]).map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={category === item ? "active" : ""}
-                  onClick={() => setCategory(item)}
+                {Array.from({ length: 11 }, (_, index) => (
+                  <line
+                    key={`v-${index}`}
+                    x1={(CHART_WIDTH / 10) * index}
+                    x2={(CHART_WIDTH / 10) * index}
+                    y1="0"
+                    y2={CHART_HEIGHT}
+                    className="grid-line"
+                  />
+                ))}
+
+                {Array.from({ length: 7 }, (_, index) => (
+                  <line
+                    key={`h-${index}`}
+                    x1="0"
+                    x2={CHART_WIDTH}
+                    y1={(CHART_HEIGHT / 6) * index}
+                    y2={(CHART_HEIGHT / 6) * index}
+                    className="grid-line"
+                  />
+                ))}
+
+                <path
+                  d={`M 0 ${CHART_HEIGHT * 0.72} L 160 ${
+                    CHART_HEIGHT * 0.36
+                  } L 310 ${CHART_HEIGHT * 0.67} L 510 ${
+                    CHART_HEIGHT * 0.42
+                  } L 690 ${CHART_HEIGHT * 0.69} L 840 ${
+                    CHART_HEIGHT * 0.48
+                  } L ${CHART_WIDTH} ${CHART_HEIGHT * 0.65} L ${CHART_WIDTH} ${
+                    CHART_HEIGHT
+                  } L 0 ${CHART_HEIGHT} Z`}
+                  fill="url(#mountainFill)"
+                />
+
+                {chartType === "Line" && (
+                  <path d={linePath} className="line-chart-path" />
+                )}
+
+                {chartType !== "Line" &&
+                  visibleCandles.map((candle, index) => {
+                    const step = CHART_WIDTH / Math.max(visibleCandles.length - 1, 1);
+                    const x = index * step;
+                    const candleWidth = Math.max(5, step * 0.52);
+                    const openY = priceToSvgY(candle.open);
+                    const closeY = priceToSvgY(candle.close);
+                    const highY = priceToSvgY(candle.high);
+                    const lowY = priceToSvgY(candle.low);
+                    const bullish = candle.close >= candle.open;
+                    const bodyY = Math.min(openY, closeY);
+                    const bodyHeight = Math.max(2, Math.abs(openY - closeY));
+
+                    if (chartType === "Bars") {
+                      return (
+                        <g key={`${candle.time}-${index}`}>
+                          <line
+                            x1={x}
+                            x2={x}
+                            y1={highY}
+                            y2={lowY}
+                            className={bullish ? "candle-up" : "candle-down"}
+                          />
+                          <line
+                            x1={x - candleWidth / 2}
+                            x2={x}
+                            y1={openY}
+                            y2={openY}
+                            className={bullish ? "candle-up" : "candle-down"}
+                          />
+                          <line
+                            x1={x}
+                            x2={x + candleWidth / 2}
+                            y1={closeY}
+                            y2={closeY}
+                            className={bullish ? "candle-up" : "candle-down"}
+                          />
+                        </g>
+                      );
+                    }
+
+                    return (
+                      <g key={`${candle.time}-${index}`}>
+                        <line
+                          x1={x}
+                          x2={x}
+                          y1={highY}
+                          y2={lowY}
+                          className={bullish ? "candle-up" : "candle-down"}
+                        />
+                        <rect
+                          x={x - candleWidth / 2}
+                          y={bodyY}
+                          width={candleWidth}
+                          height={bodyHeight}
+                          rx="1.5"
+                          className={bullish ? "candle-up-fill" : "candle-down-fill"}
+                        />
+                      </g>
+                    );
+                  })}
+
+                <line
+                  x1="0"
+                  x2={CHART_WIDTH}
+                  y1={priceToSvgY(currentPrice)}
+                  y2={priceToSvgY(currentPrice)}
+                  className="current-price-line"
+                />
+
+                <text
+                  x={CHART_WIDTH - 88}
+                  y={priceToSvgY(currentPrice) - 8}
+                  className="current-price-text"
                 >
-                  {item}
-                </button>
-              ))}
-            </div>
+                  {formatPrice(currentPrice)}
+                </text>
 
-            <div className="nt-assets-list">
-              {ASSETS.filter((item) => item.category === category).map((item) => (
-                <button
-                  key={item.symbol}
-                  type="button"
-                  onClick={() => {
-                    setAsset(item);
-                    setActiveMenu(null);
-                  }}
+                <line
+                  x1={CHART_WIDTH * 0.86}
+                  x2={CHART_WIDTH * 0.86}
+                  y1="0"
+                  y2={CHART_HEIGHT}
+                  className="expiry-line"
+                />
+
+                <text
+                  x={CHART_WIDTH * 0.86 + 12}
+                  y="44"
+                  className="expiry-text"
                 >
-                  <span>{item.symbol}</span>
-                  <small>{item.name}</small>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+                  Expiration time
+                </text>
 
-        {activeMenu === "timeframes" && (
-          <div className="nt-popover nt-small-panel nt-timeframe-panel">
-            <h3>Candlestick timeframe</h3>
-            <div className="nt-grid-buttons">
-              {TIMEFRAMES.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={timeframe === item ? "active" : ""}
-                  onClick={() => {
-                    setTimeframe(item);
-                    setActiveMenu(null);
-                  }}
+                {chartStats.labels.map((label, index) => (
+                  <text
+                    key={label}
+                    x={CHART_WIDTH - 82}
+                    y={36 + index * 86}
+                    className="price-scale-text"
+                  >
+                    {formatPrice(label)}
+                  </text>
+                ))}
+              </svg>
+
+              {pendingTrades.map((trade) => (
+                <div
+                  key={trade.id}
+                  className={`trade-marker ${trade.direction.toLowerCase()}`}
+                  style={
+                    {
+                      top: `${priceToTopPercent(trade.entryPrice)}%`,
+                    } as CSSProperties
+                  }
                 >
-                  {item}
-                </button>
+                  {trade.direction} {trade.amount} {trade.currency}
+                </div>
               ))}
-            </div>
-          </div>
-        )}
 
-        {activeMenu === "indicators" && (
-          <div className="nt-popover nt-indicator-panel">
-            <h3>Indicators</h3>
-            <div className="nt-indicator-grid">
-              {INDICATORS.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={selectedIndicators.includes(item) ? "active" : ""}
-                  onClick={() => toggleIndicator(item)}
+              {resultMarkers.map((marker) => (
+                <div
+                  key={marker.id}
+                  className={`result-marker ${marker.won ? "won" : "lost"}`}
+                  style={
+                    {
+                      top: `${priceToTopPercent(marker.price)}%`,
+                    } as CSSProperties
+                  }
                 >
-                  {item}
-                </button>
+                  {marker.won
+                    ? `✓ +${formatMoney(marker.profit, marker.currency)}`
+                    : `✓ ${formatMoney(0, marker.currency)}`}
+                </div>
               ))}
-            </div>
-          </div>
-        )}
 
-        {activeMenu === "drawings" && (
-          <div className="nt-popover nt-small-panel">
-            <h3>Drawing tools</h3>
-            <div className="nt-grid-buttons">
-              {DRAWING_TOOLS.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={tool === item ? "active" : ""}
-                  onClick={() => {
-                    setTool(item);
-                    setActiveMenu(null);
-                  }}
-                >
-                  {item}
-                </button>
-              ))}
+              <div className="chart-footer">
+                <button type="button">←</button>
+                <button type="button">H3 ▴</button>
+                <strong>{selectedAsset.displayName}</strong>
+              </div>
             </div>
-          </div>
-        )}
-
-        <section className="nt-chart-area">
-          <canvas ref={canvasRef} className="nt-chart-canvas" />
-          <div className="nt-chart-footer">
-            <button type="button">←</button>
-            <button type="button">{timeframe} ▴</button>
-            <span>{asset.name}</span>
           </div>
         </section>
 
-        <aside className="nt-trade-panel">
-          <div className="nt-meter">
+        <aside className="trade-panel">
+          {message && <div className="trade-message">{message}</div>}
+
+          <div className="sentiment-bar">
             <span>50%</span>
-            <div><i /></div>
+            <div>
+              <i />
+            </div>
             <span>50%</span>
           </div>
 
-          <div className="nt-trade-box">
-            <label>Time ⓘ</label>
-            <div className="nt-hms-expiry">
-              <div className="nt-hms-column">
-                <button type="button" onClick={() => changeExpiry("hours", -1)}>-</button>
-                <strong>{String(Math.floor(expirySeconds / 3600)).padStart(2, "0")}</strong>
-                <button type="button" onClick={() => changeExpiry("hours", 1)}>+</button>
-                <span>Hours</span>
-              </div>
+          <div className="control-title">Time ⓘ</div>
 
-              <div className="nt-hms-column">
-                <button type="button" onClick={() => changeExpiry("minutes", -1)}>-</button>
-                <strong>{String(Math.floor((expirySeconds % 3600) / 60)).padStart(2, "0")}</strong>
-                <button type="button" onClick={() => changeExpiry("minutes", 1)}>+</button>
-                <span>Min</span>
-              </div>
-
-              <div className="nt-hms-column">
-                <button type="button" onClick={() => changeExpiry("seconds", -1)}>-</button>
-                <strong>{String(expirySeconds % 60).padStart(2, "0")}</strong>
-                <button type="button" onClick={() => changeExpiry("seconds", 1)}>+</button>
-                <span>Sec</span>
-              </div>
+          <div className="expiry-control">
+            <div className="time-unit">
+              <button type="button" onClick={() => updateExpiryUnit("hours", 1)}>
+                +
+              </button>
+              <strong>{String(expiryParts.hours).padStart(2, "0")}</strong>
+              <small>Hours</small>
+              <button type="button" onClick={() => updateExpiryUnit("hours", -1)}>
+                -
+              </button>
             </div>
 
-            <div className="nt-expiry-preview">
-              <b>{formatSeconds(expirySeconds)}</b>
-              <small>Min 00:00:05 · Max 05:00:00</small>
+            <div className="time-unit">
+              <button type="button" onClick={() => updateExpiryUnit("minutes", 1)}>
+                +
+              </button>
+              <strong>{String(expiryParts.minutes).padStart(2, "0")}</strong>
+              <small>Minutes</small>
+              <button type="button" onClick={() => updateExpiryUnit("minutes", -1)}>
+                -
+              </button>
             </div>
 
-            <label>Amount ⓘ</label>
-            <div className="nt-amount-box">
+            <div className="time-unit">
+              <button type="button" onClick={() => updateExpiryUnit("seconds", 1)}>
+                +
+              </button>
+              <strong>{String(expiryParts.seconds).padStart(2, "0")}</strong>
+              <small>Seconds</small>
+              <button type="button" onClick={() => updateExpiryUnit("seconds", -1)}>
+                -
+              </button>
+            </div>
+          </div>
+
+          <div className="expiry-display">{formatExpiry(expirySeconds)}</div>
+          <small className="expiry-note">Min 00:00:05 · Max 05:00:00</small>
+
+          <div className="quick-expiry-grid">
+            {QUICK_PRESETS.map((preset) => (
+              <button
+                type="button"
+                key={preset}
+                className={expirySeconds === preset ? "selected" : ""}
+                onClick={() => setExpirySeconds(preset)}
+              >
+                {formatExpiry(preset)}
+              </button>
+            ))}
+          </div>
+
+          <label className="amount-control">
+            <span>Amount ⓘ</span>
+            <div>
               <input
-                value={amount}
-                min={1}
                 type="number"
-                onChange={(e) => setAmount(Math.max(1, Number(e.target.value || 1)))}
+                min="1"
+                value={amount}
+                onChange={(event) => {
+                  const value = Number(event.currentTarget.value);
+                  setAmount(Number.isFinite(value) ? Math.max(0, value) : 0);
+                }}
               />
-              <span>{currency}</span>
+              <strong>{currency}</strong>
+            </div>
+          </label>
+
+          <div className="payout-card">
+            <div>
+              <span>Rate</span>
+              <strong>+{selectedAsset.payout}%</strong>
             </div>
 
-            <label>Payout ⓘ</label>
-            <div className="nt-calculation">
-              <div>
-                <span>Rate</span>
-                <strong>+{asset.payout}%</strong>
-              </div>
-              <div>
-                <span>Expected profit</span>
-                <strong>{currency} {money(expectedProfit, currency)}</strong>
-              </div>
-              <div>
-                <span>Expected return</span>
-                <strong>{currency} {money(expectedReturn, currency)}</strong>
-              </div>
+            <div>
+              <span>Expected profit</span>
+              <strong>{formatMoney(expectedProfit, currency)}</strong>
             </div>
 
-            <button className="nt-buy" type="button" onClick={() => placeTrade("BUY")}>↗ BUY</button>
-            <button className="nt-ai" type="button">AI TRADING</button>
-            <button className="nt-sell" type="button" onClick={() => placeTrade("SELL")}>↘ SELL</button>
+            <div>
+              <span>Expected return</span>
+              <strong>{formatMoney(expectedReturn, currency)}</strong>
+            </div>
           </div>
-        </aside>
-      </section>
 
-      <aside className="nt-rightbar">
-        <button type="button"><span>↻</span><small>Trades</small></button>
-        <button type="button"><span>📡</span><small>Signals</small></button>
-        <button type="button"><span>👥</span><small>Social</small></button>
-        <button type="button"><span>◎</span><small>Express</small></button>
-        <button type="button"><span>⌛</span><small>Pending</small></button>
-        <button type="button"><span>⌨</span><small>Hotkeys</small></button>
-        <button type="button" onClick={() => document.documentElement.requestFullscreen?.()}><span>⛶</span><small>Full screen</small></button>
-      </aside>
+          <button type="button" className="buy-button" onClick={() => placeTrade("BUY")}>
+            ↗ BUY
+          </button>
+
+          <button type="button" className="ai-button">
+            AI TRADING
+          </button>
+
+          <button
+            type="button"
+            className="sell-button"
+            onClick={() => placeTrade("SELL")}
+          >
+            ↘ SELL
+          </button>
+        </aside>
+
+        <aside className="right-rail">
+          {RAIL_ITEMS.map((item) => (
+            <button
+              type="button"
+              key={item.label}
+              onClick={item.label === "Full screen" ? handleFullscreen : undefined}
+            >
+              <span>{item.icon}</span>
+              <small>{item.label}</small>
+            </button>
+          ))}
+        </aside>
+      </div>
     </main>
   );
 }
