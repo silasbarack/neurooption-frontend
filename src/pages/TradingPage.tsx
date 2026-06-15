@@ -1,23 +1,9 @@
 import React from "react";
 import "./TradingPage.css";
 
-type AccountType = "QT Demo" | "QT Real";
-
-type Currency =
-  | "USD"
-  | "KES"
-  | "UGX"
-  | "TZS"
-  | "NGN"
-  | "XOF"
-  | "EUR"
-  | "CAD"
-  | "JPY"
-  | "CNY"
-  | "AOA"
-  | "ZAR"
-  | "BRL";
-
+type AccountType = "demo" | "real";
+type ChartType = "Candlesticks" | "Heiken Ashi" | "Bars" | "Line";
+type Direction = "BUY" | "SELL";
 type AssetCategory =
   | "Currencies"
   | "Cryptocurrencies"
@@ -25,16 +11,13 @@ type AssetCategory =
   | "Indices"
   | "Commodities";
 
-type ChartType = "Candlesticks" | "Heiken Ashi" | "Bars" | "Line";
-type TradeSide = "BUY" | "SELL";
-
 type Asset = {
   symbol: string;
-  label: string;
+  name: string;
   category: AssetCategory;
   basePrice: number;
   precision: number;
-  payoutBoost: number;
+  volatility: number;
 };
 
 type Candle = {
@@ -47,165 +30,139 @@ type Candle = {
 
 type TradeMarker = {
   id: string;
-  side: TradeSide;
-  accountType: AccountType;
-  currency: Currency;
+  direction: Direction;
+  account: AccountType;
+  currency: CurrencyCode;
   entryPrice: number;
-  stake: number;
-  profit: number;
-  expectedReturn: number;
-  label: string;
+  stakeUsd: number;
+  payout: number;
+  createdAt: number;
 };
 
 type ResultMarker = {
   id: string;
+  direction: Direction;
+  currency: CurrencyCode;
   price: number;
-  won: boolean;
-  label: string;
+  valueUsd: number;
+  win: boolean;
+  createdAt: number;
 };
 
-const EXCHANGE_RATES: Record<Currency, number> = {
+const EXCHANGE_RATES = {
   USD: 1,
   KES: 129,
-  UGX: 3720,
-  TZS: 2550,
-  NGN: 1510,
-  XOF: 604,
+  UGX: 3800,
+  TZS: 2600,
+  NGN: 1500,
+  XOF: 610,
   EUR: 0.92,
-  CAD: 1.36,
+  CAD: 1.37,
   JPY: 157,
-  CNY: 7.24,
-  AOA: 865,
+  CNY: 7.25,
+  AOA: 870,
   ZAR: 18.2,
-  BRL: 5.42,
-};
+  BRL: 5.45,
+} as const;
 
-const CURRENCY_SYMBOLS: Record<Currency, string> = {
+type CurrencyCode = keyof typeof EXCHANGE_RATES;
+
+const CURRENCY_SYMBOLS: Record<CurrencyCode, string> = {
   USD: "$",
-  KES: "KES",
-  UGX: "UGX",
-  TZS: "TZS",
-  NGN: "NGN",
-  XOF: "XOF",
+  KES: "KES ",
+  UGX: "UGX ",
+  TZS: "TZS ",
+  NGN: "NGN ",
+  XOF: "XOF ",
   EUR: "€",
-  CAD: "CAD",
+  CAD: "CAD ",
   JPY: "¥",
   CNY: "¥",
-  AOA: "AOA",
+  AOA: "AOA ",
   ZAR: "R",
   BRL: "R$",
 };
 
+const ASSET_CATEGORIES: AssetCategory[] = [
+  "Currencies",
+  "Cryptocurrencies",
+  "Stocks",
+  "Indices",
+  "Commodities",
+];
+
 const ASSETS: Asset[] = [
-  { symbol: "AUD/CAD OTC", label: "Australian Dollar / Canadian Dollar", category: "Currencies", basePrice: 0.8421, precision: 5, payoutBoost: 7 },
-  { symbol: "EUR/USD OTC", label: "Euro / US Dollar", category: "Currencies", basePrice: 1.0845, precision: 5, payoutBoost: 5 },
-  { symbol: "USD/JPY OTC", label: "US Dollar / Japanese Yen", category: "Currencies", basePrice: 157.45, precision: 3, payoutBoost: 4 },
-  { symbol: "BTC/USD OTC", label: "Bitcoin / US Dollar", category: "Cryptocurrencies", basePrice: 68200, precision: 2, payoutBoost: 1 },
-  { symbol: "ETH/USD OTC", label: "Ethereum / US Dollar", category: "Cryptocurrencies", basePrice: 3550, precision: 2, payoutBoost: 2 },
-  { symbol: "Tesla OTC", label: "Tesla Inc.", category: "Stocks", basePrice: 181.4, precision: 2, payoutBoost: 3 },
-  { symbol: "Apple OTC", label: "Apple Inc.", category: "Stocks", basePrice: 214.2, precision: 2, payoutBoost: 3 },
-  { symbol: "Amazon OTC", label: "Amazon.com Inc.", category: "Stocks", basePrice: 185.6, precision: 2, payoutBoost: 3 },
-  { symbol: "US100 OTC", label: "Nasdaq 100", category: "Indices", basePrice: 19888.46, precision: 2, payoutBoost: 4 },
-  { symbol: "US30 OTC", label: "Dow Jones 30", category: "Indices", basePrice: 38950.9, precision: 2, payoutBoost: 4 },
-  { symbol: "XAU/USD OTC", label: "Gold / US Dollar", category: "Commodities", basePrice: 2322.4, precision: 2, payoutBoost: 5 },
-  { symbol: "Brent OTC", label: "Brent Crude Oil", category: "Commodities", basePrice: 82.8, precision: 2, payoutBoost: 2 },
+  { symbol: "AUD/CAD OTC", name: "Australian Dollar / Canadian Dollar", category: "Currencies", basePrice: 0.84217, precision: 5, volatility: 0.00052 },
+  { symbol: "EUR/USD OTC", name: "Euro / United States Dollar", category: "Currencies", basePrice: 1.13351, precision: 5, volatility: 0.0006 },
+  { symbol: "USD/JPY OTC", name: "United States Dollar / Japanese Yen", category: "Currencies", basePrice: 157.42, precision: 3, volatility: 0.12 },
+  { symbol: "GBP/USD OTC", name: "British Pound / United States Dollar", category: "Currencies", basePrice: 1.271, precision: 5, volatility: 0.0007 },
+  { symbol: "BTC/USD OTC", name: "Bitcoin / United States Dollar", category: "Cryptocurrencies", basePrice: 68450, precision: 2, volatility: 115 },
+  { symbol: "ETH/USD OTC", name: "Ethereum / United States Dollar", category: "Cryptocurrencies", basePrice: 3520, precision: 2, volatility: 9 },
+  { symbol: "Tesla OTC", name: "Tesla Inc.", category: "Stocks", basePrice: 183.22, precision: 2, volatility: 0.9 },
+  { symbol: "Apple OTC", name: "Apple Inc.", category: "Stocks", basePrice: 196.48, precision: 2, volatility: 0.65 },
+  { symbol: "Amazon OTC", name: "Amazon.com Inc.", category: "Stocks", basePrice: 184.7, precision: 2, volatility: 0.7 },
+  { symbol: "US100 OTC", name: "Nasdaq 100", category: "Indices", basePrice: 19888.46, precision: 2, volatility: 31 },
+  { symbol: "US30 OTC", name: "Dow Jones 30", category: "Indices", basePrice: 38780.22, precision: 2, volatility: 42 },
+  { symbol: "XAU/USD OTC", name: "Gold / United States Dollar", category: "Commodities", basePrice: 2332.45, precision: 2, volatility: 4.8 },
+  { symbol: "Brent OTC", name: "Brent Crude Oil", category: "Commodities", basePrice: 81.34, precision: 2, volatility: 0.35 },
 ];
 
 const TIMEFRAMES = ["S5", "S10", "S15", "S30", "M1", "M2", "M3", "M5", "M10", "M15", "M30", "H1", "H4", "D1"];
 
 const INDICATORS = [
-  "Moving Average",
-  "Exponential MA",
-  "Weighted MA",
-  "Bollinger Bands",
-  "RSI",
-  "MACD",
-  "Stochastic",
-  "CCI",
-  "ADX",
-  "ATR",
-  "Parabolic SAR",
-  "Ichimoku Cloud",
-  "Momentum",
-  "Williams %R",
-  "Awesome Oscillator",
-  "Fractals",
-  "Alligator",
-  "Envelopes",
-  "Keltner Channel",
-  "Donchian Channel",
-  "Zig Zag",
-  "Volume",
-  "VWAP",
-  "SuperTrend",
-  "Pivot Points",
-  "Fibonacci Levels",
-  "Trend Strength",
-  "Rate of Change",
-  "Aroon",
-  "DeMarker",
-  "Money Flow Index",
-  "OBV",
-  "TRIX",
-  "DPO",
-  "Elder Ray",
-  "Hull MA",
-  "TEMA",
-  "KAMA",
-  "Price Channel",
-  "Standard Deviation",
-  "Variance",
-  "Linear Regression",
+  "Moving Average", "EMA", "SMA", "WMA", "Bollinger Bands", "RSI", "MACD", "Stochastic",
+  "ADX", "ATR", "CCI", "Momentum", "Ichimoku", "Parabolic SAR", "Fractals", "Alligator",
+  "Awesome Oscillator", "DeMarker", "Envelopes", "Force Index", "Gator Oscillator", "MFI",
+  "OBV", "Williams %R", "ZigZag", "Pivot Points", "Keltner Channel", "Donchian Channel",
+  "SuperTrend", "VWAP", "Volume", "Aroon", "TRIX", "ROC", "DPO", "Elder Ray",
+  "Standard Deviation", "Linear Regression", "Heikin Trend", "Fibonacci Bands", "Price Channel", "Market Sentiment",
 ];
 
 const DRAWING_TOOLS = [
-  "Cursor",
-  "Trend Line",
-  "Horizontal Line",
-  "Vertical Line",
-  "Brush",
-  "Text",
-  "Rectangle",
-  "Fibonacci",
-  "Eraser",
+  "Cursor", "Trend Line", "Horizontal Line", "Vertical Line", "Brush", "Text", "Rectangle", "Fibonacci", "Eraser",
 ];
 
-const LEFT_NAV = [
-  ["📈", "Trading"],
-  ["💵", "Finance"],
-  ["👤", "Profile"],
-  ["🛒", "Market"],
-  ["💎", "Achievements"],
-  ["🏆", "Tournaments"],
-  ["💬", "Chat"],
-  ["?", "Help"],
-  ["🎁", "Promo"],
-  ["🤖", "Autotrading"],
+const LEFT_MENU = [
+  { label: "Trading", icon: "📈" },
+  { label: "Finance", icon: "💵" },
+  { label: "Profile", icon: "👤" },
+  { label: "Market", icon: "🛒" },
+  { label: "Achievements", icon: "💎" },
+  { label: "Tournaments", icon: "🏆" },
+  { label: "Chat", icon: "💬" },
+  { label: "Help", icon: "?" },
+  { label: "Promo", icon: "🎁" },
+  { label: "Autotrading", icon: "🤖" },
 ];
 
-const QUICK_NAV = [
-  ["↻", "Trades"],
-  ["📡", "Signals"],
-  ["👥", "Social Trading"],
-  ["◎", "Express Trades"],
-  ["⏳", "Pending Trades"],
-  ["⌨", "Hotkeys"],
-  ["⛶", "Full Screen"],
+const QUICK_MENU = [
+  { label: "Trades", icon: "↻" },
+  { label: "Signals", icon: "📡" },
+  { label: "Social Trading", icon: "👥" },
+  { label: "Express Trades", icon: "◎" },
+  { label: "Pending Trades", icon: "⏳" },
+  { label: "Hotkeys", icon: "⌨" },
+  { label: "Full Screen", icon: "⛶" },
 ];
+
+const MIN_EXPIRY = 5;
+const MAX_EXPIRY = 5 * 60 * 60;
 
 function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max);
+  return Math.min(max, Math.max(min, value));
 }
 
-function formatTime(totalSeconds: number) {
+function formatExpiry(totalSeconds: number) {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
-  return [hours, minutes, seconds].map((item) => String(item).padStart(2, "0")).join(":");
+  return [hours, minutes, seconds]
+    .map((value) => String(value).padStart(2, "0"))
+    .join(":");
 }
 
-function splitTime(totalSeconds: number) {
+function splitExpiry(totalSeconds: number) {
   return {
     hours: Math.floor(totalSeconds / 3600),
     minutes: Math.floor((totalSeconds % 3600) / 60),
@@ -213,40 +170,47 @@ function splitTime(totalSeconds: number) {
   };
 }
 
-function formatMoney(value: number, currency: Currency) {
+function formatMoney(value: number, currency: CurrencyCode) {
   const symbol = CURRENCY_SYMBOLS[currency];
-  const decimals = currency === "JPY" || currency === "UGX" || currency === "TZS" || currency === "XOF" ? 0 : 2;
-  const formatted = value.toLocaleString(undefined, {
+  const decimals = currency === "JPY" || currency === "XOF" ? 0 : 2;
+
+  return `${symbol}${value.toLocaleString(undefined, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  });
-
-  if (currency === "USD" || currency === "EUR" || currency === "JPY" || currency === "ZAR" || currency === "BRL") {
-    return `${symbol}${formatted}`;
-  }
-
-  return `${currency} ${formatted}`;
+  })}`;
 }
 
-function createInitialCandles(asset: Asset) {
+function formatPlainAmount(value: number, currency: CurrencyCode) {
+  const decimals = currency === "JPY" || currency === "XOF" ? 0 : 2;
+
+  return value.toFixed(decimals);
+}
+
+function calcPayout(asset: Asset, timeframe: string) {
+  const seed = asset.symbol.length * 13 + timeframe.length * 17;
+  const wave = Math.sin(Date.now() / 7000 + seed) * 7;
+  const volatilityBonus = Math.min(8, asset.volatility * 1000);
+  return Math.round(clamp(78 + wave + volatilityBonus, 20, 92));
+}
+
+function makeCandles(asset: Asset, count = 110): Candle[] {
   const candles: Candle[] = [];
   let price = asset.basePrice;
-  const volatility = asset.basePrice * 0.0025;
 
-  for (let index = 0; index < 100; index += 1) {
-    const wave = Math.sin(index / 7) * volatility * 2.2;
-    const noise = (Math.random() - 0.5) * volatility;
+  for (let i = 0; i < count; i += 1) {
     const open = price;
-    const close = Math.max(0.00001, open + wave * 0.22 + noise);
-    const high = Math.max(open, close) + Math.random() * volatility;
-    const low = Math.min(open, close) - Math.random() * volatility;
+    const drift = Math.sin(i / 8) * asset.volatility * 0.9;
+    const noise = (Math.random() - 0.46) * asset.volatility * 3;
+    const close = Math.max(asset.volatility, open + drift + noise);
+    const high = Math.max(open, close) + Math.random() * asset.volatility * 2;
+    const low = Math.min(open, close) - Math.random() * asset.volatility * 2;
 
     candles.push({
       open,
       high,
-      low,
+      low: Math.max(0.00001, low),
       close,
-      time: Date.now() - (100 - index) * 1000,
+      time: Date.now() - (count - i) * 60_000,
     });
 
     price = close;
@@ -255,654 +219,785 @@ function createInitialCandles(asset: Asset) {
   return candles;
 }
 
-function mutateCandles(candles: Candle[], asset: Asset) {
-  if (candles.length === 0) {
-    return createInitialCandles(asset);
-  }
+function toHeikenAshi(candles: Candle[]) {
+  const result: Candle[] = [];
 
-  const nextCandles = candles.slice();
-  const last = nextCandles[nextCandles.length - 1];
-  const volatility = asset.basePrice * 0.0015;
-  const move = (Math.random() - 0.5) * volatility;
-  const close = Math.max(0.00001, last.close + move);
+  candles.forEach((candle, index) => {
+    const close = (candle.open + candle.high + candle.low + candle.close) / 4;
+    const open =
+      index === 0
+        ? (candle.open + candle.close) / 2
+        : (result[index - 1].open + result[index - 1].close) / 2;
 
-  nextCandles[nextCandles.length - 1] = {
-    ...last,
-    close,
-    high: Math.max(last.high, close),
-    low: Math.min(last.low, close),
-  };
-
-  if (Math.random() > 0.64) {
-    const previous = nextCandles[nextCandles.length - 1];
-    const open = previous.close;
-    const nextMove = (Math.random() - 0.5) * volatility * 1.4;
-    const nextClose = Math.max(0.00001, open + nextMove);
-
-    nextCandles.push({
+    result.push({
       open,
-      close: nextClose,
-      high: Math.max(open, nextClose) + Math.random() * volatility,
-      low: Math.min(open, nextClose) - Math.random() * volatility,
-      time: Date.now(),
+      close,
+      high: Math.max(candle.high, open, close),
+      low: Math.min(candle.low, open, close),
+      time: candle.time,
     });
-  }
+  });
 
-  return nextCandles.slice(-110);
+  return result;
 }
 
-function drawTradingChart(params: {
-  canvas: HTMLCanvasElement;
-  candles: Candle[];
-  asset: Asset;
-  chartType: ChartType;
-  timeframe: string;
-  activeTrades: TradeMarker[];
-  resultMarkers: ResultMarker[];
-}) {
-  const { canvas, candles, asset, chartType, timeframe, activeTrades, resultMarkers } = params;
-  const context = canvas.getContext("2d");
+function roundedRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+) {
+  const r = Math.min(radius, width / 2, height / 2);
 
-  if (!context || candles.length === 0) {
-    return;
-  }
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + width, y, x + width, y + height, r);
+  ctx.arcTo(x + width, y + height, x, y + height, r);
+  ctx.arcTo(x, y + height, x, y, r);
+  ctx.arcTo(x, y, x + width, y, r);
+  ctx.closePath();
+}
+
+function drawChart(
+  canvas: HTMLCanvasElement,
+  candlesInput: Candle[],
+  asset: Asset,
+  chartType: ChartType,
+  timeframe: string,
+  trades: TradeMarker[],
+  results: ResultMarker[],
+) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
 
   const rect = canvas.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
+  const width = Math.max(320, rect.width);
+  const height = Math.max(320, rect.height);
 
-  canvas.width = Math.max(1, Math.floor(rect.width * dpr));
-  canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+  if (
+    canvas.width !== Math.floor(width * dpr) ||
+    canvas.height !== Math.floor(height * dpr)
+  ) {
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+  }
 
-  context.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, width, height);
 
-  const width = rect.width;
-  const height = rect.height;
-  const left = 14;
-  const right = 76;
-  const top = 36;
+  const background = ctx.createLinearGradient(0, 0, width, height);
+  background.addColorStop(0, "#1f3156");
+  background.addColorStop(0.52, "#14233f");
+  background.addColorStop(1, "#0a1328");
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.globalAlpha = 0.32;
+  ctx.fillStyle = "#6882a8";
+  ctx.beginPath();
+  ctx.moveTo(0, height * 0.76);
+  ctx.lineTo(width * 0.14, height * 0.48);
+  ctx.lineTo(width * 0.3, height * 0.76);
+  ctx.lineTo(width * 0.48, height * 0.48);
+  ctx.lineTo(width * 0.65, height * 0.76);
+  ctx.lineTo(width * 0.82, height * 0.56);
+  ctx.lineTo(width, height * 0.74);
+  ctx.lineTo(width, height);
+  ctx.lineTo(0, height);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  const top = 64;
+  const left = 12;
+  const right = 66;
   const bottom = 34;
-  const chartWidth = width - left - right;
-  const chartHeight = height - top - bottom;
+  const plotW = width - left - right;
+  const plotH = height - top - bottom;
+  const plotR = left + plotW;
+  const plotB = top + plotH;
 
-  context.clearRect(0, 0, width, height);
+  ctx.strokeStyle = "rgba(151, 184, 225, 0.16)";
+  ctx.lineWidth = 1;
 
-  const background = context.createLinearGradient(0, 0, width, height);
-  background.addColorStop(0, "#172a4d");
-  background.addColorStop(0.45, "#111d39");
-  background.addColorStop(1, "#0a1022");
-  context.fillStyle = background;
-  context.fillRect(0, 0, width, height);
+  for (let i = 0; i <= 8; i += 1) {
+    const x = left + (plotW / 8) * i;
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, plotB);
+    ctx.stroke();
+  }
 
-  context.save();
-  context.globalAlpha = 0.2;
-  context.fillStyle = "#8ab6ff";
-  context.beginPath();
-  context.moveTo(left, height - bottom);
-  context.lineTo(left + chartWidth * 0.12, height - bottom - chartHeight * 0.28);
-  context.lineTo(left + chartWidth * 0.25, height - bottom - chartHeight * 0.12);
-  context.lineTo(left + chartWidth * 0.42, height - bottom - chartHeight * 0.38);
-  context.lineTo(left + chartWidth * 0.58, height - bottom - chartHeight * 0.16);
-  context.lineTo(left + chartWidth * 0.72, height - bottom - chartHeight * 0.45);
-  context.lineTo(left + chartWidth * 0.9, height - bottom - chartHeight * 0.22);
-  context.lineTo(left + chartWidth, height - bottom - chartHeight * 0.35);
-  context.lineTo(left + chartWidth, height - bottom);
-  context.closePath();
-  context.fill();
-  context.restore();
+  for (let i = 0; i <= 6; i += 1) {
+    const y = top + (plotH / 6) * i;
+    ctx.beginPath();
+    ctx.moveTo(left, y);
+    ctx.lineTo(plotR, y);
+    ctx.stroke();
+  }
 
-  const highs = candles.map((candle) => candle.high);
+  const candles = chartType === "Heiken Ashi" ? toHeikenAshi(candlesInput) : candlesInput;
   const lows = candles.map((candle) => candle.low);
-  let minPrice = Math.min(...lows);
-  let maxPrice = Math.max(...highs);
-  const pricePadding = Math.max((maxPrice - minPrice) * 0.18, asset.basePrice * 0.001);
+  const highs = candles.map((candle) => candle.high);
+  const minRaw = Math.min(...lows);
+  const maxRaw = Math.max(...highs);
+  const pad = Math.max((maxRaw - minRaw) * 0.16, asset.volatility * 4);
+  const min = minRaw - pad;
+  const max = maxRaw + pad;
+  const range = max - min || 1;
 
-  minPrice -= pricePadding;
-  maxPrice += pricePadding;
+  const priceToY = (price: number) => top + ((max - price) / range) * plotH;
+  const step = plotW / Math.max(candles.length - 1, 1);
+  const candleWidth = Math.max(2.4, Math.min(8, step * 0.58));
 
-  const priceToY = (price: number) => {
-    return top + ((maxPrice - price) / (maxPrice - minPrice)) * chartHeight;
-  };
+  ctx.font = "700 12px Inter, Arial, sans-serif";
+  ctx.fillStyle = "rgba(219, 233, 255, 0.82)";
+  ctx.textAlign = "right";
 
-  const indexToX = (index: number) => {
-    return left + (index / Math.max(candles.length - 1, 1)) * chartWidth;
-  };
-
-  context.strokeStyle = "rgba(167, 200, 255, 0.14)";
-  context.lineWidth = 1;
-
-  for (let column = 0; column <= 9; column += 1) {
-    const x = left + (chartWidth / 9) * column;
-    context.beginPath();
-    context.moveTo(x, top);
-    context.lineTo(x, height - bottom);
-    context.stroke();
+  for (let i = 0; i <= 5; i += 1) {
+    const price = max - (range / 5) * i;
+    const y = priceToY(price);
+    ctx.fillText(price.toFixed(asset.precision), width - 8, y + 4);
   }
-
-  for (let row = 0; row <= 6; row += 1) {
-    const y = top + (chartHeight / 6) * row;
-    context.beginPath();
-    context.moveTo(left, y);
-    context.lineTo(width - right, y);
-    context.stroke();
-  }
-
-  const candleWidth = clamp(chartWidth / candles.length * 0.58, 3, 9);
 
   if (chartType === "Line") {
-    context.strokeStyle = "#55d7e5";
-    context.lineWidth = 2.4;
-    context.beginPath();
+    ctx.beginPath();
     candles.forEach((candle, index) => {
-      const x = indexToX(index);
+      const x = left + index * step;
       const y = priceToY(candle.close);
-      if (index === 0) {
-        context.moveTo(x, y);
-      } else {
-        context.lineTo(x, y);
-      }
+      if (index === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
     });
-    context.stroke();
+    ctx.strokeStyle = "#56d7ff";
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
   } else {
-    let previousHaOpen = candles[0].open;
-    let previousHaClose = candles[0].close;
-
     candles.forEach((candle, index) => {
-      let open = candle.open;
-      let close = candle.close;
-      let high = candle.high;
-      let low = candle.low;
+      const x = left + index * step;
+      const openY = priceToY(candle.open);
+      const closeY = priceToY(candle.close);
+      const highY = priceToY(candle.high);
+      const lowY = priceToY(candle.low);
+      const up = candle.close >= candle.open;
+      const color = up ? "#67e8dc" : "#ff725f";
 
-      if (chartType === "Heiken Ashi") {
-        const haClose = (candle.open + candle.high + candle.low + candle.close) / 4;
-        const haOpen = (previousHaOpen + previousHaClose) / 2;
-        const haHigh = Math.max(candle.high, haOpen, haClose);
-        const haLow = Math.min(candle.low, haOpen, haClose);
-
-        open = haOpen;
-        close = haClose;
-        high = haHigh;
-        low = haLow;
-        previousHaOpen = haOpen;
-        previousHaClose = haClose;
-      }
-
-      const x = indexToX(index);
-      const openY = priceToY(open);
-      const closeY = priceToY(close);
-      const highY = priceToY(high);
-      const lowY = priceToY(low);
-      const rising = close >= open;
-      const color = rising ? "#62e6e4" : "#ff725f";
-
-      context.strokeStyle = color;
-      context.fillStyle = color;
-      context.lineWidth = 1.4;
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = chartType === "Bars" ? 1.7 : 1.2;
 
       if (chartType === "Bars") {
-        context.beginPath();
-        context.moveTo(x, highY);
-        context.lineTo(x, lowY);
-        context.moveTo(x - candleWidth * 0.7, openY);
-        context.lineTo(x, openY);
-        context.moveTo(x, closeY);
-        context.lineTo(x + candleWidth * 0.7, closeY);
-        context.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, highY);
+        ctx.lineTo(x, lowY);
+        ctx.moveTo(x - candleWidth, openY);
+        ctx.lineTo(x, openY);
+        ctx.moveTo(x, closeY);
+        ctx.lineTo(x + candleWidth, closeY);
+        ctx.stroke();
       } else {
-        context.beginPath();
-        context.moveTo(x, highY);
-        context.lineTo(x, lowY);
-        context.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, highY);
+        ctx.lineTo(x, lowY);
+        ctx.stroke();
 
-        const bodyY = Math.min(openY, closeY);
-        const bodyHeight = Math.max(2, Math.abs(openY - closeY));
-        context.fillRect(x - candleWidth / 2, bodyY, candleWidth, bodyHeight);
+        const bodyTop = Math.min(openY, closeY);
+        const bodyHeight = Math.max(Math.abs(closeY - openY), 2);
+        roundedRect(ctx, x - candleWidth / 2, bodyTop, candleWidth, bodyHeight, 1.5);
+        ctx.fill();
       }
     });
   }
 
-  const currentPrice = candles[candles.length - 1].close;
-  const currentY = priceToY(currentPrice);
+  const current = candlesInput[candlesInput.length - 1]?.close || asset.basePrice;
+  const currentY = priceToY(current);
 
-  context.setLineDash([6, 6]);
-  context.strokeStyle = "#79dcff";
-  context.lineWidth = 1.3;
-  context.beginPath();
-  context.moveTo(left, currentY);
-  context.lineTo(width - right + 4, currentY);
-  context.stroke();
-  context.setLineDash([]);
+  ctx.setLineDash([6, 6]);
+  ctx.strokeStyle = "rgba(111, 213, 255, 0.72)";
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(left, currentY);
+  ctx.lineTo(plotR, currentY);
+  ctx.stroke();
+  ctx.setLineDash([]);
 
-  context.fillStyle = "#86c9ff";
-  context.beginPath();
-  context.roundRect(width - right + 8, currentY - 18, 64, 36, 9);
-  context.fill();
+  ctx.fillStyle = "#8ccaff";
+  roundedRect(ctx, plotR + 4, currentY - 16, 58, 30, 7);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "800 12px Inter, Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(current.toFixed(asset.precision), plotR + 33, currentY + 4);
 
-  context.fillStyle = "#ffffff";
-  context.font = "700 13px Inter, Arial, sans-serif";
-  context.textAlign = "center";
-  context.fillText(currentPrice.toFixed(asset.precision), width - right + 40, currentY + 5);
+  const expiryX = plotR - Math.min(96, plotW * 0.15);
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.82)";
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(expiryX, top);
+  ctx.lineTo(expiryX, plotB);
+  ctx.stroke();
 
-  context.fillStyle = "rgba(226, 238, 255, 0.8)";
-  context.font = "700 13px Inter, Arial, sans-serif";
-  context.textAlign = "left";
-  context.fillText(`${new Date().toLocaleTimeString()} UTC+3`, left + 8, top - 12);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "700 11px Inter, Arial, sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("Expiration time", expiryX + 8, top + 28);
 
-  context.textAlign = "right";
-  context.fillText(`Current price ${currentPrice.toFixed(asset.precision)}`, width - right - 10, top - 12);
+  ctx.font = "700 13px Inter, Arial, sans-serif";
+  ctx.fillStyle = "rgba(221, 232, 255, 0.8)";
+  ctx.textAlign = "center";
+  ctx.fillText(timeframe, Math.min(expiryX + 16, plotR - 20), currentY - 10);
 
-  context.strokeStyle = "rgba(255,255,255,0.9)";
-  context.lineWidth = 1.6;
-  const expiryX = left + chartWidth * 0.82;
-  context.beginPath();
-  context.moveTo(expiryX, top);
-  context.lineTo(expiryX, height - bottom);
-  context.stroke();
-
-  context.fillStyle = "#ffffff";
-  context.textAlign = "left";
-  context.font = "700 12px Inter, Arial, sans-serif";
-  context.fillText("⚑", expiryX + 4, top + 12);
-  context.fillText("Expiration time", expiryX + 10, top + 30);
-
-  context.fillStyle = "rgba(232, 240, 255, 0.82)";
-  context.font = "700 12px Inter, Arial, sans-serif";
-  context.textAlign = "right";
-
-  for (let index = 0; index <= 5; index += 1) {
-    const price = maxPrice - ((maxPrice - minPrice) / 5) * index;
-    const y = priceToY(price);
-    context.fillText(price.toFixed(asset.precision), width - 10, y + 4);
-  }
-
-  context.fillStyle = "rgba(232, 240, 255, 0.64)";
-  context.font = "600 12px Inter, Arial, sans-serif";
-  context.textAlign = "center";
-  ["13:16", "13:32", "13:48", "14:04"].forEach((time, index) => {
-    const x = left + chartWidth * (0.12 + index * 0.25);
-    context.fillText(time, x, height - 10);
+  const timeLabels = ["13:16", "13:32", "13:48", "14:04"];
+  timeLabels.forEach((label, index) => {
+    const x = left + (plotW / (timeLabels.length - 1)) * index;
+    ctx.fillStyle = "rgba(221, 232, 255, 0.62)";
+    ctx.font = "600 11px Inter, Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(label, x, height - 10);
   });
 
-  context.fillStyle = "rgba(255, 255, 255, 0.86)";
-  context.font = "800 17px Inter, Arial, sans-serif";
-  context.textAlign = "left";
-  context.fillText(timeframe, expiryX - 58, currentY - 10);
-
-  activeTrades.forEach((trade, index) => {
+  trades.forEach((trade, index) => {
     const y = priceToY(trade.entryPrice);
-    const markerX = left + 28 + index * 8;
+    const x = left + 36 + index * 82;
+    const stakeText = formatMoney(trade.stakeUsd * EXCHANGE_RATES[trade.currency], trade.currency);
+    const label = `${trade.direction} ${stakeText}`;
 
-    context.strokeStyle = trade.side === "BUY" ? "#62e87c" : "#ff655f";
-    context.setLineDash([4, 4]);
-    context.beginPath();
-    context.moveTo(left, y);
-    context.lineTo(width - right, y);
-    context.stroke();
-    context.setLineDash([]);
+    ctx.setLineDash([3, 4]);
+    ctx.strokeStyle = trade.direction === "BUY" ? "rgba(93, 230, 121, 0.85)" : "rgba(255, 106, 86, 0.85)";
+    ctx.beginPath();
+    ctx.moveTo(left, y);
+    ctx.lineTo(plotR, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
 
-    context.fillStyle = trade.side === "BUY" ? "#48d567" : "#f15c55";
-    context.beginPath();
-    context.roundRect(markerX, y - 16, 128, 32, 8);
-    context.fill();
+    ctx.fillStyle = trade.direction === "BUY" ? "#56d66f" : "#ff6256";
+    roundedRect(ctx, x, y - 18, 120, 28, 7);
+    ctx.fill();
 
-    context.fillStyle = "#ffffff";
-    context.font = "800 12px Inter, Arial, sans-serif";
-    context.textAlign = "left";
-    context.fillText(trade.label, markerX + 10, y + 4);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "800 11px Inter, Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(label, x + 60, y);
   });
 
-  resultMarkers.forEach((marker) => {
-    const y = priceToY(marker.price);
-    const x = width - right - 150;
+  results.forEach((result, index) => {
+    const y = priceToY(result.price);
+    const x = left + 54 + index * 90;
+    const value = formatMoney(result.valueUsd * EXCHANGE_RATES[result.currency], result.currency);
+    const label = result.win ? `✓ ${value}` : `✓ ${CURRENCY_SYMBOLS[result.currency]}0`;
 
-    context.fillStyle = marker.won ? "#47d86b" : "#f05a54";
-    context.beginPath();
-    context.roundRect(x, y - 18, 138, 36, 10);
-    context.fill();
+    ctx.fillStyle = result.win ? "#30d96a" : "#ff4238";
+    roundedRect(ctx, x, y - 44, 122, 30, 8);
+    ctx.fill();
 
-    context.fillStyle = "#ffffff";
-    context.font = "900 13px Inter, Arial, sans-serif";
-    context.textAlign = "center";
-    context.fillText(marker.label, x + 69, y + 5);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "900 12px Inter, Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(label, x + 61, y - 24);
   });
+
+  ctx.fillStyle = "rgba(255,255,255,0.72)";
+  ctx.font = "700 12px Inter, Arial, sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("Current price", Math.max(left + 210, plotR - 240), top + 24);
 }
 
 export default function TradingPage() {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const candlesRef = React.useRef<Candle[]>([]);
-  const [renderTick, setRenderTick] = React.useState(0);
+  const assetRef = React.useRef<Asset>(ASSETS[0]);
+  const chartTypeRef = React.useRef<ChartType>("Candlesticks");
+  const timeframeRef = React.useRef("M1");
+  const payoutRef = React.useRef(92);
+  const currentPriceRef = React.useRef(ASSETS[0].basePrice);
+  const tradeMarkersRef = React.useRef<TradeMarker[]>([]);
+  const resultMarkersRef = React.useRef<ResultMarker[]>([]);
+  const timeoutsRef = React.useRef<ReturnType<typeof window.setTimeout>[]>([]);
+  const lastCandleAtRef = React.useRef(Date.now());
+  const lastStatePriceAtRef = React.useRef(Date.now());
 
-  const [accountType, setAccountType] = React.useState<AccountType>("QT Demo");
-  const [currency, setCurrency] = React.useState<Currency>("USD");
-  const [balancesUsd, setBalancesUsd] = React.useState<Record<AccountType, number>>({
-    "QT Demo": 70000,
-    "QT Real": 0,
-  });
+  const [accountType, setAccountType] = React.useState<AccountType>("demo");
+  const [currency, setCurrency] = React.useState<CurrencyCode>("USD");
+  const [demoBalanceUsd, setDemoBalanceUsd] = React.useState(70000);
+  const [realBalanceUsd, setRealBalanceUsd] = React.useState(0);
 
-  const [selectedAssetSymbol, setSelectedAssetSymbol] = React.useState("AUD/CAD OTC");
-  const [activeAssetCategory, setActiveAssetCategory] = React.useState<AssetCategory>("Currencies");
-  const [assetMenuOpen, setAssetMenuOpen] = React.useState(false);
-
+  const [selectedAsset, setSelectedAsset] = React.useState<Asset>(ASSETS[0]);
+  const [activeCategory, setActiveCategory] = React.useState<AssetCategory>("Currencies");
   const [chartType, setChartType] = React.useState<ChartType>("Candlesticks");
   const [timeframe, setTimeframe] = React.useState("M1");
-  const [timeframeOpen, setTimeframeOpen] = React.useState(false);
-
-  const [indicatorOpen, setIndicatorOpen] = React.useState(false);
-  const [selectedIndicators, setSelectedIndicators] = React.useState<string[]>([]);
-  const [drawingOpen, setDrawingOpen] = React.useState(false);
-  const [selectedTool, setSelectedTool] = React.useState("Cursor");
-
-  const [expirySeconds, setExpirySeconds] = React.useState(29 * 60);
-  const [amount, setAmount] = React.useState("100");
-  const [activeTrades, setActiveTrades] = React.useState<TradeMarker[]>([]);
-  const [resultMarkers, setResultMarkers] = React.useState<ResultMarker[]>([]);
   const [payout, setPayout] = React.useState(92);
+  const [expirySeconds, setExpirySeconds] = React.useState(30 * 60);
+  const [stakeUsd, setStakeUsd] = React.useState(100);
+  const [amountText, setAmountText] = React.useState("100.00");
+  const [currentPrice, setCurrentPrice] = React.useState(selectedAsset.basePrice);
 
-  const selectedAsset = ASSETS.find((asset) => asset.symbol === selectedAssetSymbol) ?? ASSETS[0];
-  const exchangeRate = EXCHANGE_RATES[currency];
-  const balance = balancesUsd[accountType] * exchangeRate;
-  const stake = Number(amount);
-  const safeStake = Number.isFinite(stake) ? Math.max(0, stake) : 0;
-  const expectedProfit = safeStake * (payout / 100);
-  const expectedReturn = safeStake + expectedProfit;
-  const canTrade = safeStake > 0 && safeStake / exchangeRate <= balancesUsd[accountType];
+  const [showAssets, setShowAssets] = React.useState(false);
+  const [showIndicators, setShowIndicators] = React.useState(false);
+  const [showDrawingTools, setShowDrawingTools] = React.useState(false);
+  const [showTimeframes, setShowTimeframes] = React.useState(false);
+  const [showTopUp, setShowTopUp] = React.useState(false);
 
-  const expiryParts = splitTime(expirySeconds);
+  const [activeIndicators, setActiveIndicators] = React.useState<string[]>([]);
+  const [activeTool, setActiveTool] = React.useState("Cursor");
+  const [notice, setNotice] = React.useState("");
+
+  const currencyRate = EXCHANGE_RATES[currency];
+  const balanceUsd = accountType === "demo" ? demoBalanceUsd : realBalanceUsd;
+  const convertedBalance = balanceUsd * currencyRate;
+  const convertedStake = stakeUsd * currencyRate;
+  const expectedProfit = convertedStake * (payout / 100);
+  const expectedReturn = convertedStake + expectedProfit;
+  const canTrade = stakeUsd > 0 && stakeUsd <= balanceUsd;
+
+  const expiryParts = splitExpiry(expirySeconds);
 
   React.useEffect(() => {
-    candlesRef.current = createInitialCandles(selectedAsset);
-    setRenderTick((value) => value + 1);
-  }, [selectedAssetSymbol]);
+    candlesRef.current = makeCandles(selectedAsset);
+    currentPriceRef.current = candlesRef.current[candlesRef.current.length - 1].close;
+    setCurrentPrice(currentPriceRef.current);
+    assetRef.current = selectedAsset;
+    tradeMarkersRef.current = [];
+    resultMarkersRef.current = [];
+  }, [selectedAsset]);
 
   React.useEffect(() => {
-    let frame = 0;
-    let lastUpdate = 0;
+    assetRef.current = selectedAsset;
+  }, [selectedAsset]);
 
-    const loop = (time: number) => {
-      if (time - lastUpdate > 190) {
-        candlesRef.current = mutateCandles(candlesRef.current, selectedAsset);
-        setRenderTick((value) => (value + 1) % 1000000);
-        lastUpdate = time;
+  React.useEffect(() => {
+    chartTypeRef.current = chartType;
+  }, [chartType]);
+
+  React.useEffect(() => {
+    timeframeRef.current = timeframe;
+  }, [timeframe]);
+
+  React.useEffect(() => {
+    payoutRef.current = payout;
+  }, [payout]);
+
+  React.useEffect(() => {
+    setAmountText(formatPlainAmount(stakeUsd * EXCHANGE_RATES[currency], currency));
+  }, [currency]);
+
+  React.useEffect(() => {
+    const updatePayout = () => {
+      const nextPayout = calcPayout(assetRef.current, timeframeRef.current);
+      setPayout(nextPayout);
+      payoutRef.current = nextPayout;
+    };
+
+    updatePayout();
+    const id = window.setInterval(updatePayout, 4000);
+
+    return () => window.clearInterval(id);
+  }, []);
+
+  React.useEffect(() => {
+    const updateSyntheticPrice = () => {
+      const candles = candlesRef.current;
+      const asset = assetRef.current;
+
+      if (candles.length === 0) {
+        candlesRef.current = makeCandles(asset);
+        return;
       }
 
-      frame = window.requestAnimationFrame(loop);
-    };
+      const now = Date.now();
+      const last = candles[candles.length - 1];
+      const wave = Math.sin(now / 1800 + asset.symbol.length) * asset.volatility * 0.16;
+      const noise = (Math.random() - 0.49) * asset.volatility * 0.88;
+      const nextClose = Math.max(asset.volatility, last.close + wave + noise);
 
-    frame = window.requestAnimationFrame(loop);
+      last.close = nextClose;
+      last.high = Math.max(last.high, nextClose);
+      last.low = Math.min(last.low, nextClose);
+      currentPriceRef.current = nextClose;
 
-    return () => {
-      window.cancelAnimationFrame(frame);
-    };
-  }, [selectedAssetSymbol]);
+      if (now - lastCandleAtRef.current > 850) {
+        candles.push({
+          open: nextClose,
+          high: nextClose + Math.random() * asset.volatility,
+          low: Math.max(0.00001, nextClose - Math.random() * asset.volatility),
+          close: nextClose,
+          time: now,
+        });
 
-  React.useEffect(() => {
-    const timer = window.setInterval(() => {
-      const next = 20 + ((selectedAsset.payoutBoost + Math.floor(Math.random() * 72)) % 73);
-      setPayout(clamp(next, 20, 92));
-    }, 2500);
-
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, [selectedAssetSymbol]);
-
-  React.useEffect(() => {
-    if (!canvasRef.current) {
-      return;
-    }
-
-    drawTradingChart({
-      canvas: canvasRef.current,
-      candles: candlesRef.current,
-      asset: selectedAsset,
-      chartType,
-      timeframe,
-      activeTrades,
-      resultMarkers,
-    });
-  }, [renderTick, selectedAssetSymbol, chartType, timeframe, activeTrades, resultMarkers]);
-
-  function adjustExpiry(unit: "hours" | "minutes" | "seconds", delta: number) {
-    const unitSeconds = unit === "hours" ? 3600 : unit === "minutes" ? 60 : 1;
-    setExpirySeconds((current) => clamp(current + delta * unitSeconds, 5, 18000));
-  }
-
-  function toggleIndicator(name: string) {
-    setSelectedIndicators((current) => {
-      if (current.includes(name)) {
-        return current.filter((item) => item !== name);
+        if (candles.length > 115) candles.shift();
+        lastCandleAtRef.current = now;
       }
 
-      return [...current, name];
-    });
-  }
+      if (now - lastStatePriceAtRef.current > 420) {
+        setCurrentPrice(nextClose);
+        lastStatePriceAtRef.current = now;
+      }
+    };
 
-  function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => undefined);
-      return;
+    const tick = window.setInterval(updateSyntheticPrice, 180);
+
+    let animationFrame = 0;
+    const render = () => {
+      if (canvasRef.current) {
+        drawChart(
+          canvasRef.current,
+          candlesRef.current,
+          assetRef.current,
+          chartTypeRef.current,
+          timeframeRef.current,
+          tradeMarkersRef.current,
+          resultMarkersRef.current,
+        );
+      }
+
+      animationFrame = window.requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      window.clearInterval(tick);
+      window.cancelAnimationFrame(animationFrame);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      timeoutsRef.current.forEach((timeout) => window.clearTimeout(timeout));
+    };
+  }, []);
+
+  function updateBalance(account: AccountType, updater: (value: number) => number) {
+    if (account === "demo") {
+      setDemoBalanceUsd((current) => Math.max(0, updater(current)));
+    } else {
+      setRealBalanceUsd((current) => Math.max(0, updater(current)));
     }
-
-    document.exitFullscreen().catch(() => undefined);
   }
 
-  function handleTopUp() {
-    window.alert("Top Up placeholder: connect this button to your deposit flow.");
+  function handleAmountChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const value = event.target.value.replace(/[^\d.]/g, "");
+    setAmountText(value);
+
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) {
+      setStakeUsd(parsed / currencyRate);
+    }
   }
 
-  function placeTrade(side: TradeSide) {
+  function changeExpiry(unit: "hours" | "minutes" | "seconds", delta: number) {
+    const step = unit === "hours" ? 3600 : unit === "minutes" ? 60 : 1;
+    setExpirySeconds((current) => clamp(current + step * delta, MIN_EXPIRY, MAX_EXPIRY));
+  }
+
+  function toggleIndicator(indicator: string) {
+    setActiveIndicators((current) =>
+      current.includes(indicator)
+        ? current.filter((item) => item !== indicator)
+        : [...current, indicator],
+    );
+  }
+
+  function closeMenus() {
+    setShowAssets(false);
+    setShowIndicators(false);
+    setShowDrawingTools(false);
+    setShowTimeframes(false);
+  }
+
+  function placeTrade(direction: Direction) {
     if (!canTrade) {
+      setNotice("Insufficient balance or invalid amount.");
       return;
     }
 
-    const latestCandle = candlesRef.current[candlesRef.current.length - 1];
+    const account = accountType;
+    const tradeCurrency = currency;
+    const entryPrice = currentPriceRef.current;
+    const capturedStakeUsd = stakeUsd;
+    const capturedPayout = payoutRef.current;
+    const id = `${Date.now()}-${Math.random()}`;
 
-    if (!latestCandle) {
-      return;
-    }
-
-    const tradeId = `${Date.now()}-${Math.random()}`;
-    const entryPrice = latestCandle.close;
-    const stakeUsd = safeStake / exchangeRate;
-    const profitCurrency = safeStake * (payout / 100);
-    const returnCurrency = safeStake + profitCurrency;
-    const returnUsd = returnCurrency / exchangeRate;
-
-    const trade: TradeMarker = {
-      id: tradeId,
-      side,
-      accountType,
-      currency,
+    const marker: TradeMarker = {
+      id,
+      direction,
+      account,
+      currency: tradeCurrency,
       entryPrice,
-      stake: safeStake,
-      profit: profitCurrency,
-      expectedReturn: returnCurrency,
-      label: `${side} ${formatMoney(safeStake, currency)}`,
+      stakeUsd: capturedStakeUsd,
+      payout: capturedPayout,
+      createdAt: Date.now(),
     };
 
-    setBalancesUsd((current) => ({
-      ...current,
-      [accountType]: current[accountType] - stakeUsd,
-    }));
+    updateBalance(account, (value) => value - capturedStakeUsd);
+    tradeMarkersRef.current = [...tradeMarkersRef.current, marker].slice(-6);
+    setNotice(`${direction} trade placed at ${entryPrice.toFixed(selectedAsset.precision)}.`);
 
-    setActiveTrades((current) => [...current, trade]);
+    const settleTimeout = window.setTimeout(() => {
+      const closePrice = currentPriceRef.current;
+      const win =
+        direction === "BUY"
+          ? closePrice > entryPrice
+          : closePrice < entryPrice;
 
-    window.setTimeout(() => {
-      const closePrice = candlesRef.current[candlesRef.current.length - 1]?.close ?? entryPrice;
-      const won = side === "BUY" ? closePrice > entryPrice : closePrice < entryPrice;
+      const profitUsd = capturedStakeUsd * (capturedPayout / 100);
+      const returnUsd = win ? capturedStakeUsd + profitUsd : 0;
 
-      setActiveTrades((current) => current.filter((item) => item.id !== tradeId));
-
-      if (won) {
-        setBalancesUsd((current) => ({
-          ...current,
-          [accountType]: current[accountType] + returnUsd,
-        }));
+      if (win) {
+        updateBalance(account, (value) => value + returnUsd);
       }
 
-      const resultId = `${tradeId}-result`;
-
-      setResultMarkers((current) => [
-        ...current,
+      tradeMarkersRef.current = tradeMarkersRef.current.filter((trade) => trade.id !== id);
+      resultMarkersRef.current = [
+        ...resultMarkersRef.current,
         {
-          id: resultId,
+          id,
+          direction,
+          currency: tradeCurrency,
           price: closePrice,
-          won,
-          label: won ? `✓ ${formatMoney(returnCurrency, currency)}` : `✕ ${formatMoney(0, currency)}`,
+          valueUsd: returnUsd,
+          win,
+          createdAt: Date.now(),
         },
-      ]);
+      ].slice(-4);
 
-      window.setTimeout(() => {
-        setResultMarkers((current) => current.filter((item) => item.id !== resultId));
+      setNotice(
+        win
+          ? `Trade won: ${formatMoney(returnUsd * EXCHANGE_RATES[tradeCurrency], tradeCurrency)} returned.`
+          : `Trade lost: ${CURRENCY_SYMBOLS[tradeCurrency]}0 returned.`,
+      );
+
+      const resultTimeout = window.setTimeout(() => {
+        resultMarkersRef.current = resultMarkersRef.current.filter((result) => result.id !== id);
+        setNotice("");
       }, 10000);
+
+      timeoutsRef.current.push(resultTimeout);
     }, expirySeconds * 1000);
+
+    timeoutsRef.current.push(settleTimeout);
   }
+
+  async function toggleFullscreen() {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch {
+      setNotice("Fullscreen is not available in this browser.");
+    }
+  }
+
+  const visibleAssets = ASSETS.filter((asset) => asset.category === activeCategory);
 
   return (
-    <main className="trading-terminal">
-      <header className="terminal-header">
-        <div className="brand-block">
-          <span className="brand-icon">N</span>
-          <span className="brand-name">NeuroOption</span>
-          <button type="button" className="star-button">★</button>
+    <div className="no-trading-page">
+      <header className="no-topbar">
+        <div className="no-brand">
+          <div className="no-brand-mark">N</div>
+          <span className="no-brand-name">NeuroOption</span>
+          <button className="no-star" type="button">★</button>
         </div>
 
-        <div className="account-strip">
-          <select value={accountType} onChange={(event) => setAccountType(event.target.value as AccountType)}>
-            <option value="QT Demo">QT Demo</option>
-            <option value="QT Real">QT Real</option>
+        <div className="no-account-strip">
+          <select
+            value={accountType}
+            onChange={(event) => setAccountType(event.target.value as AccountType)}
+            className="no-select no-account-select"
+          >
+            <option value="demo">QT Demo</option>
+            <option value="real">QT Real</option>
           </select>
 
-          <select value={currency} onChange={(event) => setCurrency(event.target.value as Currency)}>
-            {Object.keys(EXCHANGE_RATES).map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
+          <select
+            value={currency}
+            onChange={(event) => setCurrency(event.target.value as CurrencyCode)}
+            className="no-select no-currency-select"
+          >
+            {(Object.keys(EXCHANGE_RATES) as CurrencyCode[]).map((item) => (
+              <option key={item} value={item}>{item}</option>
             ))}
           </select>
 
-          <strong className="balance-text">{formatMoney(balance, currency)}</strong>
+          <div className="no-balance">{formatMoney(convertedBalance, currency)}</div>
 
-          <button type="button" className="top-up-button" onClick={handleTopUp}>
+          <button className="no-topup" type="button" onClick={() => setShowTopUp(true)}>
             TOP UP
           </button>
 
-          <button type="button" className="fullscreen-button" onClick={toggleFullscreen}>
+          <button className="no-icon-button" type="button" onClick={toggleFullscreen} aria-label="Toggle full screen">
             ⛶
           </button>
 
-          <span className="avatar">SM</span>
+          <div className="no-avatar">SM</div>
         </div>
       </header>
 
-      <section className="terminal-body">
-        <aside className="left-sidebar">
-          {LEFT_NAV.map(([icon, label]) => (
-            <button key={label} type="button" className={`left-nav-item ${label === "Trading" ? "active" : ""}`}>
-              <span>{icon}</span>
-              <small>{label}</small>
+      <div className="no-terminal-grid">
+        <aside className="no-left-sidebar">
+          {LEFT_MENU.map((item) => (
+            <button
+              type="button"
+              key={item.label}
+              className={`no-left-item ${item.label === "Trading" ? "active" : ""}`}
+            >
+              <span className="no-left-icon">{item.icon}</span>
+              <span className="no-left-label">{item.label}</span>
             </button>
           ))}
         </aside>
 
-        <section className="chart-zone">
-          <div className="chart-toolbar">
-            <div className="asset-selector">
-              <button type="button" className="asset-trigger" onClick={() => setAssetMenuOpen((value) => !value)}>
-                <span>{selectedAsset.symbol}</span>
-                <strong>⌄</strong>
-              </button>
+        <main className="no-chart-shell">
+          <canvas ref={canvasRef} className="no-chart-canvas" />
 
-              {assetMenuOpen && (
-                <div className="asset-menu">
-                  <div className="asset-tabs">
-                    {(["Currencies", "Cryptocurrencies", "Stocks", "Indices", "Commodities"] as AssetCategory[]).map((category) => (
-                      <button
-                        type="button"
-                        key={category}
-                        className={activeAssetCategory === category ? "active" : ""}
-                        onClick={() => setActiveAssetCategory(category)}
-                      >
-                        {category}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="asset-list">
-                    {ASSETS.filter((asset) => asset.category === activeAssetCategory).map((asset) => (
-                      <button
-                        type="button"
-                        key={asset.symbol}
-                        onClick={() => {
-                          setSelectedAssetSymbol(asset.symbol);
-                          setAssetMenuOpen(false);
-                        }}
-                      >
-                        <strong>{asset.symbol}</strong>
-                        <span>{asset.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="timeframe-selector">
-              <button type="button" onClick={() => setTimeframeOpen((value) => !value)}>
-                📊 {timeframe}
-              </button>
-
-              {timeframeOpen && (
-                <div className="timeframe-menu">
-                  {TIMEFRAMES.map((item) => (
-                    <button
-                      type="button"
-                      key={item}
-                      className={timeframe === item ? "active" : ""}
-                      onClick={() => {
-                        setTimeframe(item);
-                        setTimeframeOpen(false);
-                      }}
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <button type="button" className="tool-button" onClick={() => setIndicatorOpen((value) => !value)}>
-              Indicators
+          <div className="no-chart-toolbar">
+            <button
+              className="no-asset-button"
+              type="button"
+              onClick={() => {
+                closeMenus();
+                setShowAssets((current) => !current);
+              }}
+            >
+              <span>{selectedAsset.symbol}</span>
+              <b>⌄</b>
             </button>
 
-            <button type="button" className="tool-button" onClick={() => setDrawingOpen((value) => !value)}>
-              ✎ {selectedTool}
+            <button
+              className="no-tool-button"
+              type="button"
+              onClick={() => {
+                closeMenus();
+                setShowTimeframes((current) => !current);
+              }}
+            >
+              📊 {timeframe}
             </button>
 
-            <button type="button" className="tool-button compact">•••</button>
+            <button
+              className="no-tool-button"
+              type="button"
+              onClick={() => {
+                closeMenus();
+                setShowIndicators((current) => !current);
+              }}
+            >
+              ☷ {activeIndicators.length > 0 ? activeIndicators.length : ""}
+            </button>
+
+            <button
+              className="no-tool-button"
+              type="button"
+              onClick={() => {
+                closeMenus();
+                setShowDrawingTools((current) => !current);
+              }}
+            >
+              ✎
+            </button>
+
+            <div className="no-chart-tabs">
+              {(["Candlesticks", "Heiken Ashi", "Bars", "Line"] as ChartType[]).map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  className={`no-chart-tab ${chartType === type ? "active" : ""}`}
+                  onClick={() => setChartType(type)}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="chart-type-switch">
-            {(["Candlesticks", "Heiken Ashi", "Bars", "Line"] as ChartType[]).map((type) => (
-              <button
-                type="button"
-                key={type}
-                className={chartType === type ? "active" : ""}
-                onClick={() => setChartType(type)}
-              >
-                {type}
-              </button>
-            ))}
+          <div className="no-chart-meta">
+            <span>{new Date().toLocaleTimeString()} UTC+3</span>
+            <span>{selectedAsset.name}</span>
+            <span>Current price {currentPrice.toFixed(selectedAsset.precision)}</span>
+            <span>Tool: {activeTool}</span>
           </div>
 
-          {indicatorOpen && (
-            <div className="floating-menu indicators-menu">
-              <h3>42 Indicators</h3>
-              <div>
+          <div className="no-bottom-chart-bar">
+            <button type="button" className="no-mini-button">←</button>
+            <button
+              type="button"
+              className="no-mini-button"
+              onClick={() => {
+                closeMenus();
+                setShowTimeframes((current) => !current);
+              }}
+            >
+              {timeframe} ▲
+            </button>
+            <div className="no-asset-fullname">{selectedAsset.name}</div>
+          </div>
+
+          {showAssets && (
+            <div className="no-floating-menu no-assets-menu">
+              <div className="no-menu-title">Assets</div>
+              <div className="no-category-tabs">
+                {ASSET_CATEGORIES.map((category) => (
+                  <button
+                    type="button"
+                    key={category}
+                    className={activeCategory === category ? "active" : ""}
+                    onClick={() => setActiveCategory(category)}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+              <div className="no-asset-list">
+                {visibleAssets.map((asset) => (
+                  <button
+                    type="button"
+                    key={asset.symbol}
+                    onClick={() => {
+                      setSelectedAsset(asset);
+                      setShowAssets(false);
+                    }}
+                  >
+                    <b>{asset.symbol}</b>
+                    <span>{asset.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {showTimeframes && (
+            <div className="no-floating-menu no-timeframe-menu">
+              <div className="no-menu-title">Timeframes</div>
+              <div className="no-grid-menu">
+                {TIMEFRAMES.map((item) => (
+                  <button
+                    type="button"
+                    key={item}
+                    className={timeframe === item ? "active" : ""}
+                    onClick={() => {
+                      setTimeframe(item);
+                      setShowTimeframes(false);
+                    }}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {showIndicators && (
+            <div className="no-floating-menu no-indicator-menu">
+              <div className="no-menu-title">Indicators</div>
+              <div className="no-grid-menu indicators">
                 {INDICATORS.map((indicator) => (
                   <button
                     type="button"
                     key={indicator}
-                    className={selectedIndicators.includes(indicator) ? "active" : ""}
+                    className={activeIndicators.includes(indicator) ? "active" : ""}
                     onClick={() => toggleIndicator(indicator)}
                   >
                     {indicator}
@@ -912,18 +1007,18 @@ export default function TradingPage() {
             </div>
           )}
 
-          {drawingOpen && (
-            <div className="floating-menu drawing-menu">
-              <h3>Drawing tools</h3>
-              <div>
+          {showDrawingTools && (
+            <div className="no-floating-menu no-drawing-menu">
+              <div className="no-menu-title">Drawing Tools</div>
+              <div className="no-grid-menu">
                 {DRAWING_TOOLS.map((tool) => (
                   <button
                     type="button"
                     key={tool}
-                    className={selectedTool === tool ? "active" : ""}
+                    className={activeTool === tool ? "active" : ""}
                     onClick={() => {
-                      setSelectedTool(tool);
-                      setDrawingOpen(false);
+                      setActiveTool(tool);
+                      setShowDrawingTools(false);
                     }}
                   >
                     {tool}
@@ -933,126 +1028,139 @@ export default function TradingPage() {
             </div>
           )}
 
-          <div className="chart-canvas-wrap">
-            <canvas ref={canvasRef} className="trading-canvas" />
-          </div>
+          {notice && <div className="no-toast">{notice}</div>}
+        </main>
 
-          <div className="chart-footer">
-            <button type="button">←</button>
-            <button type="button">{timeframe} ▴</button>
-            <strong>{selectedAsset.label}</strong>
-          </div>
-        </section>
-
-        <aside className="trade-panel">
-          <div className="sentiment-bar">
+        <aside className="no-trade-panel">
+          <div className="no-sentiment">
             <span>50%</span>
-            <div>
-              <i />
+            <div className="no-sentiment-track">
+              <div className="green" />
+              <div className="red" />
+              <b />
             </div>
             <span>50%</span>
           </div>
 
-          <section className="time-card">
-            <h3>Time ⓘ</h3>
+          <section className="no-panel-section">
+            <h3>Time <span>ⓘ</span></h3>
 
-            <div className="time-main">
-              <button type="button" onClick={() => adjustExpiry("seconds", -1)}>-</button>
-              <strong>{formatTime(expirySeconds)}</strong>
-              <button type="button" onClick={() => adjustExpiry("seconds", 1)}>+</button>
+            <div className="no-main-time-row">
+              <button type="button" onClick={() => changeExpiry("seconds", -1)}>-</button>
+              <strong>{formatExpiry(expirySeconds)}</strong>
+              <button type="button" onClick={() => changeExpiry("seconds", 1)}>+</button>
             </div>
 
-            <p>Min 00:00:05 · Max 05:00:00</p>
+            <p className="no-range-text">Min 00:00:05 · Max 05:00:00</p>
 
-            <div className="expiry-units">
-              <div>
-                <button type="button" onClick={() => adjustExpiry("hours", 1)}>+</button>
+            <div className="no-expiry-units">
+              <div className="no-expiry-card">
+                <button type="button" onClick={() => changeExpiry("hours", 1)}>+</button>
                 <strong>{String(expiryParts.hours).padStart(2, "0")}</strong>
-                <button type="button" onClick={() => adjustExpiry("hours", -1)}>-</button>
-                <small>Hours</small>
+                <button type="button" onClick={() => changeExpiry("hours", -1)}>-</button>
+                <span>Hours</span>
               </div>
 
-              <div>
-                <button type="button" onClick={() => adjustExpiry("minutes", 1)}>+</button>
+              <div className="no-expiry-card">
+                <button type="button" onClick={() => changeExpiry("minutes", 1)}>+</button>
                 <strong>{String(expiryParts.minutes).padStart(2, "0")}</strong>
-                <button type="button" onClick={() => adjustExpiry("minutes", -1)}>-</button>
-                <small>Minutes</small>
+                <button type="button" onClick={() => changeExpiry("minutes", -1)}>-</button>
+                <span>Minutes</span>
               </div>
 
-              <div>
-                <button type="button" onClick={() => adjustExpiry("seconds", 1)}>+</button>
+              <div className="no-expiry-card">
+                <button type="button" onClick={() => changeExpiry("seconds", 1)}>+</button>
                 <strong>{String(expiryParts.seconds).padStart(2, "0")}</strong>
-                <button type="button" onClick={() => adjustExpiry("seconds", -1)}>-</button>
-                <small>Seconds</small>
+                <button type="button" onClick={() => changeExpiry("seconds", -1)}>-</button>
+                <span>Seconds</span>
               </div>
             </div>
           </section>
 
-          <section className="amount-card">
-            <h3>Amount ⓘ</h3>
-            <label>
+          <section className="no-panel-section">
+            <h3>Amount <span>ⓘ</span></h3>
+            <div className="no-amount-box">
               <input
-                type="number"
-                min="1"
-                value={amount}
-                onChange={(event) => setAmount(event.target.value)}
+                value={amountText}
+                onChange={handleAmountChange}
+                inputMode="decimal"
               />
-              <span>{currency}</span>
-            </label>
+              <b>{currency}</b>
+            </div>
           </section>
 
-          <section className="payout-card">
+          <section className="no-payout-card">
             <div>
               <span>Rate</span>
-              <strong>+{payout}%</strong>
+              <b>+{payout}%</b>
             </div>
-
             <div>
               <span>Expected profit</span>
-              <strong>{formatMoney(expectedProfit, currency)}</strong>
+              <b>{formatMoney(expectedProfit, currency)}</b>
             </div>
-
             <div>
               <span>Expected return</span>
-              <strong>{formatMoney(expectedReturn, currency)}</strong>
+              <b>{formatMoney(expectedReturn, currency)}</b>
             </div>
           </section>
 
-          {!canTrade && (
-            <p className="trade-warning">
-              Enter a valid amount within your {accountType} balance.
-            </p>
-          )}
-
-          <div className="trade-actions">
-            <button type="button" className="buy-button" disabled={!canTrade} onClick={() => placeTrade("BUY")}>
+          <div className="no-action-buttons">
+            <button
+              type="button"
+              className="buy"
+              disabled={!canTrade}
+              onClick={() => placeTrade("BUY")}
+            >
               ↗ BUY
             </button>
 
-            <button type="button" className="ai-button">
+            <button type="button" className="ai">
               AI TRADING
             </button>
 
-            <button type="button" className="sell-button" disabled={!canTrade} onClick={() => placeTrade("SELL")}>
+            <button
+              type="button"
+              className="sell"
+              disabled={!canTrade}
+              onClick={() => placeTrade("SELL")}
+            >
               ↘ SELL
             </button>
           </div>
         </aside>
 
-        <aside className="quick-menu">
-          {QUICK_NAV.map(([icon, label]) => (
+        <aside className="no-right-menu">
+          {QUICK_MENU.map((item) => (
             <button
               type="button"
-              key={label}
-              className={label === "Hotkeys" || label === "Full Screen" ? "quick-item desktop-extra" : "quick-item"}
-              onClick={label === "Full Screen" ? toggleFullscreen : undefined}
+              key={item.label}
+              onClick={item.label === "Full Screen" ? toggleFullscreen : undefined}
             >
-              <span>{icon}</span>
-              <small>{label}</small>
+              <span>{item.icon}</span>
+              <b>{item.label}</b>
             </button>
           ))}
         </aside>
-      </section>
-    </main>
+
+        <nav className="no-mobile-bottom-nav">
+          {QUICK_MENU.slice(0, 5).map((item) => (
+            <button type="button" key={item.label}>
+              <span>{item.icon}</span>
+              <b>{item.label}</b>
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {showTopUp && (
+        <div className="no-modal-backdrop" onClick={() => setShowTopUp(false)}>
+          <div className="no-modal" onClick={(event) => event.stopPropagation()}>
+            <h2>Top Up</h2>
+            <p>Payment integration placeholder for M-Pesa, cards, Binance Pay, and wallet funding.</p>
+            <button type="button" onClick={() => setShowTopUp(false)}>Close</button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
