@@ -785,28 +785,28 @@
   font-weight: 950;
   letter-spacing: 0.03em;
 }
-/* ================================
-   MOBILE TRADING SCREEN
-   PocketOption-like compact layout
-   ================================ */
-
-html,
-body,
-#root {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
-}
+/* =====================================================
+   NEUROOPTION MOBILE TRADING SCREEN - FINAL FIX
+   PocketOption-style compact mobile layout
+   ===================================================== */
 
 @media (max-width: 768px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: #111827;
+  }
+
   .nt-screen {
     width: 100vw;
     height: 100svh;
     overflow: hidden;
-    display: block;
-    background: #11182b;
-    color: #ffffff;
+    background: #111827;
+    color: #fff;
     font-family: Inter, Arial, Helvetica, sans-serif;
   }
 
@@ -814,21 +814,23 @@ body,
     width: 100vw;
     height: 100svh;
     overflow: hidden;
+    position: relative;
   }
 
-  /* Top header */
+  /* TOP ACCOUNT BAR */
   .nt-topbar {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 64px;
-    z-index: 50;
+    height: 76px;
+    z-index: 100;
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 74px 1fr;
     align-items: center;
-    padding: 6px 8px;
-    background: rgba(20, 27, 47, 0.96);
+    gap: 4px;
+    padding: 7px 6px;
+    background: #171d2f;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
@@ -836,30 +838,34 @@ body,
     min-width: 0;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 2px;
+    overflow: hidden;
   }
 
   .nt-brand strong {
-    font-size: 13px;
+    max-width: 46px;
+    overflow: hidden;
+    font-size: 10px;
     white-space: nowrap;
+    text-overflow: clip;
   }
 
   .nt-brand-icon {
-    width: 34px;
-    height: 28px;
-    transform: scale(0.75);
+    width: 42px;
+    height: 30px;
+    flex: 0 0 auto;
+    transform: scale(0.78);
     transform-origin: left center;
   }
 
   .nt-star {
-    width: 24px;
-    height: 24px;
-    font-size: 13px;
+    display: none;
   }
 
   .nt-account {
+    min-width: 0;
     display: grid;
-    grid-template-columns: 72px 58px 88px 48px 34px;
+    grid-template-columns: 88px 58px minmax(84px, 1fr) 70px 38px;
     gap: 5px;
     align-items: center;
   }
@@ -868,59 +874,63 @@ body,
   .nt-account strong,
   .nt-topup,
   .nt-fullscreen {
-    height: 36px;
-    border-radius: 10px;
-    font-size: 11px;
-  }
-
-  .nt-account select {
-    padding: 0 6px;
-    background: #19223b;
-    color: #fff;
+    height: 48px;
+    border-radius: 13px;
     border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .nt-account strong {
-    display: grid;
-    place-items: center;
-    padding: 0 4px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    background: #19223b;
-  }
-
-  .nt-topup {
-    padding: 0;
-    font-size: 10px;
+    background: #1d263f;
+    color: #fff;
     font-weight: 900;
   }
 
-  .nt-fullscreen {
+  .nt-account select {
+    width: 100%;
+    padding: 0 8px;
+    font-size: 12px;
+    outline: none;
+  }
+
+  .nt-account strong {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nt-topup {
+    background: linear-gradient(180deg, #35d77b, #1faf5d);
+    font-size: 11px;
     padding: 0;
+  }
+
+  .nt-fullscreen {
     font-size: 17px;
+    padding: 0;
   }
 
   .nt-avatar {
     display: none;
   }
 
-  /* Left vertical menu becomes compact icon rail */
+  /* LEFT ICON BAR */
   .nt-leftbar {
     position: fixed;
     left: 0;
-    top: 64px;
-    bottom: 58px;
+    top: 76px;
+    bottom: 56px;
     width: 42px;
-    z-index: 45;
-    background: rgba(18, 25, 44, 0.94);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 90;
     display: grid;
-    grid-auto-rows: 44px;
+    grid-auto-rows: 46px;
     align-content: start;
-    padding: 4px 3px;
-    gap: 2px;
+    gap: 3px;
+    padding: 5px 3px;
     overflow: hidden;
+    background: #10182b;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .nt-leftbar .nt-app-icon,
@@ -930,12 +940,13 @@ body,
 
   .nt-leftbar button {
     width: 36px;
-    height: 40px;
+    height: 42px;
     padding: 0;
-    border-radius: 9px;
-    font-size: 16px;
+    border-radius: 10px;
     display: grid;
     place-items: center;
+    font-size: 19px;
+    background: transparent;
   }
 
   .nt-leftbar button small {
@@ -943,98 +954,116 @@ body,
   }
 
   .nt-leftbar button.active {
-    background: rgba(52, 151, 255, 0.22);
+    background: rgba(42, 145, 255, 0.25);
   }
 
-  /* Main terminal */
+  /* MAIN CHART TERMINAL */
   .nt-terminal {
     position: fixed;
-    top: 64px;
+    top: 76px;
     left: 42px;
     right: 0;
-    bottom: 58px;
-    display: block;
+    bottom: 56px;
     overflow: hidden;
-    background: #10182c;
+    background: #10182b;
   }
 
   .nt-chart-area {
     position: absolute;
     inset: 0;
     overflow: hidden;
+    background: #111a30;
     border-radius: 0;
   }
 
-  /* Top chart tools */
+  /* CHART TOP TOOLS */
   .nt-toolbar {
     position: absolute;
     top: 8px;
-    left: 8px;
-    right: 8px;
+    left: 7px;
+    right: 7px;
     height: 42px;
-    z-index: 20;
-    display: flex;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: 112px 42px 42px 42px 42px 1fr;
+    gap: 5px;
     align-items: center;
-    gap: 6px;
     overflow: hidden;
   }
 
   .nt-toolbar button {
-    height: 38px;
-    min-width: 40px;
-    border-radius: 9px;
-    font-size: 12px;
-    padding: 0 9px;
+    height: 42px;
+    min-width: 0;
+    border-radius: 11px;
+    padding: 0 6px;
+    font-size: 13px;
+    font-weight: 900;
+    overflow: hidden;
     white-space: nowrap;
+    text-overflow: ellipsis;
+    background: rgba(54, 72, 111, 0.9);
   }
 
   .nt-asset-button {
-    width: 138px;
-    max-width: 138px;
+    width: 112px;
+    max-width: 112px;
+    justify-content: center;
     font-size: 14px !important;
-    font-weight: 900;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .nt-chart-switches {
+    min-width: 0;
     display: flex;
     gap: 5px;
-    margin-left: auto;
-    overflow: hidden;
+    justify-content: flex-end;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nt-chart-switches::-webkit-scrollbar {
+    display: none;
   }
 
   .nt-chart-switches button {
-    min-width: 46px;
+    flex: 0 0 auto;
+    width: 62px;
+    height: 42px;
     font-size: 10px;
-    padding: 0 7px;
+    padding: 0 5px;
+    border-radius: 11px;
+  }
+
+  .nt-chart-switches button:nth-child(1)::after {
+    content: "";
   }
 
   .nt-subbar {
     position: absolute;
-    top: 54px;
+    top: 55px;
     left: 12px;
     right: 12px;
-    height: 24px;
-    z-index: 18;
+    z-index: 35;
+    height: 22px;
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 10px;
-    color: #b8c7e6;
+    font-size: 11px;
+    color: #b7c4df;
     overflow: hidden;
+    white-space: nowrap;
   }
 
   .nt-subbar strong {
     display: none;
   }
 
+  /* CHART HEIGHT FIX */
   .nt-chart-wrap {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    bottom: 248px;
+    bottom: 245px;
     overflow: hidden;
   }
 
@@ -1044,14 +1073,8 @@ body,
     display: block;
   }
 
-  .nt-axis-price {
-    font-size: 12px;
-  }
-
-  .nt-current-price-text {
-    font-size: 12px;
-  }
-
+  .nt-axis-price,
+  .nt-current-price-text,
   .nt-expiry-label {
     font-size: 10px;
   }
@@ -1059,139 +1082,104 @@ body,
   .nt-chart-footer {
     position: absolute;
     left: 8px;
-    bottom: 250px;
-    z-index: 21;
-    height: 30px;
+    right: 8px;
+    bottom: 248px;
+    z-index: 45;
+    height: 34px;
     display: flex;
-    gap: 5px;
     align-items: center;
-    max-width: calc(100vw - 62px);
+    gap: 6px;
     overflow: hidden;
   }
 
   .nt-chart-footer button,
   .nt-chart-footer span {
-    height: 28px;
-    border-radius: 8px;
-    font-size: 11px;
+    height: 32px;
+    border-radius: 10px;
+    font-size: 12px;
   }
 
   .nt-chart-footer span {
-    max-width: 180px;
+    max-width: 210px;
+    padding: 0 10px;
     overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
+    text-overflow: ellipsis;
+    background: rgba(27, 39, 68, 0.88);
   }
 
-  /* Popups stay inside mobile screen */
-  .nt-popover {
-    position: absolute;
-    top: 56px;
-    left: 8px;
-    right: 8px;
-    z-index: 80;
-    max-height: 48svh;
-    overflow: auto;
-    border-radius: 14px;
-    background: rgba(16, 23, 42, 0.98);
-    border: 1px solid rgba(112, 165, 255, 0.18);
-    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
-  }
-
-  .nt-assets-panel {
-    width: auto;
-  }
-
-  .nt-tabs {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-  }
-
-  .nt-tabs button {
-    height: 34px;
-    font-size: 11px;
-  }
-
-  .nt-assets-list {
-    max-height: 210px;
-    overflow: auto;
-  }
-
-  .nt-assets-list button {
-    height: 40px;
-  }
-
-  .nt-tool-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-  }
-
-  .nt-tool-grid button {
-    height: 34px;
-    font-size: 10px;
-  }
-
-  /* Trade panel becomes bottom mobile dock */
+  /* BOTTOM TRADE PANEL */
   .nt-trade-panel {
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 248px;
-    z-index: 35;
-    display: grid;
-    grid-template-columns: 1fr;
+    height: 245px;
+    z-index: 60;
+    padding: 0 8px 8px;
     background: linear-gradient(
       180deg,
-      rgba(17, 25, 46, 0.18),
-      rgba(17, 25, 46, 0.96) 18%,
-      rgba(17, 25, 46, 0.99)
+      rgba(15, 23, 42, 0.1),
+      rgba(15, 23, 42, 0.98) 14%,
+      #10182b
     );
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 0 8px 8px;
   }
 
   .nt-meter {
-    height: 26px;
+    height: 28px;
     display: grid;
-    grid-template-columns: 38px 1fr 38px;
-    align-items: center;
+    grid-template-columns: 44px 1fr 44px;
     gap: 6px;
-    margin: 0 0 5px;
+    align-items: center;
+    margin: 0;
+  }
+
+  .nt-meter span {
+    font-size: 13px;
+    font-weight: 900;
   }
 
   .nt-meter > div {
-    width: 100%;
-    height: 12px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, #27b54f 0%, #27b54f 15%, #e52b2b 15%, #e52b2b 100%);
-    overflow: hidden;
+    height: 14px;
+    border-radius: 99px;
+    background: linear-gradient(
+      90deg,
+      #35ca5f 0%,
+      #35ca5f 17%,
+      #f02835 17%,
+      #f02835 100%
+    );
   }
 
   .nt-meter > div i {
     display: none;
   }
 
-  .nt-meter span {
-    font-size: 11px;
-    font-weight: 800;
-  }
-
   .nt-trade-box {
-    height: 214px;
+    height: 209px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
       "timeLabel amountLabel"
       "time amount"
-      "range range"
-      "payout payout"
+      "preview preview"
+      "calc calc"
       "buttons buttons";
     gap: 5px 8px;
     padding: 0;
-    background: transparent;
     border: 0;
+    background: transparent;
+  }
+
+  .nt-trade-box label {
+    height: 19px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    color: #aebbd8;
+    font-size: 13px;
+    font-weight: 800;
   }
 
   .nt-trade-box > label:nth-of-type(1) {
@@ -1206,49 +1194,46 @@ body,
     display: none;
   }
 
-  .nt-trade-box label {
-    margin: 0;
-    height: 18px;
-    font-size: 12px;
-    color: #aebbd8;
-    display: flex;
-    align-items: center;
-  }
-
+  /* FIXED H:M:S EXPIRY CONTROLS */
   .nt-hms-expiry {
     grid-area: time;
     height: 48px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 4px;
-    background: #11182a;
-    border-radius: 12px;
-    padding: 4px;
+    padding: 0;
+    background: transparent;
   }
 
   .nt-hms-column {
     min-width: 0;
-    height: 40px;
-    border-radius: 10px;
-    padding: 2px;
+    height: 48px;
     display: grid;
     grid-template-columns: 20px 1fr 20px;
-    grid-template-rows: 1fr;
     align-items: center;
     gap: 2px;
-    background: transparent;
-    border: 0;
+    padding: 0 2px;
+    border-radius: 12px;
+    background: #141c31;
+    border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .nt-hms-column button {
     width: 20px;
-    height: 30px;
-    border-radius: 7px;
+    height: 34px;
+    border-radius: 8px;
+    padding: 0;
     font-size: 14px;
+    font-weight: 900;
+    background: linear-gradient(180deg, #35a7ff, #1d78d8);
   }
 
   .nt-hms-column strong {
-    font-size: 15px;
+    min-width: 0;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 950;
+    color: #fff;
     line-height: 1;
   }
 
@@ -1257,12 +1242,14 @@ body,
   }
 
   .nt-expiry-preview {
-    grid-area: range;
-    height: 21px;
-    font-size: 11px;
-    color: #b9c9e8;
-    background: transparent;
+    grid-area: preview;
+    height: 19px;
+    display: flex;
+    align-items: center;
     justify-content: flex-start;
+    font-size: 12px;
+    font-weight: 900;
+    color: #c9d6ef;
   }
 
   .nt-expiry-range {
@@ -1272,57 +1259,67 @@ body,
   .nt-amount-box {
     grid-area: amount;
     height: 48px;
-    border-radius: 12px;
-    background: #11182a;
     display: grid;
     grid-template-columns: 1fr 52px;
     overflow: hidden;
+    border-radius: 12px;
+    background: #141c31;
+    border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .nt-amount-box input {
+    min-width: 0;
+    width: 100%;
     height: 48px;
-    font-size: 18px;
-    font-weight: 900;
     padding: 0 12px;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: #fff;
+    font-size: 21px;
+    font-weight: 950;
   }
 
   .nt-amount-box span {
     height: 48px;
     display: grid;
     place-items: center;
-    font-size: 14px;
-    font-weight: 900;
+    color: #d8e4fb;
+    font-size: 15px;
+    font-weight: 950;
   }
 
   .nt-calculation {
-    grid-area: payout;
-    height: 56px;
+    grid-area: calc;
+    height: 58px;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 5px;
-    background: rgba(10, 15, 28, 0.72);
-    border: 1px dashed rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 6px;
+    padding: 7px 8px;
+    border-radius: 13px;
+    background: rgba(9, 15, 29, 0.78);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
   }
 
   .nt-calculation div {
     min-width: 0;
     display: grid;
-    gap: 2px;
+    align-content: center;
+    gap: 3px;
   }
 
   .nt-calculation span {
-    font-size: 10px;
     color: #aebbd8;
+    font-size: 10px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .nt-calculation strong {
-    font-size: 13px;
-    color: #5fe078;
+    color: #61e57b;
+    font-size: 14px;
+    font-weight: 950;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1331,76 +1328,120 @@ body,
   .nt-buy,
   .nt-ai,
   .nt-sell {
-    height: 48px;
-    border-radius: 12px;
+    grid-area: buttons;
+    height: 50px;
+    border-radius: 14px;
     font-size: 13px;
     font-weight: 950;
   }
 
   .nt-buy {
-    grid-area: buttons;
     width: 30%;
     justify-self: start;
   }
 
   .nt-ai {
-    grid-area: buttons;
     width: 34%;
     justify-self: center;
   }
 
   .nt-sell {
-    grid-area: buttons;
     width: 30%;
     justify-self: end;
   }
 
-  /* Rightbar becomes bottom action menu */
+  /* BOTTOM RIGHT MENU */
   .nt-rightbar {
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 58px;
-    z-index: 60;
+    height: 56px;
+    z-index: 120;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 3px;
     padding: 4px;
-    background: rgba(20, 27, 47, 0.98);
+    background: #131b2f;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .nt-rightbar button {
-    height: 50px;
-    border-radius: 8px;
-    padding: 3px 1px;
+    height: 48px;
+    padding: 2px;
     display: grid;
     place-items: center;
+    border-radius: 9px;
     font-size: 17px;
+    background: rgba(43, 55, 86, 0.9);
   }
 
   .nt-rightbar button small {
     display: block;
-    font-size: 9px;
     max-width: 100%;
+    font-size: 9px;
     overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   .nt-rightbar button:nth-child(n + 6) {
     display: none;
   }
 
-  .nt-notice {
+  /* MODALS / POPUPS */
+  .nt-popover {
     position: absolute;
-    top: 84px;
+    top: 56px;
     left: 8px;
     right: 8px;
-    z-index: 90;
+    z-index: 200;
+    max-height: 48svh;
+    overflow: auto;
+    border-radius: 14px;
+    background: rgba(14, 21, 38, 0.98);
+    border: 1px solid rgba(83, 157, 255, 0.18);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+  }
+
+  .nt-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .nt-tabs button {
+    height: 34px;
+    font-size: 11px;
+  }
+
+  .nt-assets-list {
+    max-height: 220px;
+    overflow: auto;
+  }
+
+  .nt-assets-list button {
+    height: 40px;
+  }
+
+  .nt-tool-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .nt-tool-grid button {
+    height: 34px;
+    font-size: 10px;
+  }
+
+  .nt-notice {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 86px;
+    z-index: 250;
+    border-radius: 12px;
     font-size: 12px;
-    border-radius: 10px;
   }
 
   .nt-position-text,
@@ -1409,49 +1450,86 @@ body,
   }
 }
 
-/* Extra-small phones */
+/* Small Android phones */
 @media (max-width: 390px) {
+  .nt-topbar {
+    height: 70px;
+    grid-template-columns: 62px 1fr;
+  }
+
   .nt-account {
-    grid-template-columns: 66px 52px 78px 42px 30px;
+    grid-template-columns: 74px 50px minmax(72px, 1fr) 58px 34px;
     gap: 4px;
   }
 
-  .nt-account strong {
+  .nt-account select,
+  .nt-account strong,
+  .nt-topup,
+  .nt-fullscreen {
+    height: 42px;
+    border-radius: 11px;
     font-size: 10px;
   }
 
+  .nt-terminal {
+    top: 70px;
+    left: 38px;
+  }
+
+  .nt-leftbar {
+    top: 70px;
+    width: 38px;
+  }
+
+  .nt-leftbar button {
+    width: 32px;
+    height: 40px;
+    font-size: 17px;
+  }
+
+  .nt-toolbar {
+    grid-template-columns: 96px 38px 38px 38px 38px 1fr;
+  }
+
   .nt-asset-button {
-    width: 122px;
-    max-width: 122px;
+    width: 96px;
+    max-width: 96px;
     font-size: 12px !important;
   }
 
   .nt-chart-switches button {
-    min-width: 38px;
+    width: 52px;
     font-size: 9px;
-    padding: 0 5px;
   }
 
   .nt-trade-panel {
-    height: 242px;
+    height: 238px;
   }
 
   .nt-chart-wrap {
-    bottom: 242px;
+    bottom: 238px;
   }
 
   .nt-chart-footer {
-    bottom: 244px;
+    bottom: 240px;
+  }
+
+  .nt-hms-column strong {
+    font-size: 14px;
+  }
+
+  .nt-hms-column button {
+    width: 18px;
+    font-size: 13px;
+  }
+
+  .nt-calculation strong {
+    font-size: 12px;
   }
 
   .nt-buy,
   .nt-ai,
   .nt-sell {
-    height: 44px;
-    font-size: 11px;
-  }
-
-  .nt-calculation strong {
-    font-size: 11px;
+    height: 46px;
   }
 }
