@@ -1,53 +1,16 @@
 import { api } from "./api";
-import type { MessageResponse } from "./auth.api";
-
-export type UserProfile = {
-  id?: string;
-  email?: string;
-  fullName?: string;
-  name?: string;
-  phone?: string;
-  country?: string;
-  currency?: string;
-  createdAt?: string;
-  updatedAt?: string;
-};
-
-export type UpdateUserPayload = Partial<{
-  fullName: string;
-  name: string;
-  phone: string;
-  country: string;
-  currency: string;
-}>;
+import type { DeleteAccountResponse, UpdateUserPayload, UserProfile } from "../types/user.types";
 
 export const usersApi = {
-  async getProfile(): Promise<UserProfile> {
-    const response = await api.get<UserProfile>("/users/me");
-    return response.data;
+  getMe(): Promise<UserProfile> {
+    return api.get<UserProfile>("/users/me");
   },
 
-  async getMe(): Promise<UserProfile> {
-    const response = await api.get<UserProfile>("/users/me");
-    return response.data;
+  updateMe(payload: UpdateUserPayload): Promise<UserProfile> {
+    return api.patch<UserProfile>("/users/me", payload);
   },
 
-  async updateProfile(payload: UpdateUserPayload): Promise<UserProfile> {
-    const response = await api.patch<UserProfile>("/users/me", payload);
-    return response.data;
-  },
-
-  async updateMe(payload: UpdateUserPayload): Promise<UserProfile> {
-    const response = await api.patch<UserProfile>("/users/me", payload);
-    return response.data;
-  },
-
-  async deleteAccount(): Promise<MessageResponse> {
-    const response = await api.delete<MessageResponse>("/users/me");
-
-    return {
-      success: response.data?.success ?? true,
-      message: response.data?.message || "Account deleted successfully.",
-    };
+  deleteMe(): Promise<DeleteAccountResponse> {
+    return api.delete<DeleteAccountResponse>("/users/me");
   },
 };

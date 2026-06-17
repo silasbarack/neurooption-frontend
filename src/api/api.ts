@@ -1,111 +1,102 @@
-export const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:10000"
-).replace(/\/+$/, "");
+import { getToken } from "../utils/storage";
 
-export type ApiResponse<T> = {
-  data: T;
-  status: number;
-  ok: boolean;
+export type ApiErrorResponse = {
+  success: false;
+  message: string;
+  statusCode?: number;
 };
 
-export class ApiError extends Error {
-  status: number;
-  data: unknown;
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL?.replace(/\/$/, "") ||
+  "https://neurooption-backend.onrender.com";
 
-  constructor(message: string, status: number, data: unknown) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
-    this.data = data;
-  }
-}
+type RequestOptions = {
+  method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
+  body?: unknown;
+  auth?: boolean;
+};
 
-function getStoredToken(): string | null {
-  return (
-    localStorage.getItem("accessToken") ||
-    localStorage.getItem("token") ||
-    localStorage.getItem("neurooption_token")
-  );
-}
+async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const url = `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 
-async function request<T>(
-  path: string,
-  options: {
-    method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-    body?: unknown;
-    token?: string | null;
-  } = {},
-): Promise<ApiResponse<T>> {
-  const cleanPath = path.startsWith("/") ? path : `/${path}`;
-  const token = options.token ?? getStoredToken();
-
-  const headers: Record<string, string> = {
+  const headers: HeadersInit = {
     "Content-Type": "application/json",
   };
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
+  if (options.auth !== false) {
+    const token = getToken();
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
   }
 
-  const response = await fetch(`${API_BASE_URL}${cleanPath}`, {
-    method: options.method || "GET",
+  const response = await fetch(url, {
+    method: options.method ?? "GET",
     headers,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    body: options.body ? JSON.stringify(options.body) : undefined,
   });
-
-  const contentType = response.headers.get("content-type") || "";
 
   let data: unknown = null;
 
-  if (contentType.includes("application/json")) {
-    data = await response.json().catch(() => null);
-  } else {
-    data = await response.text().catch(() => null);
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
   }
 
   if (!response.ok) {
-    const body = data as any;
-
     const message =
-      Array.isArray(body?.message)
-        ? body.message.join(", ")
-        : body?.message || body?.error || `Request failed with status ${response.status}`;
+      typeof data === "object" &&
+      data !== null &&
+      "message" in data &&
+      typeof (data as { message?: unknown }).message === "string"
+        ? (data as { message: string }).message
+        : "Request failed. Please try again.";
 
-    throw new ApiError(message, response.status, data);
+    throw new Error(message);
   }
 
-  return {
-    data: data as T,
-    status: response.status,
-    ok: response.ok,
-  };
+  return data as T;
 }
 
 export const api = {
-  get: <T>(path: string, token?: string | null) =>
-    request<T>(path, { method: "GET", token }),
+  baseUrl: API_BASE_URL,
 
-  post: <T>(path: string, body?: unknown, token?: string | null) =>
-    request<T>(path, { method: "POST", body, token }),
+  get<T>(path: string, auth = true): Promise<T> {
+    return request<T>(path, {
+      method: "GET",
+      auth,
+    });
+  },
 
-  put: <T>(path: string, body?: unknown, token?: string | null) =>
-    request<T>(path, { method: "PUT", body, token }),
+  post<T>(path: string, body?: unknown, auth = true): Promise<T> {
+    return request<T>(path, {
+      method: "POST",
+      body,
+      auth,
+    });
+  },
 
-  patch: <T>(path: string, body?: unknown, token?: string | null) =>
-    request<T>(path, { method: "PATCH", body, token }),
+  patch<T>(path: string, body?: unknown, auth = true): Promise<T> {
+    return request<T>(path, {
+      method: "PATCH",
+      body,
+      auth,
+    });
+  },
 
-  delete: <T>(path: string, body?: unknown, token?: string | null) =>
-    request<T>(path, { method: "DELETE", body, token }),
+  put<T>(path: string, body?: unknown, auth = true): Promise<T> {
+    return request<T>(path, {
+      method: "PUT",
+      body,
+      auth,
+    });
+  },
+
+  delete<T>(path: string, auth = true): Promise<T> {
+    return request<T>(path, {
+      method: "DELETE",
+      auth,
+    });
+  },
 };
-
-export async function apiRequest<T>(
-  path: string,
-  options: {
-    method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-    body?: unknown;
-    token?: string | null;
-  } = {},
-): Promise<T> {
-  const response = await request<T>(path, options);
-  return response.data;
-}
