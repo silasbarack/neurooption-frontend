@@ -1,4 +1,3 @@
-import React from "react";
 import type { AccountType, Currency } from "./trading.types";
 import { CURRENCIES } from "./trading.constants";
 

@@ -1,4 +1,3 @@
-import React from "react";
 import type { ChartType } from "./trading.types";
 import { DRAWING_TOOLS, INDICATORS, TIMEFRAMES } from "./trading.constants";
 
