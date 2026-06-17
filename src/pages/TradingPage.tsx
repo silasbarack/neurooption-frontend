@@ -2,12 +2,11 @@ import React from "react";
 import "./TradingPage.css";
 import type { AccountCurrency, AccountType } from "../types/auth.types";
 import { convertFromUsd, convertToUsd, formatCurrency } from "../utils/currency";
-import { formatPrice, randomId, secondsToTime } from "../utils/format";
+import { clamp, formatPrice, randomId, secondsToTime } from "../utils/format";
 import {
   calculateExpectedProfit,
   calculateExpectedReturn,
   changeExpiryUnit,
-  getDynamicPayout,
   getTradeWinStatus,
   MAX_EXPIRY_SECONDS,
   MIN_EXPIRY_SECONDS,
@@ -21,7 +20,6 @@ type MarketCategory =
   | "Commodities";
 
 type OtcTimeframe = "M1" | "M2" | "M3" | "M5" | "M15" | "M30" | "H1" | "H4";
-
 type ChartType = "Candlesticks" | "Heiken Ashi" | "Bars" | "Line";
 type TradeDirection = "BUY" | "SELL";
 type ExpiryUnit = "hours" | "minutes" | "seconds";
@@ -57,6 +55,18 @@ type OtcStreamPayload = {
   candles: OtcCandle[];
 };
 
+type AssetsResponse = {
+  success: boolean;
+  assets: OtcAsset[];
+};
+
+type CandlesResponse = {
+  success: boolean;
+  symbol: string;
+  timeframe: OtcTimeframe;
+  candles: OtcCandle[];
+};
+
 type ActiveTrade = {
   id: string;
   direction: TradeDirection;
@@ -84,16 +94,10 @@ type ResultMarker = {
   createdAt: number;
 };
 
-type AssetsResponse = {
-  success: boolean;
-  assets: OtcAsset[];
-};
-
-type CandlesResponse = {
-  success: boolean;
-  symbol: string;
-  timeframe: OtcTimeframe;
-  candles: OtcCandle[];
+type NavItem = {
+  icon: string;
+  label: string;
+  path: string;
 };
 
 const API_BASE_URL =
@@ -125,7 +129,6 @@ const MARKET_CATEGORIES: MarketCategory[] = [
 ];
 
 const TIMEFRAMES: OtcTimeframe[] = ["M1", "M2", "M3", "M5", "M15", "M30", "H1", "H4"];
-
 const CHART_TYPES: ChartType[] = ["Candlesticks", "Heiken Ashi", "Bars", "Line"];
 
 const DRAWING_TOOLS = [
@@ -185,17 +188,17 @@ const INDICATORS = [
   "Price Channel",
 ];
 
-const LEFT_NAV = [
-  ["📈", "Trading"],
-  ["💵", "Finance"],
-  ["👤", "Profile"],
-  ["🛒", "Market"],
-  ["💎", "Achievements"],
-  ["🏆", "Tournaments"],
-  ["💬", "Chat"],
-  ["?", "Help"],
-  ["🎁", "Promo"],
-  ["🤖", "Autotrading"],
+const LEFT_NAV: NavItem[] = [
+  { icon: "📈", label: "Trading", path: "/trading" },
+  { icon: "💵", label: "Finance", path: "/finance" },
+  { icon: "👤", label: "Profile", path: "/profile" },
+  { icon: "🛒", label: "Market", path: "/market" },
+  { icon: "💎", label: "Achievements", path: "/achievements" },
+  { icon: "🏆", label: "Tournaments", path: "/tournaments" },
+  { icon: "💬", label: "Chat", path: "/chat" },
+  { icon: "?", label: "Help", path: "/help" },
+  { icon: "🎁", label: "Promo", path: "/promo" },
+  { icon: "🤖", label: "Autotrading", path: "/autotrading" },
 ];
 
 const QUICK_NAV = [
@@ -270,16 +273,6 @@ const FALLBACK_ASSETS: OtcAsset[] = [
     payout: 86,
   },
   {
-    symbol: "US30 OTC",
-    displayName: "Dow Jones 30",
-    category: "Indices",
-    market: "OTC",
-    basePrice: 38950.2,
-    precision: 2,
-    volatility: 24,
-    payout: 84,
-  },
-  {
     symbol: "Tesla OTC",
     displayName: "Tesla Inc.",
     category: "Stocks",
@@ -288,16 +281,6 @@ const FALLBACK_ASSETS: OtcAsset[] = [
     precision: 2,
     volatility: 0.42,
     payout: 81,
-  },
-  {
-    symbol: "Apple OTC",
-    displayName: "Apple Inc.",
-    category: "Stocks",
-    market: "OTC",
-    basePrice: 214.85,
-    precision: 2,
-    volatility: 0.32,
-    payout: 82,
   },
   {
     symbol: "Gold OTC",
@@ -309,61 +292,7 @@ const FALLBACK_ASSETS: OtcAsset[] = [
     volatility: 1.8,
     payout: 87,
   },
-  {
-    symbol: "Brent Oil OTC",
-    displayName: "Brent Crude Oil",
-    category: "Commodities",
-    market: "OTC",
-    basePrice: 82.75,
-    precision: 2,
-    volatility: 0.12,
-    payout: 84,
-  },
 ];
-
-function splitExpiry(totalSeconds: number): {
-  hours: number;
-  minutes: number;
-  seconds: number;
-} {
-  return {
-    hours: Math.floor(totalSeconds / 3600),
-    minutes: Math.floor((totalSeconds % 3600) / 60),
-    seconds: totalSeconds % 60,
-  };
-}
-
-function createLocalFallbackCandles(asset: OtcAsset, timeframe: OtcTimeframe, count = 120): OtcCandle[] {
-  const candles: OtcCandle[] = [];
-  let price = asset.basePrice;
-  const durationMs = timeframeToMs(timeframe);
-
-  for (let index = 0; index < count; index += 1) {
-    const time = Date.now() - (count - index) * durationMs;
-    const wave = Math.sin(index / 5.2) * asset.volatility * 1.9;
-    const noise = randomNormal() * asset.volatility * 0.85;
-    const open = price;
-    const close = Math.max(0.00000001, open + wave * 0.22 + noise);
-    const high = Math.max(open, close) + Math.abs(randomNormal()) * asset.volatility * 1.15;
-    const low = Math.min(open, close) - Math.abs(randomNormal()) * asset.volatility * 1.15;
-
-    candles.push({
-      symbol: asset.symbol,
-      timeframe,
-      time,
-      open,
-      high,
-      low: Math.max(0.00000001, low),
-      close,
-      closed: true,
-    });
-
-    price = close;
-  }
-
-  candles[candles.length - 1].closed = false;
-  return candles;
-}
 
 function randomNormal(): number {
   return Math.random() + Math.random() + Math.random() + Math.random() - 2;
@@ -384,6 +313,45 @@ function timeframeToMs(timeframe: OtcTimeframe): number {
   return map[timeframe];
 }
 
+function createFallbackCandles(asset: OtcAsset, timeframe: OtcTimeframe, count = 120): OtcCandle[] {
+  const candles: OtcCandle[] = [];
+  const duration = timeframeToMs(timeframe);
+  let price = asset.basePrice;
+
+  for (let index = 0; index < count; index += 1) {
+    const open = price;
+    const impulse = Math.sin(index / 5.4) * asset.volatility * 0.45;
+    const noise = randomNormal() * asset.volatility * 0.95;
+    const close = Math.max(0.00000001, open + impulse + noise);
+    const high = Math.max(open, close) + Math.abs(randomNormal()) * asset.volatility * 1.4;
+    const low = Math.min(open, close) - Math.abs(randomNormal()) * asset.volatility * 1.4;
+
+    candles.push({
+      symbol: asset.symbol,
+      timeframe,
+      time: Date.now() - (count - index) * duration,
+      open,
+      high,
+      low: Math.max(0.00000001, low),
+      close,
+      closed: true,
+    });
+
+    price = close;
+  }
+
+  candles[candles.length - 1].closed = false;
+  return candles;
+}
+
+function splitExpiry(totalSeconds: number) {
+  return {
+    hours: Math.floor(totalSeconds / 3600),
+    minutes: Math.floor((totalSeconds % 3600) / 60),
+    seconds: totalSeconds % 60,
+  };
+}
+
 function makeHeikenAshi(candles: OtcCandle[]): OtcCandle[] {
   const output: OtcCandle[] = [];
 
@@ -402,6 +370,25 @@ function makeHeikenAshi(candles: OtcCandle[]): OtcCandle[] {
   });
 
   return output;
+}
+
+function roundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+) {
+  const r = Math.min(radius, width / 2, height / 2);
+
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + width, y, x + width, y + height, r);
+  ctx.arcTo(x + width, y + height, x, y + height, r);
+  ctx.arcTo(x, y + height, x, y, r);
+  ctx.arcTo(x, y, x + width, y, r);
+  ctx.closePath();
 }
 
 function isAssetsResponse(data: unknown): data is AssetsResponse {
@@ -433,6 +420,16 @@ function isStreamPayload(data: unknown): data is OtcStreamPayload {
 }
 
 export default function TradingPage() {
+  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const candlesRef = React.useRef<OtcCandle[]>([]);
+  const priceRef = React.useRef(0);
+  const activeTradesRef = React.useRef<ActiveTrade[]>([]);
+  const resultMarkersRef = React.useRef<ResultMarker[]>([]);
+  const scaleRef = React.useRef<{ min: number; max: number } | null>(null);
+  const frameRef = React.useRef<number | null>(null);
+  const streamLiveRef = React.useRef(false);
+  const lastFallbackCandleRef = React.useRef(Date.now());
+
   const [assets, setAssets] = React.useState<OtcAsset[]>(FALLBACK_ASSETS);
   const [selectedAsset, setSelectedAsset] = React.useState<OtcAsset>(FALLBACK_ASSETS[0]);
   const [assetCategory, setAssetCategory] = React.useState<MarketCategory>("Currencies");
@@ -440,14 +437,9 @@ export default function TradingPage() {
   const [chartType, setChartType] = React.useState<ChartType>("Candlesticks");
   const [drawingTool, setDrawingTool] = React.useState("Cursor");
 
-  const [candles, setCandles] = React.useState<OtcCandle[]>(() =>
-    createLocalFallbackCandles(FALLBACK_ASSETS[0], "M1")
-  );
-  const [currentPrice, setCurrentPrice] = React.useState(FALLBACK_ASSETS[0].basePrice);
-  const [streamStatus, setStreamStatus] = React.useState<"connecting" | "live" | "reconnecting">(
-    "connecting"
-  );
   const [serverTime, setServerTime] = React.useState(Date.now());
+  const [currentPrice, setCurrentPrice] = React.useState(FALLBACK_ASSETS[0].basePrice);
+  const [streamStatus, setStreamStatus] = React.useState<"connecting" | "live" | "reconnecting">("connecting");
 
   const [accountType, setAccountType] = React.useState<AccountType>("QT Demo");
   const [currency, setCurrency] = React.useState<AccountCurrency>("USD");
@@ -462,26 +454,24 @@ export default function TradingPage() {
   const [indicatorOpen, setIndicatorOpen] = React.useState(false);
   const [toolsOpen, setToolsOpen] = React.useState(false);
   const [selectedIndicators, setSelectedIndicators] = React.useState<string[]>([]);
-
+  const [activeNav, setActiveNav] = React.useState("Trading");
   const [activeTrades, setActiveTrades] = React.useState<ActiveTrade[]>([]);
   const [resultMarkers, setResultMarkers] = React.useState<ResultMarker[]>([]);
 
-  const latestPriceRef = React.useRef(selectedAsset.basePrice);
-  const candlesRef = React.useRef<OtcCandle[]>(candles);
-  const localFallbackTimerRef = React.useRef<number | null>(null);
-
   const activeBalanceUsd = accountType === "QT Demo" ? demoBalanceUsd : realBalanceUsd;
   const convertedBalance = convertFromUsd(activeBalanceUsd, currency);
-
   const stake = Number(amount);
   const safeStake = Number.isFinite(stake) ? Math.max(0, stake) : 0;
   const stakeUsd = convertToUsd(safeStake, currency);
 
-  const payoutPercent = getDynamicPayout(selectedAsset, serverTime);
+  const payoutPercent = React.useMemo(() => {
+    const wave = Math.sin(serverTime / 13000) * 4;
+    return Math.round(clamp(selectedAsset.payout + wave, 20, 92));
+  }, [selectedAsset.payout, serverTime]);
+
   const expectedProfit = calculateExpectedProfit(safeStake, payoutPercent);
   const expectedReturn = calculateExpectedReturn(safeStake, payoutPercent);
   const expectedReturnUsd = convertToUsd(expectedReturn, currency);
-
   const canTrade = safeStake > 0 && stakeUsd <= activeBalanceUsd;
   const expiryParts = splitExpiry(expirySeconds);
 
@@ -489,18 +479,13 @@ export default function TradingPage() {
     return assets.filter((asset) => asset.category === assetCategory);
   }, [assets, assetCategory]);
 
-  const visibleCandles = React.useMemo(() => {
-    const source = chartType === "Heiken Ashi" ? makeHeikenAshi(candles) : candles;
-    return source.slice(-104);
-  }, [candles, chartType]);
+  React.useEffect(() => {
+    activeTradesRef.current = activeTrades;
+  }, [activeTrades]);
 
   React.useEffect(() => {
-    candlesRef.current = candles;
-  }, [candles]);
-
-  React.useEffect(() => {
-    latestPriceRef.current = currentPrice;
-  }, [currentPrice]);
+    resultMarkersRef.current = resultMarkers;
+  }, [resultMarkers]);
 
   React.useEffect(() => {
     async function loadAssets() {
@@ -511,8 +496,8 @@ export default function TradingPage() {
         if (isAssetsResponse(data) && data.assets.length > 0) {
           setAssets(data.assets);
 
-          const sameAsset = data.assets.find((asset) => asset.symbol === selectedAsset.symbol);
-          if (!sameAsset) {
+          const found = data.assets.find((asset) => asset.symbol === selectedAsset.symbol);
+          if (!found) {
             setSelectedAsset(data.assets[0]);
             setAssetCategory(data.assets[0].category);
           }
@@ -526,7 +511,7 @@ export default function TradingPage() {
   }, [selectedAsset.symbol]);
 
   React.useEffect(() => {
-    async function loadInitialCandles() {
+    async function loadCandles() {
       try {
         const url = new URL(`${API_BASE_URL}/market-data/candles`);
         url.searchParams.set("symbol", selectedAsset.symbol);
@@ -537,22 +522,26 @@ export default function TradingPage() {
         const data: unknown = await response.json();
 
         if (isCandlesResponse(data) && data.candles.length > 0) {
-          setCandles(data.candles);
-          setCurrentPrice(data.candles[data.candles.length - 1].close);
-          setServerTime(Date.now());
+          candlesRef.current = data.candles;
+          priceRef.current = data.candles[data.candles.length - 1].close;
+          setCurrentPrice(priceRef.current);
+          scaleRef.current = null;
           return;
         }
       } catch {
-        const fallback = createLocalFallbackCandles(selectedAsset, timeframe);
-        setCandles(fallback);
-        setCurrentPrice(fallback[fallback.length - 1].close);
+        const fallback = createFallbackCandles(selectedAsset, timeframe);
+        candlesRef.current = fallback;
+        priceRef.current = fallback[fallback.length - 1].close;
+        setCurrentPrice(priceRef.current);
+        scaleRef.current = null;
       }
     }
 
-    void loadInitialCandles();
+    void loadCandles();
   }, [selectedAsset, timeframe]);
 
   React.useEffect(() => {
+    streamLiveRef.current = false;
     setStreamStatus("connecting");
 
     const url = new URL(`${API_BASE_URL}/market-data/stream`);
@@ -564,19 +553,19 @@ export default function TradingPage() {
     function handlePayload(payload: OtcStreamPayload) {
       if (payload.candles.length === 0) return;
 
+      candlesRef.current = payload.candles;
+      priceRef.current = payload.price;
+      streamLiveRef.current = true;
+
       setStreamStatus("live");
-      setCandles(payload.candles);
       setCurrentPrice(payload.price);
       setServerTime(payload.serverTime);
-
-      latestPriceRef.current = payload.price;
-      candlesRef.current = payload.candles;
     }
 
     function handleStreamEvent(event: Event) {
       try {
-        const messageEvent = event as MessageEvent<string>;
-        const parsed: unknown = JSON.parse(messageEvent.data);
+        const message = event as MessageEvent<string>;
+        const parsed: unknown = JSON.parse(message.data);
 
         if (isStreamPayload(parsed)) {
           handlePayload(parsed);
@@ -587,10 +576,12 @@ export default function TradingPage() {
     }
 
     source.onopen = () => {
+      streamLiveRef.current = true;
       setStreamStatus("live");
     };
 
     source.onerror = () => {
+      streamLiveRef.current = false;
       setStreamStatus("reconnecting");
     };
 
@@ -607,110 +598,335 @@ export default function TradingPage() {
   }, [selectedAsset.symbol, timeframe]);
 
   React.useEffect(() => {
-    if (streamStatus === "live") {
-      if (localFallbackTimerRef.current !== null) {
-        window.clearInterval(localFallbackTimerRef.current);
-        localFallbackTimerRef.current = null;
-      }
-
-      return;
-    }
-
-    if (localFallbackTimerRef.current !== null) return;
-
-    localFallbackTimerRef.current = window.setInterval(() => {
-      const existing = candlesRef.current.length
-        ? candlesRef.current
-        : createLocalFallbackCandles(selectedAsset, timeframe);
-
-      const next = existing.slice();
-      const last = next[next.length - 1];
-
-      if (!last) return;
-
-      const movement =
-        Math.sin(Date.now() / 800) * selectedAsset.volatility * 0.12 +
-        randomNormal() * selectedAsset.volatility * 0.38;
-
-      const nextPrice = Math.max(0.00000001, last.close + movement);
-      const updatedLast: OtcCandle = {
-        ...last,
-        close: nextPrice,
-        high: Math.max(last.high, nextPrice),
-        low: Math.min(last.low, nextPrice),
-        closed: false,
-      };
-
-      next[next.length - 1] = updatedLast;
-
-      if (Date.now() - last.time >= timeframeToMs(timeframe)) {
-        updatedLast.closed = true;
-
-        next.push({
-          symbol: selectedAsset.symbol,
-          timeframe,
-          time: Date.now(),
-          open: nextPrice,
-          high: nextPrice,
-          low: nextPrice,
-          close: nextPrice,
-          closed: false,
-        });
-      }
-
-      const trimmed = next.slice(-120);
-      candlesRef.current = trimmed;
-      latestPriceRef.current = nextPrice;
-
-      setCandles(trimmed);
-      setCurrentPrice(nextPrice);
+    const uiTimer = window.setInterval(() => {
+      setCurrentPrice(priceRef.current);
       setServerTime(Date.now());
-    }, 250);
+    }, 220);
 
     return () => {
-      if (localFallbackTimerRef.current !== null) {
-        window.clearInterval(localFallbackTimerRef.current);
-        localFallbackTimerRef.current = null;
+      window.clearInterval(uiTimer);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    function animate() {
+      applyFrontendMicroMotion();
+      drawCanvas();
+      frameRef.current = window.requestAnimationFrame(animate);
+    }
+
+    frameRef.current = window.requestAnimationFrame(animate);
+
+    return () => {
+      if (frameRef.current !== null) {
+        window.cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [selectedAsset, timeframe, streamStatus]);
+  });
+
+  function applyFrontendMicroMotion() {
+    const candles = candlesRef.current;
+    const last = candles[candles.length - 1];
+
+    if (!last) return;
+
+    const microMove =
+      Math.sin(Date.now() / 170) * selectedAsset.volatility * 0.018 +
+      randomNormal() * selectedAsset.volatility * 0.022;
+
+    const nextPrice = Math.max(0.00000001, priceRef.current + microMove);
+    priceRef.current = nextPrice;
+
+    last.close = nextPrice;
+    last.high = Math.max(last.high, nextPrice);
+    last.low = Math.min(last.low, nextPrice);
+
+    if (!streamLiveRef.current && Date.now() - lastFallbackCandleRef.current >= timeframeToMs(timeframe)) {
+      last.closed = true;
+
+      candles.push({
+        symbol: selectedAsset.symbol,
+        timeframe,
+        time: Date.now(),
+        open: nextPrice,
+        high: nextPrice,
+        low: nextPrice,
+        close: nextPrice,
+        closed: false,
+      });
+
+      if (candles.length > 120) candles.shift();
+      lastFallbackCandleRef.current = Date.now();
+    }
+  }
+
+  function drawCanvas() {
+    const canvas = canvasRef.current;
+    const parent = canvas?.parentElement;
+
+    if (!canvas || !parent) return;
+
+    const rect = parent.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.max(320, rect.width);
+    const height = Math.max(240, rect.height);
+
+    if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+    }
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+
+    const left = 22;
+    const rightPad = 78;
+    const top = 34;
+    const bottomPad = 34;
+    const chartRight = width - rightPad;
+    const chartBottom = height - bottomPad;
+    const chartWidth = chartRight - left;
+    const chartHeight = chartBottom - top;
+
+    const background = ctx.createLinearGradient(0, 0, width, height);
+    background.addColorStop(0, "#233b65");
+    background.addColorStop(0.52, "#142444");
+    background.addColorStop(1, "#091226");
+    ctx.fillStyle = background;
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.save();
+    ctx.globalAlpha = 0.18;
+    ctx.fillStyle = "#9cbbe8";
+    ctx.beginPath();
+    ctx.moveTo(0, chartBottom);
+    ctx.lineTo(width * 0.18, height * 0.54);
+    ctx.lineTo(width * 0.32, chartBottom);
+    ctx.lineTo(width * 0.5, height * 0.42);
+    ctx.lineTo(width * 0.67, chartBottom);
+    ctx.lineTo(width * 0.86, height * 0.55);
+    ctx.lineTo(width, chartBottom);
+    ctx.lineTo(width, height);
+    ctx.lineTo(0, height);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    ctx.strokeStyle = "rgba(188, 218, 255, 0.13)";
+    ctx.lineWidth = 1;
+
+    for (let index = 0; index <= 10; index += 1) {
+      const x = left + (chartWidth / 10) * index;
+      ctx.beginPath();
+      ctx.moveTo(x, top);
+      ctx.lineTo(x, chartBottom);
+      ctx.stroke();
+    }
+
+    for (let index = 0; index <= 7; index += 1) {
+      const y = top + (chartHeight / 7) * index;
+      ctx.beginPath();
+      ctx.moveTo(left, y);
+      ctx.lineTo(chartRight, y);
+      ctx.stroke();
+    }
+
+    const source = chartType === "Heiken Ashi" ? makeHeikenAshi(candlesRef.current) : candlesRef.current;
+    const visible = source.slice(-104);
+
+    if (visible.length < 2) return;
+
+    const values = visible.flatMap((candle) => [candle.open, candle.high, candle.low, candle.close]);
+    values.push(priceRef.current);
+    activeTradesRef.current.forEach((trade) => values.push(trade.entryPrice));
+    resultMarkersRef.current.forEach((marker) => values.push(marker.closePrice));
+
+    const rawMin = Math.min(...values);
+    const rawMax = Math.max(...values);
+    const rawRange = Math.max(rawMax - rawMin, selectedAsset.basePrice * 0.0015);
+    const targetMin = rawMin - rawRange * 0.22;
+    const targetMax = rawMax + rawRange * 0.22;
+
+    if (!scaleRef.current) {
+      scaleRef.current = {
+        min: targetMin,
+        max: targetMax,
+      };
+    } else {
+      scaleRef.current.min += (targetMin - scaleRef.current.min) * 0.08;
+      scaleRef.current.max += (targetMax - scaleRef.current.max) * 0.08;
+    }
+
+    const chartMin = scaleRef.current.min;
+    const chartMax = scaleRef.current.max;
+
+    const yFor = (price: number) => top + ((chartMax - price) / (chartMax - chartMin)) * chartHeight;
+    const xFor = (index: number) => left + (index / Math.max(visible.length - 1, 1)) * chartWidth;
+    const candleWidth = clamp(chartWidth / visible.length * 0.58, 3, 9);
+
+    if (chartType === "Line") {
+      ctx.strokeStyle = "#64eaff";
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+
+      visible.forEach((candle, index) => {
+        const x = xFor(index);
+        const y = yFor(candle.close);
+
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.stroke();
+    } else {
+      visible.forEach((candle, index) => {
+        const x = xFor(index);
+        const openY = yFor(candle.open);
+        const closeY = yFor(candle.close);
+        const highY = yFor(candle.high);
+        const lowY = yFor(candle.low);
+        const bullish = candle.close >= candle.open;
+        const color = bullish ? "#5ff2df" : "#ff775f";
+
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 1.55;
+
+        if (chartType === "Bars") {
+          ctx.beginPath();
+          ctx.moveTo(x, highY);
+          ctx.lineTo(x, lowY);
+          ctx.moveTo(x - candleWidth, openY);
+          ctx.lineTo(x, openY);
+          ctx.moveTo(x, closeY);
+          ctx.lineTo(x + candleWidth, closeY);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.moveTo(x, highY);
+          ctx.lineTo(x, lowY);
+          ctx.stroke();
+
+          const bodyTop = Math.min(openY, closeY);
+          const bodyHeight = Math.max(2, Math.abs(openY - closeY));
+
+          ctx.fillRect(x - candleWidth / 2, bodyTop, candleWidth, bodyHeight);
+        }
+      });
+    }
+
+    const currentY = yFor(priceRef.current);
+
+    ctx.setLineDash([7, 7]);
+    ctx.strokeStyle = "rgba(126, 221, 255, 0.92)";
+    ctx.lineWidth = 1.25;
+    ctx.beginPath();
+    ctx.moveTo(left, currentY);
+    ctx.lineTo(chartRight, currentY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = "#86cfff";
+    roundRect(ctx, chartRight + 8, currentY - 17, 66, 34, 9);
+    ctx.fill();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "700 12px Roboto, Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(formatPrice(priceRef.current, selectedAsset.precision), chartRight + 41, currentY + 5);
+
+    const expiryX = chartRight - 170;
+    ctx.strokeStyle = "rgba(255,255,255,0.95)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(expiryX, top);
+    ctx.lineTo(expiryX, chartBottom);
+    ctx.stroke();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "700 11px Roboto, Arial, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("Expiration time", expiryX + 8, top + 15);
+
+    ctx.fillStyle = "rgba(230, 242, 255, 0.85)";
+    ctx.font = "700 11px Roboto, Arial, sans-serif";
+    ctx.textAlign = "right";
+
+    for (let index = 0; index <= 5; index += 1) {
+      const price = chartMax - ((chartMax - chartMin) / 5) * index;
+      const y = yFor(price);
+      ctx.fillText(formatPrice(price, selectedAsset.precision), width - 8, y + 4);
+    }
+
+    ctx.fillStyle = "rgba(230, 242, 255, 0.66)";
+    ctx.textAlign = "center";
+
+    ["13:16", "13:32", "13:48", "14:04"].forEach((label, index) => {
+      const x = left + (chartWidth / 3) * index;
+      ctx.fillText(label, x, height - 9);
+    });
+
+    ctx.fillStyle = "rgba(255,255,255,0.88)";
+    ctx.font = "800 15px Roboto, Arial, sans-serif";
+    ctx.fillText(timeframe, chartRight - 80, currentY - 17);
+
+    activeTradesRef.current.forEach((trade, index) => {
+      const y = yFor(trade.entryPrice);
+      const x = left + 30 + index * 10;
+      const label = `${trade.direction} ${formatCurrency(trade.amount, trade.currency)}`;
+
+      ctx.setLineDash([5, 5]);
+      ctx.strokeStyle = trade.direction === "BUY" ? "#79f46e" : "#ff7469";
+      ctx.beginPath();
+      ctx.moveTo(left, y);
+      ctx.lineTo(chartRight, y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = trade.direction === "BUY" ? "#49d95d" : "#ef5048";
+      roundRect(ctx, x, y - 17, 142, 34, 8);
+      ctx.fill();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "800 11px Roboto, Arial, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(label, x + 71, y + 4);
+    });
+
+    resultMarkersRef.current.forEach((marker) => {
+      const y = yFor(marker.closePrice);
+      const label = marker.won
+        ? `✓ ${formatCurrency(marker.amount, marker.currency)}`
+        : `✕ ${formatCurrency(0, marker.currency)}`;
+
+      ctx.fillStyle = marker.won ? "#27c85d" : "#e94c42";
+      roundRect(ctx, chartRight - 220, y - 20, 170, 40, 10);
+      ctx.fill();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "900 12px Roboto, Arial, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(label, chartRight - 135, y + 5);
+    });
+  }
 
   function updateBalance(account: AccountType, nextUsd: number) {
     if (account === "QT Demo") {
       setDemoBalanceUsd(Math.max(0, nextUsd));
-      return;
+    } else {
+      setRealBalanceUsd(Math.max(0, nextUsd));
     }
-
-    setRealBalanceUsd(Math.max(0, nextUsd));
-  }
-
-  function handleExpiryChange(unit: ExpiryUnit, delta: 1 | -1) {
-    setExpirySeconds((current) => changeExpiryUnit(current, unit, delta));
-  }
-
-  function handleFullscreen() {
-    if (!document.fullscreenElement) {
-      void document.documentElement.requestFullscreen();
-      return;
-    }
-
-    void document.exitFullscreen();
-  }
-
-  function toggleIndicator(indicator: string) {
-    setSelectedIndicators((items) => {
-      if (items.includes(indicator)) {
-        return items.filter((item) => item !== indicator);
-      }
-
-      return [...items, indicator];
-    });
   }
 
   function handleTrade(direction: TradeDirection) {
     if (!canTrade) return;
 
-    const entryPrice = latestPriceRef.current;
+    const entryPrice = priceRef.current;
     const tradeId = randomId("trade");
 
     updateBalance(accountType, activeBalanceUsd - stakeUsd);
@@ -734,7 +950,7 @@ export default function TradingPage() {
     setActiveTrades((items) => [...items, trade]);
 
     window.setTimeout(() => {
-      const closePrice = latestPriceRef.current;
+      const closePrice = priceRef.current;
       const won = getTradeWinStatus(direction, entryPrice, closePrice);
       const resultAmount = won ? trade.expectedReturn : 0;
 
@@ -767,239 +983,35 @@ export default function TradingPage() {
     }, expirySeconds * 1000);
   }
 
-  function renderChart() {
-    const width = 1000;
-    const height = 590;
-    const left = 22;
-    const right = 908;
-    const top = 42;
-    const bottom = 525;
-    const priceLabelX = 930;
-    const chartHeight = bottom - top;
+  function handleNavClick(item: NavItem) {
+    setActiveNav(item.label);
 
-    const priceValues = visibleCandles.flatMap((candle) => [
-      candle.high,
-      candle.low,
-      candle.open,
-      candle.close,
-    ]);
+    if (item.path === "/trading") return;
 
-    priceValues.push(currentPrice);
-    activeTrades.forEach((trade) => priceValues.push(trade.entryPrice));
-    resultMarkers.forEach((marker) => priceValues.push(marker.closePrice));
+    window.location.href = item.path;
+  }
 
-    const rawMin = Math.min(...priceValues);
-    const rawMax = Math.max(...priceValues);
-    const rawRange = Math.max(rawMax - rawMin, selectedAsset.basePrice * 0.002);
+  function handleExpiryChange(unit: ExpiryUnit, delta: 1 | -1) {
+    setExpirySeconds((value) => changeExpiryUnit(value, unit, delta));
+  }
 
-    /*
-      This is the auto-follow behaviour:
-      when candles move near the top/bottom margin, the chart range recalculates
-      from visible candles and moves the screen with price.
-    */
-    const paddedMin = rawMin - rawRange * 0.2;
-    const paddedMax = rawMax + rawRange * 0.2;
+  function handleFullscreen() {
+    if (!document.fullscreenElement) {
+      void document.documentElement.requestFullscreen();
+      return;
+    }
 
-    const yFor = (price: number) => top + ((paddedMax - price) / (paddedMax - paddedMin)) * chartHeight;
-    const xStep = (right - left) / Math.max(visibleCandles.length - 1, 1);
-    const bodyWidth = Math.max(4, Math.min(10, xStep * 0.58));
-    const expiryX = right - 178;
-    const currentY = yFor(currentPrice);
+    void document.exitFullscreen();
+  }
 
-    const linePoints = visibleCandles
-      .map((candle, index) => `${left + index * xStep},${yFor(candle.close)}`)
-      .join(" ");
+  function toggleIndicator(indicator: string) {
+    setSelectedIndicators((items) => {
+      if (items.includes(indicator)) {
+        return items.filter((item) => item !== indicator);
+      }
 
-    return (
-      <svg className="chart-svg" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="NeuroOption OTC live chart">
-        <defs>
-          <linearGradient id="chartSky" x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0%" stopColor="#24416b" stopOpacity="0.72" />
-            <stop offset="100%" stopColor="#0c172e" stopOpacity="0.94" />
-          </linearGradient>
-
-          <linearGradient id="mountainFill" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#8fb7d8" stopOpacity="0.24" />
-            <stop offset="100%" stopColor="#18233d" stopOpacity="0.08" />
-          </linearGradient>
-        </defs>
-
-        <rect width={width} height={height} fill="url(#chartSky)" />
-
-        <polygon
-          points="20,510 150,330 250,455 385,285 510,500 650,335 760,472 890,360 980,505"
-          fill="url(#mountainFill)"
-        />
-
-        {Array.from({ length: 11 }).map((_, index) => {
-          const x = left + ((right - left) / 10) * index;
-
-          return (
-            <line
-              key={`vertical-${index}`}
-              x1={x}
-              y1={top}
-              x2={x}
-              y2={bottom}
-              className="grid-line"
-            />
-          );
-        })}
-
-        {Array.from({ length: 8 }).map((_, index) => {
-          const y = top + ((bottom - top) / 7) * index;
-
-          return (
-            <line
-              key={`horizontal-${index}`}
-              x1={left}
-              y1={y}
-              x2={right}
-              y2={y}
-              className="grid-line"
-            />
-          );
-        })}
-
-        {chartType === "Line" && <polyline points={linePoints} className="line-chart" />}
-
-        {chartType !== "Line" &&
-          visibleCandles.map((candle, index) => {
-            const x = left + index * xStep;
-            const openY = yFor(candle.open);
-            const closeY = yFor(candle.close);
-            const highY = yFor(candle.high);
-            const lowY = yFor(candle.low);
-            const bullish = candle.close >= candle.open;
-            const bodyTop = Math.min(openY, closeY);
-            const bodyHeight = Math.max(3, Math.abs(openY - closeY));
-            const colorClass = bullish ? "candle-bull" : "candle-bear";
-
-            if (chartType === "Bars") {
-              return (
-                <g key={`${candle.time}-${index}`} className={colorClass}>
-                  <line x1={x} y1={highY} x2={x} y2={lowY} className="bar-stick" />
-                  <line x1={x - bodyWidth} y1={openY} x2={x} y2={openY} className="bar-tick" />
-                  <line x1={x} y1={closeY} x2={x + bodyWidth} y2={closeY} className="bar-tick" />
-                </g>
-              );
-            }
-
-            return (
-              <g key={`${candle.time}-${index}`} className={colorClass}>
-                <line x1={x} y1={highY} x2={x} y2={lowY} className="wick" />
-                <rect
-                  x={x - bodyWidth / 2}
-                  y={bodyTop}
-                  width={bodyWidth}
-                  height={bodyHeight}
-                  rx="2"
-                  className="candle-body"
-                />
-              </g>
-            );
-          })}
-
-        <line x1={left} x2={right} y1={currentY} y2={currentY} className="current-price-line" />
-
-        <rect x={priceLabelX - 8} y={currentY - 19} width="76" height="38" rx="9" className="price-pill" />
-
-        <text x={priceLabelX + 30} y={currentY + 6} textAnchor="middle" className="price-pill-text">
-          {formatPrice(currentPrice, selectedAsset.precision)}
-        </text>
-
-        <line x1={expiryX} x2={expiryX} y1={top - 2} y2={bottom} className="expiry-line" />
-
-        <path
-          d={`M ${expiryX} ${top - 2} L ${expiryX + 28} ${top - 2} L ${expiryX} ${top + 18} Z`}
-          className="expiry-flag"
-        />
-
-        <text x={expiryX + 34} y={top + 20} className="expiry-text">
-          Expiration time
-        </text>
-
-        {Array.from({ length: 6 }).map((_, index) => {
-          const price = paddedMax - ((paddedMax - paddedMin) / 5) * index;
-          const y = yFor(price);
-
-          return (
-            <text key={`price-${index}`} x={priceLabelX + 6} y={y + 4} className="scale-text">
-              {formatPrice(price, selectedAsset.precision)}
-            </text>
-          );
-        })}
-
-        {["13:16", "13:32", "13:48", "14:04"].map((label, index) => {
-          const x = left + ((right - left) / 3) * index;
-
-          return (
-            <text key={label} x={x} y={bottom + 38} className="time-text">
-              {label}
-            </text>
-          );
-        })}
-
-        <text x={right - 86} y={currentY - 21} className="tf-floating">
-          {timeframe}
-        </text>
-
-        {activeTrades.map((trade, index) => {
-          const y = yFor(trade.entryPrice);
-          const x = 96 + index * 10;
-          const label = `${trade.direction} ${formatCurrency(trade.amount, trade.currency)}`;
-
-          return (
-            <g key={trade.id}>
-              <line
-                x1={left}
-                x2={right}
-                y1={y}
-                y2={y}
-                className={trade.direction === "BUY" ? "trade-line-buy" : "trade-line-sell"}
-              />
-
-              <rect
-                x={x}
-                y={y - 19}
-                width="156"
-                height="38"
-                rx="9"
-                className={trade.direction === "BUY" ? "trade-label-buy" : "trade-label-sell"}
-              />
-
-              <text x={x + 78} y={y + 6} textAnchor="middle" className="trade-label-text">
-                {label}
-              </text>
-            </g>
-          );
-        })}
-
-        {resultMarkers.map((marker) => {
-          const y = yFor(marker.closePrice);
-          const text = marker.won
-            ? `✓ ${formatCurrency(marker.amount, marker.currency)}`
-            : `✕ ${formatCurrency(0, marker.currency)}`;
-
-          return (
-            <g key={marker.id}>
-              <rect
-                x={right - 230}
-                y={y - 24}
-                width="190"
-                height="44"
-                rx="12"
-                className={marker.won ? "result-win" : "result-loss"}
-              />
-
-              <text x={right - 135} y={y + 5} textAnchor="middle" className="result-text">
-                {text}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
-    );
+      return [...items, indicator];
+    });
   }
 
   return (
@@ -1008,10 +1020,15 @@ export default function TradingPage() {
         <aside className="left-sidebar">
           <div className="brand-mini">N</div>
 
-          {LEFT_NAV.map(([icon, label]) => (
-            <button key={label} className="nav-button" type="button">
-              <span className="nav-icon">{icon}</span>
-              <span className="nav-label">{label}</span>
+          {LEFT_NAV.map((item) => (
+            <button
+              key={item.label}
+              className={`nav-button ${activeNav === item.label ? "active" : ""}`}
+              type="button"
+              onClick={() => handleNavClick(item)}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
             </button>
           ))}
         </aside>
@@ -1085,92 +1102,29 @@ export default function TradingPage() {
                               setSelectedAsset(asset);
                               setAssetCategory(asset.category);
                               setAssetOpen(false);
+                              scaleRef.current = null;
                             }}
                           >
                             <span>{asset.symbol}</span>
                             <strong>+{asset.payout}%</strong>
                           </button>
                         ))}
-
-                        {filteredAssets.length === 0 && (
-                          <button type="button">
-                            <span>No assets loaded</span>
-                            <strong>--</strong>
-                          </button>
-                        )}
                       </div>
                     </div>
                   )}
                 </div>
 
-                <div className="menu-wrap">
-                  <button type="button" className="tool-button" onClick={() => setTimeframeOpen((value) => !value)}>
-                    📊 {timeframe}
-                  </button>
+                <button type="button" className="tool-button" onClick={() => setTimeframeOpen((value) => !value)}>
+                  📊 {timeframe}
+                </button>
 
-                  {timeframeOpen && (
-                    <div className="small-menu timeframe-menu">
-                      {TIMEFRAMES.map((item) => (
-                        <button
-                          key={item}
-                          type="button"
-                          className={item === timeframe ? "active" : ""}
-                          onClick={() => {
-                            setTimeframe(item);
-                            setTimeframeOpen(false);
-                          }}
-                        >
-                          {item}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <button type="button" className="tool-button" onClick={() => setIndicatorOpen((value) => !value)}>
+                  Indicators
+                </button>
 
-                <div className="menu-wrap">
-                  <button type="button" className="tool-button" onClick={() => setIndicatorOpen((value) => !value)}>
-                    📶 Indicators
-                  </button>
-
-                  {indicatorOpen && (
-                    <div className="indicator-menu">
-                      {INDICATORS.map((indicator) => (
-                        <button
-                          key={indicator}
-                          type="button"
-                          className={selectedIndicators.includes(indicator) ? "active" : ""}
-                          onClick={() => toggleIndicator(indicator)}
-                        >
-                          {indicator}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="menu-wrap">
-                  <button type="button" className="tool-button" onClick={() => setToolsOpen((value) => !value)}>
-                    ✎ {drawingTool}
-                  </button>
-
-                  {toolsOpen && (
-                    <div className="small-menu">
-                      {DRAWING_TOOLS.map((tool) => (
-                        <button
-                          key={tool}
-                          type="button"
-                          className={tool === drawingTool ? "active" : ""}
-                          onClick={() => {
-                            setDrawingTool(tool);
-                            setToolsOpen(false);
-                          }}
-                        >
-                          {tool}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <button type="button" className="tool-button" onClick={() => setToolsOpen((value) => !value)}>
+                  ✎ {drawingTool}
+                </button>
 
                 <div className="chart-type-row">
                   {CHART_TYPES.map((type) => (
@@ -1184,17 +1138,69 @@ export default function TradingPage() {
                     </button>
                   ))}
                 </div>
+
+                {timeframeOpen && (
+                  <div className="small-menu timeframe-menu">
+                    {TIMEFRAMES.map((item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        className={item === timeframe ? "active" : ""}
+                        onClick={() => {
+                          setTimeframe(item);
+                          setTimeframeOpen(false);
+                          scaleRef.current = null;
+                        }}
+                      >
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {indicatorOpen && (
+                  <div className="indicator-menu">
+                    {INDICATORS.map((indicator) => (
+                      <button
+                        key={indicator}
+                        type="button"
+                        className={selectedIndicators.includes(indicator) ? "active" : ""}
+                        onClick={() => toggleIndicator(indicator)}
+                      >
+                        {indicator}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {toolsOpen && (
+                  <div className="small-menu tools-menu">
+                    {DRAWING_TOOLS.map((tool) => (
+                      <button
+                        key={tool}
+                        type="button"
+                        className={tool === drawingTool ? "active" : ""}
+                        onClick={() => {
+                          setDrawingTool(tool);
+                          setToolsOpen(false);
+                        }}
+                      >
+                        {tool}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="chart-info-row">
                 <span>{new Date(serverTime).toLocaleTimeString()} UTC+3</span>
-                <span>{streamStatus === "live" ? "Backend OTC stream live" : "Connecting OTC stream..."}</span>
+                <span>{streamStatus === "live" ? "Backend OTC stream live" : "Low-latency fallback active"}</span>
                 <span>{selectedAsset.displayName}</span>
                 <span>Current price {formatPrice(currentPrice, selectedAsset.precision)}</span>
               </div>
 
               <div className="chart-stage">
-                {renderChart()}
+                <canvas ref={canvasRef} className="trading-canvas" />
 
                 <div className="chart-bottom-tag">
                   <button type="button">←</button>
@@ -1238,35 +1244,23 @@ export default function TradingPage() {
 
                 <div className="unit-grid">
                   <div>
-                    <button type="button" onClick={() => handleExpiryChange("hours", 1)}>
-                      +
-                    </button>
+                    <button type="button" onClick={() => handleExpiryChange("hours", 1)}>+</button>
                     <strong>{String(expiryParts.hours).padStart(2, "0")}</strong>
-                    <button type="button" onClick={() => handleExpiryChange("hours", -1)}>
-                      -
-                    </button>
+                    <button type="button" onClick={() => handleExpiryChange("hours", -1)}>-</button>
                     <span>Hours</span>
                   </div>
 
                   <div>
-                    <button type="button" onClick={() => handleExpiryChange("minutes", 1)}>
-                      +
-                    </button>
+                    <button type="button" onClick={() => handleExpiryChange("minutes", 1)}>+</button>
                     <strong>{String(expiryParts.minutes).padStart(2, "0")}</strong>
-                    <button type="button" onClick={() => handleExpiryChange("minutes", -1)}>
-                      -
-                    </button>
+                    <button type="button" onClick={() => handleExpiryChange("minutes", -1)}>-</button>
                     <span>Minutes</span>
                   </div>
 
                   <div>
-                    <button type="button" onClick={() => handleExpiryChange("seconds", 1)}>
-                      +
-                    </button>
+                    <button type="button" onClick={() => handleExpiryChange("seconds", 1)}>+</button>
                     <strong>{String(expiryParts.seconds).padStart(2, "0")}</strong>
-                    <button type="button" onClick={() => handleExpiryChange("seconds", -1)}>
-                      -
-                    </button>
+                    <button type="button" onClick={() => handleExpiryChange("seconds", -1)}>-</button>
                     <span>Seconds</span>
                   </div>
                 </div>
@@ -1298,17 +1292,19 @@ export default function TradingPage() {
                 </div>
               </section>
 
-              <button type="button" className="buy-button" disabled={!canTrade} onClick={() => handleTrade("BUY")}>
-                ↗ BUY
-              </button>
+              <div className="trade-actions">
+                <button type="button" className="buy-button" disabled={!canTrade} onClick={() => handleTrade("BUY")}>
+                  ↗ BUY
+                </button>
 
-              <button type="button" className="ai-button">
-                AI TRADING
-              </button>
+                <button type="button" className="ai-button">
+                  AI TRADING
+                </button>
 
-              <button type="button" className="sell-button" disabled={!canTrade} onClick={() => handleTrade("SELL")}>
-                ↘ SELL
-              </button>
+                <button type="button" className="sell-button" disabled={!canTrade} onClick={() => handleTrade("SELL")}>
+                  ↘ SELL
+                </button>
+              </div>
             </aside>
           </section>
         </section>
