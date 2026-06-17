@@ -626,34 +626,24 @@ export default function TradingPage() {
   });
 
   function applyFrontendMicroMotion() {
-  /*
-    Important:
-    If the backend stream is live, do NOT add extra frontend price movement.
-    The previous version was too fast because frontend micro-motion was
-    moving candles on top of backend ticks.
-  */
   if (streamLiveRef.current) {
     return;
   }
-
-  const now = Date.now();
-
-  if (now - lastFrontendMotionRef.current < 650) {
-    return;
-  }
-
-  lastFrontendMotionRef.current = now;
 
   const candles = candlesRef.current;
   const last = candles[candles.length - 1];
 
   if (!last) return;
 
-  const softPulse = Math.sin(now / 2400) * selectedAsset.volatility * 0.035;
-  const noise = randomNormal() * selectedAsset.volatility * 0.13;
-  const microMove = softPulse + noise;
+  const now = Date.now();
 
-  const nextPrice = Math.max(0.00000001, priceRef.current + microMove);
+  if (now - lastFallbackCandleRef.current < 650) {
+    return;
+  }
+
+  const softPulse = Math.sin(now / 2800) * selectedAsset.volatility * 0.025;
+  const noise = randomNormal() * selectedAsset.volatility * 0.08;
+  const nextPrice = Math.max(0.00000001, priceRef.current + softPulse + noise);
 
   priceRef.current = nextPrice;
 
@@ -661,7 +651,7 @@ export default function TradingPage() {
   last.high = Math.max(last.high, nextPrice);
   last.low = Math.min(last.low, nextPrice);
 
-  if (now - lastFallbackCandleRef.current >= timeframeToMs(timeframe)) {
+  if (now - last.time >= timeframeToMs(timeframe)) {
     last.closed = true;
 
     candles.push({
@@ -678,9 +668,9 @@ export default function TradingPage() {
     if (candles.length > 120) {
       candles.shift();
     }
-
-    lastFallbackCandleRef.current = now;
   }
+
+  lastFallbackCandleRef.current = now;
 }
 
   function drawCanvas() {
