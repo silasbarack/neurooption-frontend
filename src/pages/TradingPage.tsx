@@ -429,6 +429,7 @@ export default function TradingPage() {
   const frameRef = React.useRef<number | null>(null);
   const streamLiveRef = React.useRef(false);
   const lastFallbackCandleRef = React.useRef(Date.now());
+  const lastFrontendMotionRef = React.useRef(0);
 
   const [assets, setAssets] = React.useState<OtcAsset[]>(FALLBACK_ASSETS);
   const [selectedAsset, setSelectedAsset] = React.useState<OtcAsset>(FALLBACK_ASSETS[0]);
@@ -625,40 +626,62 @@ export default function TradingPage() {
   });
 
   function applyFrontendMicroMotion() {
-    const candles = candlesRef.current;
-    const last = candles[candles.length - 1];
-
-    if (!last) return;
-
-    const microMove =
-      Math.sin(Date.now() / 170) * selectedAsset.volatility * 0.018 +
-      randomNormal() * selectedAsset.volatility * 0.022;
-
-    const nextPrice = Math.max(0.00000001, priceRef.current + microMove);
-    priceRef.current = nextPrice;
-
-    last.close = nextPrice;
-    last.high = Math.max(last.high, nextPrice);
-    last.low = Math.min(last.low, nextPrice);
-
-    if (!streamLiveRef.current && Date.now() - lastFallbackCandleRef.current >= timeframeToMs(timeframe)) {
-      last.closed = true;
-
-      candles.push({
-        symbol: selectedAsset.symbol,
-        timeframe,
-        time: Date.now(),
-        open: nextPrice,
-        high: nextPrice,
-        low: nextPrice,
-        close: nextPrice,
-        closed: false,
-      });
-
-      if (candles.length > 120) candles.shift();
-      lastFallbackCandleRef.current = Date.now();
-    }
+  /*
+    Important:
+    If the backend stream is live, do NOT add extra frontend price movement.
+    The previous version was too fast because frontend micro-motion was
+    moving candles on top of backend ticks.
+  */
+  if (streamLiveRef.current) {
+    return;
   }
+
+  const now = Date.now();
+
+  if (now - lastFrontendMotionRef.current < 650) {
+    return;
+  }
+
+  lastFrontendMotionRef.current = now;
+
+  const candles = candlesRef.current;
+  const last = candles[candles.length - 1];
+
+  if (!last) return;
+
+  const softPulse = Math.sin(now / 2400) * selectedAsset.volatility * 0.035;
+  const noise = randomNormal() * selectedAsset.volatility * 0.13;
+  const microMove = softPulse + noise;
+
+  const nextPrice = Math.max(0.00000001, priceRef.current + microMove);
+
+  priceRef.current = nextPrice;
+
+  last.close = nextPrice;
+  last.high = Math.max(last.high, nextPrice);
+  last.low = Math.min(last.low, nextPrice);
+
+  if (now - lastFallbackCandleRef.current >= timeframeToMs(timeframe)) {
+    last.closed = true;
+
+    candles.push({
+      symbol: selectedAsset.symbol,
+      timeframe,
+      time: now,
+      open: nextPrice,
+      high: nextPrice,
+      low: nextPrice,
+      close: nextPrice,
+      closed: false,
+    });
+
+    if (candles.length > 120) {
+      candles.shift();
+    }
+
+    lastFallbackCandleRef.current = now;
+  }
+}
 
   function drawCanvas() {
     const canvas = canvasRef.current;
