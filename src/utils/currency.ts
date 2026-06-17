@@ -1,60 +1,42 @@
 import type { AccountCurrency } from "../types/auth.types";
 
-export const EXCHANGE_RATES_TO_USD: Record<AccountCurrency, number> = {
+export const LOCAL_EXCHANGE_RATES: Record<AccountCurrency, number> = {
   USD: 1,
   KES: 129,
   UGX: 3720,
-  TZS: 2600,
-  NGN: 1500,
-  XOF: 610,
+  TZS: 2550,
+  NGN: 1510,
+  XOF: 604,
   EUR: 0.92,
-  CAD: 1.37,
+  CAD: 1.36,
   JPY: 157,
-  CNY: 7.25,
-  AOA: 890,
+  CNY: 7.24,
+  AOA: 865,
   ZAR: 18.2,
-  BRL: 5.45,
+  BRL: 5.42,
 };
 
-export const CURRENCY_SYMBOLS: Record<AccountCurrency, string> = {
-  USD: "$",
-  KES: "KES",
-  UGX: "UGX",
-  TZS: "TZS",
-  NGN: "₦",
-  XOF: "XOF",
-  EUR: "€",
-  CAD: "CAD",
-  JPY: "¥",
-  CNY: "¥",
-  AOA: "AOA",
-  ZAR: "R",
-  BRL: "R$",
-};
-
-export function convertFromUsd(amountUsd: number, currency: AccountCurrency): number {
-  const rate = EXCHANGE_RATES_TO_USD[currency] ?? 1;
-  return amountUsd * rate;
+export function convertFromUsd(amountUsd: number, currency: AccountCurrency) {
+  return amountUsd * LOCAL_EXCHANGE_RATES[currency];
 }
 
-export function convertToUsd(amount: number, currency: AccountCurrency): number {
-  const rate = EXCHANGE_RATES_TO_USD[currency] ?? 1;
-  return amount / rate;
+export function convertToUsd(amount: number, currency: AccountCurrency) {
+  return amount / LOCAL_EXCHANGE_RATES[currency];
 }
 
-export function formatCurrency(amount: number, currency: AccountCurrency): string {
-  const symbol = CURRENCY_SYMBOLS[currency];
+export function formatCurrency(amount: number, currency: AccountCurrency) {
+  const decimals = currency === "JPY" || currency === "UGX" || currency === "TZS" || currency === "XOF" ? 0 : 2;
 
-  const hasDecimals = Math.abs(amount % 1) > 0.001;
+  const formatted = amount.toLocaleString("en-US", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
 
-  const formatted = new Intl.NumberFormat("en-US", {
-    minimumFractionDigits: hasDecimals ? 2 : 0,
-    maximumFractionDigits: 2,
-  }).format(amount);
-
-  if (currency === "USD" || currency === "EUR" || currency === "JPY" || currency === "CNY" || currency === "NGN" || currency === "ZAR" || currency === "BRL") {
-    return `${symbol}${formatted}`;
-  }
+  if (currency === "USD") return `$${formatted}`;
+  if (currency === "EUR") return `€${formatted}`;
+  if (currency === "JPY") return `¥${formatted}`;
+  if (currency === "ZAR") return `R${formatted}`;
+  if (currency === "BRL") return `R$${formatted}`;
 
   return `${currency} ${formatted}`;
 }

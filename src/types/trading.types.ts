@@ -26,12 +26,20 @@ export type ChartType = "Candlesticks" | "Heiken Ashi" | "Bars" | "Line";
 
 export type TradeSide = "BUY" | "SELL";
 
-export type Asset = {
+export type TradingAsset = {
+  id?: string;
   symbol: string;
   label: string;
+  name?: string;
   category: AssetCategory;
   basePrice: number;
   precision: number;
+  payoutBoost?: number;
+  payout?: number;
+  isOtc?: boolean;
+};
+
+export type Asset = TradingAsset & {
   payoutBoost: number;
 };
 
@@ -55,6 +63,10 @@ export type ResultMarker = {
   price: number;
   won: boolean;
   label: string;
+};
+
+export type TradingAssetResponse = {
+  assets: TradingAsset[];
 };
 
 export type TradePayload = {

@@ -1,3 +1,18 @@
+export type AccountCurrency =
+  | "USD"
+  | "KES"
+  | "UGX"
+  | "TZS"
+  | "NGN"
+  | "XOF"
+  | "EUR"
+  | "CAD"
+  | "JPY"
+  | "CNY"
+  | "AOA"
+  | "ZAR"
+  | "BRL";
+
 export type MessageResponse = {
   message: string;
 };
@@ -9,6 +24,7 @@ export type AuthUser = {
   name?: string;
   role?: string;
   status?: string;
+  kycStatus?: string;
   createdAt?: string;
   updatedAt?: string;
 };
