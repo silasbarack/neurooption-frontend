@@ -320,11 +320,11 @@ function createFallbackCandles(asset: OtcAsset, timeframe: OtcTimeframe, count =
 
   for (let index = 0; index < count; index += 1) {
     const open = price;
-    const impulse = Math.sin(index / 5.4) * asset.volatility * 0.45;
-    const noise = randomNormal() * asset.volatility * 0.95;
+    const impulse = Math.sin(index / 5.4) * asset.volatility * 0.35;
+    const noise = randomNormal() * asset.volatility * 0.58;
     const close = Math.max(0.00000001, open + impulse + noise);
-    const high = Math.max(open, close) + Math.abs(randomNormal()) * asset.volatility * 1.4;
-    const low = Math.min(open, close) - Math.abs(randomNormal()) * asset.volatility * 1.4;
+    const high = Math.max(open, close) + Math.abs(randomNormal()) * asset.volatility * 0.85;
+    const low = Math.min(open, close) - Math.abs(randomNormal()) * asset.volatility * 0.85;
 
     candles.push({
       symbol: asset.symbol,
@@ -428,8 +428,8 @@ export default function TradingPage() {
   const scaleRef = React.useRef<{ min: number; max: number } | null>(null);
   const frameRef = React.useRef<number | null>(null);
   const streamLiveRef = React.useRef(false);
-  const lastFallbackCandleRef = React.useRef(Date.now());
-  const lastFrontendMotionRef = React.useRef(0);
+  const fallbackTickRef = React.useRef(Date.now());
+  const fallbackCandleOpenRef = React.useRef(Date.now());
 
   const [assets, setAssets] = React.useState<OtcAsset[]>(FALLBACK_ASSETS);
   const [selectedAsset, setSelectedAsset] = React.useState<OtcAsset>(FALLBACK_ASSETS[0]);
@@ -498,6 +498,7 @@ export default function TradingPage() {
           setAssets(data.assets);
 
           const found = data.assets.find((asset) => asset.symbol === selectedAsset.symbol);
+
           if (!found) {
             setSelectedAsset(data.assets[0]);
             setAssetCategory(data.assets[0].category);
@@ -525,14 +526,18 @@ export default function TradingPage() {
         if (isCandlesResponse(data) && data.candles.length > 0) {
           candlesRef.current = data.candles;
           priceRef.current = data.candles[data.candles.length - 1].close;
+          fallbackCandleOpenRef.current = Date.now();
           setCurrentPrice(priceRef.current);
           scaleRef.current = null;
           return;
         }
+
+        throw new Error("Invalid candle response");
       } catch {
         const fallback = createFallbackCandles(selectedAsset, timeframe);
         candlesRef.current = fallback;
         priceRef.current = fallback[fallback.length - 1].close;
+        fallbackCandleOpenRef.current = Date.now();
         setCurrentPrice(priceRef.current);
         scaleRef.current = null;
       }
@@ -602,7 +607,7 @@ export default function TradingPage() {
     const uiTimer = window.setInterval(() => {
       setCurrentPrice(priceRef.current);
       setServerTime(Date.now());
-    }, 220);
+    }, 350);
 
     return () => {
       window.clearInterval(uiTimer);
@@ -611,7 +616,7 @@ export default function TradingPage() {
 
   React.useEffect(() => {
     function animate() {
-      applyFrontendMicroMotion();
+      applyModerateFallbackMotion();
       drawCanvas();
       frameRef.current = window.requestAnimationFrame(animate);
     }
@@ -623,55 +628,57 @@ export default function TradingPage() {
         window.cancelAnimationFrame(frameRef.current);
       }
     };
-  });
+  }, [chartType, selectedAsset, timeframe]);
 
-  function applyFrontendMicroMotion() {
-  if (streamLiveRef.current) {
-    return;
-  }
+  function applyModerateFallbackMotion() {
+    if (streamLiveRef.current) {
+      return;
+    }
 
-  const candles = candlesRef.current;
-  const last = candles[candles.length - 1];
+    const now = Date.now();
 
-  if (!last) return;
+    if (now - fallbackTickRef.current < 650) {
+      return;
+    }
 
-  const now = Date.now();
+    fallbackTickRef.current = now;
 
-  if (now - lastFallbackCandleRef.current < 650) {
-    return;
-  }
+    const candles = candlesRef.current;
+    const last = candles[candles.length - 1];
 
-  const softPulse = Math.sin(now / 2800) * selectedAsset.volatility * 0.025;
-  const noise = randomNormal() * selectedAsset.volatility * 0.08;
-  const nextPrice = Math.max(0.00000001, priceRef.current + softPulse + noise);
+    if (!last) return;
 
-  priceRef.current = nextPrice;
+    const softPulse = Math.sin(now / 2800) * selectedAsset.volatility * 0.025;
+    const noise = randomNormal() * selectedAsset.volatility * 0.08;
+    const nextPrice = Math.max(0.00000001, priceRef.current + softPulse + noise);
 
-  last.close = nextPrice;
-  last.high = Math.max(last.high, nextPrice);
-  last.low = Math.min(last.low, nextPrice);
+    priceRef.current = nextPrice;
 
-  if (now - last.time >= timeframeToMs(timeframe)) {
-    last.closed = true;
+    last.close = nextPrice;
+    last.high = Math.max(last.high, nextPrice);
+    last.low = Math.min(last.low, nextPrice);
 
-    candles.push({
-      symbol: selectedAsset.symbol,
-      timeframe,
-      time: now,
-      open: nextPrice,
-      high: nextPrice,
-      low: nextPrice,
-      close: nextPrice,
-      closed: false,
-    });
+    if (now - fallbackCandleOpenRef.current >= timeframeToMs(timeframe)) {
+      last.closed = true;
 
-    if (candles.length > 120) {
-      candles.shift();
+      candles.push({
+        symbol: selectedAsset.symbol,
+        timeframe,
+        time: now,
+        open: nextPrice,
+        high: nextPrice,
+        low: nextPrice,
+        close: nextPrice,
+        closed: false,
+      });
+
+      if (candles.length > 120) {
+        candles.shift();
+      }
+
+      fallbackCandleOpenRef.current = now;
     }
   }
-
-  lastFallbackCandleRef.current = now;
-}
 
   function drawCanvas() {
     const canvas = canvasRef.current;
@@ -771,8 +778,8 @@ export default function TradingPage() {
         max: targetMax,
       };
     } else {
-      scaleRef.current.min += (targetMin - scaleRef.current.min) * 0.08;
-      scaleRef.current.max += (targetMax - scaleRef.current.max) * 0.08;
+      scaleRef.current.min += (targetMin - scaleRef.current.min) * 0.06;
+      scaleRef.current.max += (targetMax - scaleRef.current.max) * 0.06;
     }
 
     const chartMin = scaleRef.current.min;
@@ -1207,7 +1214,7 @@ export default function TradingPage() {
 
               <div className="chart-info-row">
                 <span>{new Date(serverTime).toLocaleTimeString()} UTC+3</span>
-                <span>{streamStatus === "live" ? "Backend OTC stream live" : "Low-latency fallback active"}</span>
+                <span>{streamStatus === "live" ? "Backend OTC stream live" : "Moderate fallback active"}</span>
                 <span>{selectedAsset.displayName}</span>
                 <span>Current price {formatPrice(currentPrice, selectedAsset.precision)}</span>
               </div>
