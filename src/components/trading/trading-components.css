@@ -1166,31 +1166,31 @@ button:disabled {
     font-size: 14px;
   }
 }
-/* PocketOption-style compact correction */
+/* Compact PocketOption-style trading panel correction */
 .nt-pocket-panel {
-  padding: 10px;
+  padding: 9px;
   gap: 8px;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(33, 45, 73, 0.95), rgba(20, 29, 52, 0.98));
+  background: linear-gradient(180deg, rgba(34, 47, 76, 0.96), rgba(20, 29, 52, 0.98));
 }
 
 .nt-pocket-sentiment {
   height: 22px;
   display: grid;
-  grid-template-columns: 42px 1fr 42px;
+  grid-template-columns: 38px 1fr 38px;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   color: #8dff9a;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 900;
 }
 
 .nt-pocket-sentiment div {
-  height: 12px;
+  height: 11px;
   border-radius: 999px;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(90deg, #36d566 0 50%, #ff4a45 50% 100%);
+  background: linear-gradient(90deg, #37d66b 0 50%, #ff4c45 50% 100%);
 }
 
 .nt-pocket-sentiment i {
@@ -1200,13 +1200,7 @@ button:disabled {
   left: 50%;
   width: 4px;
   border-radius: 999px;
-  background: #d9e7ff;
-}
-
-.nt-pocket-input-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
+  background: #dce9ff;
 }
 
 .nt-pocket-field {
@@ -1221,26 +1215,72 @@ button:disabled {
 }
 
 .nt-pocket-input {
-  width: 100%;
-  height: 44px;
+  height: 38px;
   display: grid;
-  grid-template-columns: 1fr 42px;
+  grid-template-columns: 38px 1fr 38px;
   align-items: center;
-  border-radius: 10px;
   overflow: hidden;
+  border-radius: 10px;
   background: rgba(8, 13, 27, 0.78);
   border: 1px solid rgba(164, 193, 255, 0.08);
 }
 
-.nt-pocket-input strong {
-  padding-left: 12px;
+.nt-pocket-input button {
+  width: 38px;
+  height: 38px;
+  border: 0;
   color: #ffffff;
+  background: rgba(255, 255, 255, 0.07);
   font-size: 17px;
+  font-weight: 900;
+}
+
+.nt-pocket-input strong {
+  color: #ffffff;
+  text-align: center;
+  font-size: 16px;
   font-weight: 900;
   letter-spacing: 0.01em;
 }
 
-.nt-pocket-input input {
+.nt-pocket-expiry-line {
+  height: 24px;
+  margin-top: 5px;
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.nt-pocket-expiry-line button,
+.nt-pocket-expiry-line span {
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  color: #dce9ff;
+  background: rgba(68, 91, 139, 0.48);
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.nt-pocket-expiry-line button {
+  color: #ffffff;
+  background: linear-gradient(135deg, #48d8ff, #2878f2);
+}
+
+.nt-pocket-amount {
+  height: 42px;
+  display: grid;
+  grid-template-columns: 1fr 58px;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgba(8, 13, 27, 0.82);
+  border: 1px solid rgba(164, 193, 255, 0.08);
+}
+
+.nt-pocket-amount input {
   width: 100%;
   min-width: 0;
   border: 0;
@@ -1252,69 +1292,28 @@ button:disabled {
   font-weight: 900;
 }
 
-.nt-pocket-input span {
+.nt-pocket-amount span {
   color: #ffffff;
+  text-align: center;
   font-size: 13px;
   font-weight: 900;
-  text-align: center;
-}
-
-.nt-pocket-input button {
-  width: 42px;
-  height: 44px;
-  border: 0;
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.07);
-  font-size: 18px;
-}
-
-.nt-pocket-expiry-mini {
-  height: 26px;
-  margin-top: 5px;
-  display: grid;
-  grid-template-columns: 30px 1fr 1fr 1fr 30px;
-  gap: 4px;
-  align-items: center;
-}
-
-.nt-pocket-expiry-mini button,
-.nt-pocket-expiry-mini span {
-  height: 26px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 8px;
-  color: #dce9ff;
-  background: rgba(68, 91, 139, 0.48);
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.nt-pocket-expiry-mini button {
-  background: linear-gradient(135deg, #48d8ff, #2778f3);
-  color: #ffffff;
-  font-size: 15px;
-}
-
-.nt-pocket-expiry-mini.amount-mini {
-  grid-template-columns: 30px 1fr 30px;
 }
 
 .nt-pocket-payout {
-  min-height: 58px;
-  padding: 8px 10px;
+  min-height: 54px;
+  padding: 7px 9px;
   display: grid;
-  grid-template-columns: 1fr 0.8fr 1fr;
+  grid-template-columns: 1fr 0.75fr 1fr;
   align-items: center;
-  gap: 8px;
-  border-radius: 12px;
+  gap: 6px;
+  border-radius: 11px;
   background: rgba(8, 13, 27, 0.52);
   border: 1px dashed rgba(143, 174, 235, 0.16);
 }
 
 .nt-pocket-payout div {
   display: grid;
-  gap: 3px;
+  gap: 2px;
 }
 
 .nt-pocket-payout .center {
@@ -1323,29 +1322,29 @@ button:disabled {
 
 .nt-pocket-payout span {
   color: #aebbd2;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
 }
 
 .nt-pocket-payout strong {
   color: #80ff91;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 900;
 }
 
 .nt-pocket-actions {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 8px;
+  gap: 7px;
   margin-top: auto;
 }
 
 .nt-pocket-actions button {
-  height: 44px;
+  height: 42px;
   border: 0;
   border-radius: 10px;
   color: #ffffff;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 900;
 }
 
@@ -1355,11 +1354,11 @@ button:disabled {
 }
 
 .nt-pocket-actions .buy {
-  background: linear-gradient(135deg, #71ed7a, #31bd52);
+  background: linear-gradient(135deg, #72ed7d, #31bd52);
 }
 
 .nt-pocket-actions .sell {
-  background: linear-gradient(135deg, #ff837a, #ef3b35);
+  background: linear-gradient(135deg, #ff8279, #ef3b35);
 }
 
 .nt-pocket-actions .ai {
@@ -1367,20 +1366,20 @@ button:disabled {
 }
 
 .nt-pocket-actions .ai span {
-  width: 28px;
-  height: 28px;
+  width: 25px;
+  height: 25px;
   display: inline-grid;
   place-items: center;
-  margin-right: 8px;
+  margin-right: 6px;
   border-radius: 50%;
-  color: #5ad5ff;
+  color: #56cfff;
   background: #ffffff;
   font-weight: 900;
 }
 
 @media (max-width: 980px) {
   .nt-pocket-panel {
-    height: 250px;
+    height: 240px;
     padding: 8px;
     gap: 6px;
   }
@@ -1390,50 +1389,31 @@ button:disabled {
     font-size: 12px;
   }
 
-  .nt-pocket-input-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+  .nt-pocket-field h3 {
+    font-size: 12px;
+    margin-bottom: 4px;
   }
 
-  .nt-pocket-input {
-    height: 40px;
+  .nt-pocket-input,
+  .nt-pocket-amount {
+    height: 38px;
   }
 
-  .nt-pocket-input strong,
-  .nt-pocket-input input {
-    font-size: 16px;
-  }
-
-  .nt-pocket-expiry-mini {
+  .nt-pocket-expiry-line {
     display: none;
   }
 
   .nt-pocket-payout {
-    min-height: 54px;
-    padding: 7px 9px;
-  }
-
-  .nt-pocket-payout span {
-    font-size: 11px;
-  }
-
-  .nt-pocket-payout strong {
-    font-size: 15px;
+    min-height: 50px;
   }
 
   .nt-pocket-actions {
-    grid-template-columns: 1fr 1.4fr 1fr;
-    gap: 8px;
+    grid-template-columns: 1fr 1.35fr 1fr;
+    gap: 7px;
   }
 
   .nt-pocket-actions button {
-    height: 50px;
+    height: 48px;
     font-size: 13px;
-  }
-
-  .nt-pocket-actions .ai span {
-    width: 26px;
-    height: 26px;
-    margin-right: 5px;
   }
 }

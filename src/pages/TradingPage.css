@@ -26,7 +26,7 @@ body,
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-columns: 78px minmax(0, 1fr) 270px 74px;
+  grid-template-columns: 78px minmax(0, 1fr) 238px 74px;
   overflow: hidden;
 }
 
@@ -101,7 +101,7 @@ body,
   .nt-chart-footer {
     left: 12px;
     right: 12px;
-    bottom: 260px;
+    bottom: 250px;
     max-width: none;
   }
 
@@ -119,7 +119,7 @@ body,
 
 @media (max-width: 480px) {
   .nt-chart-footer {
-    bottom: 258px;
+    bottom: 248px;
   }
 
   .nt-chart-footer strong {
