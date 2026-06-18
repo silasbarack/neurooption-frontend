@@ -26,7 +26,7 @@ body,
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr) 322px 78px;
+  grid-template-columns: 78px minmax(0, 1fr) 270px 74px;
   overflow: hidden;
 }
 
@@ -58,10 +58,10 @@ body,
 
 .nt-chart-footer button,
 .nt-chart-footer strong {
-  height: 36px;
+  height: 34px;
   border: 0;
-  border-radius: 11px;
-  padding: 0 14px;
+  border-radius: 10px;
+  padding: 0 13px;
   display: flex;
   align-items: center;
   color: #ffffff;
@@ -101,28 +101,28 @@ body,
   .nt-chart-footer {
     left: 12px;
     right: 12px;
-    bottom: 340px;
+    bottom: 260px;
     max-width: none;
   }
 
   .nt-chart-footer button {
-    height: 36px;
-    padding: 0 13px;
+    height: 34px;
+    padding: 0 12px;
   }
 
   .nt-chart-footer strong {
     flex: 1;
     max-width: none;
-    font-size: 14px;
+    font-size: 13px;
   }
 }
 
 @media (max-width: 480px) {
   .nt-chart-footer {
-    bottom: 332px;
+    bottom: 258px;
   }
 
   .nt-chart-footer strong {
-    font-size: 13px;
+    font-size: 12px;
   }
 }

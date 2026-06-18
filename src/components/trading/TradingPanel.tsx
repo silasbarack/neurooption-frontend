@@ -34,8 +34,8 @@ export default function TradingPanel({
   onTrade,
 }: TradingPanelProps) {
   return (
-    <aside className="nt-trade-panel">
-      <div className="nt-sentiment">
+    <aside className="nt-trade-panel nt-pocket-panel">
+      <div className="nt-pocket-sentiment">
         <span>50%</span>
         <div>
           <i />
@@ -43,98 +43,72 @@ export default function TradingPanel({
         <span>50%</span>
       </div>
 
-      <section className="nt-time-card">
-        <h3>Time ⓘ</h3>
+      <div className="nt-pocket-input-grid">
+        <section className="nt-pocket-field">
+          <h3>Time ⓘ</h3>
 
-        <div className="nt-time-main">
-          <button type="button" onClick={() => onAdjustExpiry("seconds", -1)}>
-            -
-          </button>
-
-          <strong>{expiryText}</strong>
-
-          <button type="button" onClick={() => onAdjustExpiry("seconds", 1)}>
-            +
-          </button>
-        </div>
-
-        <p>Min 00:00:05 · Max 05:00:00</p>
-
-        <div className="nt-expiry-grid">
-          <div>
-            <button type="button" onClick={() => onAdjustExpiry("hours", 1)}>
-              +
+          <div className="nt-pocket-input">
+            <strong>{expiryText}</strong>
+            <button type="button" onClick={() => onAdjustExpiry("seconds", 1)}>
+              ◷
             </button>
-            <strong>{String(expiryParts.hours).padStart(2, "0")}</strong>
-            <button type="button" onClick={() => onAdjustExpiry("hours", -1)}>
-              -
-            </button>
-            <small>Hours</small>
           </div>
 
-          <div>
-            <button type="button" onClick={() => onAdjustExpiry("minutes", 1)}>
-              +
-            </button>
-            <strong>{String(expiryParts.minutes).padStart(2, "0")}</strong>
+          <div className="nt-pocket-expiry-mini">
             <button type="button" onClick={() => onAdjustExpiry("minutes", -1)}>
               -
             </button>
-            <small>Minutes</small>
-          </div>
-
-          <div>
-            <button type="button" onClick={() => onAdjustExpiry("seconds", 1)}>
+            <span>{String(expiryParts.hours).padStart(2, "0")}h</span>
+            <span>{String(expiryParts.minutes).padStart(2, "0")}m</span>
+            <span>{String(expiryParts.seconds).padStart(2, "0")}s</span>
+            <button type="button" onClick={() => onAdjustExpiry("minutes", 1)}>
               +
             </button>
-            <strong>{String(expiryParts.seconds).padStart(2, "0")}</strong>
-            <button type="button" onClick={() => onAdjustExpiry("seconds", -1)}>
+          </div>
+        </section>
+
+        <section className="nt-pocket-field">
+          <h3>Amount ⓘ</h3>
+
+          <label className="nt-pocket-input">
+            <input
+              type="number"
+              min="1"
+              value={amount}
+              onChange={(event) => onAmountChange(event.target.value)}
+            />
+            <span>{currency}</span>
+          </label>
+
+          <div className="nt-pocket-expiry-mini amount-mini">
+            <button type="button" onClick={() => onAmountChange(String(Math.max(1, Number(amount || 0) - 1)))}>
               -
             </button>
-            <small>Seconds</small>
+            <span>Stake</span>
+            <button type="button" onClick={() => onAmountChange(String(Number(amount || 0) + 1))}>
+              +
+            </button>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
-      <section className="nt-amount-card">
-        <h3>Amount ⓘ</h3>
-
-        <label>
-          <input
-            type="number"
-            min="1"
-            inputMode="decimal"
-            value={amount}
-            onChange={(event) => onAmountChange(event.target.value)}
-          />
-          <span>{currency}</span>
-        </label>
-      </section>
-
-      <section className="nt-payout-card">
+      <section className="nt-pocket-payout">
         <div>
-          <span>Rate</span>
+          <span>Payout</span>
+          <strong>{expectedReturnText}</strong>
+        </div>
+
+        <div className="center">
           <strong>+{payout}%</strong>
         </div>
 
         <div>
-          <span>Expected profit</span>
+          <span>Profit</span>
           <strong>{expectedProfitText}</strong>
-        </div>
-
-        <div>
-          <span>Expected return</span>
-          <strong>{expectedReturnText}</strong>
         </div>
       </section>
 
-      {!canTrade && (
-        <p className="nt-trade-warning">
-          Enter a valid amount within your account balance.
-        </p>
-      )}
-
-      <div className="nt-trade-actions">
+      <div className="nt-pocket-actions">
         <button
           type="button"
           className="buy"
@@ -145,7 +119,8 @@ export default function TradingPanel({
         </button>
 
         <button type="button" className="ai">
-          AI TRADING
+          <span>AI</span>
+          TRADING
         </button>
 
         <button

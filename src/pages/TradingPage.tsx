@@ -28,6 +28,11 @@ import type {
 
 type BalancesUsd = Record<AccountType, number>;
 
+const MIN_EXPIRY_SECONDS = 5;
+const MAX_EXPIRY_SECONDS = 5 * 60 * 60;
+const LIVE_TICK_MS = 850;
+const M1_CANDLE_MS = 60_000;
+
 const CURRENCY_SYMBOLS: Record<Currency, string> = {
   USD: "$",
   KES: "KES",
@@ -48,11 +53,11 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
-function getAssetVolatility(asset: Asset) {
-  if (asset.basePrice < 5) return asset.basePrice * 0.00085;
-  if (asset.basePrice < 200) return asset.basePrice * 0.0018;
-  if (asset.basePrice < 5000) return asset.basePrice * 0.0011;
-  return asset.basePrice * 0.00085;
+function getFxStyleVolatility(asset: Asset) {
+  if (asset.basePrice < 3) return asset.basePrice * 0.00055;
+  if (asset.basePrice < 200) return asset.basePrice * 0.00075;
+  if (asset.basePrice < 5000) return asset.basePrice * 0.00045;
+  return asset.basePrice * 0.00032;
 }
 
 function formatMoney(value: number, currency: Currency) {
@@ -69,7 +74,13 @@ function formatMoney(value: number, currency: Currency) {
     maximumFractionDigits: decimals,
   });
 
-  if (currency === "USD" || currency === "EUR" || currency === "JPY" || currency === "ZAR" || currency === "BRL") {
+  if (
+    currency === "USD" ||
+    currency === "EUR" ||
+    currency === "JPY" ||
+    currency === "ZAR" ||
+    currency === "BRL"
+  ) {
     return `${symbol}${formatted}`;
   }
 
@@ -77,7 +88,7 @@ function formatMoney(value: number, currency: Currency) {
 }
 
 function formatExpiry(totalSeconds: number) {
-  const safeSeconds = clamp(totalSeconds, 5, 18000);
+  const safeSeconds = clamp(totalSeconds, MIN_EXPIRY_SECONDS, MAX_EXPIRY_SECONDS);
   const hours = Math.floor(safeSeconds / 3600);
   const minutes = Math.floor((safeSeconds % 3600) / 60);
   const seconds = safeSeconds % 60;
@@ -86,7 +97,7 @@ function formatExpiry(totalSeconds: number) {
 }
 
 function splitExpiry(totalSeconds: number) {
-  const safeSeconds = clamp(totalSeconds, 5, 18000);
+  const safeSeconds = clamp(totalSeconds, MIN_EXPIRY_SECONDS, MAX_EXPIRY_SECONDS);
 
   return {
     hours: Math.floor(safeSeconds / 3600),
@@ -98,22 +109,25 @@ function splitExpiry(totalSeconds: number) {
 function createInitialCandles(asset: Asset) {
   const candles: Candle[] = [];
   let price = asset.basePrice;
-  const volatility = getAssetVolatility(asset);
+  const volatility = getFxStyleVolatility(asset);
+  const now = Date.now();
 
   for (let index = 0; index < 105; index += 1) {
-    const wave = Math.sin(index / 7) * volatility * 1.4;
-    const noise = (Math.random() - 0.48) * volatility * 2.6;
+    const trendWave = Math.sin(index / 11) * volatility * 5;
+    const microNoise = (Math.random() - 0.5) * volatility * 3.2;
     const open = price;
-    const close = Math.max(0.00001, open + wave + noise);
-    const high = Math.max(open, close) + Math.random() * volatility * 1.8;
-    const low = Math.min(open, close) - Math.random() * volatility * 1.8;
+    const close = Math.max(0.00001, open + trendWave + microNoise);
+    const wickSpread = volatility * (1.8 + Math.random() * 2.4);
+
+    const high = Math.max(open, close) + wickSpread;
+    const low = Math.max(0.00001, Math.min(open, close) - wickSpread);
 
     candles.push({
       open,
       high,
-      low: Math.max(0.00001, low),
+      low,
       close,
-      time: Date.now() - (105 - index) * 1000,
+      time: now - (105 - index) * M1_CANDLE_MS,
     });
 
     price = close;
@@ -122,47 +136,51 @@ function createInitialCandles(asset: Asset) {
   return candles;
 }
 
-function createNextCandles(currentCandles: Candle[], asset: Asset) {
+function updateLiveM1Candle(currentCandles: Candle[], asset: Asset) {
   const candles = currentCandles.length > 0 ? currentCandles.slice() : createInitialCandles(asset);
   const latest = candles[candles.length - 1];
-  const volatility = getAssetVolatility(asset);
-  const pulse = Math.sin(Date.now() / 2200) * volatility * 0.6;
-  const movement = (Math.random() - 0.49) * volatility * 2.1 + pulse;
-  const close = Math.max(0.00001, latest.close + movement);
+  const volatility = getFxStyleVolatility(asset);
+  const now = Date.now();
+
+  if (now - latest.time >= M1_CANDLE_MS) {
+    const open = latest.close;
+    const tinyOpenGap = (Math.random() - 0.5) * volatility * 0.45;
+    const newOpen = Math.max(0.00001, open + tinyOpenGap);
+
+    candles.push({
+      open: newOpen,
+      high: newOpen,
+      low: newOpen,
+      close: newOpen,
+      time: now,
+    });
+
+    return candles.slice(-110);
+  }
+
+  const candleAge = (now - latest.time) / M1_CANDLE_MS;
+  const slowWave = Math.sin(now / 9000) * volatility * 0.65;
+  const microTick = (Math.random() - 0.5) * volatility * 0.95;
+  const meanReversion = (latest.open - latest.close) * 0.035 * candleAge;
+  const nextClose = Math.max(0.00001, latest.close + slowWave + microTick + meanReversion);
 
   candles[candles.length - 1] = {
     ...latest,
-    close,
-    high: Math.max(latest.high, close),
-    low: Math.min(latest.low, close),
+    close: nextClose,
+    high: Math.max(latest.high, nextClose),
+    low: Math.max(0.00001, Math.min(latest.low, nextClose)),
   };
-
-  if (Math.random() > 0.58) {
-    const previous = candles[candles.length - 1];
-    const open = previous.close;
-    const nextMove = (Math.random() - 0.48) * volatility * 1.8;
-    const nextClose = Math.max(0.00001, open + nextMove);
-
-    candles.push({
-      open,
-      close: nextClose,
-      high: Math.max(open, nextClose) + Math.random() * volatility,
-      low: Math.max(0.00001, Math.min(open, nextClose) - Math.random() * volatility),
-      time: Date.now(),
-    });
-  }
 
   return candles.slice(-110);
 }
 
 export default function TradingPage() {
   const candlesRef = React.useRef<Candle[]>(createInitialCandles(ASSETS[0]));
-  const activeTradesRef = React.useRef<TradeMarker[]>([]);
-  const resultMarkersRef = React.useRef<ResultMarker[]>([]);
   const expirySecondsRef = React.useRef(30 * 60);
 
   const [accountType, setAccountType] = React.useState<AccountType>("QT Demo");
   const [currency, setCurrency] = React.useState<Currency>("USD");
+
   const [balancesUsd, setBalancesUsd] = React.useState<BalancesUsd>({
     "QT Demo": 70000,
     "QT Real": 0,
@@ -191,26 +209,16 @@ export default function TradingPage() {
 
   const exchangeRate = EXCHANGE_RATES[currency];
   const displayedBalance = balancesUsd[accountType] * exchangeRate;
+
   const stakeAmount = Number(amount);
   const safeStakeAmount = Number.isFinite(stakeAmount) ? Math.max(0, stakeAmount) : 0;
   const stakeUsd = safeStakeAmount / exchangeRate;
+
   const expectedProfit = safeStakeAmount * (payout / 100);
   const expectedReturn = safeStakeAmount + expectedProfit;
   const canTrade = safeStakeAmount > 0 && stakeUsd <= balancesUsd[accountType];
 
   const expiryParts = splitExpiry(expirySeconds);
-
-  React.useEffect(() => {
-    candlesRef.current = candles;
-  }, [candles]);
-
-  React.useEffect(() => {
-    activeTradesRef.current = activeTrades;
-  }, [activeTrades]);
-
-  React.useEffect(() => {
-    resultMarkersRef.current = resultMarkers;
-  }, [resultMarkers]);
 
   React.useEffect(() => {
     expirySecondsRef.current = expirySeconds;
@@ -228,18 +236,18 @@ export default function TradingPage() {
     let frameId = 0;
     let lastUpdate = 0;
 
-    const animateMarket = (time: number) => {
-      if (time - lastUpdate >= 190) {
-        const nextCandles = createNextCandles(candlesRef.current, selectedAsset);
+    const runMarket = (time: number) => {
+      if (time - lastUpdate >= LIVE_TICK_MS) {
+        const nextCandles = updateLiveM1Candle(candlesRef.current, selectedAsset);
         candlesRef.current = nextCandles;
         setCandles(nextCandles);
         lastUpdate = time;
       }
 
-      frameId = window.requestAnimationFrame(animateMarket);
+      frameId = window.requestAnimationFrame(runMarket);
     };
 
-    frameId = window.requestAnimationFrame(animateMarket);
+    frameId = window.requestAnimationFrame(runMarket);
 
     return () => {
       window.cancelAnimationFrame(frameId);
@@ -248,10 +256,10 @@ export default function TradingPage() {
 
   React.useEffect(() => {
     const intervalId = window.setInterval(() => {
-      const livePulse = Math.floor(Math.random() * 16);
-      const nextPayout = clamp(72 + selectedAsset.payoutBoost + livePulse, 20, 92);
+      const stablePulse = Math.floor(Math.random() * 6);
+      const nextPayout = clamp(84 + selectedAsset.payoutBoost + stablePulse, 20, 92);
       setPayout(nextPayout);
-    }, 2200);
+    }, 4500);
 
     return () => {
       window.clearInterval(intervalId);
@@ -301,32 +309,34 @@ export default function TradingPage() {
     const unitSeconds = unit === "hours" ? 3600 : unit === "minutes" ? 60 : 1;
 
     setExpirySeconds((current) => {
-      const nextValue = clamp(current + unitSeconds * delta, 5, 18000);
+      const nextValue = clamp(
+        current + unitSeconds * delta,
+        MIN_EXPIRY_SECONDS,
+        MAX_EXPIRY_SECONDS
+      );
+
       expirySecondsRef.current = nextValue;
       return nextValue;
     });
   }
 
   function handleTrade(side: TradeSide) {
-    if (!canTrade) {
-      return;
-    }
+    if (!canTrade) return;
 
     const latestCandle = candlesRef.current[candlesRef.current.length - 1];
-
-    if (!latestCandle) {
-      return;
-    }
+    if (!latestCandle) return;
 
     const tradeId = `${side}-${Date.now()}-${Math.random()}`;
     const capturedAccountType = accountType;
     const capturedCurrency = currency;
     const capturedExchangeRate = EXCHANGE_RATES[capturedCurrency];
+
     const capturedStakeAmount = safeStakeAmount;
     const capturedStakeUsd = capturedStakeAmount / capturedExchangeRate;
     const capturedProfitAmount = capturedStakeAmount * (payout / 100);
     const capturedReturnAmount = capturedStakeAmount + capturedProfitAmount;
     const capturedReturnUsd = capturedReturnAmount / capturedExchangeRate;
+
     const entryPrice = latestCandle.close;
 
     const marker: TradeMarker = {
