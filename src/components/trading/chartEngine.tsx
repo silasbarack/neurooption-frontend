@@ -10,7 +10,7 @@ export const MAX_EXPIRY_SECONDS = 5 * 60 * 60;
   - One candle still forms for 60 seconds.
   - New candle opens only after 60 seconds.
 */
-export const LIVE_TICK_MS = 320;
+export const LIVE_TICK_MS = 245;
 export const M1_CANDLE_MS = 60_000;
 export const MAX_CANDLES = 100;
 
