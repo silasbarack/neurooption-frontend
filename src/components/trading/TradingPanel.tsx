@@ -33,112 +33,98 @@ export default function TradingPanel({
   onAmountChange,
   onTrade,
 }: TradingPanelProps) {
-  return (
-    <aside className="nt-trade-panel nt-pocket-panel">
-      <div className="nt-pocket-sentiment">
-        <span>50%</span>
-        <div>
-          <i />
-        </div>
-        <span>50%</span>
-      </div>
+  const numericAmount = Number(amount || 0);
 
-      <section className="nt-pocket-field">
+  return (
+    <aside className="nt-trade-panel nt-white-panel">
+      <section className="nt-white-field">
         <h3>Time ⓘ</h3>
 
-        <div className="nt-pocket-input">
-          <button type="button" onClick={() => onAdjustExpiry("seconds", -1)}>
-            -
-          </button>
-
+        <div className="nt-white-input">
           <strong>{expiryText}</strong>
-
-          <button type="button" onClick={() => onAdjustExpiry("seconds", 1)}>
-            +
-          </button>
+          <div>
+            <button type="button" onClick={() => onAdjustExpiry("seconds", -1)}>
+              −
+            </button>
+            <button type="button" onClick={() => onAdjustExpiry("seconds", 1)}>
+              +
+            </button>
+          </div>
         </div>
 
-        <div className="nt-pocket-expiry-line">
-          <button type="button" onClick={() => onAdjustExpiry("hours", -1)}>
-            H-
-          </button>
+        <div className="nt-white-expiry">
           <span>{String(expiryParts.hours).padStart(2, "0")}h</span>
-          <button type="button" onClick={() => onAdjustExpiry("hours", 1)}>
-            H+
-          </button>
-
-          <button type="button" onClick={() => onAdjustExpiry("minutes", -1)}>
-            M-
-          </button>
           <span>{String(expiryParts.minutes).padStart(2, "0")}m</span>
-          <button type="button" onClick={() => onAdjustExpiry("minutes", 1)}>
-            M+
-          </button>
-
-          <button type="button" onClick={() => onAdjustExpiry("seconds", -1)}>
-            S-
-          </button>
           <span>{String(expiryParts.seconds).padStart(2, "0")}s</span>
-          <button type="button" onClick={() => onAdjustExpiry("seconds", 1)}>
-            S+
-          </button>
         </div>
       </section>
 
-      <section className="nt-pocket-field">
+      <section className="nt-white-field">
         <h3>Amount ⓘ</h3>
 
-        <label className="nt-pocket-amount">
+        <label className="nt-white-input">
           <input
             type="number"
             min="1"
             value={amount}
             onChange={(event) => onAmountChange(event.target.value)}
           />
-          <span>{currency}</span>
+          <div>
+            <button
+              type="button"
+              onClick={() => onAmountChange(String(Math.max(1, numericAmount - 1)))}
+            >
+              −
+            </button>
+            <button type="button" onClick={() => onAmountChange(String(numericAmount + 1))}>
+              +
+            </button>
+          </div>
         </label>
+
+        <small>{currency}</small>
       </section>
 
-      <section className="nt-pocket-payout">
-        <div>
-          <span>Payout</span>
-          <strong>{expectedReturnText}</strong>
-        </div>
-
-        <div className="center">
-          <strong>+{payout}%</strong>
-        </div>
-
-        <div>
-          <span>Profit</span>
-          <strong>{expectedProfitText}</strong>
-        </div>
+      <section className="nt-white-payout">
+        <span>Payout</span>
+        <strong>+{payout}%</strong>
+        <small>{expectedProfitText}</small>
       </section>
 
-      <div className="nt-pocket-actions">
-        <button
-          type="button"
-          className="buy"
-          disabled={!canTrade}
-          onClick={() => onTrade("BUY")}
-        >
-          ↗ BUY
-        </button>
+      <button
+        type="button"
+        className="nt-buy"
+        disabled={!canTrade}
+        onClick={() => onTrade("BUY")}
+      >
+        ↗ BUY
+      </button>
 
-        <button type="button" className="ai">
-          <span>AI</span>
-          TRADING
-        </button>
+      <button type="button" className="nt-ai">
+        AI TRADING
+      </button>
 
-        <button
-          type="button"
-          className="sell"
-          disabled={!canTrade}
-          onClick={() => onTrade("SELL")}
-        >
-          ↘ SELL
-        </button>
-      </div>
+      <button
+        type="button"
+        className="nt-sell"
+        disabled={!canTrade}
+        onClick={() => onTrade("SELL")}
+      >
+        ↘ SELL
+      </button>
+
+      <section className="nt-white-sentiment">
+        <div>
+          <span>Sentiment</span>
+          <small>62%</small>
+        </div>
+        <div className="bar">
+          <i />
+        </div>
+        <small>38%</small>
+      </section>
+
+      <p className="nt-white-return">Expected return: {expectedReturnText}</p>
     </aside>
   );
 }

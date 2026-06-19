@@ -1,29 +1,47 @@
+type EmptyPanel = "openTrades" | "history" | "signals" | null;
+
 type TradingQuickMenuProps = {
   onFullscreen: () => void;
+  onPanelOpen: (panel: EmptyPanel) => void;
 };
 
-const items = [
-  ["↻", "Trades"],
-  ["📡", "Signals"],
-  ["👥", "Social Trading"],
-  ["◎", "Express Trades"],
-  ["⏳", "Pending Trades"],
-  ["⌨", "Hotkeys"],
-  ["⛶", "Full Screen"],
+const items: Array<{
+  icon: string;
+  label: string;
+  action?: EmptyPanel | "fullscreen";
+}> = [
+  { icon: "↻", label: "Open trades", action: "openTrades" },
+  { icon: "🕘", label: "History", action: "history" },
+  { icon: "📡", label: "Signals", action: "signals" },
+  { icon: "👥", label: "Social Trading" },
+  { icon: "◎", label: "Express Trades" },
+  { icon: "⌨", label: "Hotkeys" },
+  { icon: "⛶", label: "Full screen", action: "fullscreen" },
 ];
 
-export default function TradingQuickMenu({ onFullscreen }: TradingQuickMenuProps) {
+export default function TradingQuickMenu({
+  onFullscreen,
+  onPanelOpen,
+}: TradingQuickMenuProps) {
   return (
     <aside className="nt-quick-menu">
-      {items.map(([icon, label]) => (
+      {items.map((item) => (
         <button
-          key={label}
+          key={item.label}
           type="button"
-          className={label === "Hotkeys" || label === "Full Screen" ? "desktop-only" : ""}
-          onClick={label === "Full Screen" ? onFullscreen : undefined}
+          onClick={() => {
+            if (item.action === "fullscreen") {
+              onFullscreen();
+              return;
+            }
+
+            if (item.action) {
+              onPanelOpen(item.action);
+            }
+          }}
         >
-          <span>{icon}</span>
-          <small>{label}</small>
+          <span>{item.icon}</span>
+          <small>{item.label}</small>
         </button>
       ))}
     </aside>

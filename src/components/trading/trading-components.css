@@ -1,20 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap");
 
-:root {
-  --nt-bg: #080d18;
-  --nt-bg-soft: #10182b;
-  --nt-panel: rgba(18, 29, 55, 0.94);
-  --nt-panel-strong: rgba(9, 15, 31, 0.72);
-  --nt-border: rgba(145, 178, 232, 0.16);
-  --nt-text: #ffffff;
-  --nt-muted: #aebbd4;
-  --nt-blue: #2f8cff;
-  --nt-cyan: #45d6ff;
-  --nt-green: #36d764;
-  --nt-red: #ff4d42;
-  --nt-radius: 14px;
-}
-
 html,
 body,
 #root {
@@ -22,7 +7,7 @@ body,
   height: 100%;
   margin: 0;
   overflow: hidden;
-  background: var(--nt-bg);
+  background: #f4f7fb;
   font-family: Roboto, sans-serif;
 }
 
@@ -40,498 +25,368 @@ button {
   cursor: pointer;
 }
 
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
-/* =========================
-   HEADER
-========================= */
-
 .nt-header {
   height: 58px;
-  min-height: 58px;
-  width: 100%;
-  padding: 8px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  background: rgba(28, 43, 76, 0.92);
-  border-bottom: 1px solid var(--nt-border);
-  color: var(--nt-text);
-  overflow: hidden;
+  padding: 8px 14px;
+  background: #ffffff;
+  border-bottom: 1px solid #e4e9f2;
+  color: #101828;
 }
 
 .nt-brand {
-  min-width: 0;
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 .nt-brand-logo {
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #34c8ff, #3264e9);
-  color: #ffffff;
-  font-size: 21px;
-  font-weight: 900;
-  box-shadow: 0 10px 28px rgba(37, 151, 255, 0.32);
-}
-
-.nt-brand-text {
-  min-width: 0;
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 900;
-}
-
-.nt-star,
-.nt-fullscreen {
   width: 34px;
   height: 34px;
-  flex: 0 0 34px;
-  border: 0;
-  border-radius: 10px;
-  color: #dcecff;
-  background: rgba(255, 255, 255, 0.09);
-  font-weight: 900;
-}
-
-.nt-star:hover,
-.nt-fullscreen:hover {
-  background: rgba(67, 145, 255, 0.25);
-}
-
-.nt-account-bar {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.nt-account-bar select {
-  height: 40px;
-  max-width: 112px;
-  border: 1px solid rgba(147, 185, 245, 0.18);
-  border-radius: 13px;
-  padding: 0 12px;
-  outline: none;
-  color: #ffffff;
-  background: rgba(38, 58, 100, 0.9);
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.nt-balance {
-  min-width: 118px;
-  max-width: 170px;
-  overflow: hidden;
-  text-align: right;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 900;
-}
-
-.nt-top-up {
-  height: 40px;
-  border: 0;
-  border-radius: 12px;
-  padding: 0 18px;
-  color: #ffffff;
-  background: linear-gradient(135deg, #5fe777, #25b24a);
-  font-size: 14px;
-  font-weight: 900;
-  box-shadow: 0 10px 28px rgba(54, 221, 89, 0.28);
-}
-
-.nt-top-up:hover {
-  filter: brightness(1.07);
-}
-
-.nt-avatar {
-  width: 42px;
-  height: 42px;
-  flex: 0 0 42px;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, #8ed0ff, #5275ff);
   color: #ffffff;
-  font-size: 13px;
+  background: linear-gradient(135deg, #38bdf8, #1677ff);
+  font-size: 19px;
   font-weight: 900;
 }
 
-/* =========================
-   LEFT SIDEBAR
-========================= */
+.nt-brand-text {
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.nt-star {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: #f2f5fa;
+  color: #98a2b3;
+}
+
+.nt-account-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.nt-account-bar select {
+  height: 38px;
+  max-width: 110px;
+  border: 1px solid #e4e9f2;
+  border-radius: 9px;
+  padding: 0 10px;
+  color: #101828;
+  background: #ffffff;
+  font-weight: 700;
+  outline: none;
+}
+
+.nt-balance {
+  min-width: 124px;
+  color: #101828;
+  text-align: right;
+  font-size: 15px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.nt-top-up {
+  height: 38px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 16px;
+  color: #ffffff;
+  background: #1677ff;
+  font-weight: 900;
+}
+
+.nt-fullscreen {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475467;
+}
+
+.nt-avatar {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d7ecff, #8ec5ff);
+  color: #0f172a;
+  font-weight: 900;
+}
 
 .nt-sidebar {
-  min-width: 0;
   min-height: 0;
-  height: 100%;
-  padding: 10px 7px;
+  padding: 8px 6px;
+  background: #ffffff;
+  border-right: 1px solid #e4e9f2;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  background: rgba(7, 13, 28, 0.94);
-  border-right: 1px solid rgba(142, 176, 232, 0.13);
-  overflow: hidden;
+  gap: 4px;
 }
 
 .nt-sidebar button {
-  width: 100%;
   min-height: 48px;
   border: 0;
-  border-radius: 12px;
-  padding: 4px;
+  border-radius: 9px;
+  background: transparent;
+  color: #475467;
   display: grid;
   place-items: center;
   gap: 2px;
-  color: rgba(230, 241, 255, 0.82);
-  background: transparent;
+  padding: 4px;
 }
 
 .nt-sidebar button span {
-  display: block;
-  font-size: 20px;
+  font-size: 17px;
   line-height: 1;
 }
 
 .nt-sidebar button small {
   width: 100%;
-  display: block;
   overflow: hidden;
-  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .nt-sidebar button.active,
 .nt-sidebar button:hover {
-  color: #ffffff;
-  background: rgba(58, 133, 255, 0.2);
+  background: #eff6ff;
+  color: #1677ff;
 }
 
-/* =========================
-   RIGHT QUICK MENU
-========================= */
-
 .nt-quick-menu {
-  min-width: 0;
   min-height: 0;
-  height: 100%;
-  padding: 10px 7px;
+  padding: 8px 6px;
+  background: #ffffff;
+  border-left: 1px solid #e4e9f2;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  background: rgba(8, 14, 30, 0.94);
-  border-left: 1px solid rgba(142, 176, 232, 0.13);
-  overflow: hidden;
+  gap: 4px;
 }
 
 .nt-quick-menu button {
-  width: 100%;
-  min-height: 56px;
+  min-height: 54px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 9px;
   padding: 5px;
+  color: #475467;
+  background: transparent;
   display: grid;
   place-items: center;
   gap: 2px;
-  color: rgba(231, 241, 255, 0.83);
-  background: transparent;
 }
 
 .nt-quick-menu button:hover {
-  color: #ffffff;
-  background: rgba(61, 137, 255, 0.18);
+  background: #eff6ff;
+  color: #1677ff;
 }
 
 .nt-quick-menu span {
-  display: block;
   font-size: 18px;
-  line-height: 1;
 }
 
 .nt-quick-menu small {
   width: 100%;
-  display: block;
   overflow: hidden;
-  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
 }
-
-/* =========================
-   MOBILE BOTTOM NAV
-========================= */
 
 .nt-bottom-nav {
   display: none;
 }
 
-/* =========================
-   ASSET SELECTOR
-========================= */
-
 .nt-asset-selector {
   position: relative;
-  min-width: 0;
-  z-index: 30;
+}
+
+.nt-asset-trigger,
+.nt-tool-btn {
+  height: 38px;
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  color: #101828;
+  background: #ffffff;
+  font-weight: 700;
 }
 
 .nt-asset-trigger {
-  height: 40px;
-  min-width: 168px;
-  max-width: 230px;
-  border: 1px solid rgba(147, 185, 245, 0.16);
-  border-radius: 13px;
-  padding: 0 13px;
+  min-width: 150px;
+  max-width: 220px;
+  padding: 0 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  color: #ffffff;
-  background: rgba(38, 58, 100, 0.9);
-  font-weight: 900;
 }
 
 .nt-asset-trigger span {
-  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.nt-asset-menu {
+.nt-asset-menu,
+.nt-floating {
   position: absolute;
-  z-index: 100;
-  top: calc(100% + 10px);
+  z-index: 60;
+  top: calc(100% + 8px);
   left: 0;
   width: 380px;
   max-width: calc(100vw - 120px);
   padding: 12px;
-  border: 1px solid rgba(155, 191, 255, 0.18);
-  border-radius: 18px;
-  background: rgba(13, 23, 45, 0.98);
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
+  border: 1px solid #e4e9f2;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.12);
 }
 
 .nt-asset-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px;
+  gap: 6px;
   margin-bottom: 10px;
 }
 
 .nt-asset-tabs button,
-.nt-asset-list button {
+.nt-asset-list button,
+.nt-floating button {
   border: 0;
-  border-radius: 11px;
-  color: #dceaff;
-  background: rgba(50, 72, 116, 0.78);
-  font-weight: 800;
-}
-
-.nt-asset-tabs button {
-  padding: 9px 11px;
+  border-radius: 8px;
+  padding: 9px 10px;
+  color: #344054;
+  background: #f3f6fb;
+  font-weight: 700;
 }
 
 .nt-asset-tabs button.active,
-.nt-asset-list button.active {
+.nt-asset-list button.active,
+.nt-floating button.active {
   color: #ffffff;
-  background: linear-gradient(135deg, #38c9ff, #3368f0);
+  background: #1677ff;
 }
 
 .nt-asset-list {
   display: grid;
   gap: 8px;
-  max-height: 360px;
-  overflow: auto;
 }
 
 .nt-asset-list button {
-  padding: 10px 11px;
+  text-align: left;
   display: grid;
   gap: 3px;
-  text-align: left;
-}
-
-.nt-asset-list strong,
-.nt-asset-list span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .nt-asset-list span {
-  color: #9db0cd;
+  color: #667085;
   font-size: 12px;
 }
 
-/* =========================
-   TOOLBAR + FLOATING MENUS
-========================= */
-
 .nt-toolbar-left {
   position: absolute;
-  z-index: 20;
+  z-index: 10;
   top: 16px;
-  left: 206px;
+  left: 194px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-width: 0;
+  gap: 6px;
 }
 
 .nt-tool-wrap {
   position: relative;
-  min-width: 0;
 }
 
 .nt-tool-btn {
-  height: 40px;
-  border: 1px solid rgba(147, 185, 245, 0.16);
-  border-radius: 13px;
-  padding: 0 13px;
-  color: #ffffff;
-  background: rgba(38, 58, 100, 0.88);
-  font-size: 14px;
-  font-weight: 900;
-}
-
-.nt-tool-btn:hover {
-  background: rgba(61, 137, 255, 0.28);
+  padding: 0 10px;
 }
 
 .nt-tool-btn.compact {
-  width: 48px;
+  width: 42px;
   padding: 0;
 }
 
 .nt-chart-types {
   position: absolute;
-  z-index: 20;
+  z-index: 10;
   top: 16px;
-  right: 20px;
+  right: 18px;
   display: flex;
-  gap: 8px;
-  min-width: 0;
+  gap: 6px;
 }
 
 .nt-chart-types button {
-  height: 40px;
-  border: 1px solid rgba(148, 185, 244, 0.16);
-  border-radius: 12px;
-  padding: 0 14px;
-  color: #ffffff;
-  background: rgba(47, 68, 111, 0.88);
-  font-size: 14px;
-  font-weight: 900;
+  height: 38px;
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  padding: 0 12px;
+  color: #344054;
+  background: #ffffff;
+  font-weight: 700;
 }
 
-.nt-chart-types button.active,
-.nt-chart-types button:hover {
-  background: linear-gradient(135deg, #3bd3ff, #2e68ef);
+.nt-chart-types button.active {
+  color: #1677ff;
+  background: #eff6ff;
+  border-color: #bfdbfe;
 }
 
 .nt-floating {
-  position: absolute;
-  z-index: 110;
-  top: 70px;
-  left: 228px;
-  width: 360px;
-  max-width: calc(100vw - 110px);
-  padding: 12px;
-  border: 1px solid rgba(155, 191, 255, 0.18);
-  border-radius: 18px;
-  background: rgba(13, 23, 45, 0.98);
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
+  top: 62px;
+  left: 220px;
 }
 
 .nt-floating h3 {
   margin: 0 0 10px;
-  color: #ffffff;
+  color: #101828;
   font-size: 14px;
-  font-weight: 900;
 }
 
 .nt-floating div {
-  max-height: 330px;
+  max-height: 320px;
+  overflow: auto;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 7px;
-  overflow: auto;
-}
-
-.nt-floating button {
-  min-width: 0;
-  border: 0;
-  border-radius: 11px;
-  padding: 9px 11px;
-  overflow: hidden;
-  text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #dceaff;
-  background: rgba(50, 72, 116, 0.78);
-  font-weight: 800;
-}
-
-.nt-floating button.active,
-.nt-floating button:hover {
-  color: #ffffff;
-  background: linear-gradient(135deg, #38c9ff, #3368f0);
 }
 
 .nt-timeframes {
-  top: calc(100% + 10px);
+  top: calc(100% + 8px);
   left: 0;
-  width: 260px;
+  width: 250px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 7px;
 }
 
-.nt-timeframes button {
-  text-align: center;
-}
-
 .nt-drawings {
-  left: 330px;
+  left: 320px;
   width: 300px;
 }
-
-/* =========================
-   CHART
-========================= */
 
 .nt-chart-wrap {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(55, 112, 190, 0.22), transparent 38%),
-    #101a32;
+  background: #ffffff;
 }
 
 .nt-chart-canvas {
@@ -540,247 +395,170 @@ button:disabled {
   display: block;
 }
 
-/* =========================
-   TRADE PANEL
-========================= */
-
 .nt-trade-panel {
-  min-width: 0;
   min-height: 0;
-  height: 100%;
-  padding: 14px;
-  border-left: 1px solid rgba(142, 176, 232, 0.13);
-  background: linear-gradient(
-    180deg,
-    rgba(19, 32, 61, 0.97),
-    rgba(10, 16, 33, 0.99)
-  );
+  padding: 12px;
+  border-left: 1px solid #e4e9f2;
+  background: #ffffff;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  color: #ffffff;
+  gap: 10px;
+  color: #101828;
 }
 
-.nt-sentiment {
+.nt-white-field h3 {
+  margin: 0 0 6px;
+  color: #475467;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.nt-white-input {
+  width: 100%;
+  height: 38px;
   display: grid;
-  grid-template-columns: 42px 1fr 42px;
+  grid-template-columns: 1fr 58px;
   align-items: center;
-  gap: 8px;
-  color: #8dff9a;
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.nt-white-input strong,
+.nt-white-input input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  padding: 0 10px;
+  color: #101828;
+  background: transparent;
+  font-size: 13px;
   font-weight: 900;
 }
 
-.nt-sentiment span:last-child {
-  color: #ff6a60;
+.nt-white-input div {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-left: 1px solid #e4e9f2;
 }
 
-.nt-sentiment div {
-  height: 16px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #3ed86d 0 50%, #ff4444 50% 100%);
-  position: relative;
+.nt-white-input button {
+  border: 0;
+  color: #475467;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 900;
 }
 
-.nt-sentiment i {
-  position: absolute;
-  width: 5px;
-  top: -4px;
-  bottom: -4px;
-  left: 50%;
-  border-radius: 99px;
-  background: #cbd9ff;
+.nt-white-expiry {
+  margin-top: 5px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
 }
 
-.nt-time-card,
-.nt-amount-card,
-.nt-payout-card {
-  border-radius: 18px;
-  background: rgba(9, 15, 31, 0.5);
+.nt-white-expiry span,
+.nt-white-field small {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 700;
 }
 
-.nt-time-card {
-  padding: 12px;
-}
-
-.nt-time-card h3,
-.nt-amount-card h3 {
+.nt-white-payout {
+  padding: 10px;
+  border-radius: 9px;
+  background: #f8fafc;
+  border: 1px dashed #d0d5dd;
+  display: grid;
+  gap: 3px;
   text-align: center;
-  margin: 0 0 9px;
+}
+
+.nt-white-payout span {
+  color: #667085;
+  font-size: 12px;
+}
+
+.nt-white-payout strong {
+  color: #16a34a;
+  font-size: 18px;
+}
+
+.nt-white-payout small {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.nt-buy,
+.nt-sell,
+.nt-ai {
+  height: 46px;
+  border: 0;
+  border-radius: 8px;
   color: #ffffff;
   font-size: 15px;
   font-weight: 900;
 }
 
-.nt-time-card p {
-  margin: 8px 0 10px;
-  text-align: center;
-  color: #b9c8e2;
-  font-size: 12px;
-  font-weight: 700;
+.nt-buy {
+  background: #22c55e;
 }
 
-.nt-time-main {
+.nt-sell {
+  background: #ef4444;
+}
+
+.nt-ai {
+  background: #0ea5e9;
+}
+
+.nt-buy:disabled,
+.nt-sell:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.nt-white-sentiment {
+  margin-top: auto;
   display: grid;
-  grid-template-columns: 54px 1fr 54px;
-  gap: 9px;
-  align-items: center;
-}
-
-.nt-time-main button,
-.nt-expiry-grid button {
-  border: 0;
-  border-radius: 14px;
-  color: #ffffff;
-  background: linear-gradient(135deg, #4bd8ff, #2e6df2);
-  font-size: 24px;
-  font-weight: 900;
-}
-
-.nt-time-main button {
-  height: 52px;
-}
-
-.nt-time-main strong {
-  height: 52px;
-  display: grid;
-  place-items: center;
-  border-radius: 14px;
-  color: #ffffff;
-  background: rgba(0, 0, 0, 0.46);
-  font-size: 24px;
-  font-weight: 900;
-}
-
-.nt-expiry-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 9px;
-}
-
-.nt-expiry-grid div {
-  min-width: 0;
-  display: grid;
-  place-items: center;
   gap: 5px;
-  padding: 8px;
-  border-radius: 14px;
-  background: rgba(48, 67, 106, 0.58);
 }
 
-.nt-expiry-grid button {
-  width: 100%;
-  height: 28px;
-  font-size: 17px;
-}
-
-.nt-expiry-grid strong {
-  color: #ffffff;
-  font-size: 20px;
-  font-weight: 900;
-}
-
-.nt-expiry-grid small {
-  color: #d9e6ff;
-  font-size: 10px;
-  font-weight: 800;
-}
-
-.nt-amount-card {
-  padding: 12px;
-}
-
-.nt-amount-card label {
-  height: 56px;
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: 1fr 64px;
-  align-items: center;
-  border-radius: 15px;
-  background: rgba(0, 0, 0, 0.58);
-}
-
-.nt-amount-card input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  padding: 0 16px;
-  color: #ffffff;
-  background: transparent;
-  font-size: 25px;
-  font-weight: 900;
-}
-
-.nt-amount-card span {
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 900;
-}
-
-.nt-payout-card {
-  padding: 13px;
-  display: grid;
-  gap: 10px;
-  border: 1px dashed rgba(151, 189, 255, 0.18);
-}
-
-.nt-payout-card div {
+.nt-white-sentiment div:first-child {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  color: #667085;
+  font-size: 11px;
 }
 
-.nt-payout-card span {
-  color: #bdcae1;
-  font-weight: 700;
+.nt-white-sentiment .bar {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #22c55e 0 62%, #ef4444 62% 100%);
 }
 
-.nt-payout-card strong {
-  color: #7fff91;
-  font-size: 18px;
-  font-weight: 900;
+.nt-white-sentiment small {
+  color: #ef4444;
+  text-align: right;
+  font-size: 10px;
 }
 
-.nt-trade-actions {
-  margin-top: auto;
-  display: grid;
-  gap: 10px;
+.nt-white-return {
+  margin: 0;
+  color: #667085;
+  font-size: 11px;
+  text-align: center;
 }
-
-.nt-trade-actions button {
-  height: 54px;
-  border: 0;
-  border-radius: 15px;
-  color: #ffffff;
-  font-size: 17px;
-  font-weight: 950;
-}
-
-.nt-trade-actions .buy {
-  background: linear-gradient(135deg, #6af178, #26be49);
-}
-
-.nt-trade-actions .ai {
-  background: linear-gradient(135deg, #68dfff, #1f8fff);
-  box-shadow: 0 12px 28px rgba(32, 159, 255, 0.24);
-}
-
-.nt-trade-actions .sell {
-  background: linear-gradient(135deg, #ff786c, #f13731);
-}
-
-/* =========================
-   MOBILE
-========================= */
 
 @media (max-width: 980px) {
   .nt-header {
-    height: 78px;
-    min-height: 78px;
-    padding: 8px 12px;
+    height: 72px;
+    padding: 8px 10px;
   }
 
   .nt-brand-text,
@@ -790,57 +568,54 @@ button:disabled {
   }
 
   .nt-brand-logo {
-    width: 58px;
-    height: 58px;
-    flex-basis: 58px;
-    border-radius: 50%;
-    font-size: 30px;
+    width: 52px;
+    height: 52px;
+    font-size: 28px;
   }
 
   .nt-account-bar {
     flex: 1;
     justify-content: flex-end;
-    gap: 7px;
   }
 
   .nt-account-bar select {
-    height: 58px;
-    max-width: 118px;
-    border-radius: 18px;
-    padding: 0 10px;
+    max-width: 92px;
+    height: 52px;
+    font-size: 12px;
   }
 
   .nt-balance {
-    min-width: 104px;
-    max-width: 120px;
-    font-size: 17px;
+    min-width: 92px;
+    max-width: 112px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px;
   }
 
   .nt-top-up {
-    width: 64px;
-    height: 58px;
+    width: 54px;
+    height: 52px;
     padding: 0;
     font-size: 0;
   }
 
   .nt-top-up::after {
     content: "💳";
-    font-size: 27px;
+    font-size: 24px;
   }
 
   .nt-avatar {
-    width: 56px;
-    height: 56px;
-    flex-basis: 56px;
+    width: 50px;
+    height: 50px;
   }
 
   .nt-sidebar {
-    width: 64px;
-    padding: 8px 5px 82px;
+    width: 62px;
+    padding: 8px 5px 74px;
   }
 
   .nt-sidebar button {
-    min-height: 54px;
+    min-height: 52px;
   }
 
   .nt-sidebar button small {
@@ -848,7 +623,7 @@ button:disabled {
   }
 
   .nt-sidebar button span {
-    font-size: 26px;
+    font-size: 24px;
   }
 
   .nt-quick-menu {
@@ -857,563 +632,126 @@ button:disabled {
 
   .nt-bottom-nav {
     position: fixed;
-    z-index: 90;
+    z-index: 80;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 72px;
+    height: 68px;
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 5px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
     padding: 5px;
-    background: rgba(8, 14, 30, 0.97);
-    border-top: 1px solid rgba(142, 176, 232, 0.15);
+    background: #ffffff;
+    border-top: 1px solid #e4e9f2;
   }
 
   .nt-bottom-nav button {
-    min-width: 0;
     border: 0;
-    border-radius: 12px;
-    color: rgba(231, 241, 255, 0.86);
-    background: rgba(42, 59, 96, 0.78);
+    border-radius: 9px;
+    color: #475467;
+    background: #f3f6fb;
   }
 
   .nt-bottom-nav span {
     display: block;
-    font-size: 20px;
-    line-height: 1;
+    font-size: 18px;
   }
 
   .nt-bottom-nav small {
     display: block;
-    margin-top: 5px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 10px;
   }
 
   .nt-asset-trigger {
-    width: 190px;
+    width: 170px;
     max-width: 42vw;
-    height: 54px;
-    border-radius: 11px;
-    font-size: 18px;
-  }
-
-  .nt-asset-menu {
-    position: fixed;
-    top: 138px;
-    left: 72px;
-    width: calc(100vw - 82px);
-    max-width: calc(100vw - 82px);
-    max-height: 420px;
-    overflow: auto;
+    height: 48px;
+    font-size: 15px;
   }
 
   .nt-toolbar-left {
-    top: 22px;
-    left: 216px;
-    gap: 7px;
+    top: 18px;
+    left: 194px;
+    gap: 5px;
   }
 
   .nt-tool-btn {
-    width: 54px;
-    height: 54px;
+    width: 48px;
+    height: 48px;
     padding: 0;
-    border-radius: 11px;
     overflow: hidden;
     font-size: 0;
   }
 
   .nt-tool-btn::after {
-    font-size: 22px;
-  }
-
-  .nt-tool-btn:nth-of-type(1)::after {
-    content: "📊";
-  }
-
-  .nt-tool-btn:nth-of-type(2)::after {
     content: "☷";
+    font-size: 20px;
   }
 
-  .nt-tool-btn:nth-of-type(3)::after {
-    content: "✎";
-  }
-
-  .nt-tool-btn.compact {
-    font-size: 23px;
+  .nt-tool-btn.compact::after {
+    content: "•••";
   }
 
   .nt-chart-types {
     left: 14px;
     right: 10px;
-    top: 94px;
-    gap: 7px;
+    top: 76px;
+    gap: 5px;
   }
 
   .nt-chart-types button {
     flex: 1;
     min-width: 0;
-    height: 46px;
-    padding: 0 8px;
+    height: 40px;
+    padding: 0 6px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 12px;
-  }
-
-  .nt-floating {
-    position: fixed;
-    top: 150px;
-    left: 74px;
-    right: 10px;
-    width: auto;
-    max-width: none;
-  }
-
-  .nt-floating div {
-    max-height: 240px;
-  }
-
-  .nt-timeframes {
-    left: 74px;
-    right: 10px;
-    width: auto;
+    font-size: 11px;
   }
 
   .nt-trade-panel {
     position: fixed;
-    z-index: 80;
-    left: 64px;
+    z-index: 70;
+    left: 62px;
     right: 0;
-    bottom: 72px;
-    height: 330px;
-    padding: 8px 10px;
-    border-left: 0;
-    border-top: 1px solid rgba(142, 176, 232, 0.18);
-    background: rgba(18, 29, 55, 0.95);
-    gap: 7px;
-  }
-
-  .nt-time-card {
-    padding: 7px;
-  }
-
-  .nt-time-card h3,
-  .nt-amount-card h3 {
-    margin-bottom: 5px;
-    font-size: 14px;
-  }
-
-  .nt-time-card p {
-    display: none;
-  }
-
-  .nt-time-main {
-    grid-template-columns: 70px 1fr 70px;
-    gap: 8px;
-  }
-
-  .nt-time-main button,
-  .nt-time-main strong {
-    height: 48px;
-  }
-
-  .nt-time-main strong {
-    font-size: 23px;
-  }
-
-  .nt-expiry-grid {
-    gap: 7px;
-    margin-top: 7px;
-  }
-
-  .nt-expiry-grid div {
-    padding: 5px;
-    gap: 2px;
-  }
-
-  .nt-expiry-grid button {
-    height: 28px;
-  }
-
-  .nt-expiry-grid strong {
-    font-size: 17px;
-  }
-
-  .nt-expiry-grid small {
-    font-size: 9px;
-  }
-
-  .nt-amount-card {
-    padding: 7px;
-  }
-
-  .nt-amount-card label {
-    height: 48px;
-  }
-
-  .nt-amount-card input {
-    font-size: 25px;
-  }
-
-  .nt-payout-card {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    padding: 9px;
-    gap: 8px;
-  }
-
-  .nt-payout-card div {
-    display: grid;
-    gap: 3px;
-    text-align: center;
-  }
-
-  .nt-payout-card span {
-    font-size: 12px;
-  }
-
-  .nt-payout-card strong {
-    font-size: 16px;
-  }
-
-  .nt-trade-actions {
-    grid-template-columns: 1fr 1.4fr 1fr;
-    gap: 8px;
-  }
-
-  .nt-trade-actions button {
-    height: 54px;
-    font-size: 15px;
-  }
-}
-
-/* =========================
-   SMALL PHONES
-========================= */
-
-@media (max-width: 520px) {
-  .nt-header {
-    padding: 8px;
-  }
-
-  .nt-brand-logo {
-    width: 54px;
-    height: 54px;
-    flex-basis: 54px;
-    font-size: 28px;
-  }
-
-  .nt-account-bar select {
-    max-width: 92px;
-    height: 54px;
-    padding: 0 8px;
-    font-size: 13px;
-  }
-
-  .nt-balance {
-    min-width: 92px;
-    max-width: 96px;
-    font-size: 16px;
-  }
-
-  .nt-top-up {
-    width: 54px;
-    height: 54px;
-  }
-
-  .nt-avatar {
-    width: 50px;
-    height: 50px;
-    flex-basis: 50px;
-  }
-
-  .nt-asset-trigger {
-    width: 176px;
-    font-size: 16px;
-  }
-
-  .nt-toolbar-left {
-    left: 204px;
-  }
-
-  .nt-tool-btn {
-    width: 50px;
-    height: 54px;
-  }
-
-  .nt-chart-types button {
-    font-size: 11px;
-    padding: 0 6px;
-  }
-
-  .nt-trade-panel {
-    height: 320px;
-  }
-
-  .nt-time-main {
-    grid-template-columns: 56px 1fr 56px;
-  }
-
-  .nt-payout-card span {
-    font-size: 11px;
-  }
-
-  .nt-payout-card strong {
-    font-size: 14px;
-  }
-}
-/* Compact PocketOption-style trading panel correction */
-.nt-pocket-panel {
-  padding: 9px;
-  gap: 8px;
-  overflow: hidden;
-  background: linear-gradient(180deg, rgba(34, 47, 76, 0.96), rgba(20, 29, 52, 0.98));
-}
-
-.nt-pocket-sentiment {
-  height: 22px;
-  display: grid;
-  grid-template-columns: 38px 1fr 38px;
-  align-items: center;
-  gap: 7px;
-  color: #8dff9a;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.nt-pocket-sentiment div {
-  height: 11px;
-  border-radius: 999px;
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(90deg, #37d66b 0 50%, #ff4c45 50% 100%);
-}
-
-.nt-pocket-sentiment i {
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: 50%;
-  width: 4px;
-  border-radius: 999px;
-  background: #dce9ff;
-}
-
-.nt-pocket-field {
-  min-width: 0;
-}
-
-.nt-pocket-field h3 {
-  margin: 0 0 5px;
-  color: #dce8ff;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.nt-pocket-input {
-  height: 38px;
-  display: grid;
-  grid-template-columns: 38px 1fr 38px;
-  align-items: center;
-  overflow: hidden;
-  border-radius: 10px;
-  background: rgba(8, 13, 27, 0.78);
-  border: 1px solid rgba(164, 193, 255, 0.08);
-}
-
-.nt-pocket-input button {
-  width: 38px;
-  height: 38px;
-  border: 0;
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.07);
-  font-size: 17px;
-  font-weight: 900;
-}
-
-.nt-pocket-input strong {
-  color: #ffffff;
-  text-align: center;
-  font-size: 16px;
-  font-weight: 900;
-  letter-spacing: 0.01em;
-}
-
-.nt-pocket-expiry-line {
-  height: 24px;
-  margin-top: 5px;
-  display: grid;
-  grid-template-columns: repeat(9, minmax(0, 1fr));
-  gap: 3px;
-}
-
-.nt-pocket-expiry-line button,
-.nt-pocket-expiry-line span {
-  height: 24px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 7px;
-  color: #dce9ff;
-  background: rgba(68, 91, 139, 0.48);
-  font-size: 9px;
-  font-weight: 900;
-}
-
-.nt-pocket-expiry-line button {
-  color: #ffffff;
-  background: linear-gradient(135deg, #48d8ff, #2878f2);
-}
-
-.nt-pocket-amount {
-  height: 42px;
-  display: grid;
-  grid-template-columns: 1fr 58px;
-  align-items: center;
-  overflow: hidden;
-  border-radius: 10px;
-  background: rgba(8, 13, 27, 0.82);
-  border: 1px solid rgba(164, 193, 255, 0.08);
-}
-
-.nt-pocket-amount input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  outline: none;
-  padding: 0 12px;
-  color: #ffffff;
-  background: transparent;
-  font-size: 18px;
-  font-weight: 900;
-}
-
-.nt-pocket-amount span {
-  color: #ffffff;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.nt-pocket-payout {
-  min-height: 54px;
-  padding: 7px 9px;
-  display: grid;
-  grid-template-columns: 1fr 0.75fr 1fr;
-  align-items: center;
-  gap: 6px;
-  border-radius: 11px;
-  background: rgba(8, 13, 27, 0.52);
-  border: 1px dashed rgba(143, 174, 235, 0.16);
-}
-
-.nt-pocket-payout div {
-  display: grid;
-  gap: 2px;
-}
-
-.nt-pocket-payout .center {
-  text-align: center;
-}
-
-.nt-pocket-payout span {
-  color: #aebbd2;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.nt-pocket-payout strong {
-  color: #80ff91;
-  font-size: 14px;
-  font-weight: 900;
-}
-
-.nt-pocket-actions {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 7px;
-  margin-top: auto;
-}
-
-.nt-pocket-actions button {
-  height: 42px;
-  border: 0;
-  border-radius: 10px;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 900;
-}
-
-.nt-pocket-actions button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.nt-pocket-actions .buy {
-  background: linear-gradient(135deg, #72ed7d, #31bd52);
-}
-
-.nt-pocket-actions .sell {
-  background: linear-gradient(135deg, #ff8279, #ef3b35);
-}
-
-.nt-pocket-actions .ai {
-  background: linear-gradient(135deg, #74e4ff, #2198ff);
-}
-
-.nt-pocket-actions .ai span {
-  width: 25px;
-  height: 25px;
-  display: inline-grid;
-  place-items: center;
-  margin-right: 6px;
-  border-radius: 50%;
-  color: #56cfff;
-  background: #ffffff;
-  font-weight: 900;
-}
-
-@media (max-width: 980px) {
-  .nt-pocket-panel {
-    height: 240px;
+    bottom: 68px;
+    height: 248px;
     padding: 8px;
     gap: 6px;
+    border-top: 1px solid #e4e9f2;
   }
 
-  .nt-pocket-sentiment {
-    height: 18px;
-    font-size: 12px;
+  .nt-white-field {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
-  .nt-pocket-field h3 {
-    font-size: 12px;
-    margin-bottom: 4px;
-  }
-
-  .nt-pocket-input,
-  .nt-pocket-amount {
+  .nt-white-input {
     height: 38px;
   }
 
-  .nt-pocket-expiry-line {
+  .nt-white-payout {
+    padding: 7px;
+  }
+
+  .nt-white-payout strong {
+    font-size: 15px;
+  }
+
+  .nt-buy,
+  .nt-sell,
+  .nt-ai {
+    height: 42px;
+    font-size: 12px;
+  }
+
+  .nt-white-sentiment,
+  .nt-white-return,
+  .nt-white-expiry {
     display: none;
-  }
-
-  .nt-pocket-payout {
-    min-height: 50px;
-  }
-
-  .nt-pocket-actions {
-    grid-template-columns: 1fr 1.35fr 1fr;
-    gap: 7px;
-  }
-
-  .nt-pocket-actions button {
-    height: 48px;
-    font-size: 13px;
   }
 }
