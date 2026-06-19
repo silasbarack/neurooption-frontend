@@ -269,7 +269,7 @@ export default function TradingPage() {
   const [nowMs, setNowMs] = React.useState(Date.now());
   const [sentiment, setSentiment] = React.useState(50);
   const [emptyPanel, setEmptyPanel] = React.useState<EmptyPanel>(null);
-  const [marketStatus, setMarketStatus] = React.useState("Connecting to OTC backend...");
+  
 
   const exchangeRate = EXCHANGE_RATES[currency];
   const displayedBalance = balancesUsd[accountType] * exchangeRate;
@@ -300,7 +300,6 @@ export default function TradingPage() {
       setCandles(nextCandles);
       setSentiment(calculateSentiment(nextCandles));
       setNowMs(data.serverTime ? new Date(data.serverTime).getTime() : Date.now());
-      setMarketStatus("Live backend OTC");
     },
     []
   );
@@ -336,7 +335,6 @@ export default function TradingPage() {
       } catch {
         if (!cancelled) {
           setAvailableAssets(ASSETS);
-          setMarketStatus("Backend unavailable. Check VITE_API_URL.");
         }
       }
     };
@@ -361,7 +359,7 @@ export default function TradingPage() {
       } catch {
         if (!stopped) {
           setNowMs(Date.now());
-          setMarketStatus("Waiting for backend OTC candles...");
+          
         }
       }
     };
@@ -371,7 +369,6 @@ export default function TradingPage() {
     setActiveTrades([]);
     setResultMarkers([]);
     setActiveCategory(selectedAsset.category);
-    setMarketStatus(`Loading ${selectedAsset.symbol}...`);
 
     run();
 
