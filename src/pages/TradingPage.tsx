@@ -65,7 +65,7 @@ const API_BASE_URL = (
   "http://localhost:4000"
 ).replace(/\/$/, "");
 
-const MARKET_POLL_MS = 1000;
+const MARKET_POLL_MS = 245;
 const MIN_EXPIRY_SECONDS = 5;
 const MAX_EXPIRY_SECONDS = 5 * 60 * 60;
 
@@ -594,11 +594,9 @@ export default function TradingPage() {
           />
 
           <div className="nt-chart-footer">
-            <button type="button">←</button>
-            <button type="button">{timeframe} ▴</button>
-            <strong>{selectedAsset.label}</strong>
-            <strong>{marketStatus}</strong>
-          </div>
+  <button type="button">←</button>
+  <button type="button">{timeframe} ▴</button>
+</div>
         </section>
 
         <TradingPanel
