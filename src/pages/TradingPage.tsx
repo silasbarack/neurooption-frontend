@@ -380,6 +380,7 @@ export default function TradingPage() {
             timeframe={timeframe}
             activeTrades={activeTrades}
             resultMarkers={resultMarkers}
+            selectedIndicators={selectedIndicators}
           />
 
           <div className="nt-chart-footer">
