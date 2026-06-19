@@ -15,6 +15,7 @@ type TradingPanelProps = {
   expectedProfitText: string;
   expectedReturnText: string;
   canTrade: boolean;
+  sentiment: number;
   onAdjustExpiry: (unit: "hours" | "minutes" | "seconds", delta: number) => void;
   onAmountChange: (amount: string) => void;
   onTrade: (side: TradeSide) => void;
@@ -29,11 +30,13 @@ export default function TradingPanel({
   expectedProfitText,
   expectedReturnText,
   canTrade,
+  sentiment,
   onAdjustExpiry,
   onAmountChange,
   onTrade,
 }: TradingPanelProps) {
   const numericAmount = Number(amount || 0);
+  const sellSentiment = 100 - sentiment;
 
   return (
     <aside className="nt-trade-panel nt-white-panel">
@@ -116,12 +119,19 @@ export default function TradingPanel({
       <section className="nt-white-sentiment">
         <div>
           <span>Sentiment</span>
-          <small>62%</small>
+          <small>{sentiment}%</small>
         </div>
-        <div className="bar">
-          <i />
+
+        <div
+          className="bar"
+          style={{
+            background: `linear-gradient(90deg, #22c55e 0 ${sentiment}%, #ef4444 ${sentiment}% 100%)`,
+          }}
+        >
+          <i style={{ left: `${sentiment}%` }} />
         </div>
-        <small>38%</small>
+
+        <small>{sellSentiment}%</small>
       </section>
 
       <p className="nt-white-return">Expected return: {expectedReturnText}</p>

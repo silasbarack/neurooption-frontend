@@ -7,7 +7,7 @@ export const LIVE_TICK_MS = 245;
 export const M1_CANDLE_MS = 60_000;
 export const MAX_CANDLES = 110;
 
-type MarketStructure =
+type MarketRegime =
   | "TREND_UP"
   | "TREND_DOWN"
   | "RANGE"
@@ -15,17 +15,16 @@ type MarketStructure =
   | "PULLBACK_DOWN"
   | "BREAKOUT_UP"
   | "BREAKOUT_DOWN"
-  | "SQUEEZE";
+  | "CONSOLIDATION";
 
 type EngineState = {
   seed: number;
-  regime: MarketStructure;
+  regime: MarketRegime;
   regimeTicksLeft: number;
   volatility: number;
   momentum: number;
   fairValue: number;
-  rangeTop: number;
-  rangeBottom: number;
+  lastShock: number;
 };
 
 const states = new Map<string, EngineState>();
@@ -37,8 +36,8 @@ function clamp(value: number, min: number, max: number) {
 function hashString(value: string) {
   let hash = 2166136261;
 
-  for (let i = 0; i < value.length; i += 1) {
-    hash ^= value.charCodeAt(i);
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
     hash = Math.imul(hash, 16777619);
   }
 
@@ -69,101 +68,99 @@ function randomNormal(state: EngineState) {
 }
 
 function getBaseVolatility(asset: Asset) {
-  if (asset.basePrice < 3) return asset.basePrice * 0.000065;
-  if (asset.basePrice < 200) return asset.basePrice * 0.000105;
+  if (asset.basePrice < 3) return asset.basePrice * 0.000075;
+  if (asset.basePrice < 200) return asset.basePrice * 0.00011;
   if (asset.basePrice < 5000) return asset.basePrice * 0.00007;
-  return asset.basePrice * 0.000045;
+  return asset.basePrice * 0.00005;
 }
 
 function getState(asset: Asset) {
-  const key = asset.symbol;
-  const existing = states.get(key);
+  const existing = states.get(asset.symbol);
 
   if (existing) return existing;
 
-  const baseVolatility = getBaseVolatility(asset);
-
   const state: EngineState = {
-    seed: hashString(`${asset.symbol}-${asset.basePrice}`),
+    seed: hashString(`${asset.symbol}-${asset.basePrice}-${Date.now()}`),
     regime: "RANGE",
-    regimeTicksLeft: 120,
-    volatility: baseVolatility,
+    regimeTicksLeft: 90,
+    volatility: getBaseVolatility(asset),
     momentum: 0,
     fairValue: asset.basePrice,
-    rangeTop: asset.basePrice + baseVolatility * 60,
-    rangeBottom: asset.basePrice - baseVolatility * 60,
+    lastShock: 0,
   };
 
-  states.set(key, state);
+  states.set(asset.symbol, state);
+
   return state;
 }
 
-function chooseRegime(state: EngineState, lastPrice: number) {
+function chooseRegime(state: EngineState) {
   const roll = nextRandom(state);
 
   if (roll < 0.18) state.regime = "TREND_UP";
   else if (roll < 0.36) state.regime = "TREND_DOWN";
   else if (roll < 0.52) state.regime = "RANGE";
-  else if (roll < 0.64) state.regime = "PULLBACK_UP";
-  else if (roll < 0.76) state.regime = "PULLBACK_DOWN";
+  else if (roll < 0.65) state.regime = "PULLBACK_UP";
+  else if (roll < 0.78) state.regime = "PULLBACK_DOWN";
   else if (roll < 0.86) state.regime = "BREAKOUT_UP";
-  else if (roll < 0.96) state.regime = "BREAKOUT_DOWN";
-  else state.regime = "SQUEEZE";
+  else if (roll < 0.94) state.regime = "BREAKOUT_DOWN";
+  else state.regime = "CONSOLIDATION";
 
   state.regimeTicksLeft = Math.floor(randomBetween(state, 45, 190));
-
-  const rangeSize = state.volatility * randomBetween(state, 55, 120);
-  state.rangeTop = lastPrice + rangeSize;
-  state.rangeBottom = lastPrice - rangeSize;
 }
 
-function updateRegime(state: EngineState, lastPrice: number) {
+function updateRegime(state: EngineState) {
   state.regimeTicksLeft -= 1;
 
   if (state.regimeTicksLeft <= 0) {
-    chooseRegime(state, lastPrice);
+    chooseRegime(state);
   }
 }
 
 function updateVolatility(asset: Asset, state: EngineState) {
   const base = getBaseVolatility(asset);
   const shock = Math.abs(randomNormal(state));
-  const target = base * (0.55 + shock * 0.4);
 
-  state.volatility = state.volatility * 0.96 + target * 0.04;
-  state.volatility = clamp(state.volatility, base * 0.4, base * 2.4);
+  const target =
+    state.regime === "CONSOLIDATION"
+      ? base * randomBetween(state, 0.45, 0.75)
+      : state.regime.startsWith("BREAKOUT")
+        ? base * randomBetween(state, 1.55, 2.35)
+        : base * randomBetween(state, 0.75, 1.45) + shock * base * 0.25;
+
+  state.volatility = state.volatility * 0.93 + target * 0.07;
+  state.volatility = clamp(state.volatility, base * 0.35, base * 2.6);
 }
 
-function getStructureDrift(asset: Asset, state: EngineState, lastPrice: number) {
+function regimeDrift(asset: Asset, state: EngineState) {
   const base = getBaseVolatility(asset);
 
-  if (state.regime === "TREND_UP") return base * 0.13;
-  if (state.regime === "TREND_DOWN") return -base * 0.13;
-
-  if (state.regime === "BREAKOUT_UP") return base * 0.22;
-  if (state.regime === "BREAKOUT_DOWN") return -base * 0.22;
-
-  if (state.regime === "PULLBACK_UP") return lastPrice < state.fairValue ? base * 0.16 : -base * 0.06;
-  if (state.regime === "PULLBACK_DOWN") return lastPrice > state.fairValue ? -base * 0.16 : base * 0.06;
-
-  if (state.regime === "RANGE") {
-    const middle = (state.rangeTop + state.rangeBottom) / 2;
-    return (middle - lastPrice) * 0.0022;
+  switch (state.regime) {
+    case "TREND_UP":
+      return base * 0.12;
+    case "TREND_DOWN":
+      return -base * 0.12;
+    case "PULLBACK_UP":
+      return base * 0.05;
+    case "PULLBACK_DOWN":
+      return -base * 0.05;
+    case "BREAKOUT_UP":
+      return base * 0.22;
+    case "BREAKOUT_DOWN":
+      return -base * 0.22;
+    case "CONSOLIDATION":
+      return 0;
+    default:
+      return 0;
   }
-
-  if (state.regime === "SQUEEZE") {
-    return (state.fairValue - lastPrice) * 0.001;
-  }
-
-  return 0;
 }
 
-function createNewCandle(previousClose: number, time: number): Candle {
+function makeNewCandle(open: number, time: number): Candle {
   return {
-    open: previousClose,
-    high: previousClose,
-    low: previousClose,
-    close: previousClose,
+    open,
+    high: open,
+    low: open,
+    close: open,
     time,
   };
 }
@@ -171,45 +168,48 @@ function createNewCandle(previousClose: number, time: number): Candle {
 export function createInitialCandles(asset: Asset) {
   const state = getState(asset);
 
-  state.seed = hashString(`${asset.symbol}-${Date.now()}`);
+  state.seed = hashString(`${asset.symbol}-${asset.basePrice}-${Date.now()}`);
+  state.regime = "RANGE";
+  state.regimeTicksLeft = 90;
   state.volatility = getBaseVolatility(asset);
   state.momentum = 0;
   state.fairValue = asset.basePrice;
-  state.regime = "RANGE";
-  state.regimeTicksLeft = 100;
+  state.lastShock = 0;
 
   const candles: Candle[] = [];
-  let previousClose = asset.basePrice;
+  let close = asset.basePrice;
   const now = Date.now();
 
-  for (let i = 0; i < MAX_CANDLES; i += 1) {
-    updateRegime(state, previousClose);
+  for (let index = 0; index < MAX_CANDLES; index += 1) {
+    updateRegime(state);
     updateVolatility(asset, state);
 
-    const open = previousClose;
-    const drift = getStructureDrift(asset, state, previousClose);
-    const noise = randomNormal(state) * state.volatility * 4.1;
-    const meanReversion = (state.fairValue - previousClose) * 0.0013;
+    const open = close;
+    const drift = regimeDrift(asset, state);
+    const noise = randomNormal(state) * state.volatility * 4.2;
+    const reversion = (state.fairValue - close) * 0.0012;
 
     state.momentum = state.momentum * 0.84 + (drift + noise) * 0.16;
 
-    const close = Math.max(0.00001, open + drift + noise + meanReversion + state.momentum);
+    close = Math.max(0.00001, open + drift + noise + reversion + state.momentum);
 
     const body = Math.abs(close - open);
-    const wickBase = state.volatility * randomBetween(state, 2.8, 7.2);
-    const high = Math.max(open, close) + wickBase + body * randomBetween(state, 0.15, 0.72);
-    const low = Math.max(0.00001, Math.min(open, close) - wickBase - body * randomBetween(state, 0.15, 0.72));
+    const wickBase = state.volatility * randomBetween(state, 2.4, 6.4);
+    const high = Math.max(open, close) + wickBase + body * randomBetween(state, 0.1, 0.7);
+    const low = Math.max(
+      0.00001,
+      Math.min(open, close) - wickBase - body * randomBetween(state, 0.1, 0.7)
+    );
 
     candles.push({
       open,
       high,
       low,
       close,
-      time: now - (MAX_CANDLES - i) * M1_CANDLE_MS,
+      time: now - (MAX_CANDLES - index) * M1_CANDLE_MS,
     });
 
-    previousClose = close;
-    state.fairValue = state.fairValue * 0.9993 + close * 0.0007;
+    state.fairValue = state.fairValue * 0.9992 + close * 0.0008;
   }
 
   return candles;
@@ -221,46 +221,47 @@ export function updateLiveM1Candle(currentCandles: Candle[], asset: Asset) {
   const latest = candles[candles.length - 1];
   const now = Date.now();
 
-  if (!latest) return createInitialCandles(asset);
-
-  updateRegime(state, latest.close);
+  updateRegime(state);
   updateVolatility(asset, state);
 
   if (now - latest.time >= M1_CANDLE_MS) {
-    const gap = randomNormal(state) * state.volatility * 0.12;
-    const nextOpen = Math.max(0.00001, latest.close + gap);
+    const gap = randomNormal(state) * state.volatility * 0.14;
+    const open = Math.max(0.00001, latest.close + gap);
 
-    candles.push(createNewCandle(nextOpen, now));
+    candles.push(makeNewCandle(open, latest.time + M1_CANDLE_MS));
+
     return candles.slice(-MAX_CANDLES);
   }
 
-  const candleAge = clamp((now - latest.time) / M1_CANDLE_MS, 0, 1);
-  const drift = getStructureDrift(asset, state, latest.close);
-  const meanReversion = (state.fairValue - latest.close) * 0.0015;
-  const noiseMultiplier = state.regime === "SQUEEZE" ? 0.18 : 0.38;
-  const tickNoise = randomNormal(state) * state.volatility * noiseMultiplier;
+  const age = clamp((now - latest.time) / M1_CANDLE_MS, 0, 1);
+  const drift = regimeDrift(asset, state);
+  const noise = randomNormal(state) * state.volatility * 0.34;
+  const reversion = (state.fairValue - latest.close) * 0.0016;
 
-  state.momentum = state.momentum * 0.91 + (drift + tickNoise) * 0.09;
+  state.lastShock = state.lastShock * 0.65 + noise * 0.35;
+  state.momentum = state.momentum * 0.91 + (drift + state.lastShock) * 0.09;
+
+  const ageFactor = 0.72 + age * 0.42;
 
   const nextClose = Math.max(
     0.00001,
-    latest.close + drift * (0.75 + candleAge * 0.45) + tickNoise + state.momentum + meanReversion
+    latest.close + drift * ageFactor + noise + state.momentum + reversion
   );
 
   const body = Math.abs(nextClose - latest.open);
-  const wickPulse = Math.abs(tickNoise) * 0.7 + state.volatility * (0.14 + candleAge * 0.28);
+  const wickSearch = Math.abs(noise) * 0.7 + state.volatility * (0.16 + age * 0.36);
 
-  const nextHigh = Math.max(
+  const high = Math.max(
     latest.high,
-    nextClose + wickPulse * randomBetween(state, 0.2, 1.1),
+    nextClose + wickSearch * randomBetween(state, 0.25, 1.12),
     latest.open + body * randomBetween(state, 0.04, 0.24)
   );
 
-  const nextLow = Math.max(
+  const low = Math.max(
     0.00001,
     Math.min(
       latest.low,
-      nextClose - wickPulse * randomBetween(state, 0.2, 1.1),
+      nextClose - wickSearch * randomBetween(state, 0.25, 1.12),
       latest.open - body * randomBetween(state, 0.04, 0.24)
     )
   );
@@ -268,11 +269,11 @@ export function updateLiveM1Candle(currentCandles: Candle[], asset: Asset) {
   candles[candles.length - 1] = {
     ...latest,
     close: nextClose,
-    high: nextHigh,
-    low: nextLow,
+    high,
+    low,
   };
 
-  state.fairValue = state.fairValue * 0.9995 + nextClose * 0.0005;
+  state.fairValue = state.fairValue * 0.9994 + nextClose * 0.0006;
 
   return candles.slice(-MAX_CANDLES);
 }

@@ -37,6 +37,8 @@ import {
 type BalancesUsd = Record<AccountType, number>;
 type EmptyPanel = "openTrades" | "history" | "signals" | null;
 
+const DEFAULT_ASSET = ASSETS.find((asset) => asset.symbol === "EUR/USD OTC") ?? ASSETS[0];
+
 const CURRENCY_SYMBOLS: Record<Currency, string> = {
   USD: "$",
   KES: "KES",
@@ -61,7 +63,10 @@ function formatMoney(value: number, currency: Currency) {
   const symbol = CURRENCY_SYMBOLS[currency];
 
   const decimals =
-    currency === "JPY" || currency === "UGX" || currency === "TZS" || currency === "XOF"
+    currency === "JPY" ||
+    currency === "UGX" ||
+    currency === "TZS" ||
+    currency === "XOF"
       ? 0
       : 2;
 
@@ -115,7 +120,7 @@ function getEmptyPanelTitle(panel: EmptyPanel) {
 }
 
 export default function TradingPage() {
-  const candlesRef = React.useRef<Candle[]>(createInitialCandles(ASSETS[0]));
+  const candlesRef = React.useRef<Candle[]>(createInitialCandles(DEFAULT_ASSET));
   const expirySecondsRef = React.useRef(45);
 
   const [accountType, setAccountType] = React.useState<AccountType>("QT Demo");
@@ -126,8 +131,10 @@ export default function TradingPage() {
     "QT Real": 0,
   });
 
-  const [selectedAsset, setSelectedAsset] = React.useState<Asset>(ASSETS[1] ?? ASSETS[0]);
-  const [activeCategory, setActiveCategory] = React.useState<AssetCategory>("Currencies");
+  const [selectedAsset, setSelectedAsset] = React.useState<Asset>(DEFAULT_ASSET);
+  const [activeCategory, setActiveCategory] = React.useState<AssetCategory>(
+    DEFAULT_ASSET.category
+  );
   const [assetMenuOpen, setAssetMenuOpen] = React.useState(false);
 
   const [chartType, setChartType] = React.useState<ChartType>("Candlesticks");
@@ -137,8 +144,11 @@ export default function TradingPage() {
   const [indicatorOpen, setIndicatorOpen] = React.useState(false);
   const [selectedIndicators, setSelectedIndicators] = React.useState<string[]>([
     "Moving Average",
+    "Exponential MA",
+    "Weighted MA",
     "RSI",
   ]);
+
   const [drawingOpen, setDrawingOpen] = React.useState(false);
   const [selectedTool, setSelectedTool] = React.useState("Cursor");
 
@@ -149,6 +159,9 @@ export default function TradingPage() {
   const [candles, setCandles] = React.useState<Candle[]>(candlesRef.current);
   const [activeTrades, setActiveTrades] = React.useState<TradeMarker[]>([]);
   const [resultMarkers, setResultMarkers] = React.useState<ResultMarker[]>([]);
+
+  const [nowMs, setNowMs] = React.useState(Date.now());
+  const [sentiment, setSentiment] = React.useState(50);
   const [emptyPanel, setEmptyPanel] = React.useState<EmptyPanel>(null);
 
   const exchangeRate = EXCHANGE_RATES[currency];
@@ -170,10 +183,13 @@ export default function TradingPage() {
 
   React.useEffect(() => {
     const freshCandles = createInitialCandles(selectedAsset);
+
     candlesRef.current = freshCandles;
+
     setCandles(freshCandles);
     setActiveTrades([]);
     setResultMarkers([]);
+    setActiveCategory(selectedAsset.category);
   }, [selectedAsset]);
 
   React.useEffect(() => {
@@ -183,7 +199,9 @@ export default function TradingPage() {
     const runMarket = (time: number) => {
       if (time - lastTick >= LIVE_TICK_MS) {
         const nextCandles = updateLiveM1Candle(candlesRef.current, selectedAsset);
+
         candlesRef.current = nextCandles;
+
         setCandles(nextCandles);
         lastTick = time;
       }
@@ -202,6 +220,7 @@ export default function TradingPage() {
     const intervalId = window.setInterval(() => {
       const stablePulse = Math.floor(Math.random() * 5);
       const nextPayout = clamp(84 + selectedAsset.payoutBoost + stablePulse, 20, 92);
+
       setPayout(nextPayout);
     }, 5000);
 
@@ -209,6 +228,35 @@ export default function TradingPage() {
       window.clearInterval(intervalId);
     };
   }, [selectedAsset]);
+
+  React.useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      const latestCandles = candlesRef.current.slice(-24);
+
+      if (latestCandles.length < 2) {
+        setNowMs(Date.now());
+        return;
+      }
+
+      const firstClose = latestCandles[0].close;
+      const lastClose = latestCandles[latestCandles.length - 1].close;
+      const bullishCandles = latestCandles.filter(
+        (candle) => candle.close >= candle.open
+      ).length;
+
+      const bullishRatio = bullishCandles / latestCandles.length;
+      const trendPressure = ((lastClose - firstClose) / firstClose) * 9000;
+
+      const nextSentiment = clamp(40 + bullishRatio * 18 + trendPressure, 20, 60);
+
+      setSentiment(Math.round(nextSentiment));
+      setNowMs(Date.now());
+    }, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
 
   function handleFullscreen() {
     if (document.fullscreenElement) {
@@ -260,6 +308,7 @@ export default function TradingPage() {
       );
 
       expirySecondsRef.current = nextValue;
+
       return nextValue;
     });
   }
@@ -292,16 +341,23 @@ export default function TradingPage() {
 
     setBalancesUsd((current) => ({
       ...current,
-      [capturedAccountType]: Math.max(0, current[capturedAccountType] - capturedStakeUsd),
+      [capturedAccountType]: Math.max(
+        0,
+        current[capturedAccountType] - capturedStakeUsd
+      ),
     }));
 
     setActiveTrades((current) => [...current, marker]);
 
     window.setTimeout(() => {
-      const closePrice = candlesRef.current[candlesRef.current.length - 1]?.close ?? entryPrice;
+      const closePrice =
+        candlesRef.current[candlesRef.current.length - 1]?.close ?? entryPrice;
+
       const won = side === "BUY" ? closePrice > entryPrice : closePrice < entryPrice;
 
-      setActiveTrades((current) => current.filter((trade) => trade.id !== tradeId));
+      setActiveTrades((current) =>
+        current.filter((trade) => trade.id !== tradeId)
+      );
 
       if (won) {
         setBalancesUsd((current) => ({
@@ -324,7 +380,9 @@ export default function TradingPage() {
       setResultMarkers((current) => [...current, resultMarker]);
 
       window.setTimeout(() => {
-        setResultMarkers((current) => current.filter((item) => item.id !== resultId));
+        setResultMarkers((current) =>
+          current.filter((item) => item.id !== resultId)
+        );
       }, 10000);
     }, expirySecondsRef.current * 1000);
   }
@@ -378,9 +436,11 @@ export default function TradingPage() {
             candles={candles}
             chartType={chartType}
             timeframe={timeframe}
+            expirySeconds={expirySeconds}
+            nowMs={nowMs}
+            selectedIndicators={selectedIndicators}
             activeTrades={activeTrades}
             resultMarkers={resultMarkers}
-            selectedIndicators={selectedIndicators}
           />
 
           <div className="nt-chart-footer">
@@ -399,6 +459,7 @@ export default function TradingPage() {
           expectedProfitText={formatMoney(expectedProfit, currency)}
           expectedReturnText={formatMoney(expectedReturn, currency)}
           canTrade={canTrade}
+          sentiment={sentiment}
           onAdjustExpiry={handleAdjustExpiry}
           onAmountChange={setAmount}
           onTrade={handleTrade}
@@ -422,8 +483,10 @@ export default function TradingPage() {
             >
               ×
             </button>
+
             <h2>{getEmptyPanelTitle(emptyPanel)}</h2>
             <p>No records yet.</p>
+
             <small>
               {emptyPanel === "signals"
                 ? "Signals will appear here when your signal service is connected."
