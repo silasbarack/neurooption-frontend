@@ -1,7 +1,8 @@
+import { ASSETS } from "./trading.constants";
 import type { Asset, AssetCategory } from "./trading.types";
-import { ASSET_CATEGORIES, ASSETS } from "./trading.constants";
 
 type AssetSelectorProps = {
+  assets?: Asset[];
   selectedAsset: Asset;
   activeCategory: AssetCategory;
   open: boolean;
@@ -11,6 +12,7 @@ type AssetSelectorProps = {
 };
 
 export default function AssetSelector({
+  assets = ASSETS,
   selectedAsset,
   activeCategory,
   open,
@@ -18,21 +20,29 @@ export default function AssetSelector({
   onCategoryChange,
   onAssetChange,
 }: AssetSelectorProps) {
+  const categories = Array.from(
+    new Set(assets.map((asset) => asset.category))
+  ) as AssetCategory[];
+
+  const filteredAssets = assets.filter(
+    (asset) => asset.category === activeCategory
+  );
+
   return (
     <div className="nt-asset-selector">
       <button type="button" className="nt-asset-trigger" onClick={onToggle}>
         <span>{selectedAsset.symbol}</span>
-        <strong>⌄</strong>
+        <b>⌄</b>
       </button>
 
       {open && (
         <div className="nt-asset-menu">
           <div className="nt-asset-tabs">
-            {ASSET_CATEGORIES.map((category) => (
+            {categories.map((category) => (
               <button
                 key={category}
                 type="button"
-                className={activeCategory === category ? "active" : ""}
+                className={category === activeCategory ? "active" : ""}
                 onClick={() => onCategoryChange(category)}
               >
                 {category}
@@ -41,7 +51,7 @@ export default function AssetSelector({
           </div>
 
           <div className="nt-asset-list">
-            {ASSETS.filter((asset) => asset.category === activeCategory).map((asset) => (
+            {filteredAssets.map((asset) => (
               <button
                 key={asset.symbol}
                 type="button"
@@ -49,7 +59,9 @@ export default function AssetSelector({
                 onClick={() => onAssetChange(asset)}
               >
                 <strong>{asset.symbol}</strong>
-                <span>{asset.label}</span>
+                <span>
+                  {asset.label} • Payout boost {asset.payoutBoost}
+                </span>
               </button>
             ))}
           </div>

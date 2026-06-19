@@ -26,18 +26,58 @@ import type {
   TradeSide,
 } from "../components/trading";
 
-import {
-  LIVE_TICK_MS,
-  MAX_EXPIRY_SECONDS,
-  MIN_EXPIRY_SECONDS,
-  createInitialCandles,
-  updateLiveM1Candle,
-} from "../components/trading/chartEngine";
-
 type BalancesUsd = Record<AccountType, number>;
 type EmptyPanel = "openTrades" | "history" | "signals" | null;
 
+type BackendAsset = {
+  symbol: string;
+  label: string;
+  category: string;
+  basePrice: number;
+  precision: number;
+  payoutBoost: number;
+  isActive?: boolean;
+};
+
+type BackendCandle = {
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  time?: number;
+  openTime?: string;
+  closeTime?: string;
+};
+
+type BackendAssetsResponse = {
+  assets: BackendAsset[];
+};
+
+type BackendCandlesResponse = {
+  asset: BackendAsset;
+  timeframe: string;
+  serverTime: string;
+  candles: BackendCandle[];
+};
+
+const API_BASE_URL = (
+  (import.meta.env.VITE_API_URL as string | undefined) ||
+  "http://localhost:4000"
+).replace(/\/$/, "");
+
+const MARKET_POLL_MS = 1000;
+const MIN_EXPIRY_SECONDS = 5;
+const MAX_EXPIRY_SECONDS = 5 * 60 * 60;
+
 const DEFAULT_ASSET = ASSETS.find((asset) => asset.symbol === "EUR/USD OTC") ?? ASSETS[0];
+
+const VALID_CATEGORIES: AssetCategory[] = [
+  "Currencies",
+  "Cryptocurrencies",
+  "Stocks",
+  "Indices",
+  "Commodities",
+];
 
 const CURRENCY_SYMBOLS: Record<Currency, string> = {
   USD: "$",
@@ -57,6 +97,35 @@ const CURRENCY_SYMBOLS: Record<Currency, string> = {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
+}
+
+function normalizeCategory(category: string): AssetCategory {
+  const found = VALID_CATEGORIES.find(
+    (item) => item.toLowerCase() === category.toLowerCase()
+  );
+
+  return found ?? "Currencies";
+}
+
+function normalizeAsset(asset: BackendAsset): Asset {
+  return {
+    symbol: asset.symbol,
+    label: asset.label,
+    category: normalizeCategory(asset.category),
+    basePrice: Number(asset.basePrice),
+    precision: Number(asset.precision),
+    payoutBoost: Number(asset.payoutBoost),
+  };
+}
+
+function normalizeCandle(candle: BackendCandle): Candle {
+  return {
+    open: Number(candle.open),
+    high: Number(candle.high),
+    low: Number(candle.low),
+    close: Number(candle.close),
+    time: Number(candle.time ?? new Date(candle.openTime ?? Date.now()).getTime()),
+  };
 }
 
 function formatMoney(value: number, currency: Currency) {
@@ -112,6 +181,26 @@ function splitExpiry(totalSeconds: number) {
   };
 }
 
+function calculateSentiment(candles: Candle[]) {
+  const latestCandles = candles.slice(-24);
+
+  if (latestCandles.length < 2) {
+    return 50;
+  }
+
+  const firstClose = latestCandles[0].close;
+  const lastClose = latestCandles[latestCandles.length - 1].close;
+
+  const bullishCandles = latestCandles.filter(
+    (candle) => candle.close >= candle.open
+  ).length;
+
+  const bullishRatio = bullishCandles / latestCandles.length;
+  const trendPressure = ((lastClose - firstClose) / firstClose) * 9000;
+
+  return Math.round(clamp(40 + bullishRatio * 18 + trendPressure, 20, 60));
+}
+
 function getEmptyPanelTitle(panel: EmptyPanel) {
   if (panel === "openTrades") return "Open trades";
   if (panel === "history") return "Trades history";
@@ -119,8 +208,24 @@ function getEmptyPanelTitle(panel: EmptyPanel) {
   return "";
 }
 
+async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+    },
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  return response.json() as Promise<T>;
+}
+
 export default function TradingPage() {
-  const candlesRef = React.useRef<Candle[]>(createInitialCandles(DEFAULT_ASSET));
+  const candlesRef = React.useRef<Candle[]>([]);
   const expirySecondsRef = React.useRef(45);
 
   const [accountType, setAccountType] = React.useState<AccountType>("QT Demo");
@@ -131,6 +236,7 @@ export default function TradingPage() {
     "QT Real": 0,
   });
 
+  const [availableAssets, setAvailableAssets] = React.useState<Asset[]>(ASSETS);
   const [selectedAsset, setSelectedAsset] = React.useState<Asset>(DEFAULT_ASSET);
   const [activeCategory, setActiveCategory] = React.useState<AssetCategory>(
     DEFAULT_ASSET.category
@@ -156,13 +262,14 @@ export default function TradingPage() {
   const [amount, setAmount] = React.useState("100");
   const [payout, setPayout] = React.useState(92);
 
-  const [candles, setCandles] = React.useState<Candle[]>(candlesRef.current);
+  const [candles, setCandles] = React.useState<Candle[]>([]);
   const [activeTrades, setActiveTrades] = React.useState<TradeMarker[]>([]);
   const [resultMarkers, setResultMarkers] = React.useState<ResultMarker[]>([]);
 
   const [nowMs, setNowMs] = React.useState(Date.now());
   const [sentiment, setSentiment] = React.useState(50);
   const [emptyPanel, setEmptyPanel] = React.useState<EmptyPanel>(null);
+  const [marketStatus, setMarketStatus] = React.useState("Connecting to OTC backend...");
 
   const exchangeRate = EXCHANGE_RATES[currency];
   const displayedBalance = balancesUsd[accountType] * exchangeRate;
@@ -177,44 +284,115 @@ export default function TradingPage() {
 
   const expiryParts = splitExpiry(expirySeconds);
 
+  const loadCandles = React.useCallback(
+    async (asset: Asset, signal?: AbortSignal) => {
+      const encodedAsset = encodeURIComponent(asset.symbol);
+
+      const data = await fetchJson<BackendCandlesResponse>(
+        `${API_BASE_URL}/market-data/candles?asset=${encodedAsset}&timeframe=M1&limit=120`,
+        signal
+      );
+
+      const nextCandles = data.candles.map(normalizeCandle);
+
+      candlesRef.current = nextCandles;
+
+      setCandles(nextCandles);
+      setSentiment(calculateSentiment(nextCandles));
+      setNowMs(data.serverTime ? new Date(data.serverTime).getTime() : Date.now());
+      setMarketStatus("Live backend OTC");
+    },
+    []
+  );
+
   React.useEffect(() => {
     expirySecondsRef.current = expirySeconds;
   }, [expirySeconds]);
 
   React.useEffect(() => {
-    const freshCandles = createInitialCandles(selectedAsset);
+    let cancelled = false;
 
-    candlesRef.current = freshCandles;
+    const loadAssets = async () => {
+      try {
+        const data = await fetchJson<BackendAssetsResponse>(
+          `${API_BASE_URL}/market-data/assets`
+        );
 
-    setCandles(freshCandles);
+        if (cancelled) return;
+
+        const nextAssets = data.assets.map(normalizeAsset);
+
+        if (nextAssets.length > 0) {
+          setAvailableAssets(nextAssets);
+
+          const preferred =
+            nextAssets.find((asset) => asset.symbol === selectedAsset.symbol) ??
+            nextAssets.find((asset) => asset.symbol === "EUR/USD OTC") ??
+            nextAssets[0];
+
+          setSelectedAsset(preferred);
+          setActiveCategory(preferred.category);
+        }
+      } catch {
+        if (!cancelled) {
+          setAvailableAssets(ASSETS);
+          setMarketStatus("Backend unavailable. Check VITE_API_URL.");
+        }
+      }
+    };
+
+    loadAssets();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  React.useEffect(() => {
+    let stopped = false;
+    let controller: AbortController | null = null;
+
+    const run = async () => {
+      controller?.abort();
+      controller = new AbortController();
+
+      try {
+        await loadCandles(selectedAsset, controller.signal);
+      } catch {
+        if (!stopped) {
+          setNowMs(Date.now());
+          setMarketStatus("Waiting for backend OTC candles...");
+        }
+      }
+    };
+
+    setCandles([]);
+    candlesRef.current = [];
     setActiveTrades([]);
     setResultMarkers([]);
     setActiveCategory(selectedAsset.category);
-  }, [selectedAsset]);
+    setMarketStatus(`Loading ${selectedAsset.symbol}...`);
 
-  React.useEffect(() => {
-    let frameId = 0;
-    let lastTick = 0;
+    run();
 
-    const runMarket = (time: number) => {
-      if (time - lastTick >= LIVE_TICK_MS) {
-        const nextCandles = updateLiveM1Candle(candlesRef.current, selectedAsset);
-
-        candlesRef.current = nextCandles;
-
-        setCandles(nextCandles);
-        lastTick = time;
-      }
-
-      frameId = window.requestAnimationFrame(runMarket);
-    };
-
-    frameId = window.requestAnimationFrame(runMarket);
+    const intervalId = window.setInterval(run, MARKET_POLL_MS);
 
     return () => {
-      window.cancelAnimationFrame(frameId);
+      stopped = true;
+      window.clearInterval(intervalId);
+      controller?.abort();
     };
-  }, [selectedAsset]);
+  }, [selectedAsset, loadCandles]);
+
+  React.useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNowMs((current) => current + 1000);
+    }, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
 
   React.useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -228,35 +406,6 @@ export default function TradingPage() {
       window.clearInterval(intervalId);
     };
   }, [selectedAsset]);
-
-  React.useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      const latestCandles = candlesRef.current.slice(-24);
-
-      if (latestCandles.length < 2) {
-        setNowMs(Date.now());
-        return;
-      }
-
-      const firstClose = latestCandles[0].close;
-      const lastClose = latestCandles[latestCandles.length - 1].close;
-      const bullishCandles = latestCandles.filter(
-        (candle) => candle.close >= candle.open
-      ).length;
-
-      const bullishRatio = bullishCandles / latestCandles.length;
-      const trendPressure = ((lastClose - firstClose) / firstClose) * 9000;
-
-      const nextSentiment = clamp(40 + bullishRatio * 18 + trendPressure, 20, 60);
-
-      setSentiment(Math.round(nextSentiment));
-      setNowMs(Date.now());
-    }, 1000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, []);
 
   function handleFullscreen() {
     if (document.fullscreenElement) {
@@ -405,6 +554,7 @@ export default function TradingPage() {
         <section className="nt-main-chart">
           <div className="nt-page-asset">
             <AssetSelector
+              assets={availableAssets}
               selectedAsset={selectedAsset}
               activeCategory={activeCategory}
               open={assetMenuOpen}
@@ -447,6 +597,7 @@ export default function TradingPage() {
             <button type="button">←</button>
             <button type="button">{timeframe} ▴</button>
             <strong>{selectedAsset.label}</strong>
+            <strong>{marketStatus}</strong>
           </div>
         </section>
 
