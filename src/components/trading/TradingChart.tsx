@@ -28,6 +28,8 @@ const COLORS = [
   "#ef4444",
   "#14b8a6",
   "#64748b",
+  "#a855f7",
+  "#0f766e",
 ];
 
 function clamp(value: number, min: number, max: number) {
@@ -37,7 +39,9 @@ function clamp(value: number, min: number, max: number) {
 function sma(values: number[], period: number) {
   return values.map((_, index) => {
     if (index < period - 1) return null;
+
     const slice = values.slice(index - period + 1, index + 1);
+
     return slice.reduce((sum, value) => sum + value, 0) / period;
   });
 }
@@ -107,6 +111,7 @@ function rsi(values: number[], period = 14) {
     if (losses === 0) return 75;
 
     const rs = gains / losses;
+
     return 100 - 100 / (1 + rs);
   });
 }
@@ -210,6 +215,30 @@ function drawDots(
   });
 }
 
+function drawHorizontalLevels(
+  context: CanvasRenderingContext2D,
+  levels: number[],
+  color: string,
+  left: number,
+  rightEdge: number,
+  priceToY: (price: number) => number
+) {
+  context.strokeStyle = color;
+  context.lineWidth = 1;
+  context.setLineDash([5, 5]);
+
+  levels.forEach((price) => {
+    const y = priceToY(price);
+
+    context.beginPath();
+    context.moveTo(left, y);
+    context.lineTo(rightEdge, y);
+    context.stroke();
+  });
+
+  context.setLineDash([]);
+}
+
 function drawIndicatorVisual(
   context: CanvasRenderingContext2D,
   indicator: string,
@@ -273,8 +302,10 @@ function drawIndicatorVisual(
   }
 
   if (lowerName.includes("sar") || lowerName.includes("parabolic")) {
-    const dots = candles.map((candle, i) =>
-      i % 2 === 0 ? candle.low - (candle.high - candle.low) * 0.25 : candle.high + (candle.high - candle.low) * 0.25
+    const dots = candles.map((candle, candleIndex) =>
+      candleIndex % 2 === 0
+        ? candle.low - (candle.high - candle.low) * 0.25
+        : candle.high + (candle.high - candle.low) * 0.25
     );
 
     drawDots(context, dots, color, indexToX, priceToY);
@@ -289,23 +320,11 @@ function drawIndicatorVisual(
   ) {
     const min = Math.min(...lows);
     const max = Math.max(...highs);
-    const levels = [0.236, 0.382, 0.5, 0.618, 0.786];
+    const fibLevels = [0.236, 0.382, 0.5, 0.618, 0.786].map(
+      (level) => min + (max - min) * level
+    );
 
-    context.strokeStyle = color;
-    context.lineWidth = 1;
-    context.setLineDash([5, 5]);
-
-    levels.forEach((level) => {
-      const price = min + (max - min) * level;
-      const y = priceToY(price);
-
-      context.beginPath();
-      context.moveTo(left, y);
-      context.lineTo(rightEdge, y);
-      context.stroke();
-    });
-
-    context.setLineDash([]);
+    drawHorizontalLevels(context, fibLevels, color, left, rightEdge, priceToY);
     return;
   }
 
@@ -316,11 +335,11 @@ function drawIndicatorVisual(
 
     let started = false;
 
-    candles.forEach((candle, i) => {
-      if (i % 9 !== 0 && i !== candles.length - 1) return;
+    candles.forEach((candle, candleIndex) => {
+      if (candleIndex % 9 !== 0 && candleIndex !== candles.length - 1) return;
 
-      const x = indexToX(i);
-      const y = priceToY(i % 18 === 0 ? candle.high : candle.low);
+      const x = indexToX(candleIndex);
+      const y = priceToY(candleIndex % 18 === 0 ? candle.high : candle.low);
 
       if (!started) {
         context.moveTo(x, y);
@@ -341,19 +360,27 @@ function drawIndicatorVisual(
     context.fillStyle = "rgba(34, 197, 94, 0.10)";
     context.beginPath();
 
-    fast.forEach((value, i) => {
+    let started = false;
+
+    fast.forEach((value, fastIndex) => {
       if (value === null) return;
-      const x = indexToX(i);
+
+      const x = indexToX(fastIndex);
       const y = priceToY(value);
 
-      if (i === 8) context.moveTo(x, y);
-      else context.lineTo(x, y);
+      if (!started) {
+        context.moveTo(x, y);
+        started = true;
+      } else {
+        context.lineTo(x, y);
+      }
     });
 
     [...slow].reverse().forEach((value, reverseIndex) => {
       if (value === null) return;
-      const i = slow.length - 1 - reverseIndex;
-      context.lineTo(indexToX(i), priceToY(value));
+
+      const slowIndex = slow.length - 1 - reverseIndex;
+      context.lineTo(indexToX(slowIndex), priceToY(value));
     });
 
     context.closePath();
@@ -364,13 +391,12 @@ function drawIndicatorVisual(
     return;
   }
 
+  const min = Math.min(...lows);
+  const max = Math.max(...highs);
   const period = 6 + (hashName(indicator) % 34);
+
   const generic = lowerName.includes("rsi")
-    ? rsi(closes, 14).map((value, i) => {
-        const min = Math.min(...lows);
-        const max = Math.max(...highs);
-        return min + ((max - min) * value) / 100;
-      })
+    ? rsi(closes, 14).map((value) => min + ((max - min) * value) / 100)
     : ema(closes, period);
 
   drawLine(context, generic, color, indexToX, priceToY, 1.2);
@@ -612,7 +638,6 @@ export default function TradingChart({
     context.font = "600 11px Roboto, sans-serif";
     context.textAlign = "left";
     context.fillText(`${new Date(nowMs).toLocaleTimeString()} UTC+3`, left + 6, top - 14);
-
     context.fillText(timeframe, width - right - 26, currentY - 10);
 
     activeTrades.forEach((trade) => {
@@ -625,6 +650,19 @@ export default function TradingChart({
       context.lineTo(width - right, y);
       context.stroke();
       context.setLineDash([]);
+    });
+
+    resultMarkers.forEach((marker) => {
+      const y = priceToY(marker.price);
+
+      context.fillStyle = marker.won ? "#16a34a" : "#dc2626";
+      roundRect(context, width - right - 122, y - 14, 112, 28, 7);
+      context.fill();
+
+      context.fillStyle = "#ffffff";
+      context.font = "800 10px Roboto, sans-serif";
+      context.textAlign = "center";
+      context.fillText(marker.label, width - right - 66, y + 4);
     });
   }, [
     asset,
