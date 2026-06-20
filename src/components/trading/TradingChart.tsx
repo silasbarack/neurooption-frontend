@@ -108,17 +108,25 @@ function normalizeIndicatorName(indicator: string): CanonicalIndicator | null {
   if (name === "atr") return "ATR";
   if (name.includes("williams")) return "WILLIAMS_R";
   if (name.includes("momentum")) return "MOMENTUM";
-  if (name.includes("stochastic") || name === "stoch") return "STOCHASTIC_OSCILLATOR";
+  if (name.includes("stochastic") || name === "stoch") {
+    return "STOCHASTIC_OSCILLATOR";
+  }
   if (name === "osma") return "OSMA";
   if (name.includes("accelerator")) return "ACCELERATOR_OSCILLATOR";
   if (name.includes("bulls")) return "BULLS_POWER";
   if (name.includes("demarker") || name.includes("demark")) return "DEMARKER";
   if (name.includes("rateofchange") || name === "roc") return "RATE_OF_CHANGE";
 
-  if (name.includes("bollinger") || name.includes("bands")) return "BOLLINGER_BANDS";
-  if (name.includes("parabolic") || name.includes("sar")) return "PARABOLIC_SAR";
+  if (name.includes("bollinger") || name.includes("bands")) {
+    return "BOLLINGER_BANDS";
+  }
+  if (name.includes("parabolic") || name.includes("sar")) {
+    return "PARABOLIC_SAR";
+  }
   if (name.includes("ichimoku")) return "ICHIMOKU";
-  if (name.includes("donchian") || name.includes("channel")) return "DONCHIAN_CHANNEL";
+  if (name.includes("donchian") || name.includes("channel")) {
+    return "DONCHIAN_CHANNEL";
+  }
   if (name.includes("envelope")) return "ENVELOPES";
   if (name.includes("exponential") || name === "ema") return "EMA";
   if (name.includes("weighted") || name === "wma") return "WMA";
@@ -145,14 +153,6 @@ function uniqueIndicators(indicators: string[]) {
 
 function closes(candles: Candle[]) {
   return candles.map((candle) => candle.close);
-}
-
-function highs(candles: Candle[]) {
-  return candles.map((candle) => candle.high);
-}
-
-function lows(candles: Candle[]) {
-  return candles.map((candle) => candle.low);
 }
 
 function medianPrices(candles: Candle[]) {
@@ -199,7 +199,8 @@ function ema(values: number[], period: number): Value[] {
   if (values.length < period) return output;
 
   const multiplier = 2 / (period + 1);
-  let previous = values.slice(0, period).reduce((sum, value) => sum + value, 0) / period;
+  let previous =
+    values.slice(0, period).reduce((sum, value) => sum + value, 0) / period;
 
   output[period - 1] = previous;
 
@@ -260,7 +261,8 @@ function standardDeviation(values: number[], period: number): Value[] {
 
     const slice = values.slice(index - period + 1, index + 1);
     const mean = slice.reduce((sum, value) => sum + value, 0) / period;
-    const variance = slice.reduce((sum, value) => sum + (value - mean) ** 2, 0) / period;
+    const variance =
+      slice.reduce((sum, value) => sum + (value - mean) ** 2, 0) / period;
 
     return Math.sqrt(variance);
   });
@@ -285,7 +287,8 @@ function atr(candles: Candle[], period = 14): Value[] {
   if (candles.length <= period) return output;
 
   const ranges = candles.map((_, index) => trueRange(candles, index));
-  let previousAtr = ranges.slice(1, period + 1).reduce((sum, value) => sum + value, 0) / period;
+  let previousAtr =
+    ranges.slice(1, period + 1).reduce((sum, value) => sum + value, 0) / period;
 
   output[period] = previousAtr;
 
@@ -360,7 +363,8 @@ function cci(candles: Candle[], period = 20): Value[] {
 
     const slice = typical.slice(index - period + 1, index + 1);
     const mean = slice.reduce((sum, item) => sum + item, 0) / period;
-    const meanDeviation = slice.reduce((sum, item) => sum + Math.abs(item - mean), 0) / period;
+    const meanDeviation =
+      slice.reduce((sum, item) => sum + Math.abs(item - mean), 0) / period;
 
     if (meanDeviation === 0) return null;
 
@@ -389,8 +393,12 @@ function adx(candles: Candle[], period = 14) {
   }
 
   let smoothedTr = tr.slice(1, period + 1).reduce((sum, value) => sum + value, 0);
-  let smoothedPlusDm = plusDm.slice(1, period + 1).reduce((sum, value) => sum + value, 0);
-  let smoothedMinusDm = minusDm.slice(1, period + 1).reduce((sum, value) => sum + value, 0);
+  let smoothedPlusDm = plusDm
+    .slice(1, period + 1)
+    .reduce((sum, value) => sum + value, 0);
+  let smoothedMinusDm = minusDm
+    .slice(1, period + 1)
+    .reduce((sum, value) => sum + value, 0);
 
   for (let index = period; index < candles.length; index += 1) {
     if (index > period) {
@@ -480,7 +488,12 @@ function awesomeOscillator(candles: Candle[], fastPeriod = 5, slowPeriod = 34): 
   });
 }
 
-function acceleratorOscillator(candles: Candle[], fastPeriod = 5, slowPeriod = 34, signalPeriod = 5): Value[] {
+function acceleratorOscillator(
+  candles: Candle[],
+  fastPeriod = 5,
+  slowPeriod = 34,
+  signalPeriod = 5
+): Value[] {
   const ao = awesomeOscillator(candles, fastPeriod, slowPeriod);
   const aoSignal = smaNullable(ao, signalPeriod);
 
@@ -598,13 +611,17 @@ function ichimoku(candles: Candle[], conversionPeriod = 9, basePeriod = 26, span
     if (index >= conversionPeriod - 1) {
       const slice = candles.slice(index - conversionPeriod + 1, index + 1);
       tenkan[index] =
-        (highest(slice.map((item) => item.high)) + lowest(slice.map((item) => item.low))) / 2;
+        (highest(slice.map((item) => item.high)) +
+          lowest(slice.map((item) => item.low))) /
+        2;
     }
 
     if (index >= basePeriod - 1) {
       const slice = candles.slice(index - basePeriod + 1, index + 1);
       kijun[index] =
-        (highest(slice.map((item) => item.high)) + lowest(slice.map((item) => item.low))) / 2;
+        (highest(slice.map((item) => item.high)) +
+          lowest(slice.map((item) => item.low))) /
+        2;
     }
 
     if (isNumber(tenkan[index]) && isNumber(kijun[index])) {
@@ -614,7 +631,9 @@ function ichimoku(candles: Candle[], conversionPeriod = 9, basePeriod = 26, span
     if (index >= spanBPeriod - 1) {
       const slice = candles.slice(index - spanBPeriod + 1, index + 1);
       spanB[index] =
-        (highest(slice.map((item) => item.high)) + lowest(slice.map((item) => item.low))) / 2;
+        (highest(slice.map((item) => item.high)) +
+          lowest(slice.map((item) => item.low))) /
+        2;
     }
   });
 
@@ -760,7 +779,11 @@ function drawHistogram(
   });
 }
 
-function buildOverlay(indicator: CanonicalIndicator, candles: Candle[], colorIndex: number): Series[] {
+function buildOverlay(
+  indicator: CanonicalIndicator,
+  candles: Candle[],
+  colorIndex: number
+): Series[] {
   const closeValues = closes(candles);
   const color = COLORS[colorIndex % COLORS.length];
 
@@ -781,11 +804,15 @@ function buildOverlay(indicator: CanonicalIndicator, candles: Candle[], colorInd
     const deviation = standardDeviation(closeValues, 20);
 
     const upper = middle.map((value, index) =>
-      isNumber(value) && isNumber(deviation[index]) ? value + deviation[index] * 2 : null
+      isNumber(value) && isNumber(deviation[index])
+        ? value + deviation[index] * 2
+        : null
     );
 
     const lower = middle.map((value, index) =>
-      isNumber(value) && isNumber(deviation[index]) ? value - deviation[index] * 2 : null
+      isNumber(value) && isNumber(deviation[index])
+        ? value - deviation[index] * 2
+        : null
     );
 
     return [
@@ -835,14 +862,25 @@ function buildOverlay(indicator: CanonicalIndicator, candles: Candle[], colorInd
   return [];
 }
 
-function buildBottomPanel(indicator: CanonicalIndicator, candles: Candle[], colorIndex: number): BottomPanel | null {
+function buildBottomPanel(
+  indicator: CanonicalIndicator,
+  candles: Candle[],
+  colorIndex: number
+): BottomPanel | null {
   const color = COLORS[colorIndex % COLORS.length];
 
   if (indicator === "AWESOME_OSCILLATOR") {
     return {
       title: "Awesome Oscillator",
       params: "5, 34",
-      series: [{ label: "AO", values: awesomeOscillator(candles), color, mode: "histogram" }],
+      series: [
+        {
+          label: "AO",
+          values: awesomeOscillator(candles),
+          color,
+          mode: "histogram",
+        },
+      ],
       levels: [0],
       decimals: 6,
     };
@@ -867,7 +905,12 @@ function buildBottomPanel(indicator: CanonicalIndicator, candles: Candle[], colo
       title: "MACD",
       params: "12, 26, 9",
       series: [
-        { label: "Histogram", values: data.histogram, color: "#94a3b8", mode: "histogram" },
+        {
+          label: "Histogram",
+          values: data.histogram,
+          color: "#94a3b8",
+          mode: "histogram",
+        },
         { label: "MACD", values: data.line, color: "#2563eb" },
         { label: "Signal", values: data.signal, color: "#f59e0b" },
       ],
@@ -959,7 +1002,14 @@ function buildBottomPanel(indicator: CanonicalIndicator, candles: Candle[], colo
     return {
       title: "OsMA",
       params: "12, 26, 9",
-      series: [{ label: "OsMA", values: data.histogram, color, mode: "histogram" }],
+      series: [
+        {
+          label: "OsMA",
+          values: data.histogram,
+          color,
+          mode: "histogram",
+        },
+      ],
       levels: [0],
       decimals: 6,
     };
@@ -969,7 +1019,14 @@ function buildBottomPanel(indicator: CanonicalIndicator, candles: Candle[], colo
     return {
       title: "Accelerator Oscillator",
       params: "5, 34, 5",
-      series: [{ label: "AC", values: acceleratorOscillator(candles), color, mode: "histogram" }],
+      series: [
+        {
+          label: "AC",
+          values: acceleratorOscillator(candles),
+          color,
+          mode: "histogram",
+        },
+      ],
       levels: [0],
       decimals: 6,
     };
@@ -979,7 +1036,14 @@ function buildBottomPanel(indicator: CanonicalIndicator, candles: Candle[], colo
     return {
       title: "Bulls Power",
       params: "13",
-      series: [{ label: "Bulls", values: bullsPower(candles), color, mode: "histogram" }],
+      series: [
+        {
+          label: "Bulls",
+          values: bullsPower(candles),
+          color,
+          mode: "histogram",
+        },
+      ],
       levels: [0],
       decimals: 6,
     };
@@ -1067,9 +1131,11 @@ export default function TradingChart({
       chartType === "Heiken Ashi" ? heikenAshi(candles) : candles;
 
     const canonicalIndicators = uniqueIndicators(selectedIndicators);
+
     const overlayIndicators = canonicalIndicators.filter((item) =>
       OVERLAY_SET.has(item)
     );
+
     const bottomIndicators = canonicalIndicators.filter(
       (item) => !OVERLAY_SET.has(item)
     );
@@ -1080,7 +1146,8 @@ export default function TradingChart({
     const footer = 36;
 
     const bottomCount = bottomIndicators.length;
-    const bottomArea = bottomCount > 0 ? clamp(height * 0.42, 120, height * 0.5) : 0;
+    const bottomArea =
+      bottomCount > 0 ? clamp(height * 0.42, 120, height * 0.5) : 0;
     const panelGap = bottomCount > 0 ? 6 : 0;
     const chartBottom = height - footer - bottomArea - panelGap;
     const chartHeight = Math.max(160, chartBottom - top);
@@ -1109,7 +1176,10 @@ export default function TradingChart({
     let minPrice = Math.min(...priceValues);
     let maxPrice = Math.max(...priceValues);
 
-    const padding = Math.max((maxPrice - minPrice) * 0.18, asset.basePrice * 0.0005);
+    const padding = Math.max(
+      (maxPrice - minPrice) * 0.18,
+      asset.basePrice * 0.0005
+    );
 
     minPrice -= padding;
     maxPrice += padding;
@@ -1260,7 +1330,11 @@ export default function TradingChart({
     context.fillStyle = "#344054";
     context.font = "600 11px Roboto, Arial, sans-serif";
     context.textAlign = "left";
-    context.fillText(`${new Date(nowMs).toLocaleTimeString()} UTC+3`, left + 6, top - 14);
+    context.fillText(
+      `${new Date(nowMs).toLocaleTimeString()} UTC+3`,
+      left + 6,
+      top - 14
+    );
     context.fillText(timeframe, width - right - 26, currentY - 10);
 
     activeTrades.forEach((trade) => {
@@ -1303,7 +1377,10 @@ export default function TradingChart({
         const panelInnerBottom = panelBottom - 8;
         const panelInnerHeight = Math.max(12, panelInnerBottom - panelInnerTop);
 
-        const values = panel.series.flatMap((series) => series.values).filter(isNumber);
+        const values = panel.series
+          .flatMap((series) => series.values)
+          .filter(isNumber);
+
         const levelValues = panel.levels ?? [];
 
         let min = panel.min ?? Math.min(...values, ...levelValues, 0);
@@ -1311,6 +1388,7 @@ export default function TradingChart({
 
         if (!Number.isFinite(min)) min = 0;
         if (!Number.isFinite(max)) max = 1;
+
         if (min === max) {
           min -= 1;
           max += 1;
