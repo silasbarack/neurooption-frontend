@@ -45,10 +45,12 @@ type CanonicalIndicator =
   | "DEMARKER"
   | "RATE_OF_CHANGE";
 
+type SeriesMode = "line" | "histogram" | "dots";
+
 type Series = {
   values: Value[];
   color: string;
-  mode?: "line" | "histogram" | "dots";
+  mode?: SeriesMode;
   width?: number;
 };
 
@@ -62,7 +64,8 @@ type BottomPanel = {
   decimals?: number;
 };
 
-const MAX_RENDER_CANDLES = 96;
+const MAX_HISTORY_CANDLES = 260;
+const MAX_RENDER_CANDLES = 78;
 
 const COLORS = [
   "#2563eb",
@@ -200,6 +203,7 @@ function ema(values: number[], period: number): Value[] {
   if (values.length < period) return output;
 
   const multiplier = 2 / (period + 1);
+
   let previous =
     values.slice(0, period).reduce((sum, value) => sum + value, 0) / period;
 
@@ -288,6 +292,7 @@ function atr(candles: Candle[], period = 14): Value[] {
   if (candles.length <= period) return output;
 
   const ranges = candles.map((_, index) => trueRange(candles, index));
+
   let previousAtr =
     ranges.slice(1, period + 1).reduce((sum, value) => sum + value, 0) / period;
 
@@ -337,7 +342,12 @@ function rsi(values: number[], period = 14): Value[] {
   return output;
 }
 
-function macd(candles: Candle[], fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
+function macd(
+  candles: Candle[],
+  fastPeriod = 12,
+  slowPeriod = 26,
+  signalPeriod = 9
+) {
   const closeValues = closes(candles);
   const fast = ema(closeValues, fastPeriod);
   const slow = ema(closeValues, slowPeriod);
@@ -348,6 +358,7 @@ function macd(candles: Candle[], fastPeriod = 12, slowPeriod = 26, signalPeriod 
   });
 
   const signal = emaNullable(line, signalPeriod);
+
   const histogram = line.map((value, index) => {
     if (!isNumber(value) || !isNumber(signal[index])) return null;
     return value - signal[index];
@@ -364,6 +375,7 @@ function cci(candles: Candle[], period = 20): Value[] {
 
     const slice = typical.slice(index - period + 1, index + 1);
     const mean = slice.reduce((sum, item) => sum + item, 0) / period;
+
     const meanDeviation =
       slice.reduce((sum, item) => sum + Math.abs(item - mean), 0) / period;
 
@@ -377,12 +389,15 @@ function adx(candles: Candle[], period = 14) {
   const adxValues: Value[] = Array(candles.length).fill(null);
   const plusDi: Value[] = Array(candles.length).fill(null);
   const minusDi: Value[] = Array(candles.length).fill(null);
+
   const tr = Array(candles.length).fill(0);
   const plusDm = Array(candles.length).fill(0);
   const minusDm = Array(candles.length).fill(0);
   const dx: Value[] = Array(candles.length).fill(null);
 
-  if (candles.length <= period * 2) return { adxValues, plusDi, minusDi };
+  if (candles.length <= period * 2) {
+    return { adxValues, plusDi, minusDi };
+  }
 
   for (let index = 1; index < candles.length; index += 1) {
     const upMove = candles[index].high - candles[index - 1].high;
@@ -394,9 +409,11 @@ function adx(candles: Candle[], period = 14) {
   }
 
   let smoothedTr = tr.slice(1, period + 1).reduce((sum, value) => sum + value, 0);
+
   let smoothedPlusDm = plusDm
     .slice(1, period + 1)
     .reduce((sum, value) => sum + value, 0);
+
   let smoothedMinusDm = minusDm
     .slice(1, period + 1)
     .reduce((sum, value) => sum + value, 0);
@@ -415,14 +432,18 @@ function adx(candles: Candle[], period = 14) {
     minusDi[index] = mdi;
 
     const denominator = pdi + mdi;
-    dx[index] = denominator === 0 ? 0 : (100 * Math.abs(pdi - mdi)) / denominator;
+    dx[index] =
+      denominator === 0 ? 0 : (100 * Math.abs(pdi - mdi)) / denominator;
   }
 
   const firstDx = dx.slice(period, period * 2).filter(isNumber);
 
-  if (firstDx.length < period) return { adxValues, plusDi, minusDi };
+  if (firstDx.length < period) {
+    return { adxValues, plusDi, minusDi };
+  }
 
   let previousAdx = firstDx.reduce((sum, value) => sum + value, 0) / period;
+
   adxValues[period * 2 - 1] = previousAdx;
 
   for (let index = period * 2; index < candles.length; index += 1) {
@@ -478,7 +499,11 @@ function stochastic(candles: Candle[], kPeriod = 14, dPeriod = 3, slowing = 3) {
   return { slowK, dLine };
 }
 
-function awesomeOscillator(candles: Candle[], fastPeriod = 5, slowPeriod = 34): Value[] {
+function awesomeOscillator(
+  candles: Candle[],
+  fastPeriod = 5,
+  slowPeriod = 34
+): Value[] {
   const median = medianPrices(candles);
   const fast = sma(median, fastPeriod);
   const slow = sma(median, slowPeriod);
@@ -602,7 +627,12 @@ function parabolicSar(candles: Candle[], step = 0.02, maxStep = 0.2): Value[] {
   return output;
 }
 
-function ichimoku(candles: Candle[], conversionPeriod = 9, basePeriod = 26, spanBPeriod = 52) {
+function ichimoku(
+  candles: Candle[],
+  conversionPeriod = 9,
+  basePeriod = 26,
+  spanBPeriod = 52
+) {
   const tenkan: Value[] = Array(candles.length).fill(null);
   const kijun: Value[] = Array(candles.length).fill(null);
   const spanA: Value[] = Array(candles.length).fill(null);
@@ -666,6 +696,7 @@ function heikenAshi(candles: Candle[]) {
 
   candles.forEach((candle, index) => {
     const previous = output[index - 1];
+
     const close = (candle.open + candle.high + candle.low + candle.close) / 4;
     const open = previous ? (previous.open + previous.close) / 2 : candle.open;
     const high = Math.max(candle.high, open, close);
@@ -681,6 +712,68 @@ function heikenAshi(candles: Candle[]) {
   });
 
   return output;
+}
+
+function fillDisplayGaps(values: Value[], mode?: SeriesMode): Value[] {
+  if (mode === "dots") return values;
+
+  if (mode === "histogram") {
+    return values.map((value) => (isNumber(value) ? value : 0));
+  }
+
+  const output = [...values];
+
+  const validIndexes = output
+    .map((value, index) => (isNumber(value) ? index : -1))
+    .filter((index) => index >= 0);
+
+  if (validIndexes.length === 0) return output;
+
+  const firstIndex = validIndexes[0];
+  const lastIndex = validIndexes[validIndexes.length - 1];
+
+  for (let index = 0; index < firstIndex; index += 1) {
+    output[index] = output[firstIndex];
+  }
+
+  for (let index = lastIndex + 1; index < output.length; index += 1) {
+    output[index] = output[lastIndex];
+  }
+
+  for (let validIndex = 0; validIndex < validIndexes.length - 1; validIndex += 1) {
+    const start = validIndexes[validIndex];
+    const end = validIndexes[validIndex + 1];
+
+    if (end - start <= 1) continue;
+
+    const startValue = output[start];
+    const endValue = output[end];
+
+    if (!isNumber(startValue) || !isNumber(endValue)) continue;
+
+    for (let index = start + 1; index < end; index += 1) {
+      const ratio = (index - start) / (end - start);
+      output[index] = startValue + (endValue - startValue) * ratio;
+    }
+  }
+
+  return output;
+}
+
+function prepareSeries(series: Series, visibleCount: number): Series {
+  const visibleValues = series.values.slice(-visibleCount);
+
+  return {
+    ...series,
+    values: fillDisplayGaps(visibleValues, series.mode),
+  };
+}
+
+function preparePanel(panel: BottomPanel, visibleCount: number): BottomPanel {
+  return {
+    ...panel,
+    series: panel.series.map((series) => prepareSeries(series, visibleCount)),
+  };
 }
 
 function roundRect(
@@ -874,13 +967,7 @@ function buildBottomPanel(
     return {
       title: "Awesome Oscillator",
       params: "5, 34",
-      series: [
-        {
-          values: awesomeOscillator(candles),
-          color,
-          mode: "histogram",
-        },
-      ],
+      series: [{ values: awesomeOscillator(candles), color, mode: "histogram" }],
       levels: [0],
       decimals: 6,
     };
@@ -905,11 +992,7 @@ function buildBottomPanel(
       title: "MACD",
       params: "12, 26, 9",
       series: [
-        {
-          values: data.histogram,
-          color: "#94a3b8",
-          mode: "histogram",
-        },
+        { values: data.histogram, color: "#64748b", mode: "histogram" },
         { values: data.line, color: "#2563eb" },
         { values: data.signal, color: "#f59e0b" },
       ],
@@ -1001,13 +1084,7 @@ function buildBottomPanel(
     return {
       title: "OsMA",
       params: "12, 26, 9",
-      series: [
-        {
-          values: data.histogram,
-          color,
-          mode: "histogram",
-        },
-      ],
+      series: [{ values: data.histogram, color, mode: "histogram" }],
       levels: [0],
       decimals: 6,
     };
@@ -1018,11 +1095,7 @@ function buildBottomPanel(
       title: "Accelerator Oscillator",
       params: "5, 34, 5",
       series: [
-        {
-          values: acceleratorOscillator(candles),
-          color,
-          mode: "histogram",
-        },
+        { values: acceleratorOscillator(candles), color, mode: "histogram" },
       ],
       levels: [0],
       decimals: 6,
@@ -1033,13 +1106,7 @@ function buildBottomPanel(
     return {
       title: "Bulls Power",
       params: "13",
-      series: [
-        {
-          values: bullsPower(candles),
-          color,
-          mode: "histogram",
-        },
-      ],
+      series: [{ values: bullsPower(candles), color, mode: "histogram" }],
       levels: [0],
       decimals: 6,
     };
@@ -1094,9 +1161,22 @@ export default function TradingChart({
 }: TradingChartProps) {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 
+  const bottomPanelCount = React.useMemo(() => {
+    return uniqueIndicators(selectedIndicators).filter(
+      (indicator) => !OVERLAY_SET.has(indicator)
+    ).length;
+  }, [selectedIndicators]);
+
+  const wrapStyle: React.CSSProperties =
+    bottomPanelCount > 0
+      ? {
+          minHeight: Math.max(640, 470 + Math.min(bottomPanelCount, 3) * 170),
+        }
+      : {};
+
   React.useEffect(() => {
     const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
+    const context = canvas?.getContext("2d", { alpha: false });
 
     if (!canvas || !context) return;
 
@@ -1123,10 +1203,13 @@ export default function TradingChart({
       return;
     }
 
-    const slicedCandles = candles.slice(-MAX_RENDER_CANDLES);
+    const historyCandles = candles.slice(-MAX_HISTORY_CANDLES);
+    const visibleBaseCandles = historyCandles.slice(-MAX_RENDER_CANDLES);
 
     const renderCandles =
-      chartType === "Heiken Ashi" ? heikenAshi(slicedCandles) : slicedCandles;
+      chartType === "Heiken Ashi"
+        ? heikenAshi(visibleBaseCandles)
+        : visibleBaseCandles;
 
     const canonicalIndicators = uniqueIndicators(selectedIndicators);
 
@@ -1144,16 +1227,20 @@ export default function TradingChart({
     const footer = 36;
 
     const bottomCount = bottomIndicators.length;
+
     const bottomArea =
-      bottomCount > 0 ? clamp(height * 0.42, 120, height * 0.5) : 0;
-    const panelGap = bottomCount > 0 ? 6 : 0;
+      bottomCount > 0 ? clamp(height * 0.46, 220, height * 0.55) : 0;
+
+    const panelGap = bottomCount > 0 ? 8 : 0;
     const chartBottom = height - footer - bottomArea - panelGap;
-    const chartHeight = Math.max(160, chartBottom - top);
+    const chartHeight = Math.max(170, chartBottom - top);
     const chartWidth = width - left - right;
 
-    const overlaySeries = overlayIndicators.flatMap((indicator, index) =>
-      buildOverlay(indicator, renderCandles, index)
-    );
+    const visibleCount = renderCandles.length;
+
+    const overlaySeries = overlayIndicators
+      .flatMap((indicator, index) => buildOverlay(indicator, historyCandles, index))
+      .map((series) => prepareSeries(series, visibleCount));
 
     const priceValues = renderCandles.flatMap((candle) => [
       candle.open,
@@ -1211,7 +1298,11 @@ export default function TradingChart({
       context.stroke();
     }
 
-    const candleWidth = clamp((chartWidth / renderCandles.length) * 0.58, 2.5, 9);
+    const candleWidth = clamp(
+      (chartWidth / renderCandles.length) * 0.58,
+      2.5,
+      9
+    );
 
     if (chartType === "Line") {
       drawLine(
@@ -1229,6 +1320,7 @@ export default function TradingChart({
         const closeY = priceToY(candle.close);
         const highY = priceToY(candle.high);
         const lowY = priceToY(candle.low);
+
         const bullish = candle.close >= candle.open;
         const color = bullish ? "#17a868" : "#e5484d";
 
@@ -1362,8 +1454,9 @@ export default function TradingChart({
 
     if (bottomIndicators.length > 0) {
       const panels = bottomIndicators
-        .map((indicator, index) => buildBottomPanel(indicator, renderCandles, index))
-        .filter((panel): panel is BottomPanel => panel !== null);
+        .map((indicator, index) => buildBottomPanel(indicator, historyCandles, index))
+        .filter((panel): panel is BottomPanel => panel !== null)
+        .map((panel) => preparePanel(panel, visibleCount));
 
       const panelHeight = bottomArea / Math.max(panels.length, 1);
       const panelTopStart = chartBottom + panelGap;
@@ -1371,9 +1464,9 @@ export default function TradingChart({
       panels.forEach((panel, panelIndex) => {
         const panelTop = panelTopStart + panelHeight * panelIndex;
         const panelBottom = panelTop + panelHeight - 4;
-        const panelInnerTop = panelTop + 18;
-        const panelInnerBottom = panelBottom - 8;
-        const panelInnerHeight = Math.max(12, panelInnerBottom - panelInnerTop);
+        const panelInnerTop = panelTop + 20;
+        const panelInnerBottom = panelBottom - 10;
+        const panelInnerHeight = Math.max(24, panelInnerBottom - panelInnerTop);
 
         const values = panel.series
           .flatMap((series) => series.values)
@@ -1392,7 +1485,7 @@ export default function TradingChart({
           max += 1;
         }
 
-        const paddingValue = (max - min) * 0.12;
+        const paddingValue = (max - min) * 0.16;
 
         if (panel.min === undefined) min -= paddingValue;
         if (panel.max === undefined) max += paddingValue;
@@ -1403,7 +1496,7 @@ export default function TradingChart({
         context.fillStyle = "#ffffff";
         context.fillRect(left, panelTop, width - left - 4, panelBottom - panelTop);
 
-        context.strokeStyle = "#e4e9f2";
+        context.strokeStyle = "#dbe3ef";
         context.lineWidth = 1;
         context.beginPath();
         context.moveTo(left, panelTop);
@@ -1411,15 +1504,23 @@ export default function TradingChart({
         context.stroke();
 
         context.fillStyle = "#111827";
-        context.font = "700 10px Roboto, Arial, sans-serif";
+        context.font = "800 10px Roboto, Arial, sans-serif";
         context.textAlign = "left";
-        context.fillText(`${panel.title} ${panel.params}`, left + 4, panelTop + 12);
+        context.fillText(`${panel.title} ${panel.params}`, left + 4, panelTop + 13);
 
         context.fillStyle = "#64748b";
         context.font = "600 9px Roboto, Arial, sans-serif";
         context.textAlign = "right";
-        context.fillText(max.toFixed(panel.decimals ?? 2), width - 8, panelInnerTop + 4);
-        context.fillText(min.toFixed(panel.decimals ?? 2), width - 8, panelInnerBottom);
+        context.fillText(
+          max.toFixed(panel.decimals ?? 2),
+          width - 8,
+          panelInnerTop + 4
+        );
+        context.fillText(
+          min.toFixed(panel.decimals ?? 2),
+          width - 8,
+          panelInnerBottom
+        );
 
         context.strokeStyle = "#edf1f6";
         context.lineWidth = 1;
@@ -1459,7 +1560,7 @@ export default function TradingChart({
               series.color,
               indexToX,
               valueToY,
-              clamp(candleWidth, 2, 6)
+              clamp(candleWidth, 2, 7)
             );
           } else if (series.mode === "dots") {
             drawDots(context, series.values, series.color, indexToX, valueToY);
@@ -1470,7 +1571,7 @@ export default function TradingChart({
               series.color,
               indexToX,
               valueToY,
-              series.width ?? 1.2
+              series.width ?? 1.35
             );
           }
         });
@@ -1489,7 +1590,7 @@ export default function TradingChart({
   ]);
 
   return (
-    <div className="nt-chart-wrap">
+    <div className="nt-chart-wrap" style={wrapStyle}>
       <canvas ref={canvasRef} className="nt-chart-canvas" />
     </div>
   );
