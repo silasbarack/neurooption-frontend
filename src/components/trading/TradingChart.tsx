@@ -1,5 +1,11 @@
 import React from "react";
-import type { Asset, Candle, ChartType, ResultMarker, TradeMarker } from "./trading.types";
+import type {
+  Asset,
+  Candle,
+  ChartType,
+  ResultMarker,
+  TradeMarker,
+} from "./trading.types";
 
 type TradingChartProps = {
   asset: Asset;
@@ -29,9 +35,10 @@ function formatDuration(totalSeconds: number) {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
-    seconds
-  ).padStart(2, "0")}`;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+    2,
+    "0"
+  )}:${String(seconds).padStart(2, "0")}`;
 }
 
 function sma(values: number[], period: number) {
@@ -39,6 +46,7 @@ function sma(values: number[], period: number) {
     if (index < period - 1) return null;
 
     const slice = values.slice(index - period + 1, index + 1);
+
     return slice.reduce((sum, value) => sum + value, 0) / period;
   });
 }
@@ -78,13 +86,14 @@ function wma(values: number[], period: number) {
   });
 }
 
-function std(values: number[], period: number) {
+function standardDeviation(values: number[], period: number) {
   return values.map((_, index) => {
     if (index < period - 1) return null;
 
     const slice = values.slice(index - period + 1, index + 1);
     const average = slice.reduce((sum, value) => sum + value, 0) / period;
-    const variance = slice.reduce((sum, value) => sum + (value - average) ** 2, 0) / period;
+    const variance =
+      slice.reduce((sum, value) => sum + (value - average) ** 2, 0) / period;
 
     return Math.sqrt(variance);
   });
@@ -98,16 +107,17 @@ function rsi(values: number[], period = 14) {
     let losses = 0;
 
     for (let i = index - period + 1; i <= index; i += 1) {
-      const diff = values[i] - values[i - 1];
+      const difference = values[i] - values[i - 1];
 
-      if (diff >= 0) gains += diff;
-      else losses += Math.abs(diff);
+      if (difference >= 0) gains += difference;
+      else losses += Math.abs(difference);
     }
 
     if (losses === 0) return 70;
 
-    const rs = gains / losses;
-    return 100 - 100 / (1 + rs);
+    const relativeStrength = gains / losses;
+
+    return 100 - 100 / (1 + relativeStrength);
   });
 }
 
@@ -133,63 +143,67 @@ function heikenAshi(candles: Candle[]) {
   return result;
 }
 
-function getIndicatorStatus(name: string, closes: number[]) {
-  const latest = closes[closes.length - 1];
-  const previous = closes[closes.length - 8] ?? closes[0];
-  const direction = latest >= previous ? "UP" : "DOWN";
-  const change = ((latest - previous) / previous) * 100;
-
-  if (name.includes("RSI")) {
-    const value = rsi(closes).at(-1) ?? 50;
-    return `${value.toFixed(1)} ${value > 55 ? "UP" : value < 45 ? "DOWN" : "RANGE"}`;
-  }
-
-  if (name.includes("MACD")) {
-    const fast = ema(closes, 12).at(-1) ?? latest;
-    const slow = ema(closes, 26).at(-1) ?? latest;
-    return `${(fast - slow).toFixed(5)} ${fast >= slow ? "UP" : "DOWN"}`;
-  }
-
-  if (name.includes("Stochastic")) {
-    const recent = closes.slice(-14);
-    const high = Math.max(...recent);
-    const low = Math.min(...recent);
-    const value = ((latest - low) / Math.max(high - low, 0.000001)) * 100;
-    return `${value.toFixed(1)} ${value > 55 ? "UP" : value < 45 ? "DOWN" : "RANGE"}`;
-  }
-
-  return `${change.toFixed(2)}% ${direction}`;
-}
-
 function drawLine(
   context: CanvasRenderingContext2D,
   data: Array<number | null>,
   color: string,
   indexToX: (index: number) => number,
-  priceToY: (price: number) => number
+  priceToY: (price: number) => number,
+  width = 1.35
 ) {
   context.strokeStyle = color;
-  context.lineWidth = 1.35;
+  context.lineWidth = width;
   context.beginPath();
 
+  let started = false;
+
   data.forEach((value, index) => {
-    if (value === null) return;
+    if (value === null || !Number.isFinite(value)) return;
 
     const x = indexToX(index);
     const y = priceToY(value);
 
-    if (index === 0 || data[index - 1] === null) context.moveTo(x, y);
-    else context.lineTo(x, y);
+    if (!started) {
+      context.moveTo(x, y);
+      started = true;
+    } else {
+      context.lineTo(x, y);
+    }
   });
 
   context.stroke();
+}
+
+function drawVisualLegend(
+  context: CanvasRenderingContext2D,
+  items: Array<{ name: string; color: string }>,
+  x: number,
+  y: number
+) {
+  if (items.length === 0) return;
+
+  context.font = "700 10px Roboto, sans-serif";
+  context.textAlign = "left";
+
+  items.slice(0, 8).forEach((item, index) => {
+    const rowY = y + index * 18;
+
+    context.strokeStyle = item.color;
+    context.lineWidth = 3;
+    context.beginPath();
+    context.moveTo(x, rowY);
+    context.lineTo(x + 20, rowY);
+    context.stroke();
+
+    context.fillStyle = "#344054";
+    context.fillText(item.name, x + 28, rowY + 4);
+  });
 }
 
 export default function TradingChart({
   asset,
   candles,
   chartType,
-  timeframe,
   expirySeconds,
   nowMs,
   selectedIndicators,
@@ -202,7 +216,7 @@ export default function TradingChart({
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
 
-    if (!canvas || !context || candles.length === 0) return;
+    if (!canvas || !context) return;
 
     const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
@@ -215,27 +229,40 @@ export default function TradingChart({
     const width = rect.width;
     const height = rect.height;
 
-    const left = 20;
-    const right = 82;
-    const top = 58;
-    const rsiHeight = 105;
-    const bottom = 34;
-    const chartBottom = height - rsiHeight - bottom;
-    const chartWidth = width - left - right;
-    const chartHeight = chartBottom - top;
-
     context.clearRect(0, 0, width, height);
     context.fillStyle = "#ffffff";
     context.fillRect(0, 0, width, height);
 
-    context.fillStyle = "rgba(226, 232, 240, 0.54)";
+    if (candles.length < 2) {
+      context.fillStyle = "#667085";
+      context.font = "700 14px Roboto, sans-serif";
+      context.textAlign = "center";
+      context.fillText("Loading OTC candles...", width / 2, height / 2);
+      return;
+    }
+
+    const hasOscillator =
+      selectedIndicators.includes("RSI") ||
+      selectedIndicators.includes("MACD") ||
+      selectedIndicators.includes("Stochastic Oscillator");
+
+    const left = 18;
+    const right = 82;
+    const top = 58;
+    const axisFooter = 34;
+    const oscillatorHeight = hasOscillator ? 112 : 0;
+    const chartBottom = height - axisFooter - oscillatorHeight;
+    const chartWidth = width - left - right;
+    const chartHeight = chartBottom - top;
+
+    context.fillStyle = "rgba(226, 232, 240, 0.5)";
     context.beginPath();
     context.moveTo(left, chartBottom);
-    context.lineTo(width * 0.18, top + chartHeight * 0.42);
+    context.lineTo(width * 0.18, top + chartHeight * 0.44);
     context.lineTo(width * 0.32, chartBottom);
     context.lineTo(width * 0.52, top + chartHeight * 0.25);
     context.lineTo(width * 0.7, chartBottom);
-    context.lineTo(width * 0.88, top + chartHeight * 0.46);
+    context.lineTo(width * 0.88, top + chartHeight * 0.47);
     context.lineTo(width - right, chartBottom);
     context.closePath();
     context.fill();
@@ -255,7 +282,7 @@ export default function TradingChart({
 
     let minPrice = Math.min(...values);
     let maxPrice = Math.max(...values);
-    const padding = Math.max((maxPrice - minPrice) * 0.16, asset.basePrice * 0.0005);
+    const padding = Math.max((maxPrice - minPrice) * 0.18, asset.basePrice * 0.0005);
 
     minPrice -= padding;
     maxPrice += padding;
@@ -271,6 +298,7 @@ export default function TradingChart({
 
     for (let i = 0; i <= 8; i += 1) {
       const x = left + (chartWidth / 8) * i;
+
       context.beginPath();
       context.moveTo(x, top);
       context.lineTo(x, chartBottom);
@@ -279,6 +307,7 @@ export default function TradingChart({
 
     for (let i = 0; i <= 6; i += 1) {
       const y = top + (chartHeight / 6) * i;
+
       context.beginPath();
       context.moveTo(left, y);
       context.lineTo(width - right, y);
@@ -293,7 +322,8 @@ export default function TradingChart({
         renderCandles.map((candle) => candle.close),
         "#0ea5e9",
         indexToX,
-        priceToY
+        priceToY,
+        1.8
       );
     } else {
       renderCandles.forEach((candle, index) => {
@@ -302,12 +332,13 @@ export default function TradingChart({
         const closeY = priceToY(candle.close);
         const highY = priceToY(candle.high);
         const lowY = priceToY(candle.low);
+
         const bullish = candle.close >= candle.open;
-        const color = bullish ? "#18b971" : "#ef4444";
+        const color = bullish ? "#17a868" : "#e5484d";
 
         context.strokeStyle = color;
         context.fillStyle = color;
-        context.lineWidth = 1.4;
+        context.lineWidth = 1.3;
 
         if (chartType === "Bars") {
           context.beginPath();
@@ -326,55 +357,76 @@ export default function TradingChart({
 
           const bodyTop = Math.min(openY, closeY);
           const bodyHeight = Math.max(2, Math.abs(openY - closeY));
+
           context.fillRect(x - candleWidth / 2, bodyTop, candleWidth, bodyHeight);
         }
       });
     }
 
+    const legendItems: Array<{ name: string; color: string }> = [];
+
     if (selectedIndicators.includes("Moving Average")) {
-      drawLine(context, sma(closes, 7), "#2fb344", indexToX, priceToY);
+      drawLine(context, sma(closes, 7), "#2fb344", indexToX, priceToY, 1.4);
+      legendItems.push({ name: "MA 7", color: "#2fb344" });
     }
 
     if (selectedIndicators.includes("Exponential MA")) {
-      drawLine(context, ema(closes, 20), "#f59e0b", indexToX, priceToY);
+      drawLine(context, ema(closes, 20), "#f59e0b", indexToX, priceToY, 1.4);
+      legendItems.push({ name: "EMA 20", color: "#f59e0b" });
     }
 
     if (selectedIndicators.includes("Weighted MA")) {
-      drawLine(context, wma(closes, 50), "#2563eb", indexToX, priceToY);
+      drawLine(context, wma(closes, 50), "#2563eb", indexToX, priceToY, 1.4);
+      legendItems.push({ name: "WMA 50", color: "#2563eb" });
     }
 
     if (selectedIndicators.includes("Bollinger Bands")) {
       const middle = sma(closes, 20);
-      const deviation = std(closes, 20);
+      const deviation = standardDeviation(closes, 20);
 
       drawLine(
         context,
         middle.map((value, index) =>
-          value === null || deviation[index] === null ? null : value + deviation[index]! * 2
+          value === null || deviation[index] === null
+            ? null
+            : value + deviation[index]! * 2
         ),
         "#9333ea",
         indexToX,
-        priceToY
+        priceToY,
+        1.2
       );
 
       drawLine(
         context,
         middle.map((value, index) =>
-          value === null || deviation[index] === null ? null : value - deviation[index]! * 2
+          value === null || deviation[index] === null
+            ? null
+            : value - deviation[index]! * 2
         ),
         "#9333ea",
         indexToX,
-        priceToY
+        priceToY,
+        1.2
       );
+
+      legendItems.push({ name: "Bollinger", color: "#9333ea" });
     }
 
-    if (selectedIndicators.includes("Price Channel") || selectedIndicators.includes("Donchian Channel")) {
+    if (
+      selectedIndicators.includes("Price Channel") ||
+      selectedIndicators.includes("Donchian Channel")
+    ) {
       const highs = renderCandles.map((candle) => candle.high);
       const lows = renderCandles.map((candle) => candle.low);
 
-      drawLine(context, sma(highs, 10), "#06b6d4", indexToX, priceToY);
-      drawLine(context, sma(lows, 10), "#06b6d4", indexToX, priceToY);
+      drawLine(context, sma(highs, 10), "#06b6d4", indexToX, priceToY, 1.1);
+      drawLine(context, sma(lows, 10), "#06b6d4", indexToX, priceToY, 1.1);
+
+      legendItems.push({ name: "Channel", color: "#06b6d4" });
     }
+
+    drawVisualLegend(context, legendItems, left + 8, top - 34);
 
     const latest = renderCandles[renderCandles.length - 1];
     const currentY = priceToY(latest.close);
@@ -404,6 +456,7 @@ export default function TradingChart({
     for (let i = 0; i <= 5; i += 1) {
       const price = maxPrice - ((maxPrice - minPrice) / 5) * i;
       const y = priceToY(price);
+
       context.fillText(price.toFixed(asset.precision), width - 8, y + 4);
     }
 
@@ -469,40 +522,7 @@ export default function TradingChart({
     context.fillStyle = "#344054";
     context.font = "600 11px Roboto, sans-serif";
     context.textAlign = "left";
-    context.fillText(`${new Date(nowMs).toLocaleTimeString()} UTC+3`, left + 8, top - 24);
-
-    const rsiTop = chartBottom + 18;
-    const rsiBottom = height - bottom;
-    const rsiValues = rsi(closes);
-
-    context.strokeStyle = "#e5e7eb";
-
-    for (let i = 0; i <= 3; i += 1) {
-      const y = rsiTop + ((rsiBottom - rsiTop) / 3) * i;
-      context.beginPath();
-      context.moveTo(left, y);
-      context.lineTo(width - right, y);
-      context.stroke();
-    }
-
-    context.strokeStyle = "#6aa84f";
-    context.lineWidth = 1.4;
-    context.beginPath();
-
-    rsiValues.forEach((value, index) => {
-      const x = indexToX(index);
-      const y = rsiBottom - ((value - 20) / 60) * (rsiBottom - rsiTop);
-
-      if (index === 0) context.moveTo(x, y);
-      else context.lineTo(x, y);
-    });
-
-    context.stroke();
-
-    context.fillStyle = "#475467";
-    context.font = "600 11px Roboto, sans-serif";
-    context.textAlign = "left";
-    context.fillText("RSI 14", left + 2, rsiTop - 5);
+    context.fillText(`${new Date(nowMs).toLocaleTimeString()} UTC+3`, left + 8, top - 16);
 
     context.textAlign = "center";
 
@@ -510,13 +530,56 @@ export default function TradingChart({
       const candleIndex = Math.floor((renderCandles.length - 1) * (i / 5));
       const candle = renderCandles[candleIndex];
       const x = left + (chartWidth / 5) * i;
-      context.fillText(formatClock(candle.time), x, chartBottom + 10);
+
+      context.fillStyle = "#475467";
+      context.font = "600 11px Roboto, sans-serif";
+      context.fillText(formatClock(candle.time), x, chartBottom + 16);
+    }
+
+    if (hasOscillator) {
+      const oscTop = chartBottom + 34;
+      const oscBottom = height - 16;
+      const oscHeight = oscBottom - oscTop;
+
+      context.strokeStyle = "#e5e7eb";
+      context.lineWidth = 1;
+
+      for (let i = 0; i <= 3; i += 1) {
+        const y = oscTop + (oscHeight / 3) * i;
+
+        context.beginPath();
+        context.moveTo(left, y);
+        context.lineTo(width - right, y);
+        context.stroke();
+      }
+
+      if (selectedIndicators.includes("RSI")) {
+        const rsiValues = rsi(closes);
+
+        context.strokeStyle = "#6aa84f";
+        context.lineWidth = 1.5;
+        context.beginPath();
+
+        rsiValues.forEach((value, index) => {
+          const x = indexToX(index);
+          const y = oscBottom - ((value - 20) / 60) * oscHeight;
+
+          if (index === 0) context.moveTo(x, y);
+          else context.lineTo(x, y);
+        });
+
+        context.stroke();
+
+        context.fillStyle = "#475467";
+        context.font = "700 10px Roboto, sans-serif";
+        context.textAlign = "left";
+        context.fillText("RSI", left + 4, oscTop - 6);
+      }
     }
   }, [
     asset,
     candles,
     chartType,
-    timeframe,
     expirySeconds,
     nowMs,
     selectedIndicators,
@@ -524,21 +587,9 @@ export default function TradingChart({
     resultMarkers,
   ]);
 
-  const closes = candles.map((candle) => candle.close);
-
   return (
     <div className="nt-chart-wrap">
       <canvas ref={canvasRef} className="nt-chart-canvas" />
-
-      {selectedIndicators.length > 0 && (
-        <div className="nt-indicator-stack">
-          {selectedIndicators.map((indicator) => (
-            <span key={indicator}>
-              {indicator}: {getIndicatorStatus(indicator, closes)}
-            </span>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

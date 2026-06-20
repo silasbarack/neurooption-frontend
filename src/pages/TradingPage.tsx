@@ -4,7 +4,6 @@ import "./TradingPage.css";
 import {
   ASSETS,
   EXCHANGE_RATES,
-  AssetSelector,
   TradingBottomNav,
   TradingChart,
   TradingHeader,
@@ -25,6 +24,13 @@ import type {
   TradeMarker,
   TradeSide,
 } from "../components/trading";
+
+import {
+  MAX_EXPIRY_SECONDS,
+  MIN_EXPIRY_SECONDS,
+  createInitialCandles,
+  updateLiveM1Candle,
+} from "../components/trading/chartEngine";
 
 type BalancesUsd = Record<AccountType, number>;
 type EmptyPanel = "openTrades" | "history" | "signals" | null;
@@ -54,22 +60,19 @@ type BackendAssetsResponse = {
 };
 
 type BackendCandlesResponse = {
-  asset: BackendAsset;
-  timeframe: string;
-  serverTime: string;
+  serverTime?: string;
   candles: BackendCandle[];
 };
 
 const API_BASE_URL = (
-  (import.meta.env.VITE_API_URL as string | undefined) ||
-  "http://localhost:4000"
+  (import.meta.env.VITE_API_URL as string | undefined) || "http://localhost:4000"
 ).replace(/\/$/, "");
 
-const MARKET_POLL_MS = 245;
-const MIN_EXPIRY_SECONDS = 5;
-const MAX_EXPIRY_SECONDS = 5 * 60 * 60;
+const BACKEND_POLL_MS = 500;
+const FALLBACK_TICK_MS = 350;
 
-const DEFAULT_ASSET = ASSETS.find((asset) => asset.symbol === "EUR/USD OTC") ?? ASSETS[0];
+const DEFAULT_ASSET =
+  ASSETS.find((asset) => asset.symbol === "EUR/USD OTC") ?? ASSETS[0];
 
 const VALID_CATEGORIES: AssetCategory[] = [
   "Currencies",
@@ -124,7 +127,9 @@ function normalizeCandle(candle: BackendCandle): Candle {
     high: Number(candle.high),
     low: Number(candle.low),
     close: Number(candle.close),
-    time: Number(candle.time ?? new Date(candle.openTime ?? Date.now()).getTime()),
+    time: Number(
+      candle.time ?? new Date(candle.openTime ?? Date.now()).getTime()
+    ),
   };
 }
 
@@ -160,7 +165,12 @@ function formatMoney(value: number, currency: Currency) {
 }
 
 function formatExpiry(totalSeconds: number) {
-  const safeSeconds = clamp(totalSeconds, MIN_EXPIRY_SECONDS, MAX_EXPIRY_SECONDS);
+  const safeSeconds = clamp(
+    totalSeconds,
+    MIN_EXPIRY_SECONDS,
+    MAX_EXPIRY_SECONDS
+  );
+
   const hours = Math.floor(safeSeconds / 3600);
   const minutes = Math.floor((safeSeconds % 3600) / 60);
   const seconds = safeSeconds % 60;
@@ -172,7 +182,11 @@ function formatExpiry(totalSeconds: number) {
 }
 
 function splitExpiry(totalSeconds: number) {
-  const safeSeconds = clamp(totalSeconds, MIN_EXPIRY_SECONDS, MAX_EXPIRY_SECONDS);
+  const safeSeconds = clamp(
+    totalSeconds,
+    MIN_EXPIRY_SECONDS,
+    MAX_EXPIRY_SECONDS
+  );
 
   return {
     hours: Math.floor(safeSeconds / 3600),
@@ -225,7 +239,8 @@ async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
 }
 
 export default function TradingPage() {
-  const candlesRef = React.useRef<Candle[]>([]);
+  const candlesRef = React.useRef<Candle[]>(createInitialCandles(DEFAULT_ASSET));
+  const backendHealthyRef = React.useRef(false);
   const expirySecondsRef = React.useRef(45);
 
   const [accountType, setAccountType] = React.useState<AccountType>("QT Demo");
@@ -262,20 +277,22 @@ export default function TradingPage() {
   const [amount, setAmount] = React.useState("100");
   const [payout, setPayout] = React.useState(92);
 
-  const [candles, setCandles] = React.useState<Candle[]>([]);
+  const [candles, setCandles] = React.useState<Candle[]>(candlesRef.current);
   const [activeTrades, setActiveTrades] = React.useState<TradeMarker[]>([]);
   const [resultMarkers, setResultMarkers] = React.useState<ResultMarker[]>([]);
 
   const [nowMs, setNowMs] = React.useState(Date.now());
   const [sentiment, setSentiment] = React.useState(50);
   const [emptyPanel, setEmptyPanel] = React.useState<EmptyPanel>(null);
-  
 
   const exchangeRate = EXCHANGE_RATES[currency];
   const displayedBalance = balancesUsd[accountType] * exchangeRate;
 
   const stakeAmount = Number(amount);
-  const safeStakeAmount = Number.isFinite(stakeAmount) ? Math.max(0, stakeAmount) : 0;
+  const safeStakeAmount = Number.isFinite(stakeAmount)
+    ? Math.max(0, stakeAmount)
+    : 0;
+
   const stakeUsd = safeStakeAmount / exchangeRate;
 
   const expectedProfit = safeStakeAmount * (payout / 100);
@@ -284,7 +301,15 @@ export default function TradingPage() {
 
   const expiryParts = splitExpiry(expirySeconds);
 
-  const loadCandles = React.useCallback(
+  const assetCategories = Array.from(
+    new Set(availableAssets.map((asset) => asset.category))
+  ) as AssetCategory[];
+
+  const filteredAssets = availableAssets.filter(
+    (asset) => asset.category === activeCategory
+  );
+
+  const loadBackendCandles = React.useCallback(
     async (asset: Asset, signal?: AbortSignal) => {
       const encodedAsset = encodeURIComponent(asset.symbol);
 
@@ -295,6 +320,12 @@ export default function TradingPage() {
 
       const nextCandles = data.candles.map(normalizeCandle);
 
+      if (nextCandles.length < 2) {
+        backendHealthyRef.current = false;
+        return;
+      }
+
+      backendHealthyRef.current = true;
       candlesRef.current = nextCandles;
 
       setCandles(nextCandles);
@@ -347,6 +378,19 @@ export default function TradingPage() {
   }, []);
 
   React.useEffect(() => {
+    backendHealthyRef.current = false;
+
+    const freshCandles = createInitialCandles(selectedAsset);
+    candlesRef.current = freshCandles;
+
+    setCandles(freshCandles);
+    setSentiment(calculateSentiment(freshCandles));
+    setActiveTrades([]);
+    setResultMarkers([]);
+    setActiveCategory(selectedAsset.category);
+  }, [selectedAsset]);
+
+  React.useEffect(() => {
     let stopped = false;
     let controller: AbortController | null = null;
 
@@ -355,31 +399,41 @@ export default function TradingPage() {
       controller = new AbortController();
 
       try {
-        await loadCandles(selectedAsset, controller.signal);
+        await loadBackendCandles(selectedAsset, controller.signal);
       } catch {
         if (!stopped) {
-          setNowMs(Date.now());
-          
+          backendHealthyRef.current = false;
         }
       }
     };
 
-    setCandles([]);
-    candlesRef.current = [];
-    setActiveTrades([]);
-    setResultMarkers([]);
-    setActiveCategory(selectedAsset.category);
-
     run();
 
-    const intervalId = window.setInterval(run, MARKET_POLL_MS);
+    const intervalId = window.setInterval(run, BACKEND_POLL_MS);
 
     return () => {
       stopped = true;
       window.clearInterval(intervalId);
       controller?.abort();
     };
-  }, [selectedAsset, loadCandles]);
+  }, [selectedAsset, loadBackendCandles]);
+
+  React.useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      if (backendHealthyRef.current) return;
+
+      const nextCandles = updateLiveM1Candle(candlesRef.current, selectedAsset);
+
+      candlesRef.current = nextCandles;
+
+      setCandles(nextCandles);
+      setSentiment(calculateSentiment(nextCandles));
+    }, FALLBACK_TICK_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [selectedAsset]);
 
   React.useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -394,7 +448,11 @@ export default function TradingPage() {
   React.useEffect(() => {
     const intervalId = window.setInterval(() => {
       const stablePulse = Math.floor(Math.random() * 5);
-      const nextPayout = clamp(84 + selectedAsset.payoutBoost + stablePulse, 20, 92);
+      const nextPayout = clamp(
+        84 + selectedAsset.payoutBoost + stablePulse,
+        20,
+        92
+      );
 
       setPayout(nextPayout);
     }, 5000);
@@ -463,6 +521,7 @@ export default function TradingPage() {
     if (!canTrade) return;
 
     const latestCandle = candlesRef.current[candlesRef.current.length - 1];
+
     if (!latestCandle) return;
 
     const tradeId = `${side}-${Date.now()}-${Math.random()}`;
@@ -499,7 +558,8 @@ export default function TradingPage() {
       const closePrice =
         candlesRef.current[candlesRef.current.length - 1]?.close ?? entryPrice;
 
-      const won = side === "BUY" ? closePrice > entryPrice : closePrice < entryPrice;
+      const won =
+        side === "BUY" ? closePrice > entryPrice : closePrice < entryPrice;
 
       setActiveTrades((current) =>
         current.filter((trade) => trade.id !== tradeId)
@@ -550,15 +610,51 @@ export default function TradingPage() {
 
         <section className="nt-main-chart">
           <div className="nt-page-asset">
-            <AssetSelector
-              assets={availableAssets}
-              selectedAsset={selectedAsset}
-              activeCategory={activeCategory}
-              open={assetMenuOpen}
-              onToggle={() => setAssetMenuOpen((current) => !current)}
-              onCategoryChange={setActiveCategory}
-              onAssetChange={handleAssetChange}
-            />
+            <div className="nt-asset-selector">
+              <button
+                type="button"
+                className="nt-asset-trigger"
+                onClick={() => setAssetMenuOpen((current) => !current)}
+              >
+                <span>{selectedAsset.symbol}</span>
+                <b>⌄</b>
+              </button>
+
+              {assetMenuOpen && (
+                <div className="nt-asset-menu">
+                  <div className="nt-asset-tabs">
+                    {assetCategories.map((category) => (
+                      <button
+                        key={category}
+                        type="button"
+                        className={category === activeCategory ? "active" : ""}
+                        onClick={() => setActiveCategory(category)}
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="nt-asset-list">
+                    {filteredAssets.map((asset) => (
+                      <button
+                        key={asset.symbol}
+                        type="button"
+                        className={
+                          asset.symbol === selectedAsset.symbol ? "active" : ""
+                        }
+                        onClick={() => handleAssetChange(asset)}
+                      >
+                        <strong>{asset.symbol}</strong>
+                        <span>
+                          {asset.label} • Payout boost {asset.payoutBoost}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <TradingToolbar
@@ -591,9 +687,9 @@ export default function TradingPage() {
           />
 
           <div className="nt-chart-footer">
-  <button type="button">←</button>
-  <button type="button">{timeframe} ▴</button>
-</div>
+            <button type="button">←</button>
+            <button type="button">{timeframe} ▴</button>
+          </div>
         </section>
 
         <TradingPanel
