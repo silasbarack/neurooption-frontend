@@ -69,11 +69,11 @@ const API_BASE_URL = (
 ).replace(/\/$/, "");
 
 /**
- * Higher values reduce frontend lag.
- * 500ms was too aggressive for Render/browser canvas.
+ * These values reduce lag.
+ * The chart should not call the backend every 500ms.
  */
-const BACKEND_POLL_MS = 3000;
-const VISUAL_REFRESH_MS = 2500;
+const BACKEND_POLL_MS = 5000;
+const SECOND_TIMEFRAME_VISUAL_REFRESH_MS = 1200;
 
 const MIN_EXPIRY_SECONDS = 5;
 const MAX_EXPIRY_SECONDS = 5 * 60 * 60;
@@ -105,11 +105,7 @@ const CURRENCY_SYMBOLS: Record<Currency, string> = {
   BRL: "R$",
 };
 
-const DEFAULT_SELECTED_INDICATORS = [
-  "Bollinger Bands",
-  "Moving Average",
-  "Stochastic Oscillator",
-];
+const DEFAULT_SELECTED_INDICATORS = ["Moving Average", "MACD"];
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -144,6 +140,37 @@ function normalizeCandle(candle: BackendCandle): Candle {
       candle.time ?? new Date(candle.openTime ?? Date.now()).getTime()
     ),
   };
+}
+
+function getBackendLimit(timeframe: string) {
+  const seconds = TIMEFRAME_SECONDS[timeframe] ?? 60;
+
+  if (seconds <= 30) return 90;
+  if (seconds <= 60) return 120;
+  if (seconds <= 300) return 160;
+
+  return 220;
+}
+
+function candlesSignature(candles: Candle[]) {
+  if (candles.length === 0) return "empty";
+
+  const first = candles[0];
+  const last = candles[candles.length - 1];
+
+  return [
+    candles.length,
+    first.time,
+    first.open,
+    first.high,
+    first.low,
+    first.close,
+    last.time,
+    last.open,
+    last.high,
+    last.low,
+    last.close,
+  ].join("|");
 }
 
 function formatMoney(value: number, currency: Currency) {
@@ -254,7 +281,10 @@ async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
 export default function TradingPage() {
   const backendM1CandlesRef = React.useRef<Candle[]>([]);
   const candlesRef = React.useRef<Candle[]>([]);
+  const candlesSignatureRef = React.useRef("");
+  const backendSignatureRef = React.useRef("");
   const expirySecondsRef = React.useRef(45);
+  const fetchingRef = React.useRef(false);
 
   const [accountType, setAccountType] = React.useState<AccountType>("QT Demo");
   const [currency, setCurrency] = React.useState<Currency>("USD");
@@ -319,7 +349,12 @@ export default function TradingPage() {
   );
 
   const rebuildDisplayCandles = React.useCallback(
-    (asset: Asset, nextTimeframe: string, backendCandles: Candle[]) => {
+    (
+      asset: Asset,
+      nextTimeframe: string,
+      backendCandles: Candle[],
+      force = false
+    ) => {
       const nextCandles = buildTimeframeCandles(
         asset,
         nextTimeframe,
@@ -327,6 +362,13 @@ export default function TradingPage() {
         Date.now()
       );
 
+      const nextSignature = candlesSignature(nextCandles);
+
+      if (!force && nextSignature === candlesSignatureRef.current) {
+        return candlesRef.current;
+      }
+
+      candlesSignatureRef.current = nextSignature;
       candlesRef.current = nextCandles;
 
       setCandles(nextCandles);
@@ -339,25 +381,40 @@ export default function TradingPage() {
 
   const loadBackendCandles = React.useCallback(
     async (asset: Asset, signal?: AbortSignal) => {
-      const encodedAsset = encodeURIComponent(asset.symbol);
+      if (fetchingRef.current) return;
 
-      const data = await fetchJson<BackendCandlesResponse>(
-        `${API_BASE_URL}/market-data/candles?asset=${encodedAsset}&timeframe=M1&limit=90`,
-        signal
-      );
+      fetchingRef.current = true;
 
-      const nextBackendCandles = data.candles.map(normalizeCandle);
+      try {
+        const encodedAsset = encodeURIComponent(asset.symbol);
+        const limit = getBackendLimit(timeframe);
 
-      if (nextBackendCandles.length < 2) {
-        rebuildDisplayCandles(asset, timeframe, []);
-        return;
+        const data = await fetchJson<BackendCandlesResponse>(
+          `${API_BASE_URL}/market-data/candles?asset=${encodedAsset}&timeframe=M1&limit=${limit}`,
+          signal
+        );
+
+        const nextBackendCandles = data.candles.map(normalizeCandle);
+        const nextBackendSignature = candlesSignature(nextBackendCandles);
+
+        if (nextBackendCandles.length < 2) {
+          rebuildDisplayCandles(asset, timeframe, [], true);
+          return;
+        }
+
+        if (nextBackendSignature !== backendSignatureRef.current) {
+          backendSignatureRef.current = nextBackendSignature;
+          backendM1CandlesRef.current = nextBackendCandles;
+
+          rebuildDisplayCandles(asset, timeframe, nextBackendCandles);
+        }
+
+        if (data.serverTime) {
+          setNowMs(new Date(data.serverTime).getTime());
+        }
+      } finally {
+        fetchingRef.current = false;
       }
-
-      backendM1CandlesRef.current = nextBackendCandles;
-
-      rebuildDisplayCandles(asset, timeframe, nextBackendCandles);
-
-      setNowMs(data.serverTime ? new Date(data.serverTime).getTime() : Date.now());
     },
     [rebuildDisplayCandles, timeframe]
   );
@@ -406,8 +463,10 @@ export default function TradingPage() {
 
   React.useEffect(() => {
     backendM1CandlesRef.current = [];
+    backendSignatureRef.current = "";
+    candlesSignatureRef.current = "";
 
-    rebuildDisplayCandles(selectedAsset, timeframe, []);
+    rebuildDisplayCandles(selectedAsset, timeframe, [], true);
     setActiveTrades([]);
     setResultMarkers([]);
     setActiveCategory(selectedAsset.category);
@@ -418,6 +477,8 @@ export default function TradingPage() {
     let controller: AbortController | null = null;
 
     const run = async () => {
+      if (document.hidden || stopped) return;
+
       controller?.abort();
       controller = new AbortController();
 
@@ -442,29 +503,33 @@ export default function TradingPage() {
       stopped = true;
       window.clearInterval(intervalId);
       controller?.abort();
+      fetchingRef.current = false;
     };
   }, [selectedAsset, timeframe, loadBackendCandles, rebuildDisplayCandles]);
 
   React.useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      const timeframeSeconds = TIMEFRAME_SECONDS[timeframe] ?? 60;
+    const timeframeSeconds = TIMEFRAME_SECONDS[timeframe] ?? 60;
 
-      if (timeframeSeconds === 60 && backendM1CandlesRef.current.length >= 5) {
-        return;
-      }
+    /**
+     * Only second-based charts need visual synthetic refresh.
+     * M1, M5, M15, H1, etc. should not keep regenerating every second.
+     */
+    if (timeframeSeconds >= 60) return;
+
+    const intervalId = window.setInterval(() => {
+      if (document.hidden) return;
 
       rebuildDisplayCandles(
         selectedAsset,
         timeframe,
         backendM1CandlesRef.current
       );
-    }, VISUAL_REFRESH_MS);
+    }, SECOND_TIMEFRAME_VISUAL_REFRESH_MS);
 
     return () => {
       window.clearInterval(intervalId);
     };
   }, [selectedAsset, timeframe, rebuildDisplayCandles]);
-
 
   React.useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -472,7 +537,7 @@ export default function TradingPage() {
       const nextPayout = clamp(84 + selectedAsset.payoutBoost + pulse, 20, 92);
 
       setPayout(nextPayout);
-    }, 5000);
+    }, 8000);
 
     return () => {
       window.clearInterval(intervalId);
@@ -502,10 +567,13 @@ export default function TradingPage() {
     setTimeframe(nextTimeframe);
     setTimeframeOpen(false);
 
+    candlesSignatureRef.current = "";
+
     rebuildDisplayCandles(
       selectedAsset,
       nextTimeframe,
-      backendM1CandlesRef.current
+      backendM1CandlesRef.current,
+      true
     );
   }
 
@@ -594,7 +662,8 @@ export default function TradingPage() {
       if (won) {
         setBalancesUsd((current) => ({
           ...current,
-          [capturedAccountType]: current[capturedAccountType] + capturedReturnUsd,
+          [capturedAccountType]:
+            current[capturedAccountType] + capturedReturnUsd,
         }));
       }
 
