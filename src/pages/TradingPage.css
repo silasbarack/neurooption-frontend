@@ -235,3 +235,50 @@ body,
     z-index: 70;
   }
 }
+.nt-page {
+  overflow: hidden;
+}
+
+.nt-page-body {
+  gap: 14px;
+  padding: 8px 12px 10px;
+}
+
+.nt-main-chart {
+  min-width: 0;
+  padding: 4px 8px 8px;
+}
+
+.nt-chart-wrap {
+  width: 100%;
+  min-height: 560px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.nt-chart-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.nt-chart-types button,
+.nt-tool-btn,
+.nt-asset-trigger {
+  transform: scale(0.96);
+}
+
+@media (max-width: 1200px) {
+  .nt-page-body {
+    gap: 8px;
+    padding: 6px;
+  }
+
+  .nt-main-chart {
+    padding: 2px 4px 6px;
+  }
+
+  .nt-chart-wrap {
+    min-height: 520px;
+  }
+}

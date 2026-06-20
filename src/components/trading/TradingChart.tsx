@@ -64,8 +64,8 @@ type BottomPanel = {
   decimals?: number;
 };
 
-const MAX_HISTORY_CANDLES = 160;
-const MAX_RENDER_CANDLES = 58;
+const MAX_HISTORY_CANDLES = 220;
+const MAX_RENDER_CANDLES = 96;
 
 const COLORS = [
   "#2563eb",
@@ -1226,10 +1226,10 @@ function TradingChartComponent({
       (item) => !OVERLAY_SET.has(item)
     );
 
-    const left = 12;
-    const right = 78;
-    const top = 46;
-    const footer = 36;
+    const left = 18;
+    const right = 92;
+    const top = 58;
+    const footer = 44;
 
     const bottomCount = bottomIndicators.length;
 
@@ -1267,8 +1267,8 @@ function TradingChartComponent({
     let maxPrice = Math.max(...priceValues);
 
     const padding = Math.max(
-      (maxPrice - minPrice) * 0.18,
-      asset.basePrice * 0.0005
+      (maxPrice - minPrice) * 0.32,
+      asset.basePrice * 0.001
     );
 
     minPrice -= padding;
@@ -1304,9 +1304,9 @@ function TradingChartComponent({
     }
 
     const candleWidth = clamp(
-      (chartWidth / renderCandles.length) * 0.58,
-      2.5,
-      9
+      (chartWidth / renderCandles.length) * 0.48,
+      1.6,
+      6
     );
 
     if (chartType === "Line") {
