@@ -19,10 +19,54 @@ type TradingChartProps = {
   resultMarkers: ResultMarker[];
 };
 
+type Value = number | null;
+
+type CanonicalIndicator =
+  | "SMA"
+  | "EMA"
+  | "WMA"
+  | "BOLLINGER_BANDS"
+  | "PARABOLIC_SAR"
+  | "ICHIMOKU"
+  | "DONCHIAN_CHANNEL"
+  | "ENVELOPES"
+  | "AWESOME_OSCILLATOR"
+  | "RSI"
+  | "MACD"
+  | "CCI"
+  | "ADX"
+  | "ATR"
+  | "WILLIAMS_R"
+  | "MOMENTUM"
+  | "STOCHASTIC_OSCILLATOR"
+  | "OSMA"
+  | "ACCELERATOR_OSCILLATOR"
+  | "BULLS_POWER"
+  | "DEMARKER"
+  | "RATE_OF_CHANGE";
+
+type Series = {
+  label: string;
+  values: Value[];
+  color: string;
+  mode?: "line" | "histogram" | "dots";
+  width?: number;
+};
+
+type BottomPanel = {
+  title: string;
+  params: string;
+  series: Series[];
+  levels?: number[];
+  min?: number;
+  max?: number;
+  decimals?: number;
+};
+
 const COLORS = [
-  "#22c55e",
-  "#f59e0b",
   "#2563eb",
+  "#16a34a",
+  "#f59e0b",
   "#9333ea",
   "#06b6d4",
   "#ef4444",
@@ -30,13 +74,104 @@ const COLORS = [
   "#64748b",
   "#a855f7",
   "#0f766e",
+  "#dc2626",
+  "#0891b2",
 ];
+
+const OVERLAY_SET = new Set<CanonicalIndicator>([
+  "SMA",
+  "EMA",
+  "WMA",
+  "BOLLINGER_BANDS",
+  "PARABOLIC_SAR",
+  "ICHIMOKU",
+  "DONCHIAN_CHANNEL",
+  "ENVELOPES",
+]);
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
-function sma(values: number[], period: number) {
+function isNumber(value: Value): value is number {
+  return value !== null && Number.isFinite(value);
+}
+
+function normalizeIndicatorName(indicator: string): CanonicalIndicator | null {
+  const name = indicator.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+  if (name.includes("awesome") || name === "ao") return "AWESOME_OSCILLATOR";
+  if (name === "rsi" || name.includes("relativestrength")) return "RSI";
+  if (name === "macd") return "MACD";
+  if (name === "cci") return "CCI";
+  if (name === "adx") return "ADX";
+  if (name === "atr") return "ATR";
+  if (name.includes("williams")) return "WILLIAMS_R";
+  if (name.includes("momentum")) return "MOMENTUM";
+  if (name.includes("stochastic") || name === "stoch") return "STOCHASTIC_OSCILLATOR";
+  if (name === "osma") return "OSMA";
+  if (name.includes("accelerator")) return "ACCELERATOR_OSCILLATOR";
+  if (name.includes("bulls")) return "BULLS_POWER";
+  if (name.includes("demarker") || name.includes("demark")) return "DEMARKER";
+  if (name.includes("rateofchange") || name === "roc") return "RATE_OF_CHANGE";
+
+  if (name.includes("bollinger") || name.includes("bands")) return "BOLLINGER_BANDS";
+  if (name.includes("parabolic") || name.includes("sar")) return "PARABOLIC_SAR";
+  if (name.includes("ichimoku")) return "ICHIMOKU";
+  if (name.includes("donchian") || name.includes("channel")) return "DONCHIAN_CHANNEL";
+  if (name.includes("envelope")) return "ENVELOPES";
+  if (name.includes("exponential") || name === "ema") return "EMA";
+  if (name.includes("weighted") || name === "wma") return "WMA";
+  if (name.includes("moving") || name === "ma" || name === "sma") return "SMA";
+
+  return null;
+}
+
+function uniqueIndicators(indicators: string[]) {
+  const seen = new Set<CanonicalIndicator>();
+  const output: CanonicalIndicator[] = [];
+
+  indicators.forEach((indicator) => {
+    const key = normalizeIndicatorName(indicator);
+
+    if (!key || seen.has(key)) return;
+
+    seen.add(key);
+    output.push(key);
+  });
+
+  return output;
+}
+
+function closes(candles: Candle[]) {
+  return candles.map((candle) => candle.close);
+}
+
+function highs(candles: Candle[]) {
+  return candles.map((candle) => candle.high);
+}
+
+function lows(candles: Candle[]) {
+  return candles.map((candle) => candle.low);
+}
+
+function medianPrices(candles: Candle[]) {
+  return candles.map((candle) => (candle.high + candle.low) / 2);
+}
+
+function typicalPrices(candles: Candle[]) {
+  return candles.map((candle) => (candle.high + candle.low + candle.close) / 3);
+}
+
+function highest(values: number[]) {
+  return Math.max(...values);
+}
+
+function lowest(values: number[]) {
+  return Math.min(...values);
+}
+
+function sma(values: number[], period: number): Value[] {
   return values.map((_, index) => {
     if (index < period - 1) return null;
 
@@ -46,27 +181,65 @@ function sma(values: number[], period: number) {
   });
 }
 
-function ema(values: number[], period: number) {
-  const output: Array<number | null> = [];
+function smaNullable(values: Value[], period: number): Value[] {
+  return values.map((_, index) => {
+    if (index < period - 1) return null;
+
+    const slice = values.slice(index - period + 1, index + 1);
+
+    if (slice.some((value) => !isNumber(value))) return null;
+
+    return (slice as number[]).reduce((sum, value) => sum + value, 0) / period;
+  });
+}
+
+function ema(values: number[], period: number): Value[] {
+  const output: Value[] = Array(values.length).fill(null);
+
+  if (values.length < period) return output;
+
   const multiplier = 2 / (period + 1);
-  let previous = values[0];
+  let previous = values.slice(0, period).reduce((sum, value) => sum + value, 0) / period;
+
+  output[period - 1] = previous;
+
+  for (let index = period; index < values.length; index += 1) {
+    previous = values[index] * multiplier + previous * (1 - multiplier);
+    output[index] = previous;
+  }
+
+  return output;
+}
+
+function emaNullable(values: Value[], period: number): Value[] {
+  const output: Value[] = Array(values.length).fill(null);
+  const multiplier = 2 / (period + 1);
+  const seed: number[] = [];
+  let previous: number | null = null;
 
   values.forEach((value, index) => {
-    if (index === 0) {
-      previous = value;
-      output.push(value);
+    if (!isNumber(value)) return;
+
+    if (previous === null) {
+      seed.push(value);
+
+      if (seed.length === period) {
+        previous = seed.reduce((sum, item) => sum + item, 0) / period;
+        output[index] = previous;
+      }
+
       return;
     }
 
     previous = value * multiplier + previous * (1 - multiplier);
-    output.push(previous);
+    output[index] = previous;
   });
 
   return output;
 }
 
-function wma(values: number[], period: number) {
-  const weightTotal = (period * (period + 1)) / 2;
+function wma(values: number[], period: number): Value[] {
+  const denominator = (period * (period + 1)) / 2;
 
   return values.map((_, index) => {
     if (index < period - 1) return null;
@@ -77,43 +250,395 @@ function wma(values: number[], period: number) {
       total += values[index - offset] * (period - offset);
     }
 
-    return total / weightTotal;
+    return total / denominator;
   });
 }
 
-function standardDeviation(values: number[], period: number) {
+function standardDeviation(values: number[], period: number): Value[] {
   return values.map((_, index) => {
     if (index < period - 1) return null;
 
     const slice = values.slice(index - period + 1, index + 1);
-    const average = slice.reduce((sum, value) => sum + value, 0) / period;
-    const variance =
-      slice.reduce((sum, value) => sum + (value - average) ** 2, 0) / period;
+    const mean = slice.reduce((sum, value) => sum + value, 0) / period;
+    const variance = slice.reduce((sum, value) => sum + (value - mean) ** 2, 0) / period;
 
     return Math.sqrt(variance);
   });
 }
 
-function rsi(values: number[], period = 14) {
-  return values.map((_, index) => {
-    if (index < period) return 50;
+function trueRange(candles: Candle[], index: number) {
+  if (index === 0) return candles[0].high - candles[0].low;
 
-    let gains = 0;
-    let losses = 0;
+  const candle = candles[index];
+  const previousClose = candles[index - 1].close;
 
-    for (let i = index - period + 1; i <= index; i += 1) {
-      const diff = values[i] - values[i - 1];
+  return Math.max(
+    candle.high - candle.low,
+    Math.abs(candle.high - previousClose),
+    Math.abs(candle.low - previousClose)
+  );
+}
 
-      if (diff >= 0) gains += diff;
-      else losses += Math.abs(diff);
+function atr(candles: Candle[], period = 14): Value[] {
+  const output: Value[] = Array(candles.length).fill(null);
+
+  if (candles.length <= period) return output;
+
+  const ranges = candles.map((_, index) => trueRange(candles, index));
+  let previousAtr = ranges.slice(1, period + 1).reduce((sum, value) => sum + value, 0) / period;
+
+  output[period] = previousAtr;
+
+  for (let index = period + 1; index < candles.length; index += 1) {
+    previousAtr = (previousAtr * (period - 1) + ranges[index]) / period;
+    output[index] = previousAtr;
+  }
+
+  return output;
+}
+
+function rsi(values: number[], period = 14): Value[] {
+  const output: Value[] = Array(values.length).fill(null);
+
+  if (values.length <= period) return output;
+
+  let gains = 0;
+  let losses = 0;
+
+  for (let index = 1; index <= period; index += 1) {
+    const difference = values[index] - values[index - 1];
+
+    if (difference >= 0) gains += difference;
+    else losses += Math.abs(difference);
+  }
+
+  let averageGain = gains / period;
+  let averageLoss = losses / period;
+
+  output[period] =
+    averageLoss === 0 ? 100 : 100 - 100 / (1 + averageGain / averageLoss);
+
+  for (let index = period + 1; index < values.length; index += 1) {
+    const difference = values[index] - values[index - 1];
+    const gain = difference > 0 ? difference : 0;
+    const loss = difference < 0 ? Math.abs(difference) : 0;
+
+    averageGain = (averageGain * (period - 1) + gain) / period;
+    averageLoss = (averageLoss * (period - 1) + loss) / period;
+
+    output[index] =
+      averageLoss === 0 ? 100 : 100 - 100 / (1 + averageGain / averageLoss);
+  }
+
+  return output;
+}
+
+function macd(candles: Candle[], fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
+  const closeValues = closes(candles);
+  const fast = ema(closeValues, fastPeriod);
+  const slow = ema(closeValues, slowPeriod);
+
+  const line: Value[] = closeValues.map((_, index) => {
+    if (!isNumber(fast[index]) || !isNumber(slow[index])) return null;
+    return fast[index] - slow[index];
+  });
+
+  const signal = emaNullable(line, signalPeriod);
+  const histogram = line.map((value, index) => {
+    if (!isNumber(value) || !isNumber(signal[index])) return null;
+    return value - signal[index];
+  });
+
+  return { line, signal, histogram };
+}
+
+function cci(candles: Candle[], period = 20): Value[] {
+  const typical = typicalPrices(candles);
+
+  return typical.map((value, index) => {
+    if (index < period - 1) return null;
+
+    const slice = typical.slice(index - period + 1, index + 1);
+    const mean = slice.reduce((sum, item) => sum + item, 0) / period;
+    const meanDeviation = slice.reduce((sum, item) => sum + Math.abs(item - mean), 0) / period;
+
+    if (meanDeviation === 0) return null;
+
+    return (value - mean) / (0.015 * meanDeviation);
+  });
+}
+
+function adx(candles: Candle[], period = 14) {
+  const adxValues: Value[] = Array(candles.length).fill(null);
+  const plusDi: Value[] = Array(candles.length).fill(null);
+  const minusDi: Value[] = Array(candles.length).fill(null);
+  const tr = Array(candles.length).fill(0);
+  const plusDm = Array(candles.length).fill(0);
+  const minusDm = Array(candles.length).fill(0);
+  const dx: Value[] = Array(candles.length).fill(null);
+
+  if (candles.length <= period * 2) return { adxValues, plusDi, minusDi };
+
+  for (let index = 1; index < candles.length; index += 1) {
+    const upMove = candles[index].high - candles[index - 1].high;
+    const downMove = candles[index - 1].low - candles[index].low;
+
+    plusDm[index] = upMove > downMove && upMove > 0 ? upMove : 0;
+    minusDm[index] = downMove > upMove && downMove > 0 ? downMove : 0;
+    tr[index] = trueRange(candles, index);
+  }
+
+  let smoothedTr = tr.slice(1, period + 1).reduce((sum, value) => sum + value, 0);
+  let smoothedPlusDm = plusDm.slice(1, period + 1).reduce((sum, value) => sum + value, 0);
+  let smoothedMinusDm = minusDm.slice(1, period + 1).reduce((sum, value) => sum + value, 0);
+
+  for (let index = period; index < candles.length; index += 1) {
+    if (index > period) {
+      smoothedTr = smoothedTr - smoothedTr / period + tr[index];
+      smoothedPlusDm = smoothedPlusDm - smoothedPlusDm / period + plusDm[index];
+      smoothedMinusDm = smoothedMinusDm - smoothedMinusDm / period + minusDm[index];
     }
 
-    if (losses === 0) return 75;
+    const pdi = smoothedTr === 0 ? 0 : 100 * (smoothedPlusDm / smoothedTr);
+    const mdi = smoothedTr === 0 ? 0 : 100 * (smoothedMinusDm / smoothedTr);
 
-    const rs = gains / losses;
+    plusDi[index] = pdi;
+    minusDi[index] = mdi;
 
-    return 100 - 100 / (1 + rs);
+    const denominator = pdi + mdi;
+    dx[index] = denominator === 0 ? 0 : (100 * Math.abs(pdi - mdi)) / denominator;
+  }
+
+  const firstDx = dx.slice(period, period * 2).filter(isNumber);
+
+  if (firstDx.length < period) return { adxValues, plusDi, minusDi };
+
+  let previousAdx = firstDx.reduce((sum, value) => sum + value, 0) / period;
+  adxValues[period * 2 - 1] = previousAdx;
+
+  for (let index = period * 2; index < candles.length; index += 1) {
+    previousAdx = (previousAdx * (period - 1) + (dx[index] ?? 0)) / period;
+    adxValues[index] = previousAdx;
+  }
+
+  return { adxValues, plusDi, minusDi };
+}
+
+function williamsR(candles: Candle[], period = 14): Value[] {
+  return candles.map((candle, index) => {
+    if (index < period - 1) return null;
+
+    const slice = candles.slice(index - period + 1, index + 1);
+    const high = highest(slice.map((item) => item.high));
+    const low = lowest(slice.map((item) => item.low));
+
+    if (high === low) return null;
+
+    return ((high - candle.close) / (high - low)) * -100;
   });
+}
+
+function momentum(candles: Candle[], period = 10): Value[] {
+  return candles.map((candle, index) => {
+    if (index < period) return null;
+
+    const previousClose = candles[index - period].close;
+
+    if (previousClose === 0) return null;
+
+    return (candle.close / previousClose) * 100;
+  });
+}
+
+function stochastic(candles: Candle[], kPeriod = 14, dPeriod = 3, slowing = 3) {
+  const rawK: Value[] = candles.map((candle, index) => {
+    if (index < kPeriod - 1) return null;
+
+    const slice = candles.slice(index - kPeriod + 1, index + 1);
+    const high = highest(slice.map((item) => item.high));
+    const low = lowest(slice.map((item) => item.low));
+
+    if (high === low) return null;
+
+    return ((candle.close - low) / (high - low)) * 100;
+  });
+
+  const slowK = smaNullable(rawK, slowing);
+  const dLine = smaNullable(slowK, dPeriod);
+
+  return { slowK, dLine };
+}
+
+function awesomeOscillator(candles: Candle[], fastPeriod = 5, slowPeriod = 34): Value[] {
+  const median = medianPrices(candles);
+  const fast = sma(median, fastPeriod);
+  const slow = sma(median, slowPeriod);
+
+  return median.map((_, index) => {
+    if (!isNumber(fast[index]) || !isNumber(slow[index])) return null;
+    return fast[index] - slow[index];
+  });
+}
+
+function acceleratorOscillator(candles: Candle[], fastPeriod = 5, slowPeriod = 34, signalPeriod = 5): Value[] {
+  const ao = awesomeOscillator(candles, fastPeriod, slowPeriod);
+  const aoSignal = smaNullable(ao, signalPeriod);
+
+  return ao.map((value, index) => {
+    if (!isNumber(value) || !isNumber(aoSignal[index])) return null;
+    return value - aoSignal[index];
+  });
+}
+
+function bullsPower(candles: Candle[], period = 13): Value[] {
+  const closeEma = ema(closes(candles), period);
+
+  return candles.map((candle, index) => {
+    if (!isNumber(closeEma[index])) return null;
+    return candle.high - closeEma[index];
+  });
+}
+
+function deMarker(candles: Candle[], period = 14): Value[] {
+  const deMax = Array(candles.length).fill(0);
+  const deMin = Array(candles.length).fill(0);
+
+  for (let index = 1; index < candles.length; index += 1) {
+    deMax[index] =
+      candles[index].high > candles[index - 1].high
+        ? candles[index].high - candles[index - 1].high
+        : 0;
+
+    deMin[index] =
+      candles[index].low < candles[index - 1].low
+        ? candles[index - 1].low - candles[index].low
+        : 0;
+  }
+
+  const maxSma = sma(deMax, period);
+  const minSma = sma(deMin, period);
+
+  return candles.map((_, index) => {
+    if (!isNumber(maxSma[index]) || !isNumber(minSma[index])) return null;
+
+    const denominator = maxSma[index] + minSma[index];
+
+    if (denominator === 0) return null;
+
+    return maxSma[index] / denominator;
+  });
+}
+
+function rateOfChange(candles: Candle[], period = 12): Value[] {
+  return candles.map((candle, index) => {
+    if (index < period) return null;
+
+    const previousClose = candles[index - period].close;
+
+    if (previousClose === 0) return null;
+
+    return ((candle.close - previousClose) / previousClose) * 100;
+  });
+}
+
+function parabolicSar(candles: Candle[], step = 0.02, maxStep = 0.2): Value[] {
+  const output: Value[] = Array(candles.length).fill(null);
+
+  if (candles.length < 2) return output;
+
+  let upTrend = candles[1].close >= candles[0].close;
+  let acceleration = step;
+  let extremePoint = upTrend ? candles[1].high : candles[1].low;
+  let sar = upTrend ? candles[0].low : candles[0].high;
+
+  output[1] = sar;
+
+  for (let index = 2; index < candles.length; index += 1) {
+    sar = sar + acceleration * (extremePoint - sar);
+
+    if (upTrend) {
+      sar = Math.min(sar, candles[index - 1].low, candles[index - 2].low);
+
+      if (candles[index].low < sar) {
+        upTrend = false;
+        sar = extremePoint;
+        extremePoint = candles[index].low;
+        acceleration = step;
+      } else if (candles[index].high > extremePoint) {
+        extremePoint = candles[index].high;
+        acceleration = Math.min(acceleration + step, maxStep);
+      }
+    } else {
+      sar = Math.max(sar, candles[index - 1].high, candles[index - 2].high);
+
+      if (candles[index].high > sar) {
+        upTrend = true;
+        sar = extremePoint;
+        extremePoint = candles[index].high;
+        acceleration = step;
+      } else if (candles[index].low < extremePoint) {
+        extremePoint = candles[index].low;
+        acceleration = Math.min(acceleration + step, maxStep);
+      }
+    }
+
+    output[index] = sar;
+  }
+
+  return output;
+}
+
+function ichimoku(candles: Candle[], conversionPeriod = 9, basePeriod = 26, spanBPeriod = 52) {
+  const tenkan: Value[] = Array(candles.length).fill(null);
+  const kijun: Value[] = Array(candles.length).fill(null);
+  const spanA: Value[] = Array(candles.length).fill(null);
+  const spanB: Value[] = Array(candles.length).fill(null);
+
+  candles.forEach((_, index) => {
+    if (index >= conversionPeriod - 1) {
+      const slice = candles.slice(index - conversionPeriod + 1, index + 1);
+      tenkan[index] =
+        (highest(slice.map((item) => item.high)) + lowest(slice.map((item) => item.low))) / 2;
+    }
+
+    if (index >= basePeriod - 1) {
+      const slice = candles.slice(index - basePeriod + 1, index + 1);
+      kijun[index] =
+        (highest(slice.map((item) => item.high)) + lowest(slice.map((item) => item.low))) / 2;
+    }
+
+    if (isNumber(tenkan[index]) && isNumber(kijun[index])) {
+      spanA[index] = (tenkan[index] + kijun[index]) / 2;
+    }
+
+    if (index >= spanBPeriod - 1) {
+      const slice = candles.slice(index - spanBPeriod + 1, index + 1);
+      spanB[index] =
+        (highest(slice.map((item) => item.high)) + lowest(slice.map((item) => item.low))) / 2;
+    }
+  });
+
+  return { tenkan, kijun, spanA, spanB };
+}
+
+function donchianChannel(candles: Candle[], period = 20) {
+  const upper: Value[] = Array(candles.length).fill(null);
+  const middle: Value[] = Array(candles.length).fill(null);
+  const lower: Value[] = Array(candles.length).fill(null);
+
+  candles.forEach((_, index) => {
+    if (index < period - 1) return;
+
+    const slice = candles.slice(index - period + 1, index + 1);
+    const high = highest(slice.map((item) => item.high));
+    const low = lowest(slice.map((item) => item.low));
+
+    upper[index] = high;
+    middle[index] = (high + low) / 2;
+    lower[index] = low;
+  });
+
+  return { upper, middle, lower };
 }
 
 function heikenAshi(candles: Candle[]) {
@@ -136,10 +661,6 @@ function heikenAshi(candles: Candle[]) {
   });
 
   return output;
-}
-
-function hashName(name: string) {
-  return name.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
 }
 
 function roundRect(
@@ -165,10 +686,10 @@ function roundRect(
 
 function drawLine(
   context: CanvasRenderingContext2D,
-  data: Array<number | null>,
+  values: Value[],
   color: string,
   indexToX: (index: number) => number,
-  priceToY: (price: number) => number,
+  valueToY: (value: number) => number,
   width = 1.4
 ) {
   context.strokeStyle = color;
@@ -177,11 +698,11 @@ function drawLine(
 
   let started = false;
 
-  data.forEach((value, index) => {
-    if (value === null || !Number.isFinite(value)) return;
+  values.forEach((value, index) => {
+    if (!isNumber(value)) return;
 
     const x = indexToX(index);
-    const y = priceToY(value);
+    const y = valueToY(value);
 
     if (!started) {
       context.moveTo(x, y);
@@ -196,210 +717,297 @@ function drawLine(
 
 function drawDots(
   context: CanvasRenderingContext2D,
-  data: Array<number | null>,
+  values: Value[],
   color: string,
   indexToX: (index: number) => number,
-  priceToY: (price: number) => number
+  valueToY: (value: number) => number
 ) {
   context.fillStyle = color;
 
-  data.forEach((value, index) => {
-    if (value === null || !Number.isFinite(value)) return;
+  values.forEach((value, index) => {
+    if (!isNumber(value)) return;
 
     const x = indexToX(index);
-    const y = priceToY(value);
+    const y = valueToY(value);
 
     context.beginPath();
-    context.arc(x, y, 2.4, 0, Math.PI * 2);
+    context.arc(x, y, 2.3, 0, Math.PI * 2);
     context.fill();
   });
 }
 
-function drawHorizontalLevels(
+function drawHistogram(
   context: CanvasRenderingContext2D,
-  levels: number[],
+  values: Value[],
   color: string,
-  left: number,
-  rightEdge: number,
-  priceToY: (price: number) => number
+  indexToX: (index: number) => number,
+  valueToY: (value: number) => number,
+  candleWidth: number
 ) {
-  context.strokeStyle = color;
-  context.lineWidth = 1;
-  context.setLineDash([5, 5]);
+  const zeroY = valueToY(0);
 
-  levels.forEach((price) => {
-    const y = priceToY(price);
+  context.fillStyle = color;
 
-    context.beginPath();
-    context.moveTo(left, y);
-    context.lineTo(rightEdge, y);
-    context.stroke();
+  values.forEach((value, index) => {
+    if (!isNumber(value)) return;
+
+    const x = indexToX(index);
+    const y = valueToY(value);
+    const top = Math.min(y, zeroY);
+    const height = Math.max(1, Math.abs(zeroY - y));
+
+    context.fillRect(x - candleWidth / 2, top, candleWidth, height);
   });
-
-  context.setLineDash([]);
 }
 
-function drawIndicatorVisual(
-  context: CanvasRenderingContext2D,
-  indicator: string,
-  index: number,
-  candles: Candle[],
-  indexToX: (index: number) => number,
-  priceToY: (price: number) => number,
-  left: number,
-  rightEdge: number
-) {
-  const closes = candles.map((candle) => candle.close);
-  const highs = candles.map((candle) => candle.high);
-  const lows = candles.map((candle) => candle.low);
-  const color = COLORS[index % COLORS.length];
-  const lowerName = indicator.toLowerCase();
+function buildOverlay(indicator: CanonicalIndicator, candles: Candle[], colorIndex: number): Series[] {
+  const closeValues = closes(candles);
+  const color = COLORS[colorIndex % COLORS.length];
 
-  if (lowerName.includes("exponential")) {
-    drawLine(context, ema(closes, 20), color, indexToX, priceToY, 1.5);
-    return;
+  if (indicator === "SMA") {
+    return [{ label: "SMA 20", values: sma(closeValues, 20), color }];
   }
 
-  if (lowerName.includes("weighted")) {
-    drawLine(context, wma(closes, 30), color, indexToX, priceToY, 1.5);
-    return;
+  if (indicator === "EMA") {
+    return [{ label: "EMA 20", values: ema(closeValues, 20), color }];
   }
 
-  if (lowerName.includes("moving") || lowerName === "ma") {
-    drawLine(context, sma(closes, 9), color, indexToX, priceToY, 1.5);
-    return;
+  if (indicator === "WMA") {
+    return [{ label: "WMA 20", values: wma(closeValues, 20), color }];
   }
 
-  if (
-    lowerName.includes("bollinger") ||
-    lowerName.includes("bands") ||
-    lowerName.includes("envelope")
-  ) {
-    const middle = sma(closes, 20);
-    const deviation = standardDeviation(closes, 20);
+  if (indicator === "BOLLINGER_BANDS") {
+    const middle = sma(closeValues, 20);
+    const deviation = standardDeviation(closeValues, 20);
 
-    const upper = middle.map((value, i) =>
-      value === null || deviation[i] === null ? null : value + deviation[i]! * 2
+    const upper = middle.map((value, index) =>
+      isNumber(value) && isNumber(deviation[index]) ? value + deviation[index] * 2 : null
     );
 
-    const lower = middle.map((value, i) =>
-      value === null || deviation[i] === null ? null : value - deviation[i]! * 2
+    const lower = middle.map((value, index) =>
+      isNumber(value) && isNumber(deviation[index]) ? value - deviation[index] * 2 : null
     );
 
-    drawLine(context, upper, color, indexToX, priceToY, 1.2);
-    drawLine(context, lower, color, indexToX, priceToY, 1.2);
-    return;
+    return [
+      { label: "BB Upper", values: upper, color: "#2563eb", width: 1.1 },
+      { label: "BB Middle", values: middle, color: "#64748b", width: 1 },
+      { label: "BB Lower", values: lower, color: "#2563eb", width: 1.1 },
+    ];
   }
 
-  if (
-    lowerName.includes("channel") ||
-    lowerName.includes("donchian") ||
-    lowerName.includes("keltner")
-  ) {
-    drawLine(context, sma(highs, 12), color, indexToX, priceToY, 1.2);
-    drawLine(context, sma(lows, 12), color, indexToX, priceToY, 1.2);
-    return;
+  if (indicator === "PARABOLIC_SAR") {
+    return [{ label: "SAR", values: parabolicSar(candles), color, mode: "dots" }];
   }
 
-  if (lowerName.includes("sar") || lowerName.includes("parabolic")) {
-    const dots = candles.map((candle, candleIndex) =>
-      candleIndex % 2 === 0
-        ? candle.low - (candle.high - candle.low) * 0.25
-        : candle.high + (candle.high - candle.low) * 0.25
-    );
+  if (indicator === "ICHIMOKU") {
+    const data = ichimoku(candles);
 
-    drawDots(context, dots, color, indexToX, priceToY);
-    return;
+    return [
+      { label: "Tenkan", values: data.tenkan, color: "#dc2626", width: 1.1 },
+      { label: "Kijun", values: data.kijun, color: "#2563eb", width: 1.1 },
+      { label: "Span A", values: data.spanA, color: "#16a34a", width: 1 },
+      { label: "Span B", values: data.spanB, color: "#f59e0b", width: 1 },
+    ];
   }
 
-  if (
-    lowerName.includes("pivot") ||
-    lowerName.includes("support") ||
-    lowerName.includes("resistance") ||
-    lowerName.includes("fibonacci")
-  ) {
-    const min = Math.min(...lows);
-    const max = Math.max(...highs);
-    const fibLevels = [0.236, 0.382, 0.5, 0.618, 0.786].map(
-      (level) => min + (max - min) * level
-    );
+  if (indicator === "DONCHIAN_CHANNEL") {
+    const data = donchianChannel(candles, 20);
 
-    drawHorizontalLevels(context, fibLevels, color, left, rightEdge, priceToY);
-    return;
+    return [
+      { label: "DC Upper", values: data.upper, color: "#9333ea", width: 1.1 },
+      { label: "DC Middle", values: data.middle, color: "#64748b", width: 1 },
+      { label: "DC Lower", values: data.lower, color: "#9333ea", width: 1.1 },
+    ];
   }
 
-  if (lowerName.includes("zig") || lowerName.includes("fractal")) {
-    context.strokeStyle = color;
-    context.lineWidth = 1.5;
-    context.beginPath();
+  if (indicator === "ENVELOPES") {
+    const middle = sma(closeValues, 20);
+    const upper = middle.map((value) => (isNumber(value) ? value * 1.001 : null));
+    const lower = middle.map((value) => (isNumber(value) ? value * 0.999 : null));
 
-    let started = false;
-
-    candles.forEach((candle, candleIndex) => {
-      if (candleIndex % 9 !== 0 && candleIndex !== candles.length - 1) return;
-
-      const x = indexToX(candleIndex);
-      const y = priceToY(candleIndex % 18 === 0 ? candle.high : candle.low);
-
-      if (!started) {
-        context.moveTo(x, y);
-        started = true;
-      } else {
-        context.lineTo(x, y);
-      }
-    });
-
-    context.stroke();
-    return;
+    return [
+      { label: "Env Upper", values: upper, color: "#0891b2", width: 1.1 },
+      { label: "Env Middle", values: middle, color: "#64748b", width: 1 },
+      { label: "Env Lower", values: lower, color: "#0891b2", width: 1.1 },
+    ];
   }
 
-  if (lowerName.includes("ichimoku")) {
-    const fast = sma(closes, 9);
-    const slow = sma(closes, 26);
+  return [];
+}
 
-    context.fillStyle = "rgba(34, 197, 94, 0.10)";
-    context.beginPath();
+function buildBottomPanel(indicator: CanonicalIndicator, candles: Candle[], colorIndex: number): BottomPanel | null {
+  const color = COLORS[colorIndex % COLORS.length];
 
-    let started = false;
-
-    fast.forEach((value, fastIndex) => {
-      if (value === null) return;
-
-      const x = indexToX(fastIndex);
-      const y = priceToY(value);
-
-      if (!started) {
-        context.moveTo(x, y);
-        started = true;
-      } else {
-        context.lineTo(x, y);
-      }
-    });
-
-    [...slow].reverse().forEach((value, reverseIndex) => {
-      if (value === null) return;
-
-      const slowIndex = slow.length - 1 - reverseIndex;
-      context.lineTo(indexToX(slowIndex), priceToY(value));
-    });
-
-    context.closePath();
-    context.fill();
-
-    drawLine(context, fast, color, indexToX, priceToY, 1.2);
-    drawLine(context, slow, "#64748b", indexToX, priceToY, 1.2);
-    return;
+  if (indicator === "AWESOME_OSCILLATOR") {
+    return {
+      title: "Awesome Oscillator",
+      params: "5, 34",
+      series: [{ label: "AO", values: awesomeOscillator(candles), color, mode: "histogram" }],
+      levels: [0],
+      decimals: 6,
+    };
   }
 
-  const min = Math.min(...lows);
-  const max = Math.max(...highs);
-  const period = 6 + (hashName(indicator) % 34);
+  if (indicator === "RSI") {
+    return {
+      title: "RSI",
+      params: "14",
+      series: [{ label: "RSI", values: rsi(closes(candles), 14), color }],
+      levels: [30, 50, 70],
+      min: 0,
+      max: 100,
+      decimals: 2,
+    };
+  }
 
-  const generic = lowerName.includes("rsi")
-    ? rsi(closes, 14).map((value) => min + ((max - min) * value) / 100)
-    : ema(closes, period);
+  if (indicator === "MACD") {
+    const data = macd(candles);
 
-  drawLine(context, generic, color, indexToX, priceToY, 1.2);
+    return {
+      title: "MACD",
+      params: "12, 26, 9",
+      series: [
+        { label: "Histogram", values: data.histogram, color: "#94a3b8", mode: "histogram" },
+        { label: "MACD", values: data.line, color: "#2563eb" },
+        { label: "Signal", values: data.signal, color: "#f59e0b" },
+      ],
+      levels: [0],
+      decimals: 6,
+    };
+  }
+
+  if (indicator === "CCI") {
+    return {
+      title: "CCI",
+      params: "20",
+      series: [{ label: "CCI", values: cci(candles), color }],
+      levels: [-100, 0, 100],
+      decimals: 2,
+    };
+  }
+
+  if (indicator === "ADX") {
+    const data = adx(candles);
+
+    return {
+      title: "ADX",
+      params: "14",
+      series: [
+        { label: "ADX", values: data.adxValues, color: "#2563eb" },
+        { label: "+DI", values: data.plusDi, color: "#16a34a" },
+        { label: "-DI", values: data.minusDi, color: "#dc2626" },
+      ],
+      levels: [20, 25, 50],
+      min: 0,
+      max: 100,
+      decimals: 2,
+    };
+  }
+
+  if (indicator === "ATR") {
+    return {
+      title: "ATR",
+      params: "14",
+      series: [{ label: "ATR", values: atr(candles), color }],
+      min: 0,
+      decimals: 6,
+    };
+  }
+
+  if (indicator === "WILLIAMS_R") {
+    return {
+      title: "Williams %R",
+      params: "14",
+      series: [{ label: "%R", values: williamsR(candles), color }],
+      levels: [-80, -50, -20],
+      min: -100,
+      max: 0,
+      decimals: 2,
+    };
+  }
+
+  if (indicator === "MOMENTUM") {
+    return {
+      title: "Momentum",
+      params: "10",
+      series: [{ label: "Momentum", values: momentum(candles), color }],
+      levels: [100],
+      decimals: 3,
+    };
+  }
+
+  if (indicator === "STOCHASTIC_OSCILLATOR") {
+    const data = stochastic(candles);
+
+    return {
+      title: "Stochastic Oscillator",
+      params: "14, 3, 3",
+      series: [
+        { label: "%K", values: data.slowK, color: "#2563eb" },
+        { label: "%D", values: data.dLine, color: "#f59e0b" },
+      ],
+      levels: [20, 50, 80],
+      min: 0,
+      max: 100,
+      decimals: 2,
+    };
+  }
+
+  if (indicator === "OSMA") {
+    const data = macd(candles);
+
+    return {
+      title: "OsMA",
+      params: "12, 26, 9",
+      series: [{ label: "OsMA", values: data.histogram, color, mode: "histogram" }],
+      levels: [0],
+      decimals: 6,
+    };
+  }
+
+  if (indicator === "ACCELERATOR_OSCILLATOR") {
+    return {
+      title: "Accelerator Oscillator",
+      params: "5, 34, 5",
+      series: [{ label: "AC", values: acceleratorOscillator(candles), color, mode: "histogram" }],
+      levels: [0],
+      decimals: 6,
+    };
+  }
+
+  if (indicator === "BULLS_POWER") {
+    return {
+      title: "Bulls Power",
+      params: "13",
+      series: [{ label: "Bulls", values: bullsPower(candles), color, mode: "histogram" }],
+      levels: [0],
+      decimals: 6,
+    };
+  }
+
+  if (indicator === "DEMARKER") {
+    return {
+      title: "DeMarker",
+      params: "14",
+      series: [{ label: "DeM", values: deMarker(candles), color }],
+      levels: [0.3, 0.5, 0.7],
+      min: 0,
+      max: 1,
+      decimals: 3,
+    };
+  }
+
+  if (indicator === "RATE_OF_CHANGE") {
+    return {
+      title: "Rate of Change",
+      params: "12",
+      series: [{ label: "ROC", values: rateOfChange(candles), color }],
+      levels: [0],
+      decimals: 3,
+    };
+  }
+
+  return null;
 }
 
 function formatDuration(totalSeconds: number) {
@@ -449,32 +1057,38 @@ export default function TradingChart({
 
     if (candles.length < 2) {
       context.fillStyle = "#667085";
-      context.font = "700 14px Roboto, sans-serif";
+      context.font = "700 14px Roboto, Arial, sans-serif";
       context.textAlign = "center";
       context.fillText("Loading candles...", width / 2, height / 2);
       return;
     }
 
-    const renderCandles = chartType === "Heiken Ashi" ? heikenAshi(candles) : candles;
+    const renderCandles =
+      chartType === "Heiken Ashi" ? heikenAshi(candles) : candles;
+
+    const canonicalIndicators = uniqueIndicators(selectedIndicators);
+    const overlayIndicators = canonicalIndicators.filter((item) =>
+      OVERLAY_SET.has(item)
+    );
+    const bottomIndicators = canonicalIndicators.filter(
+      (item) => !OVERLAY_SET.has(item)
+    );
 
     const left = 12;
     const right = 78;
     const top = 46;
-    const bottom = height - 38;
-    const chartWidth = width - left - right;
-    const chartHeight = bottom - top;
+    const footer = 36;
 
-    context.fillStyle = "rgba(226, 232, 240, 0.55)";
-    context.beginPath();
-    context.moveTo(left, bottom);
-    context.lineTo(width * 0.2, top + chartHeight * 0.42);
-    context.lineTo(width * 0.34, bottom);
-    context.lineTo(width * 0.55, top + chartHeight * 0.22);
-    context.lineTo(width * 0.72, bottom);
-    context.lineTo(width * 0.9, top + chartHeight * 0.45);
-    context.lineTo(width - right, bottom);
-    context.closePath();
-    context.fill();
+    const bottomCount = bottomIndicators.length;
+    const bottomArea = bottomCount > 0 ? clamp(height * 0.42, 120, height * 0.5) : 0;
+    const panelGap = bottomCount > 0 ? 6 : 0;
+    const chartBottom = height - footer - bottomArea - panelGap;
+    const chartHeight = Math.max(160, chartBottom - top);
+    const chartWidth = width - left - right;
+
+    const overlaySeries = overlayIndicators.flatMap((indicator, index) =>
+      buildOverlay(indicator, renderCandles, index)
+    );
 
     const priceValues = renderCandles.flatMap((candle) => [
       candle.open,
@@ -482,6 +1096,12 @@ export default function TradingChart({
       candle.low,
       candle.close,
     ]);
+
+    overlaySeries.forEach((series) => {
+      series.values.forEach((value) => {
+        if (isNumber(value)) priceValues.push(value);
+      });
+    });
 
     activeTrades.forEach((trade) => priceValues.push(trade.entryPrice));
     resultMarkers.forEach((marker) => priceValues.push(marker.price));
@@ -494,8 +1114,10 @@ export default function TradingChart({
     minPrice -= padding;
     maxPrice += padding;
 
+    const priceRange = maxPrice - minPrice || 1;
+
     const priceToY = (price: number) =>
-      top + ((maxPrice - price) / (maxPrice - minPrice)) * chartHeight;
+      top + ((maxPrice - price) / priceRange) * chartHeight;
 
     const indexToX = (index: number) =>
       left + (index / Math.max(renderCandles.length - 1, 1)) * chartWidth;
@@ -508,7 +1130,7 @@ export default function TradingChart({
 
       context.beginPath();
       context.moveTo(x, top);
-      context.lineTo(x, bottom);
+      context.lineTo(x, chartBottom);
       context.stroke();
     }
 
@@ -539,7 +1161,6 @@ export default function TradingChart({
         const closeY = priceToY(candle.close);
         const highY = priceToY(candle.high);
         const lowY = priceToY(candle.low);
-
         const bullish = candle.close >= candle.open;
         const color = bullish ? "#17a868" : "#e5484d";
 
@@ -570,17 +1191,19 @@ export default function TradingChart({
       });
     }
 
-    selectedIndicators.forEach((indicator, index) => {
-      drawIndicatorVisual(
-        context,
-        indicator,
-        index,
-        renderCandles,
-        indexToX,
-        priceToY,
-        left,
-        width - right
-      );
+    overlaySeries.forEach((series) => {
+      if (series.mode === "dots") {
+        drawDots(context, series.values, series.color, indexToX, priceToY);
+      } else {
+        drawLine(
+          context,
+          series.values,
+          series.color,
+          indexToX,
+          priceToY,
+          series.width ?? 1.3
+        );
+      }
     });
 
     const latest = renderCandles[renderCandles.length - 1];
@@ -599,7 +1222,7 @@ export default function TradingChart({
     context.fill();
 
     context.fillStyle = "#ffffff";
-    context.font = "700 12px Roboto, sans-serif";
+    context.font = "700 12px Roboto, Arial, sans-serif";
     context.textAlign = "center";
     context.fillText(
       latest.close.toFixed(asset.precision),
@@ -608,7 +1231,7 @@ export default function TradingChart({
     );
 
     context.fillStyle = "#344054";
-    context.font = "500 11px Roboto, sans-serif";
+    context.font = "500 11px Roboto, Arial, sans-serif";
     context.textAlign = "right";
 
     for (let i = 0; i <= 5; i += 1) {
@@ -624,18 +1247,18 @@ export default function TradingChart({
     context.setLineDash([3, 3]);
     context.beginPath();
     context.moveTo(expiryX, top);
-    context.lineTo(expiryX, bottom);
+    context.lineTo(expiryX, chartBottom);
     context.stroke();
     context.setLineDash([]);
 
     context.fillStyle = "#475467";
-    context.font = "700 10px Roboto, sans-serif";
+    context.font = "700 10px Roboto, Arial, sans-serif";
     context.textAlign = "left";
     context.fillText("Expiration time", expiryX + 6, top + 12);
     context.fillText(formatDuration(expirySeconds), expiryX + 6, top + 29);
 
     context.fillStyle = "#344054";
-    context.font = "600 11px Roboto, sans-serif";
+    context.font = "600 11px Roboto, Arial, sans-serif";
     context.textAlign = "left";
     context.fillText(`${new Date(nowMs).toLocaleTimeString()} UTC+3`, left + 6, top - 14);
     context.fillText(timeframe, width - right - 26, currentY - 10);
@@ -660,10 +1283,123 @@ export default function TradingChart({
       context.fill();
 
       context.fillStyle = "#ffffff";
-      context.font = "800 10px Roboto, sans-serif";
+      context.font = "800 10px Roboto, Arial, sans-serif";
       context.textAlign = "center";
       context.fillText(marker.label, width - right - 66, y + 4);
     });
+
+    if (bottomIndicators.length > 0) {
+      const panels = bottomIndicators
+        .map((indicator, index) => buildBottomPanel(indicator, renderCandles, index))
+        .filter((panel): panel is BottomPanel => panel !== null);
+
+      const panelHeight = bottomArea / Math.max(panels.length, 1);
+      const panelTopStart = chartBottom + panelGap;
+
+      panels.forEach((panel, panelIndex) => {
+        const panelTop = panelTopStart + panelHeight * panelIndex;
+        const panelBottom = panelTop + panelHeight - 4;
+        const panelInnerTop = panelTop + 18;
+        const panelInnerBottom = panelBottom - 8;
+        const panelInnerHeight = Math.max(12, panelInnerBottom - panelInnerTop);
+
+        const values = panel.series.flatMap((series) => series.values).filter(isNumber);
+        const levelValues = panel.levels ?? [];
+
+        let min = panel.min ?? Math.min(...values, ...levelValues, 0);
+        let max = panel.max ?? Math.max(...values, ...levelValues, 0);
+
+        if (!Number.isFinite(min)) min = 0;
+        if (!Number.isFinite(max)) max = 1;
+        if (min === max) {
+          min -= 1;
+          max += 1;
+        }
+
+        const paddingValue = (max - min) * 0.12;
+
+        if (panel.min === undefined) min -= paddingValue;
+        if (panel.max === undefined) max += paddingValue;
+
+        const valueToY = (value: number) =>
+          panelInnerTop + ((max - value) / (max - min || 1)) * panelInnerHeight;
+
+        context.fillStyle = "#ffffff";
+        context.fillRect(left, panelTop, width - left - 4, panelBottom - panelTop);
+
+        context.strokeStyle = "#e4e9f2";
+        context.lineWidth = 1;
+        context.beginPath();
+        context.moveTo(left, panelTop);
+        context.lineTo(width - 4, panelTop);
+        context.stroke();
+
+        context.fillStyle = "#111827";
+        context.font = "700 10px Roboto, Arial, sans-serif";
+        context.textAlign = "left";
+        context.fillText(`${panel.title} ${panel.params}`, left + 4, panelTop + 12);
+
+        context.fillStyle = "#64748b";
+        context.font = "600 9px Roboto, Arial, sans-serif";
+        context.textAlign = "right";
+        context.fillText(max.toFixed(panel.decimals ?? 2), width - 8, panelInnerTop + 4);
+        context.fillText(min.toFixed(panel.decimals ?? 2), width - 8, panelInnerBottom);
+
+        context.strokeStyle = "#edf1f6";
+        context.lineWidth = 1;
+
+        [0.25, 0.5, 0.75].forEach((ratio) => {
+          const y = panelInnerTop + panelInnerHeight * ratio;
+
+          context.beginPath();
+          context.moveTo(left, y);
+          context.lineTo(width - right, y);
+          context.stroke();
+        });
+
+        if (panel.levels) {
+          context.strokeStyle = "#cbd5e1";
+          context.setLineDash([4, 4]);
+
+          panel.levels.forEach((level) => {
+            if (level < min || level > max) return;
+
+            const y = valueToY(level);
+
+            context.beginPath();
+            context.moveTo(left, y);
+            context.lineTo(width - right, y);
+            context.stroke();
+          });
+
+          context.setLineDash([]);
+        }
+
+        panel.series.forEach((series) => {
+          if (series.mode === "histogram") {
+            drawHistogram(
+              context,
+              series.values,
+              series.color,
+              indexToX,
+              valueToY,
+              clamp(candleWidth, 2, 6)
+            );
+          } else if (series.mode === "dots") {
+            drawDots(context, series.values, series.color, indexToX, valueToY);
+          } else {
+            drawLine(
+              context,
+              series.values,
+              series.color,
+              indexToX,
+              valueToY,
+              series.width ?? 1.2
+            );
+          }
+        });
+      });
+    }
   }, [
     asset,
     candles,

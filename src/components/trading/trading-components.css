@@ -812,3 +812,56 @@ button {
     font-size: 9px;
   }
 }
+.nt-indicators {
+  width: min(640px, calc(100vw - 36px));
+  max-height: 520px;
+  overflow: auto;
+}
+
+.nt-indicator-section {
+  margin-top: 10px;
+}
+
+.nt-indicator-section h4 {
+  margin: 0 0 8px;
+  color: #475467;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.nt-indicator-section div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.nt-indicator-section button {
+  min-height: 34px;
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  padding: 6px 9px;
+  color: #344054;
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.nt-indicator-section button.active {
+  color: #1677ff;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+@media (max-width: 768px) {
+  .nt-indicators {
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-height: 420px;
+  }
+
+  .nt-indicator-section div {
+    grid-template-columns: 1fr;
+  }
+}

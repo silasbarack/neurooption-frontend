@@ -1,5 +1,10 @@
 import type { ChartType } from "./trading.types";
-import { DRAWING_TOOLS, INDICATORS, TIMEFRAMES } from "./trading.constants";
+import {
+  BOTTOM_INDICATORS,
+  DRAWING_TOOLS,
+  OVERLAY_INDICATORS,
+  TIMEFRAMES,
+} from "./trading.constants";
 
 type TradingToolbarProps = {
   timeframe: string;
@@ -17,6 +22,37 @@ type TradingToolbarProps = {
   onToolChange: (tool: string) => void;
   onIndicatorToggle: (indicator: string) => void;
 };
+
+function IndicatorGroup({
+  title,
+  items,
+  selectedIndicators,
+  onIndicatorToggle,
+}: {
+  title: string;
+  items: string[];
+  selectedIndicators: string[];
+  onIndicatorToggle: (indicator: string) => void;
+}) {
+  return (
+    <section className="nt-indicator-section">
+      <h4>{title}</h4>
+
+      <div>
+        {items.map((indicator) => (
+          <button
+            key={indicator}
+            type="button"
+            className={selectedIndicators.includes(indicator) ? "active" : ""}
+            onClick={() => onIndicatorToggle(indicator)}
+          >
+            {indicator}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 export default function TradingToolbar({
   timeframe,
@@ -72,39 +108,44 @@ export default function TradingToolbar({
       </div>
 
       <div className="nt-chart-types">
-        {(["Candlesticks", "Heiken Ashi", "Bars", "Line"] as ChartType[]).map((item) => (
-          <button
-            key={item}
-            type="button"
-            className={item === chartType ? "active" : ""}
-            onClick={() => onChartTypeChange(item)}
-          >
-            {item}
-          </button>
-        ))}
+        {(["Candlesticks", "Heiken Ashi", "Bars", "Line"] as ChartType[]).map(
+          (item) => (
+            <button
+              key={item}
+              type="button"
+              className={item === chartType ? "active" : ""}
+              onClick={() => onChartTypeChange(item)}
+            >
+              {item}
+            </button>
+          )
+        )}
       </div>
 
       {indicatorsOpen && (
         <div className="nt-floating nt-indicators">
-          <h3>Indicators</h3>
-          <div>
-            {INDICATORS.map((indicator) => (
-              <button
-                key={indicator}
-                type="button"
-                className={selectedIndicators.includes(indicator) ? "active" : ""}
-                onClick={() => onIndicatorToggle(indicator)}
-              >
-                {indicator}
-              </button>
-            ))}
-          </div>
+          <h3>Forex indicators</h3>
+
+          <IndicatorGroup
+            title="Overlay indicators on chart"
+            items={OVERLAY_INDICATORS}
+            selectedIndicators={selectedIndicators}
+            onIndicatorToggle={onIndicatorToggle}
+          />
+
+          <IndicatorGroup
+            title="Bottom indicators below chart"
+            items={BOTTOM_INDICATORS}
+            selectedIndicators={selectedIndicators}
+            onIndicatorToggle={onIndicatorToggle}
+          />
         </div>
       )}
 
       {drawingOpen && (
         <div className="nt-floating nt-drawings">
           <h3>Drawing tools</h3>
+
           <div>
             {DRAWING_TOOLS.map((tool) => (
               <button

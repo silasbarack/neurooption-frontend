@@ -267,11 +267,30 @@ export default function TradingPage() {
 
   const [indicatorOpen, setIndicatorOpen] = React.useState(false);
   const [selectedIndicators, setSelectedIndicators] = React.useState<string[]>([
-    "Moving Average",
-    "Exponential MA",
-    "Weighted MA",
-    "RSI",
-  ]);
+  "Moving Average",
+  "Exponential MA",
+  "Weighted MA",
+  "Bollinger Bands",
+  "Parabolic SAR",
+  "Ichimoku",
+  "Donchian Channel",
+  "Envelopes",
+
+  "Awesome Oscillator",
+  "RSI",
+  "MACD",
+  "CCI",
+  "ADX",
+  "ATR",
+  "Williams %R",
+  "Momentum",
+  "Stochastic Oscillator",
+  "OsMA",
+  "Accelerator Oscillator",
+  "Bulls Power",
+  "DeMarker",
+  "Rate of Change",
+]);
 
   const [drawingOpen, setDrawingOpen] = React.useState(false);
   const [selectedTool, setSelectedTool] = React.useState("Cursor");

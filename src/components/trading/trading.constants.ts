@@ -142,50 +142,35 @@ export const TIMEFRAMES = [
   "D1",
 ];
 
-export const INDICATORS = [
+export const OVERLAY_INDICATORS = [
   "Moving Average",
   "Exponential MA",
   "Weighted MA",
   "Bollinger Bands",
+  "Parabolic SAR",
+  "Ichimoku",
+  "Donchian Channel",
+  "Envelopes",
+];
+
+export const BOTTOM_INDICATORS = [
+  "Awesome Oscillator",
   "RSI",
   "MACD",
-  "Stochastic",
   "CCI",
   "ADX",
   "ATR",
-  "Parabolic SAR",
-  "Ichimoku Cloud",
-  "Momentum",
   "Williams %R",
-  "Awesome Oscillator",
-  "Fractals",
-  "Alligator",
-  "Envelopes",
-  "Keltner Channel",
-  "Donchian Channel",
-  "Zig Zag",
-  "Volume",
-  "VWAP",
-  "SuperTrend",
-  "Pivot Points",
-  "Fibonacci Levels",
-  "Trend Strength",
-  "Rate of Change",
-  "Aroon",
+  "Momentum",
+  "Stochastic Oscillator",
+  "OsMA",
+  "Accelerator Oscillator",
+  "Bulls Power",
   "DeMarker",
-  "Money Flow Index",
-  "OBV",
-  "TRIX",
-  "DPO",
-  "Elder Ray",
-  "Hull MA",
-  "TEMA",
-  "KAMA",
-  "Price Channel",
-  "Standard Deviation",
-  "Variance",
-  "Linear Regression",
+  "Rate of Change",
 ];
+
+export const INDICATORS = [...OVERLAY_INDICATORS, ...BOTTOM_INDICATORS];
 
 export const DRAWING_TOOLS = [
   "Cursor",
