@@ -68,8 +68,12 @@ const API_BASE_URL = (
   (import.meta.env.VITE_API_URL as string | undefined) || "http://localhost:4000"
 ).replace(/\/$/, "");
 
-const BACKEND_POLL_MS = 500;
-const VISUAL_REFRESH_MS = 500;
+/**
+ * Higher values reduce frontend lag.
+ * 500ms was too aggressive for Render/browser canvas.
+ */
+const BACKEND_POLL_MS = 1800;
+const VISUAL_REFRESH_MS = 1000;
 
 const MIN_EXPIRY_SECONDS = 5;
 const MAX_EXPIRY_SECONDS = 5 * 60 * 60;
@@ -100,6 +104,12 @@ const CURRENCY_SYMBOLS: Record<Currency, string> = {
   ZAR: "R",
   BRL: "R$",
 };
+
+const DEFAULT_SELECTED_INDICATORS = [
+  "Bollinger Bands",
+  "Moving Average",
+  "Stochastic Oscillator",
+];
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -266,31 +276,9 @@ export default function TradingPage() {
   const [timeframeOpen, setTimeframeOpen] = React.useState(false);
 
   const [indicatorOpen, setIndicatorOpen] = React.useState(false);
-  const [selectedIndicators, setSelectedIndicators] = React.useState<string[]>([
-  "Moving Average",
-  "Exponential MA",
-  "Weighted MA",
-  "Bollinger Bands",
-  "Parabolic SAR",
-  "Ichimoku",
-  "Donchian Channel",
-  "Envelopes",
-
-  "Awesome Oscillator",
-  "RSI",
-  "MACD",
-  "CCI",
-  "ADX",
-  "ATR",
-  "Williams %R",
-  "Momentum",
-  "Stochastic Oscillator",
-  "OsMA",
-  "Accelerator Oscillator",
-  "Bulls Power",
-  "DeMarker",
-  "Rate of Change",
-]);
+  const [selectedIndicators, setSelectedIndicators] = React.useState<string[]>(
+    DEFAULT_SELECTED_INDICATORS
+  );
 
   const [drawingOpen, setDrawingOpen] = React.useState(false);
   const [selectedTool, setSelectedTool] = React.useState("Cursor");

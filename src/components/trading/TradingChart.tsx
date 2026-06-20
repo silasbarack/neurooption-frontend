@@ -46,7 +46,6 @@ type CanonicalIndicator =
   | "RATE_OF_CHANGE";
 
 type Series = {
-  label: string;
   values: Value[];
   color: string;
   mode?: "line" | "histogram" | "dots";
@@ -62,6 +61,8 @@ type BottomPanel = {
   max?: number;
   decimals?: number;
 };
+
+const MAX_RENDER_CANDLES = 96;
 
 const COLORS = [
   "#2563eb",
@@ -788,15 +789,15 @@ function buildOverlay(
   const color = COLORS[colorIndex % COLORS.length];
 
   if (indicator === "SMA") {
-    return [{ label: "SMA 20", values: sma(closeValues, 20), color }];
+    return [{ values: sma(closeValues, 20), color }];
   }
 
   if (indicator === "EMA") {
-    return [{ label: "EMA 20", values: ema(closeValues, 20), color }];
+    return [{ values: ema(closeValues, 20), color }];
   }
 
   if (indicator === "WMA") {
-    return [{ label: "WMA 20", values: wma(closeValues, 20), color }];
+    return [{ values: wma(closeValues, 20), color }];
   }
 
   if (indicator === "BOLLINGER_BANDS") {
@@ -816,24 +817,24 @@ function buildOverlay(
     );
 
     return [
-      { label: "BB Upper", values: upper, color: "#2563eb", width: 1.1 },
-      { label: "BB Middle", values: middle, color: "#64748b", width: 1 },
-      { label: "BB Lower", values: lower, color: "#2563eb", width: 1.1 },
+      { values: upper, color: "#2563eb", width: 1.1 },
+      { values: middle, color: "#64748b", width: 1 },
+      { values: lower, color: "#2563eb", width: 1.1 },
     ];
   }
 
   if (indicator === "PARABOLIC_SAR") {
-    return [{ label: "SAR", values: parabolicSar(candles), color, mode: "dots" }];
+    return [{ values: parabolicSar(candles), color, mode: "dots" }];
   }
 
   if (indicator === "ICHIMOKU") {
     const data = ichimoku(candles);
 
     return [
-      { label: "Tenkan", values: data.tenkan, color: "#dc2626", width: 1.1 },
-      { label: "Kijun", values: data.kijun, color: "#2563eb", width: 1.1 },
-      { label: "Span A", values: data.spanA, color: "#16a34a", width: 1 },
-      { label: "Span B", values: data.spanB, color: "#f59e0b", width: 1 },
+      { values: data.tenkan, color: "#dc2626", width: 1.1 },
+      { values: data.kijun, color: "#2563eb", width: 1.1 },
+      { values: data.spanA, color: "#16a34a", width: 1 },
+      { values: data.spanB, color: "#f59e0b", width: 1 },
     ];
   }
 
@@ -841,9 +842,9 @@ function buildOverlay(
     const data = donchianChannel(candles, 20);
 
     return [
-      { label: "DC Upper", values: data.upper, color: "#9333ea", width: 1.1 },
-      { label: "DC Middle", values: data.middle, color: "#64748b", width: 1 },
-      { label: "DC Lower", values: data.lower, color: "#9333ea", width: 1.1 },
+      { values: data.upper, color: "#9333ea", width: 1.1 },
+      { values: data.middle, color: "#64748b", width: 1 },
+      { values: data.lower, color: "#9333ea", width: 1.1 },
     ];
   }
 
@@ -853,9 +854,9 @@ function buildOverlay(
     const lower = middle.map((value) => (isNumber(value) ? value * 0.999 : null));
 
     return [
-      { label: "Env Upper", values: upper, color: "#0891b2", width: 1.1 },
-      { label: "Env Middle", values: middle, color: "#64748b", width: 1 },
-      { label: "Env Lower", values: lower, color: "#0891b2", width: 1.1 },
+      { values: upper, color: "#0891b2", width: 1.1 },
+      { values: middle, color: "#64748b", width: 1 },
+      { values: lower, color: "#0891b2", width: 1.1 },
     ];
   }
 
@@ -875,7 +876,6 @@ function buildBottomPanel(
       params: "5, 34",
       series: [
         {
-          label: "AO",
           values: awesomeOscillator(candles),
           color,
           mode: "histogram",
@@ -890,7 +890,7 @@ function buildBottomPanel(
     return {
       title: "RSI",
       params: "14",
-      series: [{ label: "RSI", values: rsi(closes(candles), 14), color }],
+      series: [{ values: rsi(closes(candles), 14), color }],
       levels: [30, 50, 70],
       min: 0,
       max: 100,
@@ -906,13 +906,12 @@ function buildBottomPanel(
       params: "12, 26, 9",
       series: [
         {
-          label: "Histogram",
           values: data.histogram,
           color: "#94a3b8",
           mode: "histogram",
         },
-        { label: "MACD", values: data.line, color: "#2563eb" },
-        { label: "Signal", values: data.signal, color: "#f59e0b" },
+        { values: data.line, color: "#2563eb" },
+        { values: data.signal, color: "#f59e0b" },
       ],
       levels: [0],
       decimals: 6,
@@ -923,7 +922,7 @@ function buildBottomPanel(
     return {
       title: "CCI",
       params: "20",
-      series: [{ label: "CCI", values: cci(candles), color }],
+      series: [{ values: cci(candles), color }],
       levels: [-100, 0, 100],
       decimals: 2,
     };
@@ -936,9 +935,9 @@ function buildBottomPanel(
       title: "ADX",
       params: "14",
       series: [
-        { label: "ADX", values: data.adxValues, color: "#2563eb" },
-        { label: "+DI", values: data.plusDi, color: "#16a34a" },
-        { label: "-DI", values: data.minusDi, color: "#dc2626" },
+        { values: data.adxValues, color: "#2563eb" },
+        { values: data.plusDi, color: "#16a34a" },
+        { values: data.minusDi, color: "#dc2626" },
       ],
       levels: [20, 25, 50],
       min: 0,
@@ -951,7 +950,7 @@ function buildBottomPanel(
     return {
       title: "ATR",
       params: "14",
-      series: [{ label: "ATR", values: atr(candles), color }],
+      series: [{ values: atr(candles), color }],
       min: 0,
       decimals: 6,
     };
@@ -961,7 +960,7 @@ function buildBottomPanel(
     return {
       title: "Williams %R",
       params: "14",
-      series: [{ label: "%R", values: williamsR(candles), color }],
+      series: [{ values: williamsR(candles), color }],
       levels: [-80, -50, -20],
       min: -100,
       max: 0,
@@ -973,7 +972,7 @@ function buildBottomPanel(
     return {
       title: "Momentum",
       params: "10",
-      series: [{ label: "Momentum", values: momentum(candles), color }],
+      series: [{ values: momentum(candles), color }],
       levels: [100],
       decimals: 3,
     };
@@ -986,8 +985,8 @@ function buildBottomPanel(
       title: "Stochastic Oscillator",
       params: "14, 3, 3",
       series: [
-        { label: "%K", values: data.slowK, color: "#2563eb" },
-        { label: "%D", values: data.dLine, color: "#f59e0b" },
+        { values: data.slowK, color: "#2563eb" },
+        { values: data.dLine, color: "#f59e0b" },
       ],
       levels: [20, 50, 80],
       min: 0,
@@ -1004,7 +1003,6 @@ function buildBottomPanel(
       params: "12, 26, 9",
       series: [
         {
-          label: "OsMA",
           values: data.histogram,
           color,
           mode: "histogram",
@@ -1021,7 +1019,6 @@ function buildBottomPanel(
       params: "5, 34, 5",
       series: [
         {
-          label: "AC",
           values: acceleratorOscillator(candles),
           color,
           mode: "histogram",
@@ -1038,7 +1035,6 @@ function buildBottomPanel(
       params: "13",
       series: [
         {
-          label: "Bulls",
           values: bullsPower(candles),
           color,
           mode: "histogram",
@@ -1053,7 +1049,7 @@ function buildBottomPanel(
     return {
       title: "DeMarker",
       params: "14",
-      series: [{ label: "DeM", values: deMarker(candles), color }],
+      series: [{ values: deMarker(candles), color }],
       levels: [0.3, 0.5, 0.7],
       min: 0,
       max: 1,
@@ -1065,7 +1061,7 @@ function buildBottomPanel(
     return {
       title: "Rate of Change",
       params: "12",
-      series: [{ label: "ROC", values: rateOfChange(candles), color }],
+      series: [{ values: rateOfChange(candles), color }],
       levels: [0],
       decimals: 3,
     };
@@ -1127,8 +1123,10 @@ export default function TradingChart({
       return;
     }
 
+    const slicedCandles = candles.slice(-MAX_RENDER_CANDLES);
+
     const renderCandles =
-      chartType === "Heiken Ashi" ? heikenAshi(candles) : candles;
+      chartType === "Heiken Ashi" ? heikenAshi(slicedCandles) : slicedCandles;
 
     const canonicalIndicators = uniqueIndicators(selectedIndicators);
 
