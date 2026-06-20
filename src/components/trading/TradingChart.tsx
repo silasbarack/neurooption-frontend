@@ -64,8 +64,8 @@ type BottomPanel = {
   decimals?: number;
 };
 
-const MAX_HISTORY_CANDLES = 260;
-const MAX_RENDER_CANDLES = 78;
+const MAX_HISTORY_CANDLES = 160;
+const MAX_RENDER_CANDLES = 58;
 
 const COLORS = [
   "#2563eb",
@@ -266,6 +266,7 @@ function standardDeviation(values: number[], period: number): Value[] {
 
     const slice = values.slice(index - period + 1, index + 1);
     const mean = slice.reduce((sum, value) => sum + value, 0) / period;
+
     const variance =
       slice.reduce((sum, value) => sum + (value - mean) ** 2, 0) / period;
 
@@ -432,6 +433,7 @@ function adx(candles: Candle[], period = 14) {
     minusDi[index] = mdi;
 
     const denominator = pdi + mdi;
+
     dx[index] =
       denominator === 0 ? 0 : (100 * Math.abs(pdi - mdi)) / denominator;
   }
@@ -641,6 +643,7 @@ function ichimoku(
   candles.forEach((_, index) => {
     if (index >= conversionPeriod - 1) {
       const slice = candles.slice(index - conversionPeriod + 1, index + 1);
+
       tenkan[index] =
         (highest(slice.map((item) => item.high)) +
           lowest(slice.map((item) => item.low))) /
@@ -649,6 +652,7 @@ function ichimoku(
 
     if (index >= basePeriod - 1) {
       const slice = candles.slice(index - basePeriod + 1, index + 1);
+
       kijun[index] =
         (highest(slice.map((item) => item.high)) +
           lowest(slice.map((item) => item.low))) /
@@ -661,6 +665,7 @@ function ichimoku(
 
     if (index >= spanBPeriod - 1) {
       const slice = candles.slice(index - spanBPeriod + 1, index + 1);
+
       spanB[index] =
         (highest(slice.map((item) => item.high)) +
           lowest(slice.map((item) => item.low))) /
@@ -1148,7 +1153,7 @@ function formatDuration(totalSeconds: number) {
   )}:${String(seconds).padStart(2, "0")}`;
 }
 
-export default function TradingChart({
+function TradingChartComponent({
   asset,
   candles,
   chartType,
@@ -1170,7 +1175,7 @@ export default function TradingChart({
   const wrapStyle: React.CSSProperties =
     bottomPanelCount > 0
       ? {
-          minHeight: Math.max(640, 470 + Math.min(bottomPanelCount, 3) * 170),
+          minHeight: Math.max(620, 460 + Math.min(bottomPanelCount, 3) * 155),
         }
       : {};
 
@@ -1181,7 +1186,7 @@ export default function TradingChart({
     if (!canvas || !context) return;
 
     const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
 
     canvas.width = Math.max(1, Math.floor(rect.width * dpr));
     canvas.height = Math.max(1, Math.floor(rect.height * dpr));
@@ -1583,7 +1588,6 @@ export default function TradingChart({
     chartType,
     timeframe,
     expirySeconds,
-    nowMs,
     selectedIndicators,
     activeTrades,
     resultMarkers,
@@ -1595,3 +1599,23 @@ export default function TradingChart({
     </div>
   );
 }
+
+function areTradingChartPropsEqual(
+  previous: TradingChartProps,
+  next: TradingChartProps
+) {
+  return (
+    previous.asset.symbol === next.asset.symbol &&
+    previous.asset.precision === next.asset.precision &&
+    previous.asset.basePrice === next.asset.basePrice &&
+    previous.chartType === next.chartType &&
+    previous.timeframe === next.timeframe &&
+    previous.expirySeconds === next.expirySeconds &&
+    previous.candles === next.candles &&
+    previous.selectedIndicators === next.selectedIndicators &&
+    previous.activeTrades === next.activeTrades &&
+    previous.resultMarkers === next.resultMarkers
+  );
+}
+
+export default React.memo(TradingChartComponent, areTradingChartPropsEqual);

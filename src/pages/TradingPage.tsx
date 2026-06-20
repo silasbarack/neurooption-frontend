@@ -72,8 +72,8 @@ const API_BASE_URL = (
  * Higher values reduce frontend lag.
  * 500ms was too aggressive for Render/browser canvas.
  */
-const BACKEND_POLL_MS = 1800;
-const VISUAL_REFRESH_MS = 1000;
+const BACKEND_POLL_MS = 3000;
+const VISUAL_REFRESH_MS = 2500;
 
 const MIN_EXPIRY_SECONDS = 5;
 const MAX_EXPIRY_SECONDS = 5 * 60 * 60;
@@ -342,7 +342,7 @@ export default function TradingPage() {
       const encodedAsset = encodeURIComponent(asset.symbol);
 
       const data = await fetchJson<BackendCandlesResponse>(
-        `${API_BASE_URL}/market-data/candles?asset=${encodedAsset}&timeframe=M1&limit=120`,
+        `${API_BASE_URL}/market-data/candles?asset=${encodedAsset}&timeframe=M1&limit=90`,
         signal
       );
 
@@ -465,15 +465,6 @@ export default function TradingPage() {
     };
   }, [selectedAsset, timeframe, rebuildDisplayCandles]);
 
-  React.useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setNowMs((current) => current + 1000);
-    }, 1000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, []);
 
   React.useEffect(() => {
     const intervalId = window.setInterval(() => {
