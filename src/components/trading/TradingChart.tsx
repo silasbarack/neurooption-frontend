@@ -141,6 +141,84 @@ function getVisibleCandleCount(timeframe: string) {
   return 80;
 }
 
+function getSmoothFrameDelayMs(timeframe: string) {
+  const seconds = timeframeToSeconds(timeframe);
+
+  if (seconds <= 5) return 45;
+  if (seconds <= 10) return 55;
+  if (seconds <= 15) return 65;
+  if (seconds <= 30) return 80;
+  if (seconds <= 60) return 95;
+  if (seconds <= 120) return 120;
+  if (seconds <= 180) return 140;
+  if (seconds <= 300) return 170;
+  if (seconds <= 600) return 220;
+  if (seconds <= 900) return 260;
+  if (seconds <= 1800) return 320;
+  if (seconds <= 3600) return 420;
+
+  return 520;
+}
+
+function getSmoothEaseRatio(timeframe: string) {
+  const seconds = timeframeToSeconds(timeframe);
+
+  if (seconds <= 5) return 0.34;
+  if (seconds <= 10) return 0.3;
+  if (seconds <= 15) return 0.27;
+  if (seconds <= 30) return 0.24;
+  if (seconds <= 60) return 0.2;
+  if (seconds <= 120) return 0.17;
+  if (seconds <= 180) return 0.15;
+  if (seconds <= 300) return 0.13;
+  if (seconds <= 600) return 0.11;
+  if (seconds <= 900) return 0.095;
+  if (seconds <= 1800) return 0.08;
+  if (seconds <= 3600) return 0.065;
+
+  return 0.05;
+}
+
+function easeNumber(current: number, target: number, ratio: number) {
+  return current + (target - current) * ratio;
+}
+
+function smoothCandles(
+  currentCandles: Candle[],
+  targetCandles: Candle[],
+  timeframe: string
+): Candle[] {
+  if (targetCandles.length === 0) return [];
+
+  if (currentCandles.length === 0) {
+    return targetCandles.map((candle) => ({ ...candle }));
+  }
+
+  const currentByTime = new Map<number, Candle>();
+
+  currentCandles.forEach((candle) => {
+    currentByTime.set(candle.time, candle);
+  });
+
+  const ratio = getSmoothEaseRatio(timeframe);
+
+  return targetCandles.map((target) => {
+    const current = currentByTime.get(target.time);
+
+    if (!current) {
+      return { ...target };
+    }
+
+    return {
+      time: target.time,
+      open: easeNumber(current.open, target.open, ratio),
+      high: easeNumber(current.high, target.high, ratio),
+      low: easeNumber(current.low, target.low, ratio),
+      close: easeNumber(current.close, target.close, ratio),
+    };
+  });
+}
+
 function normalizeIndicatorName(indicator: string): CanonicalIndicator | null {
   const name = indicator.toLowerCase().replace(/[^a-z0-9]/g, "");
 
@@ -185,6 +263,7 @@ function uniqueIndicators(indicators: string[]) {
 
   indicators.forEach((indicator) => {
     const key = normalizeIndicatorName(indicator);
+
     if (!key || seen.has(key)) return;
 
     seen.add(key);
@@ -219,6 +298,7 @@ function sma(values: number[], period: number): Value[] {
     if (index < period - 1) return null;
 
     const slice = values.slice(index - period + 1, index + 1);
+
     return slice.reduce((sum, value) => sum + value, 0) / period;
   });
 }
@@ -228,6 +308,7 @@ function smaNullable(values: Value[], period: number): Value[] {
     if (index < period - 1) return null;
 
     const slice = values.slice(index - period + 1, index + 1);
+
     if (slice.some((value) => !isNumber(value))) return null;
 
     return (slice as number[]).reduce((sum, value) => sum + value, 0) / period;
@@ -303,7 +384,6 @@ function standardDeviation(values: number[], period: number): Value[] {
 
     const slice = values.slice(index - period + 1, index + 1);
     const mean = slice.reduce((sum, value) => sum + value, 0) / period;
-
     const variance =
       slice.reduce((sum, value) => sum + (value - mean) ** 2, 0) / period;
 
@@ -512,6 +592,7 @@ function momentum(candles: Candle[], period = 10): Value[] {
     if (index < period) return null;
 
     const previousClose = candles[index - period].close;
+
     if (previousClose === 0) return null;
 
     return (candle.close / previousClose) * 100;
@@ -599,6 +680,7 @@ function deMarker(candles: Candle[], period = 14): Value[] {
     if (!isNumber(maxSma[index]) || !isNumber(minSma[index])) return null;
 
     const denominator = maxSma[index] + minSma[index];
+
     if (denominator === 0) return null;
 
     return maxSma[index] / denominator;
@@ -610,6 +692,7 @@ function rateOfChange(candles: Candle[], period = 12): Value[] {
     if (index < period) return null;
 
     const previousClose = candles[index - period].close;
+
     if (previousClose === 0) return null;
 
     return ((candle.close - previousClose) / previousClose) * 100;
@@ -1191,12 +1274,14 @@ function TradingChartComponent({
   chartType,
   timeframe,
   expirySeconds,
-  nowMs,
   selectedIndicators,
   activeTrades,
   resultMarkers,
 }: TradingChartProps) {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const animationRef = React.useRef<number | null>(null);
+  const lastFrameRef = React.useRef(0);
+  const smoothCandlesRef = React.useRef<Candle[]>([]);
 
   const prepared = React.useMemo<PreparedChartData>(() => {
     const historyCandles = candles.slice(-MAX_HISTORY_CANDLES);
@@ -1222,9 +1307,7 @@ function TradingChartComponent({
     const visibleCount = visibleCandles.length;
 
     const overlaySeries = overlayIndicators
-      .flatMap((indicator, index) =>
-        buildOverlay(indicator, historyCandles, index)
-      )
+      .flatMap((indicator, index) => buildOverlay(indicator, historyCandles, index))
       .map((series) => prepareSeries(series, visibleCount));
 
     const bottomPanels = bottomIndicators
@@ -1249,14 +1332,35 @@ function TradingChartComponent({
       : {};
 
   React.useEffect(() => {
+    smoothCandlesRef.current = prepared.visibleCandles.map((candle) => ({
+      ...candle,
+    }));
+  }, [asset.symbol, timeframe, chartType]);
+
+  React.useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d", { alpha: false });
 
     if (!canvas || !context) return;
 
-    let animationId: number | null = null;
+    const draw = (frameTime: number) => {
+      const frameDelayMs = getSmoothFrameDelayMs(timeframe);
 
-    const draw = () => {
+      if (frameTime - lastFrameRef.current < frameDelayMs) {
+        animationRef.current = window.requestAnimationFrame(draw);
+        return;
+      }
+
+      lastFrameRef.current = frameTime;
+
+      smoothCandlesRef.current = smoothCandles(
+        smoothCandlesRef.current,
+        prepared.visibleCandles,
+        timeframe
+      );
+
+      const renderCandles = smoothCandlesRef.current;
+
       const rect = canvas.getBoundingClientRect();
       const cssWidth = Math.max(1, Math.floor(rect.width));
       const cssHeight = Math.max(1, Math.floor(rect.height));
@@ -1282,15 +1386,15 @@ function TradingChartComponent({
       context.fillStyle = "#ffffff";
       context.fillRect(0, 0, width, height);
 
-      if (prepared.visibleCandles.length < 2) {
+      if (renderCandles.length < 2) {
         context.fillStyle = "#667085";
         context.font = "700 14px Roboto, Arial, sans-serif";
         context.textAlign = "center";
-        context.fillText("Loading backend OTC candles...", width / 2, height / 2);
+        context.fillText("Loading candles...", width / 2, height / 2);
+
+        animationRef.current = window.requestAnimationFrame(draw);
         return;
       }
-
-      const renderCandles = prepared.visibleCandles;
 
       const left = 18;
       const right = 92;
@@ -1489,11 +1593,6 @@ function TradingChartComponent({
       context.font = "600 11px Roboto, Arial, sans-serif";
       context.textAlign = "left";
       context.fillText(timeframe, width - right - 26, currentY - 10);
-      context.fillText(
-        `${new Date(nowMs).toLocaleTimeString()} backend OTC`,
-        left + 6,
-        top - 16
-      );
 
       activeTrades.forEach((trade) => {
         const y = priceToY(trade.entryPrice);
@@ -1640,34 +1739,23 @@ function TradingChartComponent({
           });
         });
       }
+
+      animationRef.current = window.requestAnimationFrame(draw);
     };
 
-    draw();
-
-    const resizeObserver = new ResizeObserver(() => {
-      if (animationId !== null) {
-        window.cancelAnimationFrame(animationId);
-      }
-
-      animationId = window.requestAnimationFrame(draw);
-    });
-
-    resizeObserver.observe(canvas);
+    animationRef.current = window.requestAnimationFrame(draw);
 
     return () => {
-      resizeObserver.disconnect();
-
-      if (animationId !== null) {
-        window.cancelAnimationFrame(animationId);
+      if (animationRef.current !== null) {
+        window.cancelAnimationFrame(animationRef.current);
       }
     };
   }, [
     asset,
-    prepared,
     chartType,
     timeframe,
     expirySeconds,
-    nowMs,
+    prepared,
     activeTrades,
     resultMarkers,
     bottomPanelCount,
@@ -1691,7 +1779,6 @@ function areTradingChartPropsEqual(
     previous.chartType === next.chartType &&
     previous.timeframe === next.timeframe &&
     previous.expirySeconds === next.expirySeconds &&
-    previous.nowMs === next.nowMs &&
     previous.candles === next.candles &&
     previous.selectedIndicators === next.selectedIndicators &&
     previous.activeTrades === next.activeTrades &&

@@ -46,7 +46,6 @@ type BackendCandle = {
   time?: number;
   openTime?: string;
   closeTime?: string;
-  volume?: number;
 };
 
 type BackendAssetsResponse = {
@@ -115,7 +114,7 @@ function getBackendLimit(timeframe: string) {
   if (seconds <= 15) return 480;
   if (seconds <= 30) return 420;
   if (seconds <= 60) return 360;
-  if (seconds <= 120) return 300;
+  if (seconds <= 120) return 320;
   if (seconds <= 180) return 280;
   if (seconds <= 300) return 240;
   if (seconds <= 600) return 220;
@@ -129,20 +128,20 @@ function getBackendLimit(timeframe: string) {
 function getBackendPollMs(timeframe: string) {
   const seconds = timeframeToSeconds(timeframe);
 
-  if (seconds <= 5) return 900;
-  if (seconds <= 10) return 1000;
-  if (seconds <= 15) return 1200;
-  if (seconds <= 30) return 1500;
-  if (seconds <= 60) return 2000;
-  if (seconds <= 120) return 2300;
-  if (seconds <= 180) return 2600;
-  if (seconds <= 300) return 3200;
-  if (seconds <= 600) return 3800;
-  if (seconds <= 900) return 4500;
-  if (seconds <= 1800) return 5500;
-  if (seconds <= 3600) return 7000;
+  if (seconds <= 5) return 450;
+  if (seconds <= 10) return 550;
+  if (seconds <= 15) return 650;
+  if (seconds <= 30) return 850;
+  if (seconds <= 60) return 1000;
+  if (seconds <= 120) return 1300;
+  if (seconds <= 180) return 1500;
+  if (seconds <= 300) return 1900;
+  if (seconds <= 600) return 2400;
+  if (seconds <= 900) return 3000;
+  if (seconds <= 1800) return 4000;
+  if (seconds <= 3600) return 5500;
 
-  return 9000;
+  return 7000;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -468,7 +467,7 @@ export default function TradingPage() {
       try {
         await loadBackendCandles(selectedAsset, controller.signal);
       } catch {
-        // Keep last good candles on temporary network/backend errors.
+        // Keep last good candles during temporary backend/network delay.
       }
     };
 
