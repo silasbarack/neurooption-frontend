@@ -377,42 +377,42 @@ export default function TradingPage() {
   );
 
   const loadBackendCandles = React.useCallback(
-    async (asset: Asset, signal?: AbortSignal) => {
-      if (fetchingRef.current || document.hidden) return;
+  async (asset: Asset, signal?: AbortSignal) => {
+    if (fetchingRef.current || document.hidden) return;
 
-      fetchingRef.current = true;
+    fetchingRef.current = true;
 
-      try {
-        const encodedAsset = encodeURIComponent(asset.symbol);
-        const limit = getBackendLimit(timeframe);
+    try {
+      const encodedAsset = encodeURIComponent(asset.symbol);
+      const limit = getBackendLimit(timeframe);
 
-        const data = await fetchJson<BackendCandlesResponse>(
-          `${API_BASE_URL}/market-data/candles?asset=${encodedAsset}&timeframe=M1&limit=${limit}`,
-          signal
-        );
+      const data = await fetchJson<BackendCandlesResponse>(
+        `${API_BASE_URL}/market-data/candles?asset=${encodedAsset}&timeframe=${timeframe}&limit=${limit}`,
+        signal
+      );
 
-        const nextBackendCandles = data.candles.map(normalizeCandle);
-        const nextBackendSignature = candlesSignature(nextBackendCandles);
+      const nextBackendCandles = data.candles.map(normalizeCandle);
+      const nextBackendSignature = candlesSignature(nextBackendCandles);
 
-        if (nextBackendCandles.length < 2) {
-          rebuildDisplayCandles(asset, timeframe, [], true);
-          return;
-        }
-
-        if (nextBackendSignature !== backendSignatureRef.current) {
-          backendSignatureRef.current = nextBackendSignature;
-          backendM1CandlesRef.current = nextBackendCandles;
-
-          rebuildDisplayCandles(asset, timeframe, nextBackendCandles);
-        }
-
-        setNowMs(data.serverTime ? new Date(data.serverTime).getTime() : Date.now());
-      } finally {
-        fetchingRef.current = false;
+      if (nextBackendCandles.length < 2) {
+        rebuildDisplayCandles(asset, timeframe, [], true);
+        return;
       }
-    },
-    [rebuildDisplayCandles, timeframe]
-  );
+
+      if (nextBackendSignature !== backendSignatureRef.current) {
+        backendSignatureRef.current = nextBackendSignature;
+        backendM1CandlesRef.current = nextBackendCandles;
+
+        rebuildDisplayCandles(asset, timeframe, nextBackendCandles);
+      }
+
+      setNowMs(data.serverTime ? new Date(data.serverTime).getTime() : Date.now());
+    } finally {
+      fetchingRef.current = false;
+    }
+  },
+  [rebuildDisplayCandles, timeframe]
+);
 
   React.useEffect(() => {
     expirySecondsRef.current = expirySeconds;
