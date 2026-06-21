@@ -72,7 +72,7 @@ const API_BASE_URL = (
  * Moderate backend refresh.
  * The frontend animation handles smooth candle movement.
  */
-const BACKEND_POLL_MS = 2500;
+const BACKEND_POLL_MS = 1800;
 
 const MIN_EXPIRY_SECONDS = 5;
 const MAX_EXPIRY_SECONDS = 5 * 60 * 60;

@@ -129,80 +129,112 @@ function getTimeframeMovementProfile(timeframe: string) {
 
   if (seconds <= 5) {
     return {
-      frameDelayMs: 240,
-      waveSpeedMs: 2600,
-      amplitudeRatio: 0.055,
+      frameDelayMs: 120,
+      waveSpeedMs: 1400,
+      amplitudeRatio: 0.09,
+    };
+  }
+
+  if (seconds <= 10) {
+    return {
+      frameDelayMs: 150,
+      waveSpeedMs: 1800,
+      amplitudeRatio: 0.075,
     };
   }
 
   if (seconds <= 15) {
     return {
-      frameDelayMs: 300,
-      waveSpeedMs: 3600,
-      amplitudeRatio: 0.045,
+      frameDelayMs: 180,
+      waveSpeedMs: 2300,
+      amplitudeRatio: 0.065,
     };
   }
 
   if (seconds <= 30) {
     return {
-      frameDelayMs: 380,
-      waveSpeedMs: 4800,
-      amplitudeRatio: 0.037,
+      frameDelayMs: 230,
+      waveSpeedMs: 3000,
+      amplitudeRatio: 0.055,
     };
   }
 
   if (seconds <= 60) {
     return {
-      frameDelayMs: 520,
-      waveSpeedMs: 7000,
-      amplitudeRatio: 0.03,
+      frameDelayMs: 280,
+      waveSpeedMs: 3800,
+      amplitudeRatio: 0.048,
+    };
+  }
+
+  if (seconds <= 120) {
+    return {
+      frameDelayMs: 360,
+      waveSpeedMs: 5200,
+      amplitudeRatio: 0.04,
+    };
+  }
+
+  if (seconds <= 180) {
+    return {
+      frameDelayMs: 430,
+      waveSpeedMs: 6500,
+      amplitudeRatio: 0.034,
     };
   }
 
   if (seconds <= 300) {
     return {
-      frameDelayMs: 750,
+      frameDelayMs: 520,
+      waveSpeedMs: 8000,
+      amplitudeRatio: 0.028,
+    };
+  }
+
+  if (seconds <= 600) {
+    return {
+      frameDelayMs: 650,
       waveSpeedMs: 11000,
-      amplitudeRatio: 0.022,
+      amplitudeRatio: 0.023,
     };
   }
 
   if (seconds <= 900) {
     return {
-      frameDelayMs: 950,
-      waveSpeedMs: 16000,
-      amplitudeRatio: 0.016,
+      frameDelayMs: 760,
+      waveSpeedMs: 14000,
+      amplitudeRatio: 0.019,
     };
   }
 
   if (seconds <= 1800) {
     return {
-      frameDelayMs: 1150,
-      waveSpeedMs: 22000,
-      amplitudeRatio: 0.012,
+      frameDelayMs: 950,
+      waveSpeedMs: 19000,
+      amplitudeRatio: 0.015,
     };
   }
 
   if (seconds <= 3600) {
     return {
-      frameDelayMs: 1400,
-      waveSpeedMs: 30000,
-      amplitudeRatio: 0.009,
+      frameDelayMs: 1200,
+      waveSpeedMs: 26000,
+      amplitudeRatio: 0.011,
     };
   }
 
   if (seconds <= 14400) {
     return {
-      frameDelayMs: 1700,
-      waveSpeedMs: 42000,
-      amplitudeRatio: 0.0065,
+      frameDelayMs: 1600,
+      waveSpeedMs: 38000,
+      amplitudeRatio: 0.008,
     };
   }
 
   return {
     frameDelayMs: 2200,
-    waveSpeedMs: 62000,
-    amplitudeRatio: 0.004,
+    waveSpeedMs: 54000,
+    amplitudeRatio: 0.005,
   };
 }
 
@@ -1167,19 +1199,22 @@ function liveCandle(
 
   const candleRange = Math.max(
     candle.high - candle.low,
-    asset.basePrice * 0.00008
+    asset.basePrice * 0.00012
   );
 
-  const smoothWave =
-    Math.sin(frameTime / profile.waveSpeedMs) * 0.65 +
-    Math.sin(frameTime / (profile.waveSpeedMs * 2.2)) * 0.35;
+  const primaryWave = Math.sin(frameTime / profile.waveSpeedMs);
+  const secondaryWave = Math.sin(frameTime / (profile.waveSpeedMs * 0.47));
+  const microWave = Math.sin(frameTime / (profile.waveSpeedMs * 0.21));
+
+  const combinedWave =
+    primaryWave * 0.58 + secondaryWave * 0.28 + microWave * 0.14;
 
   const maxMovement = candleRange * profile.amplitudeRatio;
 
   const close = clamp(
-    candle.close + smoothWave * maxMovement,
-    candle.low - candleRange * 0.05,
-    candle.high + candleRange * 0.05
+    candle.close + combinedWave * maxMovement,
+    candle.low - candleRange * 0.08,
+    candle.high + candleRange * 0.08
   );
 
   return {
@@ -1357,12 +1392,17 @@ function TradingChartComponent(props: TradingChartProps) {
 
     const draw = (frameTime: number) => {
       const profile = getTimeframeMovementProfile(timeframe);
-      const frameDelayMs = profile.frameDelayMs || DEFAULT_FRAME_DELAY_MS;
+const frameDelayMs = profile.frameDelayMs || DEFAULT_FRAME_DELAY_MS;
 
-      if (frameTime - lastFrameRef.current < frameDelayMs) {
-        animationRef.current = window.requestAnimationFrame(draw);
-        return;
-      }
+if (document.hidden) {
+  animationRef.current = window.requestAnimationFrame(draw);
+  return;
+}
+
+if (frameTime - lastFrameRef.current < frameDelayMs) {
+  animationRef.current = window.requestAnimationFrame(draw);
+  return;
+}
 
       lastFrameRef.current = frameTime;
 
