@@ -70,7 +70,7 @@ type PreparedChartData = {
   bottomPanels: BottomPanel[];
 };
 
-const MAX_HISTORY_CANDLES = 500;
+const MAX_HISTORY_CANDLES = 320;
 
 const COLORS = [
   "#2563eb",
@@ -122,23 +122,28 @@ function timeframeToSeconds(timeframe: string) {
   return 60;
 }
 
+/**
+ * This fixes your current problem.
+ * Previous values showed too many candles, so candles looked too far/small.
+ * These values bring the chart back to a normal default screen view.
+ */
 function getVisibleCandleCount(timeframe: string) {
   const seconds = timeframeToSeconds(timeframe);
 
-  if (seconds <= 5) return 260;
-  if (seconds <= 10) return 250;
-  if (seconds <= 15) return 240;
-  if (seconds <= 30) return 220;
-  if (seconds <= 60) return 200;
-  if (seconds <= 120) return 180;
-  if (seconds <= 180) return 170;
-  if (seconds <= 300) return 150;
-  if (seconds <= 600) return 130;
-  if (seconds <= 900) return 120;
-  if (seconds <= 1800) return 110;
-  if (seconds <= 3600) return 100;
+  if (seconds <= 5) return 96;
+  if (seconds <= 10) return 96;
+  if (seconds <= 15) return 94;
+  if (seconds <= 30) return 92;
+  if (seconds <= 60) return 90;
+  if (seconds <= 120) return 88;
+  if (seconds <= 180) return 86;
+  if (seconds <= 300) return 84;
+  if (seconds <= 600) return 80;
+  if (seconds <= 900) return 76;
+  if (seconds <= 1800) return 72;
+  if (seconds <= 3600) return 68;
 
-  return 80;
+  return 60;
 }
 
 function getSmoothFrameDelayMs(timeframe: string) {
@@ -384,6 +389,7 @@ function standardDeviation(values: number[], period: number): Value[] {
 
     const slice = values.slice(index - period + 1, index + 1);
     const mean = slice.reduce((sum, value) => sum + value, 0) / period;
+
     const variance =
       slice.reduce((sum, value) => sum + (value - mean) ** 2, 0) / period;
 
@@ -540,7 +546,8 @@ function adx(candles: Candle[], period = 14) {
     if (index > period) {
       smoothedTr = smoothedTr - smoothedTr / period + tr[index];
       smoothedPlusDm = smoothedPlusDm - smoothedPlusDm / period + plusDm[index];
-      smoothedMinusDm = smoothedMinusDm - smoothedMinusDm / period + minusDm[index];
+      smoothedMinusDm =
+        smoothedMinusDm - smoothedMinusDm / period + minusDm[index];
     }
 
     const pdi = smoothedTr === 0 ? 0 : 100 * (smoothedPlusDm / smoothedTr);
@@ -1397,16 +1404,16 @@ function TradingChartComponent({
       }
 
       const left = 18;
-      const right = 92;
-      const top = 58;
-      const footer = 44;
+      const right = 82;
+      const top = 54;
+      const footer = 38;
 
       const bottomArea =
-        bottomPanelCount > 0 ? clamp(height * 0.46, 220, height * 0.55) : 0;
+        bottomPanelCount > 0 ? clamp(height * 0.43, 205, height * 0.5) : 0;
 
       const panelGap = bottomPanelCount > 0 ? 8 : 0;
       const chartBottom = height - footer - bottomArea - panelGap;
-      const chartHeight = Math.max(170, chartBottom - top);
+      const chartHeight = Math.max(185, chartBottom - top);
       const chartWidth = width - left - right;
 
       const priceValues = renderCandles.flatMap((candle) => [
@@ -1429,8 +1436,8 @@ function TradingChartComponent({
       let maxPrice = Math.max(...priceValues);
 
       const padding = Math.max(
-        (maxPrice - minPrice) * 0.32,
-        asset.basePrice * 0.001
+        (maxPrice - minPrice) * 0.2,
+        asset.basePrice * 0.00045
       );
 
       minPrice -= padding;
@@ -1466,9 +1473,9 @@ function TradingChartComponent({
       }
 
       const candleWidth = clamp(
-        (chartWidth / renderCandles.length) * 0.48,
-        1.4,
-        6
+        (chartWidth / renderCandles.length) * 0.62,
+        2.4,
+        9
       );
 
       if (chartType === "Line") {
