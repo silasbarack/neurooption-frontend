@@ -70,9 +70,7 @@ type PreparedChartData = {
   bottomPanels: BottomPanel[];
 };
 
-const MAX_HISTORY_CANDLES = 220;
-const MAX_RENDER_CANDLES = 96;
-const DEFAULT_FRAME_DELAY_MS = 450;
+const MAX_HISTORY_CANDLES = 500;
 
 const COLORS = [
   "#2563eb",
@@ -124,118 +122,23 @@ function timeframeToSeconds(timeframe: string) {
   return 60;
 }
 
-function getTimeframeMovementProfile(timeframe: string) {
+function getVisibleCandleCount(timeframe: string) {
   const seconds = timeframeToSeconds(timeframe);
 
-  if (seconds <= 5) {
-    return {
-      frameDelayMs: 120,
-      waveSpeedMs: 1400,
-      amplitudeRatio: 0.09,
-    };
-  }
+  if (seconds <= 5) return 260;
+  if (seconds <= 10) return 250;
+  if (seconds <= 15) return 240;
+  if (seconds <= 30) return 220;
+  if (seconds <= 60) return 200;
+  if (seconds <= 120) return 180;
+  if (seconds <= 180) return 170;
+  if (seconds <= 300) return 150;
+  if (seconds <= 600) return 130;
+  if (seconds <= 900) return 120;
+  if (seconds <= 1800) return 110;
+  if (seconds <= 3600) return 100;
 
-  if (seconds <= 10) {
-    return {
-      frameDelayMs: 150,
-      waveSpeedMs: 1800,
-      amplitudeRatio: 0.075,
-    };
-  }
-
-  if (seconds <= 15) {
-    return {
-      frameDelayMs: 180,
-      waveSpeedMs: 2300,
-      amplitudeRatio: 0.065,
-    };
-  }
-
-  if (seconds <= 30) {
-    return {
-      frameDelayMs: 230,
-      waveSpeedMs: 3000,
-      amplitudeRatio: 0.055,
-    };
-  }
-
-  if (seconds <= 60) {
-    return {
-      frameDelayMs: 280,
-      waveSpeedMs: 3800,
-      amplitudeRatio: 0.048,
-    };
-  }
-
-  if (seconds <= 120) {
-    return {
-      frameDelayMs: 360,
-      waveSpeedMs: 5200,
-      amplitudeRatio: 0.04,
-    };
-  }
-
-  if (seconds <= 180) {
-    return {
-      frameDelayMs: 430,
-      waveSpeedMs: 6500,
-      amplitudeRatio: 0.034,
-    };
-  }
-
-  if (seconds <= 300) {
-    return {
-      frameDelayMs: 520,
-      waveSpeedMs: 8000,
-      amplitudeRatio: 0.028,
-    };
-  }
-
-  if (seconds <= 600) {
-    return {
-      frameDelayMs: 650,
-      waveSpeedMs: 11000,
-      amplitudeRatio: 0.023,
-    };
-  }
-
-  if (seconds <= 900) {
-    return {
-      frameDelayMs: 760,
-      waveSpeedMs: 14000,
-      amplitudeRatio: 0.019,
-    };
-  }
-
-  if (seconds <= 1800) {
-    return {
-      frameDelayMs: 950,
-      waveSpeedMs: 19000,
-      amplitudeRatio: 0.015,
-    };
-  }
-
-  if (seconds <= 3600) {
-    return {
-      frameDelayMs: 1200,
-      waveSpeedMs: 26000,
-      amplitudeRatio: 0.011,
-    };
-  }
-
-  if (seconds <= 14400) {
-    return {
-      frameDelayMs: 1600,
-      waveSpeedMs: 38000,
-      amplitudeRatio: 0.008,
-    };
-  }
-
-  return {
-    frameDelayMs: 2200,
-    waveSpeedMs: 54000,
-    amplitudeRatio: 0.005,
-  };
+  return 80;
 }
 
 function normalizeIndicatorName(indicator: string): CanonicalIndicator | null {
@@ -282,7 +185,6 @@ function uniqueIndicators(indicators: string[]) {
 
   indicators.forEach((indicator) => {
     const key = normalizeIndicatorName(indicator);
-
     if (!key || seen.has(key)) return;
 
     seen.add(key);
@@ -317,7 +219,6 @@ function sma(values: number[], period: number): Value[] {
     if (index < period - 1) return null;
 
     const slice = values.slice(index - period + 1, index + 1);
-
     return slice.reduce((sum, value) => sum + value, 0) / period;
   });
 }
@@ -327,7 +228,6 @@ function smaNullable(values: Value[], period: number): Value[] {
     if (index < period - 1) return null;
 
     const slice = values.slice(index - period + 1, index + 1);
-
     if (slice.some((value) => !isNumber(value))) return null;
 
     return (slice as number[]).reduce((sum, value) => sum + value, 0) / period;
@@ -340,6 +240,7 @@ function ema(values: number[], period: number): Value[] {
   if (values.length < period) return output;
 
   const multiplier = 2 / (period + 1);
+
   let previous =
     values.slice(0, period).reduce((sum, value) => sum + value, 0) / period;
 
@@ -402,6 +303,7 @@ function standardDeviation(values: number[], period: number): Value[] {
 
     const slice = values.slice(index - period + 1, index + 1);
     const mean = slice.reduce((sum, value) => sum + value, 0) / period;
+
     const variance =
       slice.reduce((sum, value) => sum + (value - mean) ** 2, 0) / period;
 
@@ -610,7 +512,6 @@ function momentum(candles: Candle[], period = 10): Value[] {
     if (index < period) return null;
 
     const previousClose = candles[index - period].close;
-
     if (previousClose === 0) return null;
 
     return (candle.close / previousClose) * 100;
@@ -698,7 +599,6 @@ function deMarker(candles: Candle[], period = 14): Value[] {
     if (!isNumber(maxSma[index]) || !isNumber(minSma[index])) return null;
 
     const denominator = maxSma[index] + minSma[index];
-
     if (denominator === 0) return null;
 
     return maxSma[index] / denominator;
@@ -710,7 +610,6 @@ function rateOfChange(candles: Candle[], period = 12): Value[] {
     if (index < period) return null;
 
     const previousClose = candles[index - period].close;
-
     if (previousClose === 0) return null;
 
     return ((candle.close - previousClose) / previousClose) * 100;
@@ -1189,42 +1088,6 @@ function formatDuration(totalSeconds: number) {
   )}:${String(seconds).padStart(2, "0")}`;
 }
 
-function liveCandle(
-  candle: Candle,
-  asset: Asset,
-  frameTime: number,
-  timeframe: string
-): Candle {
-  const profile = getTimeframeMovementProfile(timeframe);
-
-  const candleRange = Math.max(
-    candle.high - candle.low,
-    asset.basePrice * 0.00012
-  );
-
-  const primaryWave = Math.sin(frameTime / profile.waveSpeedMs);
-  const secondaryWave = Math.sin(frameTime / (profile.waveSpeedMs * 0.47));
-  const microWave = Math.sin(frameTime / (profile.waveSpeedMs * 0.21));
-
-  const combinedWave =
-    primaryWave * 0.58 + secondaryWave * 0.28 + microWave * 0.14;
-
-  const maxMovement = candleRange * profile.amplitudeRatio;
-
-  const close = clamp(
-    candle.close + combinedWave * maxMovement,
-    candle.low - candleRange * 0.08,
-    candle.high + candleRange * 0.08
-  );
-
-  return {
-    ...candle,
-    close,
-    high: Math.max(candle.high, close),
-    low: Math.min(candle.low, close),
-  };
-}
-
 function drawLine(
   context: CanvasRenderingContext2D,
   values: Value[],
@@ -1322,25 +1185,24 @@ function roundRect(
   context.closePath();
 }
 
-function TradingChartComponent(props: TradingChartProps) {
-  const {
-    asset,
-    candles,
-    chartType,
-    timeframe,
-    expirySeconds,
-    selectedIndicators,
-    activeTrades,
-    resultMarkers,
-  } = props;
-
+function TradingChartComponent({
+  asset,
+  candles,
+  chartType,
+  timeframe,
+  expirySeconds,
+  nowMs,
+  selectedIndicators,
+  activeTrades,
+  resultMarkers,
+}: TradingChartProps) {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
-  const animationRef = React.useRef<number | null>(null);
-  const lastFrameRef = React.useRef(0);
 
   const prepared = React.useMemo<PreparedChartData>(() => {
     const historyCandles = candles.slice(-MAX_HISTORY_CANDLES);
-    const visibleBaseCandles = historyCandles.slice(-MAX_RENDER_CANDLES);
+    const visibleBaseCandles = historyCandles.slice(
+      -getVisibleCandleCount(timeframe)
+    );
 
     const visibleCandles =
       chartType === "Heiken Ashi"
@@ -1360,7 +1222,9 @@ function TradingChartComponent(props: TradingChartProps) {
     const visibleCount = visibleCandles.length;
 
     const overlaySeries = overlayIndicators
-      .flatMap((indicator, index) => buildOverlay(indicator, historyCandles, index))
+      .flatMap((indicator, index) =>
+        buildOverlay(indicator, historyCandles, index)
+      )
       .map((series) => prepareSeries(series, visibleCount));
 
     const bottomPanels = bottomIndicators
@@ -1373,7 +1237,7 @@ function TradingChartComponent(props: TradingChartProps) {
       overlaySeries,
       bottomPanels,
     };
-  }, [candles, chartType, selectedIndicators]);
+  }, [candles, chartType, selectedIndicators, timeframe]);
 
   const bottomPanelCount = prepared.bottomPanels.length;
 
@@ -1390,22 +1254,9 @@ function TradingChartComponent(props: TradingChartProps) {
 
     if (!canvas || !context) return;
 
-    const draw = (frameTime: number) => {
-      const profile = getTimeframeMovementProfile(timeframe);
-const frameDelayMs = profile.frameDelayMs || DEFAULT_FRAME_DELAY_MS;
+    let animationId: number | null = null;
 
-if (document.hidden) {
-  animationRef.current = window.requestAnimationFrame(draw);
-  return;
-}
-
-if (frameTime - lastFrameRef.current < frameDelayMs) {
-  animationRef.current = window.requestAnimationFrame(draw);
-  return;
-}
-
-      lastFrameRef.current = frameTime;
-
+    const draw = () => {
       const rect = canvas.getBoundingClientRect();
       const cssWidth = Math.max(1, Math.floor(rect.width));
       const cssHeight = Math.max(1, Math.floor(rect.height));
@@ -1435,22 +1286,11 @@ if (frameTime - lastFrameRef.current < frameDelayMs) {
         context.fillStyle = "#667085";
         context.font = "700 14px Roboto, Arial, sans-serif";
         context.textAlign = "center";
-        context.fillText("Loading candles...", width / 2, height / 2);
-        animationRef.current = window.requestAnimationFrame(draw);
+        context.fillText("Loading backend OTC candles...", width / 2, height / 2);
         return;
       }
 
-      const renderCandles = [...prepared.visibleCandles];
-      const lastIndex = renderCandles.length - 1;
-
-      if (lastIndex >= 0) {
-        renderCandles[lastIndex] = liveCandle(
-          renderCandles[lastIndex],
-          asset,
-          frameTime,
-          timeframe
-        );
-      }
+      const renderCandles = prepared.visibleCandles;
 
       const left = 18;
       const right = 92;
@@ -1523,7 +1363,7 @@ if (frameTime - lastFrameRef.current < frameDelayMs) {
 
       const candleWidth = clamp(
         (chartWidth / renderCandles.length) * 0.48,
-        1.6,
+        1.4,
         6
       );
 
@@ -1649,6 +1489,11 @@ if (frameTime - lastFrameRef.current < frameDelayMs) {
       context.font = "600 11px Roboto, Arial, sans-serif";
       context.textAlign = "left";
       context.fillText(timeframe, width - right - 26, currentY - 10);
+      context.fillText(
+        `${new Date(nowMs).toLocaleTimeString()} backend OTC`,
+        left + 6,
+        top - 16
+      );
 
       activeTrades.forEach((trade) => {
         const y = priceToY(trade.entryPrice);
@@ -1795,23 +1640,34 @@ if (frameTime - lastFrameRef.current < frameDelayMs) {
           });
         });
       }
-
-      animationRef.current = window.requestAnimationFrame(draw);
     };
 
-    animationRef.current = window.requestAnimationFrame(draw);
+    draw();
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (animationId !== null) {
+        window.cancelAnimationFrame(animationId);
+      }
+
+      animationId = window.requestAnimationFrame(draw);
+    });
+
+    resizeObserver.observe(canvas);
 
     return () => {
-      if (animationRef.current !== null) {
-        window.cancelAnimationFrame(animationRef.current);
+      resizeObserver.disconnect();
+
+      if (animationId !== null) {
+        window.cancelAnimationFrame(animationId);
       }
     };
   }, [
     asset,
+    prepared,
     chartType,
     timeframe,
     expirySeconds,
-    prepared,
+    nowMs,
     activeTrades,
     resultMarkers,
     bottomPanelCount,
@@ -1835,6 +1691,7 @@ function areTradingChartPropsEqual(
     previous.chartType === next.chartType &&
     previous.timeframe === next.timeframe &&
     previous.expirySeconds === next.expirySeconds &&
+    previous.nowMs === next.nowMs &&
     previous.candles === next.candles &&
     previous.selectedIndicators === next.selectedIndicators &&
     previous.activeTrades === next.activeTrades &&
