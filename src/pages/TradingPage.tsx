@@ -24,6 +24,12 @@ import type {
   TradeSide,
 } from "../components/trading";
 
+import {
+  DEFAULT_INDICATOR_SETTINGS,
+  type IndicatorSettingsMap,
+  updateIndicatorSetting,
+} from "../components/trading/indicator-settings";
+
 type EmptyPanel = "openTrades" | "history" | "signals" | null;
 
 type BackendAsset = {
@@ -77,25 +83,20 @@ type BackendTrade = {
   side: TradeSide;
   accountType: AccountType;
   currency: Currency;
-
   stakeAmount: number;
   stakeUsd: number;
-
   payoutPercent: number;
   expectedProfitAmount: number;
   expectedProfitUsd: number;
   expectedReturnAmount: number;
   expectedReturnUsd: number;
-
   entryPrice: number;
   entryTime: number;
   expirySeconds: number;
   expiryTime: number;
-
   status: BackendTradeStatus;
   closePrice?: number;
   settledAt?: number;
-
   resultAmount?: number;
   resultUsd?: number;
   profitAmount?: number;
@@ -152,6 +153,7 @@ function timeframeToSeconds(timeframe: string) {
   if (normalized.startsWith("S")) return value;
   if (normalized.startsWith("M")) return value * 60;
   if (normalized.startsWith("H")) return value * 60 * 60;
+  if (normalized.startsWith("D")) return value * 24 * 60 * 60;
 
   return 60;
 }
@@ -455,6 +457,8 @@ export default function TradingPage() {
   const [selectedIndicators, setSelectedIndicators] = React.useState<string[]>(
     DEFAULT_SELECTED_INDICATORS
   );
+  const [indicatorSettings, setIndicatorSettings] =
+    React.useState<IndicatorSettingsMap>(DEFAULT_INDICATOR_SETTINGS);
 
   const [drawingOpen, setDrawingOpen] = React.useState(false);
   const [selectedTool, setSelectedTool] = React.useState("Cursor");
@@ -587,15 +591,14 @@ export default function TradingPage() {
         setOpenTrades(open);
         setTradeHistory(history);
         setWalletBalance(Number(wallet.balance));
-
         setActiveTrades(open.map(tradeToMarker));
 
-        const latestResults = history
-          .filter((trade) => trade.status !== "PENDING")
-          .slice(0, 12)
-          .map(tradeToResultMarker);
-
-        setResultMarkers(latestResults);
+        setResultMarkers(
+          history
+            .filter((trade) => trade.status !== "PENDING")
+            .slice(0, 12)
+            .map(tradeToResultMarker)
+        );
       } finally {
         fetchingTradingStateRef.current = false;
       }
@@ -632,9 +635,7 @@ export default function TradingPage() {
           setActiveCategory(preferred.category);
         }
       } catch {
-        if (!cancelled) {
-          setAvailableAssets(ASSETS);
-        }
+        if (!cancelled) setAvailableAssets(ASSETS);
       }
     };
 
@@ -666,7 +667,7 @@ export default function TradingPage() {
       try {
         await loadBackendCandles(selectedAsset, controller.signal);
       } catch {
-        // Keep the last good candles during temporary backend/network delay.
+        // Keep latest valid candles during temporary backend delay.
       }
     };
 
@@ -684,7 +685,6 @@ export default function TradingPage() {
 
   React.useEffect(() => {
     const controller = new AbortController();
-
     loadWallet(controller.signal).catch(() => undefined);
 
     return () => {
@@ -704,7 +704,7 @@ export default function TradingPage() {
       try {
         await loadTradingState(controller.signal);
       } catch {
-        // Keep the current wallet/trade state if request temporarily fails.
+        // Keep current state during temporary backend delay.
       }
     };
 
@@ -772,6 +772,16 @@ export default function TradingPage() {
     });
   }
 
+  function handleIndicatorSettingChange(
+    indicator: string,
+    key: string,
+    value: number
+  ) {
+    setIndicatorSettings((current) =>
+      updateIndicatorSetting(current, indicator, key, value)
+    );
+  }
+
   function handleAdjustExpiry(
     unit: "hours" | "minutes" | "seconds",
     delta: number
@@ -823,7 +833,6 @@ export default function TradingPage() {
 
       setPayout(Number(response.trade.payoutPercent));
       setWalletBalance(Number(response.wallet.balance));
-
       setOpenTrades((current) => [response.trade, ...current]);
       setActiveTrades((current) => [tradeToMarker(response.trade), ...current]);
 
@@ -908,6 +917,7 @@ export default function TradingPage() {
             chartType={chartType}
             selectedTool={selectedTool}
             selectedIndicators={selectedIndicators}
+            indicator-Settings={indicatorSettings}
             timeframeOpen={timeframeOpen}
             indicatorsOpen={indicatorOpen}
             drawingOpen={drawingOpen}
@@ -918,6 +928,7 @@ export default function TradingPage() {
             onChartTypeChange={setChartType}
             onToolChange={handleToolChange}
             onIndicatorToggle={handleIndicatorToggle}
+            onIndicator-SettingChange={handleIndicatorSettingChange}
           />
 
           <TradingChart
@@ -928,6 +939,7 @@ export default function TradingPage() {
             expirySeconds={expirySeconds}
             nowMs={nowMs}
             selectedIndicators={selectedIndicators}
+            indicator-Settings={indicatorSettings}
             activeTrades={activeTrades}
             resultMarkers={resultMarkers}
           />
@@ -961,11 +973,7 @@ export default function TradingPage() {
 
       <TradingBottomNav onPanelOpen={setEmptyPanel} />
 
-      {tradeError && (
-        <div className="nt-trade-error">
-          {tradeError}
-        </div>
-      )}
+      {tradeError && <div className="nt-trade-error">{tradeError}</div>}
 
       {emptyPanel && (
         <section className="nt-empty-panel">
