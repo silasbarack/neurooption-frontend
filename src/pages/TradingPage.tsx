@@ -68,12 +68,7 @@ const API_BASE_URL = (
   (import.meta.env.VITE_API_URL as string | undefined) || "http://localhost:4000"
 ).replace(/\/$/, "");
 
-/**
- * These values reduce lag.
- * The chart should not call the backend every 500ms.
- */
-const BACKEND_POLL_MS = 5000;
-const SECOND_TIMEFRAME_VISUAL_REFRESH_MS = 1200;
+const BACKEND_POLL_MS = 1200;
 
 const MIN_EXPIRY_SECONDS = 5;
 const MAX_EXPIRY_SECONDS = 5 * 60 * 60;
@@ -145,11 +140,11 @@ function normalizeCandle(candle: BackendCandle): Candle {
 function getBackendLimit(timeframe: string) {
   const seconds = TIMEFRAME_SECONDS[timeframe] ?? 60;
 
-  if (seconds <= 30) return 90;
-  if (seconds <= 60) return 120;
-  if (seconds <= 300) return 160;
+  if (seconds <= 30) return 140;
+  if (seconds <= 60) return 180;
+  if (seconds <= 300) return 220;
 
-  return 220;
+  return 260;
 }
 
 function candlesSignature(candles: Candle[]) {
@@ -381,7 +376,7 @@ export default function TradingPage() {
 
   const loadBackendCandles = React.useCallback(
     async (asset: Asset, signal?: AbortSignal) => {
-      if (fetchingRef.current) return;
+      if (fetchingRef.current || document.hidden) return;
 
       fetchingRef.current = true;
 
@@ -409,9 +404,7 @@ export default function TradingPage() {
           rebuildDisplayCandles(asset, timeframe, nextBackendCandles);
         }
 
-        if (data.serverTime) {
-          setNowMs(new Date(data.serverTime).getTime());
-        }
+        setNowMs(data.serverTime ? new Date(data.serverTime).getTime() : Date.now());
       } finally {
         fetchingRef.current = false;
       }
@@ -477,7 +470,7 @@ export default function TradingPage() {
     let controller: AbortController | null = null;
 
     const run = async () => {
-      if (document.hidden || stopped) return;
+      if (stopped || document.hidden) return;
 
       controller?.abort();
       controller = new AbortController();
@@ -506,30 +499,6 @@ export default function TradingPage() {
       fetchingRef.current = false;
     };
   }, [selectedAsset, timeframe, loadBackendCandles, rebuildDisplayCandles]);
-
-  React.useEffect(() => {
-    const timeframeSeconds = TIMEFRAME_SECONDS[timeframe] ?? 60;
-
-    /**
-     * Only second-based charts need visual synthetic refresh.
-     * M1, M5, M15, H1, etc. should not keep regenerating every second.
-     */
-    if (timeframeSeconds >= 60) return;
-
-    const intervalId = window.setInterval(() => {
-      if (document.hidden) return;
-
-      rebuildDisplayCandles(
-        selectedAsset,
-        timeframe,
-        backendM1CandlesRef.current
-      );
-    }, SECOND_TIMEFRAME_VISUAL_REFRESH_MS);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [selectedAsset, timeframe, rebuildDisplayCandles]);
 
   React.useEffect(() => {
     const intervalId = window.setInterval(() => {
