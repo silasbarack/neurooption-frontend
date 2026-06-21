@@ -65,7 +65,6 @@ type BottomPanel = {
 };
 
 type PreparedChartData = {
-  historyCandles: Candle[];
   visibleCandles: Candle[];
   overlaySeries: Series[];
   bottomPanels: BottomPanel[];
@@ -73,8 +72,7 @@ type PreparedChartData = {
 
 const MAX_HISTORY_CANDLES = 220;
 const MAX_RENDER_CANDLES = 96;
-const LIVE_FPS = 14;
-const LIVE_FRAME_MS = 1000 / LIVE_FPS;
+const DEFAULT_FRAME_DELAY_MS = 450;
 
 const COLORS = [
   "#2563eb",
@@ -112,6 +110,100 @@ function isNumber(value: Value): value is number {
 
 function crisp(value: number) {
   return Math.round(value) + 0.5;
+}
+
+function timeframeToSeconds(timeframe: string) {
+  const normalized = timeframe.trim().toUpperCase();
+  const value = Number(normalized.slice(1)) || 1;
+
+  if (normalized.startsWith("S")) return value;
+  if (normalized.startsWith("M")) return value * 60;
+  if (normalized.startsWith("H")) return value * 60 * 60;
+  if (normalized.startsWith("D")) return value * 24 * 60 * 60;
+
+  return 60;
+}
+
+function getTimeframeMovementProfile(timeframe: string) {
+  const seconds = timeframeToSeconds(timeframe);
+
+  if (seconds <= 5) {
+    return {
+      frameDelayMs: 240,
+      waveSpeedMs: 2600,
+      amplitudeRatio: 0.055,
+    };
+  }
+
+  if (seconds <= 15) {
+    return {
+      frameDelayMs: 300,
+      waveSpeedMs: 3600,
+      amplitudeRatio: 0.045,
+    };
+  }
+
+  if (seconds <= 30) {
+    return {
+      frameDelayMs: 380,
+      waveSpeedMs: 4800,
+      amplitudeRatio: 0.037,
+    };
+  }
+
+  if (seconds <= 60) {
+    return {
+      frameDelayMs: 520,
+      waveSpeedMs: 7000,
+      amplitudeRatio: 0.03,
+    };
+  }
+
+  if (seconds <= 300) {
+    return {
+      frameDelayMs: 750,
+      waveSpeedMs: 11000,
+      amplitudeRatio: 0.022,
+    };
+  }
+
+  if (seconds <= 900) {
+    return {
+      frameDelayMs: 950,
+      waveSpeedMs: 16000,
+      amplitudeRatio: 0.016,
+    };
+  }
+
+  if (seconds <= 1800) {
+    return {
+      frameDelayMs: 1150,
+      waveSpeedMs: 22000,
+      amplitudeRatio: 0.012,
+    };
+  }
+
+  if (seconds <= 3600) {
+    return {
+      frameDelayMs: 1400,
+      waveSpeedMs: 30000,
+      amplitudeRatio: 0.009,
+    };
+  }
+
+  if (seconds <= 14400) {
+    return {
+      frameDelayMs: 1700,
+      waveSpeedMs: 42000,
+      amplitudeRatio: 0.0065,
+    };
+  }
+
+  return {
+    frameDelayMs: 2200,
+    waveSpeedMs: 62000,
+    amplitudeRatio: 0.004,
+  };
 }
 
 function normalizeIndicatorName(indicator: string): CanonicalIndicator | null {
@@ -216,7 +308,6 @@ function ema(values: number[], period: number): Value[] {
   if (values.length < period) return output;
 
   const multiplier = 2 / (period + 1);
-
   let previous =
     values.slice(0, period).reduce((sum, value) => sum + value, 0) / period;
 
@@ -279,7 +370,6 @@ function standardDeviation(values: number[], period: number): Value[] {
 
     const slice = values.slice(index - period + 1, index + 1);
     const mean = slice.reduce((sum, value) => sum + value, 0) / period;
-
     const variance =
       slice.reduce((sum, value) => sum + (value - mean) ** 2, 0) / period;
 
@@ -1067,16 +1157,29 @@ function formatDuration(totalSeconds: number) {
   )}:${String(seconds).padStart(2, "0")}`;
 }
 
-function liveCandle(candle: Candle, asset: Asset, frameTime: number): Candle {
-  const rawRange = Math.max(candle.high - candle.low, asset.basePrice * 0.00015);
-  const wave =
-    Math.sin(frameTime / 320) * rawRange * 0.34 +
-    Math.sin(frameTime / 900) * rawRange * 0.22;
+function liveCandle(
+  candle: Candle,
+  asset: Asset,
+  frameTime: number,
+  timeframe: string
+): Candle {
+  const profile = getTimeframeMovementProfile(timeframe);
+
+  const candleRange = Math.max(
+    candle.high - candle.low,
+    asset.basePrice * 0.00008
+  );
+
+  const smoothWave =
+    Math.sin(frameTime / profile.waveSpeedMs) * 0.65 +
+    Math.sin(frameTime / (profile.waveSpeedMs * 2.2)) * 0.35;
+
+  const maxMovement = candleRange * profile.amplitudeRatio;
 
   const close = clamp(
-    candle.close + wave,
-    candle.low - rawRange * 0.18,
-    candle.high + rawRange * 0.18
+    candle.close + smoothWave * maxMovement,
+    candle.low - candleRange * 0.05,
+    candle.high + candleRange * 0.05
   );
 
   return {
@@ -1231,7 +1334,6 @@ function TradingChartComponent(props: TradingChartProps) {
       .map((panel) => preparePanel(panel, visibleCount));
 
     return {
-      historyCandles,
       visibleCandles,
       overlaySeries,
       bottomPanels,
@@ -1254,7 +1356,10 @@ function TradingChartComponent(props: TradingChartProps) {
     if (!canvas || !context) return;
 
     const draw = (frameTime: number) => {
-      if (frameTime - lastFrameRef.current < LIVE_FRAME_MS) {
+      const profile = getTimeframeMovementProfile(timeframe);
+      const frameDelayMs = profile.frameDelayMs || DEFAULT_FRAME_DELAY_MS;
+
+      if (frameTime - lastFrameRef.current < frameDelayMs) {
         animationRef.current = window.requestAnimationFrame(draw);
         return;
       }
@@ -1302,7 +1407,8 @@ function TradingChartComponent(props: TradingChartProps) {
         renderCandles[lastIndex] = liveCandle(
           renderCandles[lastIndex],
           asset,
-          frameTime
+          frameTime,
+          timeframe
         );
       }
 

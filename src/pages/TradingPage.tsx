@@ -68,7 +68,11 @@ const API_BASE_URL = (
   (import.meta.env.VITE_API_URL as string | undefined) || "http://localhost:4000"
 ).replace(/\/$/, "");
 
-const BACKEND_POLL_MS = 1200;
+/**
+ * Moderate backend refresh.
+ * The frontend animation handles smooth candle movement.
+ */
+const BACKEND_POLL_MS = 2500;
 
 const MIN_EXPIRY_SECONDS = 5;
 const MAX_EXPIRY_SECONDS = 5 * 60 * 60;
@@ -131,9 +135,7 @@ function normalizeCandle(candle: BackendCandle): Candle {
     high: Number(candle.high),
     low: Number(candle.low),
     close: Number(candle.close),
-    time: Number(
-      candle.time ?? new Date(candle.openTime ?? Date.now()).getTime()
-    ),
+    time: Number(candle.time ?? new Date(candle.openTime ?? Date.now()).getTime()),
   };
 }
 
@@ -470,9 +472,8 @@ export default function TradingPage() {
     let controller: AbortController | null = null;
 
     const run = async () => {
-      if (stopped || document.hidden) return;
+      if (stopped || document.hidden || fetchingRef.current) return;
 
-      controller?.abort();
       controller = new AbortController();
 
       try {
