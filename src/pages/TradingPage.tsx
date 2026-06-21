@@ -3,7 +3,6 @@ import "./TradingPage.css";
 
 import {
   ASSETS,
-  EXCHANGE_RATES,
   TradingBottomNav,
   TradingChart,
   TradingHeader,
@@ -25,7 +24,6 @@ import type {
   TradeSide,
 } from "../components/trading";
 
-type BalancesUsd = Record<AccountType, number>;
 type EmptyPanel = "openTrades" | "history" | "signals" | null;
 
 type BackendAsset = {
@@ -46,6 +44,7 @@ type BackendCandle = {
   time?: number;
   openTime?: string;
   closeTime?: string;
+  volume?: number;
 };
 
 type BackendAssetsResponse = {
@@ -59,9 +58,60 @@ type BackendCandlesResponse = {
   candles: BackendCandle[];
 };
 
+type BackendWalletResponse = {
+  userId: string;
+  accountType: AccountType;
+  currency: Currency;
+  balanceUsd: number;
+  balance: number;
+  updatedAt?: string;
+};
+
+type BackendTradeStatus = "PENDING" | "WON" | "LOST" | "DRAW";
+
+type BackendTrade = {
+  id: string;
+  userId: string;
+  asset: string;
+  timeframe: string;
+  side: TradeSide;
+  accountType: AccountType;
+  currency: Currency;
+
+  stakeAmount: number;
+  stakeUsd: number;
+
+  payoutPercent: number;
+  expectedProfitAmount: number;
+  expectedProfitUsd: number;
+  expectedReturnAmount: number;
+  expectedReturnUsd: number;
+
+  entryPrice: number;
+  entryTime: number;
+  expirySeconds: number;
+  expiryTime: number;
+
+  status: BackendTradeStatus;
+  closePrice?: number;
+  settledAt?: number;
+
+  resultAmount?: number;
+  resultUsd?: number;
+  profitAmount?: number;
+  profitUsd?: number;
+};
+
+type PlaceTradeResponse = {
+  trade: BackendTrade;
+  wallet: BackendWalletResponse;
+};
+
 const API_BASE_URL = (
   (import.meta.env.VITE_API_URL as string | undefined) || "http://localhost:4000"
 ).replace(/\/$/, "");
+
+const USER_ID = "demo-user";
 
 const MIN_EXPIRY_SECONDS = 5;
 const MAX_EXPIRY_SECONDS = 5 * 60 * 60;
@@ -142,6 +192,16 @@ function getBackendPollMs(timeframe: string) {
   if (seconds <= 3600) return 5500;
 
   return 7000;
+}
+
+function getTradingPollMs(timeframe: string) {
+  const seconds = timeframeToSeconds(timeframe);
+
+  if (seconds <= 15) return 900;
+  if (seconds <= 60) return 1200;
+  if (seconds <= 300) return 1600;
+
+  return 2500;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -301,19 +361,84 @@ async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+async function postJson<TResponse, TBody>(
+  url: string,
+  body: TBody,
+  signal?: AbortSignal
+): Promise<TResponse> {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+    signal,
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message =
+      data && typeof data.message === "string"
+        ? data.message
+        : `Request failed: ${response.status}`;
+
+    throw new Error(message);
+  }
+
+  return data as TResponse;
+}
+
+function tradeToMarker(trade: BackendTrade): TradeMarker {
+  return {
+    id: trade.id,
+    side: trade.side,
+    entryPrice: Number(trade.entryPrice),
+    label: `${trade.side} ${formatMoney(
+      Number(trade.stakeAmount),
+      trade.currency
+    )}`,
+  };
+}
+
+function tradeToResultMarker(trade: BackendTrade): ResultMarker {
+  const won = trade.status === "WON";
+  const draw = trade.status === "DRAW";
+  const price = Number(trade.closePrice ?? trade.entryPrice);
+
+  let label = `✕ ${formatMoney(0, trade.currency)}`;
+
+  if (won) {
+    label = `✓ ${formatMoney(Number(trade.resultAmount ?? 0), trade.currency)}`;
+  }
+
+  if (draw) {
+    label = `↔ ${formatMoney(Number(trade.resultAmount ?? 0), trade.currency)}`;
+  }
+
+  return {
+    id: `${trade.id}-result`,
+    price,
+    won,
+    label,
+  };
+}
+
 export default function TradingPage() {
   const candlesRef = React.useRef<Candle[]>([]);
   const candlesSignatureRef = React.useRef("");
   const expirySecondsRef = React.useRef(45);
-  const fetchingRef = React.useRef(false);
+  const fetchingCandlesRef = React.useRef(false);
+  const fetchingTradingStateRef = React.useRef(false);
 
   const [accountType, setAccountType] = React.useState<AccountType>("QT Demo");
   const [currency, setCurrency] = React.useState<Currency>("USD");
 
-  const [balancesUsd, setBalancesUsd] = React.useState<BalancesUsd>({
-    "QT Demo": 70000,
-    "QT Real": 0,
-  });
+  const [walletBalance, setWalletBalance] = React.useState(70000);
+  const [walletLoading, setWalletLoading] = React.useState(false);
+  const [tradeSubmitting, setTradeSubmitting] = React.useState(false);
+  const [tradeError, setTradeError] = React.useState<string | null>(null);
 
   const [availableAssets, setAvailableAssets] = React.useState<Asset[]>(ASSETS);
   const [selectedAsset, setSelectedAsset] = React.useState<Asset>(DEFAULT_ASSET);
@@ -342,22 +467,25 @@ export default function TradingPage() {
   const [activeTrades, setActiveTrades] = React.useState<TradeMarker[]>([]);
   const [resultMarkers, setResultMarkers] = React.useState<ResultMarker[]>([]);
 
+  const [openTrades, setOpenTrades] = React.useState<BackendTrade[]>([]);
+  const [tradeHistory, setTradeHistory] = React.useState<BackendTrade[]>([]);
+
   const [nowMs, setNowMs] = React.useState(Date.now());
   const [sentiment, setSentiment] = React.useState(50);
   const [emptyPanel, setEmptyPanel] = React.useState<EmptyPanel>(null);
-
-  const exchangeRate = EXCHANGE_RATES[currency];
-  const displayedBalance = balancesUsd[accountType] * exchangeRate;
 
   const stakeAmount = Number(amount);
   const safeStakeAmount = Number.isFinite(stakeAmount)
     ? Math.max(0, stakeAmount)
     : 0;
 
-  const stakeUsd = safeStakeAmount / exchangeRate;
   const expectedProfit = safeStakeAmount * (payout / 100);
   const expectedReturn = safeStakeAmount + expectedProfit;
-  const canTrade = safeStakeAmount > 0 && stakeUsd <= balancesUsd[accountType];
+  const canTrade =
+    safeStakeAmount > 0 &&
+    safeStakeAmount <= walletBalance &&
+    !tradeSubmitting &&
+    !walletLoading;
 
   const expiryParts = splitExpiry(expirySeconds);
 
@@ -371,9 +499,9 @@ export default function TradingPage() {
 
   const loadBackendCandles = React.useCallback(
     async (asset: Asset, signal?: AbortSignal) => {
-      if (fetchingRef.current || document.hidden) return;
+      if (fetchingCandlesRef.current || document.hidden) return;
 
-      fetchingRef.current = true;
+      fetchingCandlesRef.current = true;
 
       try {
         const encodedAsset = encodeURIComponent(asset.symbol);
@@ -398,10 +526,81 @@ export default function TradingPage() {
 
         setNowMs(data.serverTime ? new Date(data.serverTime).getTime() : Date.now());
       } finally {
-        fetchingRef.current = false;
+        fetchingCandlesRef.current = false;
       }
     },
     [timeframe]
+  );
+
+  const loadWallet = React.useCallback(
+    async (signal?: AbortSignal) => {
+      setWalletLoading(true);
+
+      try {
+        const data = await fetchJson<BackendWalletResponse>(
+          `${API_BASE_URL}/trading-engine/wallet?userId=${encodeURIComponent(
+            USER_ID
+          )}&accountType=${encodeURIComponent(
+            accountType
+          )}&currency=${encodeURIComponent(currency)}`,
+          signal
+        );
+
+        setWalletBalance(Number(data.balance));
+      } finally {
+        setWalletLoading(false);
+      }
+    },
+    [accountType, currency]
+  );
+
+  const loadTradingState = React.useCallback(
+    async (signal?: AbortSignal) => {
+      if (fetchingTradingStateRef.current || document.hidden) return;
+
+      fetchingTradingStateRef.current = true;
+
+      try {
+        const [open, history, wallet] = await Promise.all([
+          fetchJson<BackendTrade[]>(
+            `${API_BASE_URL}/trading-engine/trades/open?userId=${encodeURIComponent(
+              USER_ID
+            )}`,
+            signal
+          ),
+          fetchJson<BackendTrade[]>(
+            `${API_BASE_URL}/trading-engine/trades/history?userId=${encodeURIComponent(
+              USER_ID
+            )}`,
+            signal
+          ),
+          fetchJson<BackendWalletResponse>(
+            `${API_BASE_URL}/trading-engine/wallet?userId=${encodeURIComponent(
+              USER_ID
+            )}&accountType=${encodeURIComponent(
+              accountType
+            )}&currency=${encodeURIComponent(currency)}`,
+            signal
+          ),
+        ]);
+
+        setOpenTrades(open);
+        setTradeHistory(history);
+        setWalletBalance(Number(wallet.balance));
+
+        setActiveTrades(open.map(tradeToMarker));
+
+        const latestResults = history
+          .filter((trade) => trade.status !== "PENDING")
+          .slice(0, 12)
+          .map(tradeToResultMarker);
+
+        setResultMarkers(latestResults);
+      } finally {
+        fetchingTradingStateRef.current = false;
+      }
+    },
+    [accountType, currency]
   );
 
   React.useEffect(() => {
@@ -460,14 +659,14 @@ export default function TradingPage() {
     let controller: AbortController | null = null;
 
     const run = async () => {
-      if (stopped || document.hidden || fetchingRef.current) return;
+      if (stopped || document.hidden || fetchingCandlesRef.current) return;
 
       controller = new AbortController();
 
       try {
         await loadBackendCandles(selectedAsset, controller.signal);
       } catch {
-        // Keep last good candles during temporary backend/network delay.
+        // Keep the last good candles during temporary backend/network delay.
       }
     };
 
@@ -479,9 +678,47 @@ export default function TradingPage() {
       stopped = true;
       window.clearInterval(intervalId);
       controller?.abort();
-      fetchingRef.current = false;
+      fetchingCandlesRef.current = false;
     };
   }, [selectedAsset, timeframe, loadBackendCandles]);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+
+    loadWallet(controller.signal).catch(() => undefined);
+
+    return () => {
+      controller.abort();
+    };
+  }, [loadWallet]);
+
+  React.useEffect(() => {
+    let stopped = false;
+    let controller: AbortController | null = null;
+
+    const run = async () => {
+      if (stopped || document.hidden || fetchingTradingStateRef.current) return;
+
+      controller = new AbortController();
+
+      try {
+        await loadTradingState(controller.signal);
+      } catch {
+        // Keep the current wallet/trade state if request temporarily fails.
+      }
+    };
+
+    run();
+
+    const intervalId = window.setInterval(run, getTradingPollMs(timeframe));
+
+    return () => {
+      stopped = true;
+      window.clearInterval(intervalId);
+      controller?.abort();
+      fetchingTradingStateRef.current = false;
+    };
+  }, [timeframe, loadTradingState]);
 
   React.useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -554,81 +791,52 @@ export default function TradingPage() {
     });
   }
 
-  function handleTrade(side: TradeSide) {
+  async function handleTrade(side: TradeSide) {
     if (!canTrade) return;
 
-    const latestCandle = candlesRef.current[candlesRef.current.length - 1];
+    setTradeSubmitting(true);
+    setTradeError(null);
 
-    if (!latestCandle) return;
+    try {
+      const response = await postJson<
+        PlaceTradeResponse,
+        {
+          userId: string;
+          asset: string;
+          timeframe: string;
+          side: TradeSide;
+          accountType: AccountType;
+          currency: Currency;
+          amount: number;
+          expirySeconds: number;
+        }
+      >(`${API_BASE_URL}/trading-engine/trades`, {
+        userId: USER_ID,
+        asset: selectedAsset.symbol,
+        timeframe,
+        side,
+        accountType,
+        currency,
+        amount: safeStakeAmount,
+        expirySeconds: expirySecondsRef.current,
+      });
 
-    const tradeId = `${side}-${Date.now()}-${Math.random()}`;
-    const capturedAccountType = accountType;
-    const capturedCurrency = currency;
-    const capturedExchangeRate = EXCHANGE_RATES[capturedCurrency];
+      setPayout(Number(response.trade.payoutPercent));
+      setWalletBalance(Number(response.wallet.balance));
 
-    const capturedStakeAmount = safeStakeAmount;
-    const capturedStakeUsd = capturedStakeAmount / capturedExchangeRate;
-    const capturedProfitAmount = capturedStakeAmount * (payout / 100);
-    const capturedReturnAmount = capturedStakeAmount + capturedProfitAmount;
-    const capturedReturnUsd = capturedReturnAmount / capturedExchangeRate;
+      setOpenTrades((current) => [response.trade, ...current]);
+      setActiveTrades((current) => [tradeToMarker(response.trade), ...current]);
 
-    const entryPrice = latestCandle.close;
+      await loadTradingState();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Could not place trade.";
 
-    const marker: TradeMarker = {
-      id: tradeId,
-      side,
-      entryPrice,
-      label: `${side} ${formatMoney(capturedStakeAmount, capturedCurrency)}`,
-    };
-
-    setBalancesUsd((current) => ({
-      ...current,
-      [capturedAccountType]: Math.max(
-        0,
-        current[capturedAccountType] - capturedStakeUsd
-      ),
-    }));
-
-    setActiveTrades((current) => [...current, marker]);
-
-    window.setTimeout(() => {
-      const closePrice =
-        candlesRef.current[candlesRef.current.length - 1]?.close ?? entryPrice;
-
-      const won =
-        side === "BUY" ? closePrice > entryPrice : closePrice < entryPrice;
-
-      setActiveTrades((current) =>
-        current.filter((trade) => trade.id !== tradeId)
-      );
-
-      if (won) {
-        setBalancesUsd((current) => ({
-          ...current,
-          [capturedAccountType]:
-            current[capturedAccountType] + capturedReturnUsd,
-        }));
-      }
-
-      const resultId = `${tradeId}-result`;
-
-      const resultMarker: ResultMarker = {
-        id: resultId,
-        price: closePrice,
-        won,
-        label: won
-          ? `✓ ${formatMoney(capturedReturnAmount, capturedCurrency)}`
-          : `✕ ${formatMoney(0, capturedCurrency)}`,
-      };
-
-      setResultMarkers((current) => [...current, resultMarker]);
-
-      window.setTimeout(() => {
-        setResultMarkers((current) =>
-          current.filter((item) => item.id !== resultId)
-        );
-      }, 10000);
-    }, expirySecondsRef.current * 1000);
+      setTradeError(message);
+      window.alert(message);
+    } finally {
+      setTradeSubmitting(false);
+    }
   }
 
   return (
@@ -636,7 +844,7 @@ export default function TradingPage() {
       <TradingHeader
         accountType={accountType}
         currency={currency}
-        balanceText={formatMoney(displayedBalance, currency)}
+        balanceText={formatMoney(walletBalance, currency)}
         onAccountChange={setAccountType}
         onCurrencyChange={setCurrency}
         onTopUp={handleTopUp}
@@ -753,6 +961,12 @@ export default function TradingPage() {
 
       <TradingBottomNav onPanelOpen={setEmptyPanel} />
 
+      {tradeError && (
+        <div className="nt-trade-error">
+          {tradeError}
+        </div>
+      )}
+
       {emptyPanel && (
         <section className="nt-empty-panel">
           <div className="nt-empty-card">
@@ -765,13 +979,60 @@ export default function TradingPage() {
             </button>
 
             <h2>{getEmptyPanelTitle(emptyPanel)}</h2>
-            <p>No records yet.</p>
 
-            <small>
-              {emptyPanel === "signals"
-                ? "Signals will appear here when your signal service is connected."
-                : "Your data will appear here after users start trading."}
-            </small>
+            {emptyPanel === "openTrades" && (
+              <>
+                {openTrades.length === 0 ? (
+                  <p>No open trades yet.</p>
+                ) : (
+                  <div className="nt-panel-list">
+                    {openTrades.map((trade) => (
+                      <div key={trade.id} className="nt-panel-row">
+                        <strong>
+                          {trade.side} {trade.asset}
+                        </strong>
+                        <span>
+                          {formatMoney(trade.stakeAmount, trade.currency)} •{" "}
+                          {trade.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
+            {emptyPanel === "history" && (
+              <>
+                {tradeHistory.length === 0 ? (
+                  <p>No closed trades yet.</p>
+                ) : (
+                  <div className="nt-panel-list">
+                    {tradeHistory.slice(0, 20).map((trade) => (
+                      <div key={trade.id} className="nt-panel-row">
+                        <strong>
+                          {trade.status} • {trade.side} {trade.asset}
+                        </strong>
+                        <span>
+                          Entry {trade.entryPrice} → Close{" "}
+                          {trade.closePrice ?? "-"} • Profit{" "}
+                          {formatMoney(trade.profitAmount ?? 0, trade.currency)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
+            {emptyPanel === "signals" && (
+              <>
+                <p>No signals yet.</p>
+                <small>
+                  Signals will appear here when your signal service is connected.
+                </small>
+              </>
+            )}
           </div>
         </section>
       )}
