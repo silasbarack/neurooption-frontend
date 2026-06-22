@@ -33,7 +33,11 @@ import {
   updateIndicatorSetting,
   updateIndicatorStyle,
 } from "../components/trading/indicator-settings";
-import { buildTimeframeCandles } from "../components/trading/timeframeEngine";
+import {
+  buildTimeframeCandles,
+  getLivePriceOffset,
+  updateLiveCandle,
+} from "../components/trading/timeframeEngine";
 
 type EmptyPanel = "openTrades" | "history" | "signals" | null;
 
@@ -47,26 +51,15 @@ type BackendAsset = {
   isActive?: boolean;
 };
 
-type BackendCandle = {
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  time?: number;
-  openTime?: string;
-  closeTime?: string;
-  volume?: number;
-};
-
 type BackendAssetsResponse = {
   assets: BackendAsset[];
 };
 
-type BackendCandlesResponse = {
-  asset?: BackendAsset;
-  timeframe?: string;
-  serverTime?: string;
-  candles: BackendCandle[];
+type BackendTickResponse = {
+  asset: string;
+  price: number;
+  time: number;
+  serverTime: string;
 };
 
 type BackendWalletResponse = {
@@ -176,52 +169,56 @@ function timeframeToSeconds(timeframe: string) {
   return 60;
 }
 
-function getBackendLimit(timeframe: string) {
-  const seconds = timeframeToSeconds(timeframe);
-
-  if (seconds <= 5) return 500;
-  if (seconds <= 10) return 500;
-  if (seconds <= 15) return 480;
-  if (seconds <= 30) return 420;
-  if (seconds <= 60) return 360;
-  if (seconds <= 120) return 320;
-  if (seconds <= 180) return 280;
-  if (seconds <= 300) return 240;
-  if (seconds <= 600) return 220;
-  if (seconds <= 900) return 200;
-  if (seconds <= 1800) return 160;
-  if (seconds <= 3600) return 120;
-
-  return 90;
-}
-
 function getBackendPollMs(timeframe: string) {
   const seconds = timeframeToSeconds(timeframe);
 
-  if (seconds <= 5) return 450;
-  if (seconds <= 10) return 550;
-  if (seconds <= 15) return 650;
-  if (seconds <= 30) return 850;
-  if (seconds <= 60) return 1000;
-  if (seconds <= 120) return 1300;
-  if (seconds <= 180) return 1500;
-  if (seconds <= 300) return 1900;
-  if (seconds <= 600) return 2400;
-  if (seconds <= 900) return 3000;
-  if (seconds <= 1800) return 4000;
-  if (seconds <= 3600) return 5500;
+  if (seconds <= 5) return 300;
+  if (seconds <= 10) return 350;
+  if (seconds <= 15) return 400;
+  if (seconds <= 30) return 450;
+  if (seconds <= 60) return 500;
+  if (seconds <= 120) return 600;
+  if (seconds <= 180) return 650;
+  if (seconds <= 300) return 750;
+  if (seconds <= 600) return 850;
+  if (seconds <= 900) return 950;
+  if (seconds <= 1800) return 1100;
 
-  return 7000;
+  return 1250;
+}
+
+function getAnimationFrameMs(timeframe: string) {
+  const seconds = timeframeToSeconds(timeframe);
+
+  if (seconds <= 15) return 1000 / 30;
+  if (seconds <= 60) return 1000 / 26;
+  if (seconds <= 300) return 1000 / 22;
+  if (seconds <= 900) return 1000 / 18;
+
+  return 1000 / 15;
+}
+
+function getPriceResponseMs(timeframe: string) {
+  const seconds = timeframeToSeconds(timeframe);
+
+  if (seconds <= 15) return 130;
+  if (seconds <= 60) return 180;
+  if (seconds <= 300) return 240;
+  if (seconds <= 900) return 310;
+
+  return 390;
 }
 
 function getTradingPollMs(timeframe: string) {
   const seconds = timeframeToSeconds(timeframe);
 
-  if (seconds <= 15) return 900;
-  if (seconds <= 60) return 1200;
-  if (seconds <= 300) return 1600;
+  if (seconds <= 15) return 1200;
+  if (seconds <= 60) return 1500;
+  if (seconds <= 300) return 2000;
+  if (seconds <= 900) return 3000;
+  if (seconds <= 3600) return 5000;
 
-  return 2500;
+  return 8000;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -245,37 +242,6 @@ function normalizeAsset(asset: BackendAsset): Asset {
     precision: Number(asset.precision),
     payoutBoost: Number(asset.payoutBoost),
   };
-}
-
-function normalizeCandle(candle: BackendCandle): Candle {
-  return {
-    open: Number(candle.open),
-    high: Number(candle.high),
-    low: Number(candle.low),
-    close: Number(candle.close),
-    time: Number(candle.time ?? new Date(candle.openTime ?? Date.now()).getTime()),
-  };
-}
-
-function candlesSignature(candles: Candle[]) {
-  if (candles.length === 0) return "empty";
-
-  const first = candles[0];
-  const last = candles[candles.length - 1];
-
-  return [
-    candles.length,
-    first.time,
-    first.open,
-    first.high,
-    first.low,
-    first.close,
-    last.time,
-    last.open,
-    last.high,
-    last.low,
-    last.close,
-  ].join("|");
 }
 
 function formatMoney(value: number, currency: Currency) {
@@ -447,10 +413,16 @@ function tradeToResultMarker(trade: BackendTrade): ResultMarker {
 
 export default function TradingPage() {
   const candlesRef = React.useRef<Candle[]>(INITIAL_CANDLES);
-  const candlesSignatureRef = React.useRef("");
   const expirySecondsRef = React.useRef(45);
-  const fetchingCandlesRef = React.useRef(false);
+  const fetchingMarketRef = React.useRef(false);
   const fetchingTradingStateRef = React.useRef(false);
+  const targetPriceRef = React.useRef(
+    INITIAL_CANDLES[INITIAL_CANDLES.length - 1]?.close ?? DEFAULT_ASSET.basePrice
+  );
+  const displayedPriceRef = React.useRef(
+    INITIAL_CANDLES[INITIAL_CANDLES.length - 1]?.close ?? DEFAULT_ASSET.basePrice
+  );
+  const serverOffsetRef = React.useRef(0);
 
   const [accountType, setAccountType] = React.useState<AccountType>("QT Demo");
   const [currency, setCurrency] = React.useState<Currency>("USD");
@@ -533,8 +505,10 @@ export default function TradingPage() {
         atMs
       );
 
-      candlesSignatureRef.current = candlesSignature(nextCandles);
       candlesRef.current = nextCandles;
+      targetPriceRef.current = nextCandles[nextCandles.length - 1].close;
+      displayedPriceRef.current = targetPriceRef.current;
+      serverOffsetRef.current = atMs - Date.now();
       setCandles(nextCandles);
       setSentiment(calculateSentiment(nextCandles));
       setNowMs(atMs);
@@ -544,46 +518,35 @@ export default function TradingPage() {
     []
   );
 
-  const loadBackendCandles = React.useCallback(
+  const loadMarketTick = React.useCallback(
     async (asset: Asset, signal?: AbortSignal) => {
-      if (fetchingCandlesRef.current || document.hidden) return;
+      if (fetchingMarketRef.current || document.hidden) return;
 
-      fetchingCandlesRef.current = true;
+      fetchingMarketRef.current = true;
 
       try {
         const encodedAsset = encodeURIComponent(asset.symbol);
-        const limit = getBackendLimit(timeframe);
-
-        const data = await fetchJson<BackendCandlesResponse>(
-          `${API_BASE_URL}/market-data/candles?asset=${encodedAsset}&timeframe=${timeframe}&limit=${limit}`,
+        const data = await fetchJson<BackendTickResponse>(
+          `${API_BASE_URL}/market-data/tick?asset=${encodedAsset}`,
           signal
         );
 
-        const backendCandles = data.candles.map(normalizeCandle);
         const serverNow = data.serverTime
           ? new Date(data.serverTime).getTime()
           : Date.now();
-        const nextCandles = buildTimeframeCandles(
-          asset,
-          timeframe,
-          backendCandles,
-          serverNow
-        );
-        const nextSignature = candlesSignature(nextCandles);
+        const nextTarget = Number(data.price);
 
-        if (nextSignature !== candlesSignatureRef.current) {
-          candlesSignatureRef.current = nextSignature;
-          candlesRef.current = nextCandles;
-          setCandles(nextCandles);
-          setSentiment(calculateSentiment(nextCandles));
+        if (Number.isFinite(nextTarget) && nextTarget > 0) {
+          targetPriceRef.current = nextTarget;
         }
 
+        serverOffsetRef.current = serverNow - Date.now();
         setNowMs(serverNow);
       } finally {
-        fetchingCandlesRef.current = false;
+        fetchingMarketRef.current = false;
       }
     },
-    [timeframe]
+    []
   );
 
   const loadWallet = React.useCallback(
@@ -661,6 +624,62 @@ export default function TradingPage() {
   }, [expirySeconds]);
 
   React.useEffect(() => {
+    let animationFrameId = 0;
+    let previousFrameTime = 0;
+    let previousPaintTime = 0;
+    let previousClockTime = 0;
+    let previousSentimentTime = 0;
+    const frameInterval = getAnimationFrameMs(timeframe);
+    const responseMs = getPriceResponseMs(timeframe);
+
+    const animate = (frameTime: number) => {
+      if (previousFrameTime === 0) previousFrameTime = frameTime;
+
+      const elapsedMs = clamp(frameTime - previousFrameTime, 0, 100);
+      previousFrameTime = frameTime;
+      const serverNow = Date.now() + serverOffsetRef.current;
+      const liveOffset = getLivePriceOffset(selectedAsset, timeframe, serverNow);
+      const liveTarget = targetPriceRef.current * (1 + liveOffset);
+      const easing = 1 - Math.exp(-elapsedMs / responseMs);
+
+      displayedPriceRef.current +=
+        (liveTarget - displayedPriceRef.current) * easing;
+
+      if (frameTime - previousPaintTime >= frameInterval) {
+        previousPaintTime = frameTime;
+        const nextCandles = updateLiveCandle(
+          candlesRef.current,
+          selectedAsset,
+          timeframe,
+          displayedPriceRef.current,
+          serverNow
+        );
+
+        if (nextCandles !== candlesRef.current) {
+          candlesRef.current = nextCandles;
+          setCandles(nextCandles);
+        }
+
+        if (frameTime - previousClockTime >= 250) {
+          previousClockTime = frameTime;
+          setNowMs(serverNow);
+        }
+
+        if (frameTime - previousSentimentTime >= 750) {
+          previousSentimentTime = frameTime;
+          setSentiment(calculateSentiment(nextCandles));
+        }
+      }
+
+      animationFrameId = window.requestAnimationFrame(animate);
+    };
+
+    animationFrameId = window.requestAnimationFrame(animate);
+
+    return () => window.cancelAnimationFrame(animationFrameId);
+  }, [selectedAsset, timeframe]);
+
+  React.useEffect(() => {
     let cancelled = false;
 
     const loadAssets = async () => {
@@ -704,12 +723,12 @@ export default function TradingPage() {
     let controller: AbortController | null = null;
 
     const run = async () => {
-      if (stopped || document.hidden || fetchingCandlesRef.current) return;
+      if (stopped || document.hidden || fetchingMarketRef.current) return;
 
       controller = new AbortController();
 
       try {
-        await loadBackendCandles(selectedAsset, controller.signal);
+        await loadMarketTick(selectedAsset, controller.signal);
       } catch {
         // Keep latest valid candles during temporary backend delay.
       }
@@ -718,14 +737,20 @@ export default function TradingPage() {
     run();
 
     const intervalId = window.setInterval(run, getBackendPollMs(timeframe));
+    const handleVisibilityChange = () => {
+      if (!document.hidden) run();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       stopped = true;
       window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       controller?.abort();
-      fetchingCandlesRef.current = false;
+      fetchingMarketRef.current = false;
     };
-  }, [selectedAsset, timeframe, loadBackendCandles]);
+  }, [selectedAsset, timeframe, loadMarketTick]);
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -758,10 +783,16 @@ export default function TradingPage() {
     run();
 
     const intervalId = window.setInterval(run, getTradingPollMs(timeframe));
+    const handleVisibilityChange = () => {
+      if (!document.hidden) run();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       stopped = true;
       window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       controller?.abort();
       fetchingTradingStateRef.current = false;
     };

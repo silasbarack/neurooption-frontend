@@ -91,6 +91,87 @@ function roundPrice(value: number, precision: number) {
   return Number(Math.max(value, 0.00000001).toFixed(decimals));
 }
 
+export function getLivePriceOffset(
+  asset: Asset,
+  timeframe: string,
+  nowMs: number,
+) {
+  const profile = createAssetProfile(asset);
+  const timeframeSeconds = TIMEFRAME_SECONDS[timeframe] ?? 60;
+  const speedScale = clamp(Math.sqrt(60 / Math.max(timeframeSeconds, 5)), 0.35, 2.2);
+  const amplitude =
+    profile.volatility *
+    profile.volatilityScale *
+    clamp(0.032 * speedScale, 0.012, 0.065);
+  const fast = Math.sin(nowMs / 430 + profile.phaseA) * 0.48;
+  const medium = Math.sin(nowMs / 1170 + profile.phaseB) * 0.32;
+  const bucketMs = 360;
+  const bucket = Math.floor(nowMs / bucketMs);
+  const progress = (nowMs - bucket * bucketMs) / bucketMs;
+  const smooth = progress * progress * (3 - 2 * progress);
+  const currentNoise = signedFromHash(
+    `${asset.symbol}:${timeframe}:${bucket}:live`,
+  );
+  const nextNoise = signedFromHash(
+    `${asset.symbol}:${timeframe}:${bucket + 1}:live`,
+  );
+  const noise = currentNoise * (1 - smooth) + nextNoise * smooth;
+
+  return amplitude * (fast + medium + noise * 0.2);
+}
+
+export function updateLiveCandle(
+  candles: Candle[],
+  asset: Asset,
+  timeframe: string,
+  price: number,
+  nowMs: number,
+) {
+  if (candles.length === 0 || !Number.isFinite(price) || price <= 0) {
+    return candles;
+  }
+
+  const timeframeSeconds = TIMEFRAME_SECONDS[timeframe] ?? 60;
+  const timeframeMs = timeframeSeconds * 1000;
+  const bucketTime = Math.floor(nowMs / timeframeMs) * timeframeMs;
+  const roundedPrice = roundPrice(price, asset.precision);
+  const latest = candles[candles.length - 1];
+
+  if (latest.time < bucketTime) {
+    const nextCandle: Candle = {
+      time: bucketTime,
+      open: latest.close,
+      high: Math.max(latest.close, roundedPrice),
+      low: Math.min(latest.close, roundedPrice),
+      close: roundedPrice,
+    };
+
+    return [...candles.slice(-419), nextCandle];
+  }
+
+  if (latest.time > bucketTime) return candles;
+
+  const nextHigh = Math.max(latest.high, roundedPrice);
+  const nextLow = Math.min(latest.low, roundedPrice);
+
+  if (
+    latest.close === roundedPrice &&
+    latest.high === nextHigh &&
+    latest.low === nextLow
+  ) {
+    return candles;
+  }
+
+  const updatedLatest: Candle = {
+    ...latest,
+    high: nextHigh,
+    low: nextLow,
+    close: roundedPrice,
+  };
+
+  return [...candles.slice(0, -1), updatedLatest];
+}
+
 function createAssetProfile(asset: Asset): MarketProfile & {
   seed: number;
   phaseA: number;
