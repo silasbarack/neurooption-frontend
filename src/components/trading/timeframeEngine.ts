@@ -23,6 +23,10 @@ type MarketProfile = {
   chop: number;
   wick: number;
   breakoutChance: number;
+  indecision: number;
+  reversalWick: number;
+  bodyClean: number;
+  trendPersistence: number;
 };
 
 const CATEGORY_PROFILES: Record<AssetCategory, MarketProfile> = {
@@ -32,6 +36,10 @@ const CATEGORY_PROFILES: Record<AssetCategory, MarketProfile> = {
     chop: 0.48,
     wick: 0.72,
     breakoutChance: 0.022,
+    indecision: 0.8,
+    reversalWick: 0.85,
+    bodyClean: 0.35,
+    trendPersistence: 0.85,
   },
   Cryptocurrencies: {
     volatility: 0.009,
@@ -39,6 +47,10 @@ const CATEGORY_PROFILES: Record<AssetCategory, MarketProfile> = {
     chop: 0.82,
     wick: 0.9,
     breakoutChance: 0.06,
+    indecision: 0.3,
+    reversalWick: 0.55,
+    bodyClean: 0.8,
+    trendPersistence: 1.3,
   },
   Stocks: {
     volatility: 0.0042,
@@ -46,6 +58,10 @@ const CATEGORY_PROFILES: Record<AssetCategory, MarketProfile> = {
     chop: 0.55,
     wick: 0.8,
     breakoutChance: 0.038,
+    indecision: 0.45,
+    reversalWick: 0.6,
+    bodyClean: 0.6,
+    trendPersistence: 1.05,
   },
   Indices: {
     volatility: 0.0032,
@@ -53,6 +69,10 @@ const CATEGORY_PROFILES: Record<AssetCategory, MarketProfile> = {
     chop: 0.42,
     wick: 0.66,
     breakoutChance: 0.03,
+    indecision: 0.35,
+    reversalWick: 0.45,
+    bodyClean: 0.7,
+    trendPersistence: 1.15,
   },
   Commodities: {
     volatility: 0.0048,
@@ -60,11 +80,65 @@ const CATEGORY_PROFILES: Record<AssetCategory, MarketProfile> = {
     chop: 0.68,
     wick: 1.02,
     breakoutChance: 0.045,
+    indecision: 0.5,
+    reversalWick: 1.0,
+    bodyClean: 0.5,
+    trendPersistence: 0.95,
   },
 };
 
+// Each asset is deterministically assigned one of these archetypes (by symbol
+// hash) so that, for example, two currency pairs in the same category can
+// still feel distinct: one grinds in a tight range, another trends hard.
+const PERSONALITIES = [
+  {
+    name: "trending",
+    volatilityMul: 1.05,
+    trendMul: 1.35,
+    chopMul: 0.7,
+    breakoutMul: 0.85,
+    reversalWickMul: 0.85,
+    bodyCleanMul: 1.1,
+    persistenceMul: 1.4,
+  },
+  {
+    name: "ranging",
+    volatilityMul: 0.85,
+    trendMul: 0.6,
+    chopMul: 1.35,
+    breakoutMul: 0.7,
+    reversalWickMul: 1.15,
+    bodyCleanMul: 0.8,
+    persistenceMul: 0.65,
+  },
+  {
+    name: "volatile",
+    volatilityMul: 1.3,
+    trendMul: 1.0,
+    chopMul: 1.1,
+    breakoutMul: 1.6,
+    reversalWickMul: 1.3,
+    bodyCleanMul: 0.85,
+    persistenceMul: 0.9,
+  },
+  {
+    name: "steady",
+    volatilityMul: 0.75,
+    trendMul: 0.9,
+    chopMul: 0.6,
+    breakoutMul: 0.55,
+    reversalWickMul: 0.7,
+    bodyCleanMul: 1.25,
+    persistenceMul: 1.15,
+  },
+];
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
+}
+
+function probability(value: number) {
+  return clamp(value * 0.55, 0.05, 0.85);
 }
 
 function hashString(value: string) {
@@ -182,14 +256,28 @@ function createAssetProfile(asset: Asset): MarketProfile & {
 } {
   const seed = hashString(asset.symbol);
   const base = CATEGORY_PROFILES[asset.category];
+  const personality =
+    PERSONALITIES[
+      Math.floor(unitFromHash(`${asset.symbol}:personality`) * PERSONALITIES.length) %
+        PERSONALITIES.length
+    ];
+  const baseVolatilityScale = 0.76 + unitFromHash(`${asset.symbol}:volatility`) * 0.58;
 
   return {
-    ...base,
+    volatility: base.volatility,
+    trend: base.trend * personality.trendMul,
+    chop: base.chop * personality.chopMul,
+    wick: base.wick,
+    breakoutChance: base.breakoutChance * personality.breakoutMul,
+    indecision: base.indecision,
+    reversalWick: base.reversalWick * personality.reversalWickMul,
+    bodyClean: base.bodyClean * personality.bodyCleanMul,
+    trendPersistence: base.trendPersistence * personality.persistenceMul,
     seed,
     phaseA: unitFromHash(`${asset.symbol}:phase-a`) * Math.PI * 2,
     phaseB: unitFromHash(`${asset.symbol}:phase-b`) * Math.PI * 2,
     phaseC: unitFromHash(`${asset.symbol}:phase-c`) * Math.PI * 2,
-    volatilityScale: 0.76 + unitFromHash(`${asset.symbol}:volatility`) * 0.58,
+    volatilityScale: baseVolatilityScale * personality.volatilityMul,
     directionalBias: signedFromHash(`${asset.symbol}:bias`) * 0.16,
   };
 }
@@ -205,8 +293,8 @@ function marketStructureValue(
   const amplitude = profile.volatility * profile.volatilityScale * timeframeScale;
 
   const fastPeriod = 7 + (profile.seed % 9);
-  const swingPeriod = 29 + (profile.seed % 23);
-  const regimePeriod = 94 + (profile.seed % 61);
+  const swingPeriod = Math.round((29 + (profile.seed % 23)) * profile.trendPersistence);
+  const regimePeriod = Math.round((94 + (profile.seed % 61)) * profile.trendPersistence);
 
   const fast = Math.sin(bucket / fastPeriod + profile.phaseA) * profile.chop;
   const swing = Math.sin(bucket / swingPeriod + profile.phaseB) * 0.92;
@@ -307,12 +395,52 @@ function generateSyntheticCandles(
       `${asset.symbol}:${timeframe}:${bucket}:lower-wick`,
     );
     const wickFloor = Math.max(baseWick, safeAnchor * 10 ** -asset.precision);
-    const upperWick =
-      wickFloor * (0.28 + upperNoise * profile.wick) +
-      body * (0.08 + upperNoise * 0.22);
-    const lowerWick =
-      wickFloor * (0.28 + lowerNoise * profile.wick) +
-      body * (0.08 + lowerNoise * 0.22);
+
+    // Classify this candle against the surrounding price path so the wick
+    // shaping reads as a real formation (Doji, Hammer, Shooting Star,
+    // Marubozu) rather than uniform random noise.
+    const slopeBefore =
+      index > 0
+        ? rawBoundaryPrices[index] - rawBoundaryPrices[index - 1]
+        : rawBoundaryPrices[index + 1] - rawBoundaryPrices[index];
+    const slopeAfter =
+      index + 2 <= count
+        ? rawBoundaryPrices[index + 2] - rawBoundaryPrices[index + 1]
+        : rawBoundaryPrices[index + 1] - rawBoundaryPrices[index];
+    const isBullishReversal = slopeBefore < 0 && slopeAfter > 0;
+    const isBearishReversal = slopeBefore > 0 && slopeAfter < 0;
+    const bodyRatio = body / wickFloor;
+    const patternRoll = unitFromHash(
+      `${asset.symbol}:${timeframe}:${bucket}:pattern`,
+    );
+
+    let upperWick: number;
+    let lowerWick: number;
+
+    if (bodyRatio < 0.45 && patternRoll < probability(profile.indecision)) {
+      // Doji / Spinning Top: tiny body, long wicks on both sides.
+      upperWick = wickFloor * (0.55 + upperNoise * 0.55);
+      lowerWick = wickFloor * (0.55 + lowerNoise * 0.55);
+    } else if (isBullishReversal && patternRoll < probability(profile.reversalWick)) {
+      // Hammer: long lower wick rejecting the downside, small upper wick.
+      lowerWick = wickFloor * (1.3 + lowerNoise * 0.9) + body * 0.15;
+      upperWick = wickFloor * (0.05 + upperNoise * 0.12);
+    } else if (isBearishReversal && patternRoll < probability(profile.reversalWick)) {
+      // Shooting Star: long upper wick rejecting the upside, small lower wick.
+      upperWick = wickFloor * (1.3 + upperNoise * 0.9) + body * 0.15;
+      lowerWick = wickFloor * (0.05 + lowerNoise * 0.12);
+    } else if (bodyRatio > 1.2 && patternRoll < probability(profile.bodyClean)) {
+      // Marubozu: a decisive, near-full-body breakout/trend candle.
+      upperWick = wickFloor * (0.04 + upperNoise * 0.1);
+      lowerWick = wickFloor * (0.04 + lowerNoise * 0.1);
+    } else {
+      upperWick =
+        wickFloor * (0.28 + upperNoise * profile.wick) +
+        body * (0.08 + upperNoise * 0.22);
+      lowerWick =
+        wickFloor * (0.28 + lowerNoise * profile.wick) +
+        body * (0.08 + lowerNoise * 0.22);
+    }
 
     candles.push({
       time: bucket * timeframeMs,
