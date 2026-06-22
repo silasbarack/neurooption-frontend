@@ -26,8 +26,11 @@ import type {
 
 import {
   DEFAULT_INDICATOR_SETTINGS,
+  DEFAULT_INDICATOR_STYLES,
   type IndicatorSettingsMap,
+  type IndicatorStylesMap,
   updateIndicatorSetting,
+  updateIndicatorStyle,
 } from "../components/trading/indicator-settings";
 
 type EmptyPanel = "openTrades" | "history" | "signals" | null;
@@ -83,20 +86,25 @@ type BackendTrade = {
   side: TradeSide;
   accountType: AccountType;
   currency: Currency;
+
   stakeAmount: number;
   stakeUsd: number;
+
   payoutPercent: number;
   expectedProfitAmount: number;
   expectedProfitUsd: number;
   expectedReturnAmount: number;
   expectedReturnUsd: number;
+
   entryPrice: number;
   entryTime: number;
   expirySeconds: number;
   expiryTime: number;
+
   status: BackendTradeStatus;
   closePrice?: number;
   settledAt?: number;
+
   resultAmount?: number;
   resultUsd?: number;
   profitAmount?: number;
@@ -457,8 +465,12 @@ export default function TradingPage() {
   const [selectedIndicators, setSelectedIndicators] = React.useState<string[]>(
     DEFAULT_SELECTED_INDICATORS
   );
+
   const [indicatorSettings, setIndicatorSettings] =
     React.useState<IndicatorSettingsMap>(DEFAULT_INDICATOR_SETTINGS);
+
+  const [indicatorStyles, setIndicatorStyles] =
+    React.useState<IndicatorStylesMap>(DEFAULT_INDICATOR_STYLES);
 
   const [drawingOpen, setDrawingOpen] = React.useState(false);
   const [selectedTool, setSelectedTool] = React.useState("Cursor");
@@ -485,6 +497,7 @@ export default function TradingPage() {
 
   const expectedProfit = safeStakeAmount * (payout / 100);
   const expectedReturn = safeStakeAmount + expectedProfit;
+
   const canTrade =
     safeStakeAmount > 0 &&
     safeStakeAmount <= walletBalance &&
@@ -635,7 +648,9 @@ export default function TradingPage() {
           setActiveCategory(preferred.category);
         }
       } catch {
-        if (!cancelled) setAvailableAssets(ASSETS);
+        if (!cancelled) {
+          setAvailableAssets(ASSETS);
+        }
       }
     };
 
@@ -685,6 +700,7 @@ export default function TradingPage() {
 
   React.useEffect(() => {
     const controller = new AbortController();
+
     loadWallet(controller.signal).catch(() => undefined);
 
     return () => {
@@ -704,7 +720,7 @@ export default function TradingPage() {
       try {
         await loadTradingState(controller.signal);
       } catch {
-        // Keep current state during temporary backend delay.
+        // Keep current wallet/trade state during temporary backend delay.
       }
     };
 
@@ -743,7 +759,9 @@ export default function TradingPage() {
   }
 
   function handleTopUp() {
-    window.alert("Deposit placeholder: connect this button to your NeuroOption deposit flow.");
+    window.alert(
+      "Deposit placeholder: connect this button to your NeuroOption deposit flow."
+    );
   }
 
   function handleAssetChange(asset: Asset) {
@@ -779,6 +797,16 @@ export default function TradingPage() {
   ) {
     setIndicatorSettings((current) =>
       updateIndicatorSetting(current, indicator, key, value)
+    );
+  }
+
+  function handleIndicatorStyleChange(
+    indicator: string,
+    key: string,
+    value: string | number | boolean
+  ) {
+    setIndicatorStyles((current) =>
+      updateIndicatorStyle(current, indicator, key, value)
     );
   }
 
@@ -833,6 +861,7 @@ export default function TradingPage() {
 
       setPayout(Number(response.trade.payoutPercent));
       setWalletBalance(Number(response.wallet.balance));
+
       setOpenTrades((current) => [response.trade, ...current]);
       setActiveTrades((current) => [tradeToMarker(response.trade), ...current]);
 
@@ -917,7 +946,8 @@ export default function TradingPage() {
             chartType={chartType}
             selectedTool={selectedTool}
             selectedIndicators={selectedIndicators}
-            indicator-Settings={indicatorSettings}
+            indicatorSettings={indicatorSettings}
+            indicatorStyles={indicatorStyles}
             timeframeOpen={timeframeOpen}
             indicatorsOpen={indicatorOpen}
             drawingOpen={drawingOpen}
@@ -928,7 +958,8 @@ export default function TradingPage() {
             onChartTypeChange={setChartType}
             onToolChange={handleToolChange}
             onIndicatorToggle={handleIndicatorToggle}
-            onIndicator-SettingChange={handleIndicatorSettingChange}
+            onIndicatorSettingChange={handleIndicatorSettingChange}
+            onIndicatorStyleChange={handleIndicatorStyleChange}
           />
 
           <TradingChart
@@ -939,7 +970,8 @@ export default function TradingPage() {
             expirySeconds={expirySeconds}
             nowMs={nowMs}
             selectedIndicators={selectedIndicators}
-            indicator-Settings={indicatorSettings}
+            indicatorSettings={indicatorSettings}
+            indicatorStyles={indicatorStyles}
             activeTrades={activeTrades}
             resultMarkers={resultMarkers}
           />
