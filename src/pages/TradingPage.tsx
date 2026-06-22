@@ -33,11 +33,13 @@ import {
   updateIndicatorSetting,
   updateIndicatorStyle,
 } from "../components/trading/indicator-settings";
+import { buildTimeframeCandles } from "../components/trading/timeframeEngine";
 import {
-  buildTimeframeCandles,
-  getLivePriceOffset,
-  updateLiveCandle,
-} from "../components/trading/timeframeEngine";
+  getMarketSocket,
+  MARKET_SOCKET_EVENTS,
+  type MarketCandleUpdate,
+  type MarketPriceUpdate,
+} from "../components/trading/marketSocket";
 
 type EmptyPanel = "openTrades" | "history" | "signals" | null;
 
@@ -55,11 +57,16 @@ type BackendAssetsResponse = {
   assets: BackendAsset[];
 };
 
-type BackendTickResponse = {
-  asset: string;
-  price: number;
+type BackendCandle = {
   time: number;
-  serverTime: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+};
+
+type BackendCandlesResponse = {
+  candles: BackendCandle[];
 };
 
 type BackendWalletResponse = {
@@ -167,46 +174,6 @@ function timeframeToSeconds(timeframe: string) {
   if (normalized.startsWith("D")) return value * 24 * 60 * 60;
 
   return 60;
-}
-
-function getBackendPollMs(timeframe: string) {
-  const seconds = timeframeToSeconds(timeframe);
-
-  if (seconds <= 5) return 300;
-  if (seconds <= 10) return 350;
-  if (seconds <= 15) return 400;
-  if (seconds <= 30) return 450;
-  if (seconds <= 60) return 500;
-  if (seconds <= 120) return 600;
-  if (seconds <= 180) return 650;
-  if (seconds <= 300) return 750;
-  if (seconds <= 600) return 850;
-  if (seconds <= 900) return 950;
-  if (seconds <= 1800) return 1100;
-
-  return 1250;
-}
-
-function getAnimationFrameMs(timeframe: string) {
-  const seconds = timeframeToSeconds(timeframe);
-
-  if (seconds <= 15) return 1000 / 30;
-  if (seconds <= 60) return 1000 / 26;
-  if (seconds <= 300) return 1000 / 22;
-  if (seconds <= 900) return 1000 / 18;
-
-  return 1000 / 15;
-}
-
-function getPriceResponseMs(timeframe: string) {
-  const seconds = timeframeToSeconds(timeframe);
-
-  if (seconds <= 15) return 130;
-  if (seconds <= 60) return 180;
-  if (seconds <= 300) return 240;
-  if (seconds <= 900) return 310;
-
-  return 390;
 }
 
 function getTradingPollMs(timeframe: string) {
@@ -414,14 +381,7 @@ function tradeToResultMarker(trade: BackendTrade): ResultMarker {
 export default function TradingPage() {
   const candlesRef = React.useRef<Candle[]>(INITIAL_CANDLES);
   const expirySecondsRef = React.useRef(45);
-  const fetchingMarketRef = React.useRef(false);
   const fetchingTradingStateRef = React.useRef(false);
-  const targetPriceRef = React.useRef(
-    INITIAL_CANDLES[INITIAL_CANDLES.length - 1]?.close ?? DEFAULT_ASSET.basePrice
-  );
-  const displayedPriceRef = React.useRef(
-    INITIAL_CANDLES[INITIAL_CANDLES.length - 1]?.close ?? DEFAULT_ASSET.basePrice
-  );
   const serverOffsetRef = React.useRef(0);
 
   const [accountType, setAccountType] = React.useState<AccountType>("QT Demo");
@@ -506,8 +466,6 @@ export default function TradingPage() {
       );
 
       candlesRef.current = nextCandles;
-      targetPriceRef.current = nextCandles[nextCandles.length - 1].close;
-      displayedPriceRef.current = targetPriceRef.current;
       serverOffsetRef.current = atMs - Date.now();
       setCandles(nextCandles);
       setSentiment(calculateSentiment(nextCandles));
@@ -518,33 +476,29 @@ export default function TradingPage() {
     []
   );
 
-  const loadMarketTick = React.useCallback(
-    async (asset: Asset, signal?: AbortSignal) => {
-      if (fetchingMarketRef.current || document.hidden) return;
+  // Replaces the instant local placeholder with the backend's authoritative
+  // (settlement-accurate) candle history once it arrives.
+  const loadHistoricalCandles = React.useCallback(
+    async (asset: Asset, nextTimeframe: string, signal?: AbortSignal) => {
+      const encodedAsset = encodeURIComponent(asset.symbol);
+      const data = await fetchJson<BackendCandlesResponse>(
+        `${API_BASE_URL}/market-data/candles?asset=${encodedAsset}&timeframe=${nextTimeframe}`,
+        signal
+      );
 
-      fetchingMarketRef.current = true;
+      if (data.candles.length === 0) return;
 
-      try {
-        const encodedAsset = encodeURIComponent(asset.symbol);
-        const data = await fetchJson<BackendTickResponse>(
-          `${API_BASE_URL}/market-data/tick?asset=${encodedAsset}`,
-          signal
-        );
+      const nextCandles: Candle[] = data.candles.map((candle) => ({
+        time: candle.time,
+        open: Number(candle.open),
+        high: Number(candle.high),
+        low: Number(candle.low),
+        close: Number(candle.close),
+      }));
 
-        const serverNow = data.serverTime
-          ? new Date(data.serverTime).getTime()
-          : Date.now();
-        const nextTarget = Number(data.price);
-
-        if (Number.isFinite(nextTarget) && nextTarget > 0) {
-          targetPriceRef.current = nextTarget;
-        }
-
-        serverOffsetRef.current = serverNow - Date.now();
-        setNowMs(serverNow);
-      } finally {
-        fetchingMarketRef.current = false;
-      }
+      candlesRef.current = nextCandles;
+      setCandles(nextCandles);
+      setSentiment(calculateSentiment(nextCandles));
     },
     []
   );
@@ -623,61 +577,16 @@ export default function TradingPage() {
     expirySecondsRef.current = expirySeconds;
   }, [expirySeconds]);
 
+  // Candle data now arrives authoritatively from the backend over the market
+  // WebSocket; this just keeps the on-screen clock (and expiry countdown)
+  // ticking in between pushes.
   React.useEffect(() => {
-    let animationFrameId = 0;
-    let previousFrameTime = 0;
-    let previousPaintTime = 0;
-    let previousClockTime = 0;
-    let previousSentimentTime = 0;
-    const frameInterval = getAnimationFrameMs(timeframe);
-    const responseMs = getPriceResponseMs(timeframe);
+    const intervalId = window.setInterval(() => {
+      setNowMs(Date.now() + serverOffsetRef.current);
+    }, 250);
 
-    const animate = (frameTime: number) => {
-      if (previousFrameTime === 0) previousFrameTime = frameTime;
-
-      const elapsedMs = clamp(frameTime - previousFrameTime, 0, 100);
-      previousFrameTime = frameTime;
-      const serverNow = Date.now() + serverOffsetRef.current;
-      const liveOffset = getLivePriceOffset(selectedAsset, timeframe, serverNow);
-      const liveTarget = targetPriceRef.current * (1 + liveOffset);
-      const easing = 1 - Math.exp(-elapsedMs / responseMs);
-
-      displayedPriceRef.current +=
-        (liveTarget - displayedPriceRef.current) * easing;
-
-      if (frameTime - previousPaintTime >= frameInterval) {
-        previousPaintTime = frameTime;
-        const nextCandles = updateLiveCandle(
-          candlesRef.current,
-          selectedAsset,
-          timeframe,
-          displayedPriceRef.current,
-          serverNow
-        );
-
-        if (nextCandles !== candlesRef.current) {
-          candlesRef.current = nextCandles;
-          setCandles(nextCandles);
-        }
-
-        if (frameTime - previousClockTime >= 250) {
-          previousClockTime = frameTime;
-          setNowMs(serverNow);
-        }
-
-        if (frameTime - previousSentimentTime >= 750) {
-          previousSentimentTime = frameTime;
-          setSentiment(calculateSentiment(nextCandles));
-        }
-      }
-
-      animationFrameId = window.requestAnimationFrame(animate);
-    };
-
-    animationFrameId = window.requestAnimationFrame(animate);
-
-    return () => window.cancelAnimationFrame(animationFrameId);
-  }, [selectedAsset, timeframe]);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -703,6 +612,7 @@ export default function TradingPage() {
           showSyntheticMarket(preferred, timeframe);
           setSelectedAsset(preferred);
           setActiveCategory(preferred.category);
+          loadHistoricalCandles(preferred, timeframe).catch(() => undefined);
         }
       } catch {
         if (!cancelled) {
@@ -716,41 +626,55 @@ export default function TradingPage() {
     return () => {
       cancelled = true;
     };
-  }, [showSyntheticMarket, timeframe]);
+  }, [showSyntheticMarket, loadHistoricalCandles, timeframe]);
 
+  // Live price/candle feed: subscribe to this asset+timeframe room on the
+  // backend's market WebSocket, which ticks continuously regardless of
+  // whether anyone is watching, and is the same price feed trade settlement
+  // uses — so the chart can never drift from what actually decides trades.
   React.useEffect(() => {
-    let stopped = false;
-    let controller: AbortController | null = null;
+    const socket = getMarketSocket(API_BASE_URL);
+    const symbol = selectedAsset.symbol;
 
-    const run = async () => {
-      if (stopped || document.hidden || fetchingMarketRef.current) return;
-
-      controller = new AbortController();
-
-      try {
-        await loadMarketTick(selectedAsset, controller.signal);
-      } catch {
-        // Keep latest valid candles during temporary backend delay.
-      }
+    const handlePriceUpdate = (data: MarketPriceUpdate) => {
+      if (data.symbol !== symbol) return;
+      serverOffsetRef.current = new Date(data.serverTime).getTime() - Date.now();
     };
 
-    run();
+    const handleCandleUpdate = (data: MarketCandleUpdate) => {
+      if (data.symbol !== symbol || data.timeframe !== timeframe) return;
 
-    const intervalId = window.setInterval(run, getBackendPollMs(timeframe));
-    const handleVisibilityChange = () => {
-      if (!document.hidden) run();
+      const nextCandle: Candle = {
+        time: data.candle.time,
+        open: data.candle.open,
+        high: data.candle.high,
+        low: data.candle.low,
+        close: data.candle.close,
+      };
+
+      const current = candlesRef.current;
+      const lastIndex = current.length - 1;
+
+      const nextCandles =
+        lastIndex >= 0 && current[lastIndex].time === nextCandle.time
+          ? [...current.slice(0, lastIndex), nextCandle]
+          : [...current.slice(-419), nextCandle];
+
+      candlesRef.current = nextCandles;
+      setCandles(nextCandles);
+      setSentiment(calculateSentiment(nextCandles));
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    socket.on(MARKET_SOCKET_EVENTS.PRICE_UPDATE, handlePriceUpdate);
+    socket.on(MARKET_SOCKET_EVENTS.CANDLE_UPDATE, handleCandleUpdate);
+    socket.emit(MARKET_SOCKET_EVENTS.SUBSCRIBE_SYMBOL, { symbol, timeframe });
 
     return () => {
-      stopped = true;
-      window.clearInterval(intervalId);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      controller?.abort();
-      fetchingMarketRef.current = false;
+      socket.emit(MARKET_SOCKET_EVENTS.UNSUBSCRIBE_SYMBOL, { symbol, timeframe });
+      socket.off(MARKET_SOCKET_EVENTS.PRICE_UPDATE, handlePriceUpdate);
+      socket.off(MARKET_SOCKET_EVENTS.CANDLE_UPDATE, handleCandleUpdate);
     };
-  }, [selectedAsset, timeframe, loadMarketTick]);
+  }, [selectedAsset, timeframe]);
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -831,12 +755,14 @@ export default function TradingPage() {
     setSelectedAsset(asset);
     setActiveCategory(asset.category);
     setAssetMenuOpen(false);
+    loadHistoricalCandles(asset, timeframe).catch(() => undefined);
   }
 
   function handleTimeframeChange(nextTimeframe: string) {
     showSyntheticMarket(selectedAsset, nextTimeframe);
     setTimeframe(nextTimeframe);
     setTimeframeOpen(false);
+    loadHistoricalCandles(selectedAsset, nextTimeframe).catch(() => undefined);
   }
 
   function handleToolChange(tool: string) {
