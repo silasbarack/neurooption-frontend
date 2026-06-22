@@ -3,6 +3,7 @@ import "./TradingPage.css";
 
 import {
   ASSETS,
+  BOTTOM_INDICATORS,
   TradingBottomNav,
   TradingChart,
   TradingHeader,
@@ -32,6 +33,7 @@ import {
   updateIndicatorSetting,
   updateIndicatorStyle,
 } from "../components/trading/indicator-settings";
+import { buildTimeframeCandles } from "../components/trading/timeframeEngine";
 
 type EmptyPanel = "openTrades" | "history" | "signals" | null;
 
@@ -127,6 +129,14 @@ const MAX_EXPIRY_SECONDS = 5 * 60 * 60;
 
 const DEFAULT_ASSET =
   ASSETS.find((asset) => asset.symbol === "EUR/USD OTC") ?? ASSETS[0];
+
+const INITIAL_NOW_MS = Date.now();
+const INITIAL_CANDLES = buildTimeframeCandles(
+  DEFAULT_ASSET,
+  "M1",
+  [],
+  INITIAL_NOW_MS
+);
 
 const VALID_CATEGORIES: AssetCategory[] = [
   "Currencies",
@@ -436,7 +446,7 @@ function tradeToResultMarker(trade: BackendTrade): ResultMarker {
 }
 
 export default function TradingPage() {
-  const candlesRef = React.useRef<Candle[]>([]);
+  const candlesRef = React.useRef<Candle[]>(INITIAL_CANDLES);
   const candlesSignatureRef = React.useRef("");
   const expirySecondsRef = React.useRef(45);
   const fetchingCandlesRef = React.useRef(false);
@@ -479,14 +489,14 @@ export default function TradingPage() {
   const [amount, setAmount] = React.useState("100");
   const [payout, setPayout] = React.useState(91);
 
-  const [candles, setCandles] = React.useState<Candle[]>([]);
+  const [candles, setCandles] = React.useState<Candle[]>(INITIAL_CANDLES);
   const [activeTrades, setActiveTrades] = React.useState<TradeMarker[]>([]);
   const [resultMarkers, setResultMarkers] = React.useState<ResultMarker[]>([]);
 
   const [openTrades, setOpenTrades] = React.useState<BackendTrade[]>([]);
   const [tradeHistory, setTradeHistory] = React.useState<BackendTrade[]>([]);
 
-  const [nowMs, setNowMs] = React.useState(Date.now());
+  const [nowMs, setNowMs] = React.useState(INITIAL_NOW_MS);
   const [sentiment, setSentiment] = React.useState(50);
   const [emptyPanel, setEmptyPanel] = React.useState<EmptyPanel>(null);
 
@@ -514,6 +524,26 @@ export default function TradingPage() {
     (asset) => asset.category === activeCategory
   );
 
+  const showSyntheticMarket = React.useCallback(
+    (asset: Asset, nextTimeframe: string, atMs = Date.now()) => {
+      const nextCandles = buildTimeframeCandles(
+        asset,
+        nextTimeframe,
+        [],
+        atMs
+      );
+
+      candlesSignatureRef.current = candlesSignature(nextCandles);
+      candlesRef.current = nextCandles;
+      setCandles(nextCandles);
+      setSentiment(calculateSentiment(nextCandles));
+      setNowMs(atMs);
+      setActiveTrades([]);
+      setResultMarkers([]);
+    },
+    []
+  );
+
   const loadBackendCandles = React.useCallback(
     async (asset: Asset, signal?: AbortSignal) => {
       if (fetchingCandlesRef.current || document.hidden) return;
@@ -529,10 +559,17 @@ export default function TradingPage() {
           signal
         );
 
-        const nextCandles = data.candles.map(normalizeCandle);
+        const backendCandles = data.candles.map(normalizeCandle);
+        const serverNow = data.serverTime
+          ? new Date(data.serverTime).getTime()
+          : Date.now();
+        const nextCandles = buildTimeframeCandles(
+          asset,
+          timeframe,
+          backendCandles,
+          serverNow
+        );
         const nextSignature = candlesSignature(nextCandles);
-
-        if (nextCandles.length < 2) return;
 
         if (nextSignature !== candlesSignatureRef.current) {
           candlesSignatureRef.current = nextSignature;
@@ -541,7 +578,7 @@ export default function TradingPage() {
           setSentiment(calculateSentiment(nextCandles));
         }
 
-        setNowMs(data.serverTime ? new Date(data.serverTime).getTime() : Date.now());
+        setNowMs(serverNow);
       } finally {
         fetchingCandlesRef.current = false;
       }
@@ -640,10 +677,11 @@ export default function TradingPage() {
           setAvailableAssets(nextAssets);
 
           const preferred =
-            nextAssets.find((asset) => asset.symbol === selectedAsset.symbol) ??
+            nextAssets.find((asset) => asset.symbol === DEFAULT_ASSET.symbol) ??
             nextAssets.find((asset) => asset.symbol === "EUR/USD OTC") ??
             nextAssets[0];
 
+          showSyntheticMarket(preferred, timeframe);
           setSelectedAsset(preferred);
           setActiveCategory(preferred.category);
         }
@@ -659,16 +697,7 @@ export default function TradingPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  React.useEffect(() => {
-    candlesSignatureRef.current = "";
-    candlesRef.current = [];
-    setCandles([]);
-    setActiveTrades([]);
-    setResultMarkers([]);
-    setActiveCategory(selectedAsset.category);
-  }, [selectedAsset, timeframe]);
+  }, [showSyntheticMarket, timeframe]);
 
   React.useEffect(() => {
     let stopped = false;
@@ -700,10 +729,12 @@ export default function TradingPage() {
 
   React.useEffect(() => {
     const controller = new AbortController();
-
-    loadWallet(controller.signal).catch(() => undefined);
+    const timerId = window.setTimeout(() => {
+      loadWallet(controller.signal).catch(() => undefined);
+    }, 0);
 
     return () => {
+      window.clearTimeout(timerId);
       controller.abort();
     };
   }, [loadWallet]);
@@ -765,12 +796,14 @@ export default function TradingPage() {
   }
 
   function handleAssetChange(asset: Asset) {
+    showSyntheticMarket(asset, timeframe);
     setSelectedAsset(asset);
     setActiveCategory(asset.category);
     setAssetMenuOpen(false);
   }
 
   function handleTimeframeChange(nextTimeframe: string) {
+    showSyntheticMarket(selectedAsset, nextTimeframe);
     setTimeframe(nextTimeframe);
     setTimeframeOpen(false);
   }
@@ -877,6 +910,16 @@ export default function TradingPage() {
     }
   }
 
+  const bottomIndicatorCount = Math.min(
+    4,
+    selectedIndicators.filter((indicator) =>
+      BOTTOM_INDICATORS.includes(indicator)
+    ).length
+  );
+  const chartLayoutStyle = {
+    "--nt-indicator-space": `${bottomIndicatorCount * 100}px`,
+  } as React.CSSProperties;
+
   return (
     <main className="nt-page nt-light-page">
       <TradingHeader
@@ -892,7 +935,7 @@ export default function TradingPage() {
       <section className="nt-page-body">
         <TradingSidebar />
 
-        <section className="nt-main-chart">
+        <section className="nt-main-chart" style={chartLayoutStyle}>
           <div className="nt-page-asset">
             <div className="nt-asset-selector">
               <button

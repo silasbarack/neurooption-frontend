@@ -1173,13 +1173,21 @@ function drawCandles(
 }
 
 function priceRangeFromCandles(candles: Candle[], extras: number[]) {
-  const values = candles.flatMap((candle) => [
+  const candleValues = candles.flatMap((candle) => [
     candle.open,
     candle.high,
     candle.low,
     candle.close,
-    ...extras,
   ]);
+  const candleMin = Math.min(...candleValues);
+  const candleMax = Math.max(...candleValues);
+  const candleRange = Math.max(candleMax - candleMin, Math.abs(candleMax) * 0.0005);
+  const relevantExtras = extras.filter(
+    (value) =>
+      value >= candleMin - candleRange * 1.5 &&
+      value <= candleMax + candleRange * 1.5,
+  );
+  const values = [...candleValues, ...relevantExtras];
 
   let min = Math.min(...values);
   let max = Math.max(...values);
@@ -1189,7 +1197,7 @@ function priceRangeFromCandles(candles: Candle[], extras: number[]) {
     max = 1;
   }
 
-  const padding = Math.max((max - min) * 0.18, Math.abs(max) * 0.00025, 0.00001);
+  const padding = Math.max((max - min) * 0.1, Math.abs(max) * 0.00018, 0.00001);
 
   return { min: min - padding, max: max + padding };
 }
@@ -1336,7 +1344,23 @@ function TradingChartComponent({
   activeTrades,
   resultMarkers,
 }: TradingChartProps) {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const [resizeVersion, setResizeVersion] = React.useState(0);
+
+  React.useEffect(() => {
+    const container = containerRef.current;
+
+    if (!container || typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver(() => {
+      setResizeVersion((version) => version + 1);
+    });
+
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, []);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -1351,6 +1375,7 @@ function TradingChartComponent({
     canvas.height = Math.max(1, Math.floor(rect.height * dpr));
 
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
+    context.imageSmoothingEnabled = false;
 
     const width = rect.width;
     const height = rect.height;
@@ -1405,23 +1430,22 @@ function TradingChartComponent({
     const left = 18;
     const rightSpace = 84;
     const right = width - rightSpace;
-    const top = 54;
-    const footer = 34;
-    const availableHeight = height - top - footer;
-
+    const top = 64;
+    const footer = 26;
+    const availableHeight = Math.max(height - top - footer, 160);
+    const singlePanelHeight = clamp(availableHeight * 0.125, 84, 108);
+    const desiredBottomArea = bottomPanels.length * singlePanelHeight;
     const bottomAreaHeight =
       bottomPanels.length > 0
-        ? clamp(availableHeight * 0.28, 145, availableHeight * 0.38)
+        ? Math.min(desiredBottomArea, availableHeight * 0.36)
         : 0;
-
     const panelHeight =
       bottomPanels.length > 0 ? bottomAreaHeight / bottomPanels.length : 0;
-
     const chartBottom = height - footer - bottomAreaHeight;
-    const chartHeight = Math.max(chartBottom - top, 220);
+    const chartHeight = Math.max(chartBottom - top, 120);
     const chartWidth = right - left;
     const candleGap = chartWidth / Math.max(visibleLength - 1, 1);
-    const candleWidth = clamp(candleGap * 0.62, 2.5, 9);
+    const candleWidth = clamp(Math.floor(candleGap * 0.66), 3, 10);
 
     const overlayValues = collectFiniteValues(overlaySeries);
 
@@ -1434,24 +1458,13 @@ function TradingChartComponent({
     const { min, max } = priceRangeFromCandles(renderCandles, markerValues);
 
     const priceToY = (price: number) =>
-      top + ((max - price) / (max - min)) * chartHeight;
+  Math.round(top + ((max - price) / (max - min)) * chartHeight) + 0.5;
 
     const indexToX = (index: number) =>
-      left + (index / Math.max(visibleLength - 1, 1)) * chartWidth;
+      Math.round(left + (index / Math.max(visibleLength - 1, 1)) * chartWidth) +
+      0.5;
 
     drawGrid(context, left, right, top, chartBottom, 8, 6);
-
-    context.fillStyle = "rgba(226, 232, 240, 0.42)";
-    context.beginPath();
-    context.moveTo(left, chartBottom);
-    context.lineTo(width * 0.2, top + chartHeight * 0.44);
-    context.lineTo(width * 0.34, chartBottom);
-    context.lineTo(width * 0.55, top + chartHeight * 0.24);
-    context.lineTo(width * 0.72, chartBottom);
-    context.lineTo(right, top + chartHeight * 0.46);
-    context.lineTo(right, chartBottom);
-    context.closePath();
-    context.fill();
 
     drawCandles(context, renderCandles, chartType, indexToX, priceToY, candleWidth);
 
@@ -1550,16 +1563,12 @@ function TradingChartComponent({
       drawTextPill(context, marker.label, right - 112, y, color);
     });
 
-    context.fillStyle = "#101828";
-    context.font = "900 12px Roboto, sans-serif";
-    context.textAlign = "left";
-    context.textBaseline = "top";
-    context.fillText(`${asset.symbol} • ${timeframe} • ${chartType}`, left, 13);
-
     overlaySeries.slice(0, 6).forEach((series, index) => {
       context.fillStyle = series.color;
       context.font = "800 11px Roboto, sans-serif";
-      context.fillText(series.name, left + 190 + index * 96, 13);
+      context.textAlign = "left";
+      context.textBaseline = "top";
+      context.fillText(series.name, left + index * 96, top + 8);
     });
 
     context.fillStyle = "#64748b";
@@ -1602,12 +1611,13 @@ function TradingChartComponent({
     indicatorStyles,
     nowMs,
     resultMarkers,
+    resizeVersion,
     selectedIndicators,
     timeframe,
   ]);
 
   return (
-    <div className="nt-chart-canvas-wrap">
+    <div ref={containerRef} className="nt-chart-canvas-wrap">
       <canvas ref={canvasRef} className="nt-chart-canvas" />
     </div>
   );

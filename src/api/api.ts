@@ -36,7 +36,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
 
-  let data: unknown = null;
+  let data: unknown;
 
   try {
     data = await response.json();
