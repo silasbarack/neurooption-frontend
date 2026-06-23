@@ -128,6 +128,7 @@ const USER_ID = "demo-user";
 
 const MIN_EXPIRY_SECONDS = 5;
 const MAX_EXPIRY_SECONDS = 5 * 60 * 60;
+const TRADE_RESULT_DISPLAY_MS = 10000;
 
 const DEFAULT_ASSET =
   ASSETS.find((asset) => asset.symbol === "EUR/USD OTC") ?? ASSETS[0];
@@ -406,6 +407,7 @@ export default function TradingPage() {
   const fetchingTradingStateRef = React.useRef(false);
   const serverOffsetRef = React.useRef(0);
   const seenSettledTradeIdsRef = React.useRef<Set<string> | null>(null);
+  const resultMarkerTimersRef = React.useRef<Map<string, number>>(new Map());
 
   const [accountType, setAccountType] = React.useState<AccountType>("QT Demo");
   const [currency, setCurrency] = React.useState<Currency>("USD");
@@ -480,6 +482,48 @@ export default function TradingPage() {
     (asset) => asset.category === activeCategory
   );
 
+  const clearResultMarkers = React.useCallback(() => {
+    resultMarkerTimersRef.current.forEach((timerId) => {
+      window.clearTimeout(timerId);
+    });
+    resultMarkerTimersRef.current.clear();
+    setResultMarkers([]);
+  }, []);
+
+  const showTemporaryResultMarkers = React.useCallback(
+    (markers: ResultMarker[]) => {
+      if (markers.length === 0) return;
+
+      setResultMarkers((current) => {
+        const nextById = new Map(current.map((marker) => [marker.id, marker]));
+
+        for (const marker of markers) {
+          nextById.set(marker.id, marker);
+        }
+
+        return Array.from(nextById.values()).slice(-12);
+      });
+
+      for (const marker of markers) {
+        const currentTimerId = resultMarkerTimersRef.current.get(marker.id);
+
+        if (currentTimerId !== undefined) {
+          window.clearTimeout(currentTimerId);
+        }
+
+        const timerId = window.setTimeout(() => {
+          resultMarkerTimersRef.current.delete(marker.id);
+          setResultMarkers((current) =>
+            current.filter((item) => item.id !== marker.id)
+          );
+        }, TRADE_RESULT_DISPLAY_MS);
+
+        resultMarkerTimersRef.current.set(marker.id, timerId);
+      }
+    },
+    []
+  );
+
   const showSyntheticMarket = React.useCallback(
     (asset: Asset, nextTimeframe: string, atMs = Date.now()) => {
       const nextCandles = buildTimeframeCandles(
@@ -495,9 +539,9 @@ export default function TradingPage() {
       setSentiment(calculateSentiment(nextCandles));
       setNowMs(atMs);
       setActiveTrades([]);
-      setResultMarkers([]);
+      clearResultMarkers();
     },
-    []
+    [clearResultMarkers]
   );
 
   // Replaces the instant local placeholder with the backend's authoritative
@@ -586,8 +630,6 @@ export default function TradingPage() {
 
         const settled = history.filter((trade) => trade.status !== "PENDING");
 
-        setResultMarkers(settled.slice(0, 12).map(tradeToResultMarker));
-
         if (seenSettledTradeIdsRef.current === null) {
           // First load: just remember what's already settled, don't pop up
           // a result for trades that finished before this page was opened.
@@ -604,6 +646,10 @@ export default function TradingPage() {
               seenSettledTradeIdsRef.current.add(trade.id);
             }
 
+            showTemporaryResultMarkers(
+              newlySettled.slice(0, 12).map(tradeToResultMarker)
+            );
+
             setResultPopups((current) => [
               ...current,
               ...newlySettled.map(tradeToResultPopupItem),
@@ -614,8 +660,19 @@ export default function TradingPage() {
         fetchingTradingStateRef.current = false;
       }
     },
-    [accountType, currency]
+    [accountType, currency, showTemporaryResultMarkers]
   );
+
+  React.useEffect(() => {
+    const resultMarkerTimers = resultMarkerTimersRef.current;
+
+    return () => {
+      resultMarkerTimers.forEach((timerId) => {
+        window.clearTimeout(timerId);
+      });
+      resultMarkerTimers.clear();
+    };
+  }, []);
 
   React.useEffect(() => {
     expirySecondsRef.current = expirySeconds;
