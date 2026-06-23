@@ -32,12 +32,15 @@ export default function DeleteAccountPage() {
       }
 
       const token = localStorage.getItem("neurooption_token");
+      const storedUser = JSON.parse(
+        localStorage.getItem("neurooption_user") || "{}"
+      );
 
-      if (!token) {
+      if (!token || !storedUser?.id) {
         throw new Error("You are not signed in");
       }
 
-      const response = await fetch(`${API_URL}/users/me`, {
+      const response = await fetch(`${API_URL}/users/me/${storedUser.id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
