@@ -7,7 +7,7 @@ body,
   height: 100%;
   margin: 0;
   overflow: hidden;
-  background: #f4f7fb;
+  background: var(--nt-bg, #0a0d14);
   font-family: Roboto, sans-serif;
 }
 
@@ -23,6 +23,8 @@ input {
 
 button {
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease, transform 0.08s ease;
 }
 
 .nt-header {
@@ -32,9 +34,9 @@ button {
   justify-content: space-between;
   gap: 14px;
   padding: 8px 14px;
-  background: #ffffff;
-  border-bottom: 1px solid #e4e9f2;
-  color: #101828;
+  background: var(--nt-surface);
+  border-bottom: 1px solid var(--nt-border);
+  color: var(--nt-text);
 }
 
 .nt-brand {
@@ -51,7 +53,8 @@ button {
   place-items: center;
   border-radius: 50%;
   color: #ffffff;
-  background: linear-gradient(135deg, #38bdf8, #1677ff);
+  background: linear-gradient(135deg, #3aa0ff, #1158d6);
+  box-shadow: 0 4px 14px rgba(58, 160, 255, 0.4);
   font-size: 19px;
   font-weight: 900;
 }
@@ -60,6 +63,7 @@ button {
   font-size: 16px;
   font-weight: 700;
   white-space: nowrap;
+  color: var(--nt-text);
 }
 
 .nt-star {
@@ -67,8 +71,13 @@ button {
   height: 30px;
   border: 0;
   border-radius: 8px;
-  background: #f2f5fa;
-  color: #98a2b3;
+  background: var(--nt-surface-alt);
+  color: var(--nt-text-muted);
+}
+
+.nt-star:hover {
+  color: #ffd34d;
+  background: rgba(255, 211, 77, 0.12);
 }
 
 .nt-account-bar {
@@ -81,18 +90,18 @@ button {
 .nt-account-bar select {
   height: 38px;
   max-width: 110px;
-  border: 1px solid #e4e9f2;
+  border: 1px solid var(--nt-border);
   border-radius: 9px;
   padding: 0 10px;
-  color: #101828;
-  background: #ffffff;
+  color: var(--nt-text);
+  background: var(--nt-surface-alt);
   font-weight: 700;
   outline: none;
 }
 
 .nt-balance {
   min-width: 124px;
-  color: #101828;
+  color: var(--nt-text);
   text-align: right;
   font-size: 15px;
   font-weight: 900;
@@ -105,17 +114,28 @@ button {
   border-radius: 8px;
   padding: 0 16px;
   color: #ffffff;
-  background: #1677ff;
+  background: linear-gradient(135deg, #4cb0ff, #1f74e0);
+  box-shadow: 0 6px 16px rgba(58, 160, 255, 0.35);
   font-weight: 900;
+}
+
+.nt-top-up:hover {
+  box-shadow: 0 8px 20px rgba(58, 160, 255, 0.5);
+  transform: translateY(-1px);
 }
 
 .nt-fullscreen {
   width: 36px;
   height: 36px;
-  border: 1px solid #e4e9f2;
+  border: 1px solid var(--nt-border);
   border-radius: 8px;
-  background: #ffffff;
-  color: #475467;
+  background: var(--nt-surface-alt);
+  color: var(--nt-text-muted);
+}
+
+.nt-fullscreen:hover {
+  color: var(--nt-text);
+  border-color: var(--nt-accent);
 }
 
 .nt-avatar {
@@ -124,16 +144,16 @@ button {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, #d7ecff, #8ec5ff);
-  color: #0f172a;
+  background: linear-gradient(135deg, #2a3550, #16c784);
+  color: #ffffff;
   font-weight: 900;
 }
 
 .nt-sidebar {
   min-height: 0;
   padding: 8px 6px;
-  background: #ffffff;
-  border-right: 1px solid #e4e9f2;
+  background: var(--nt-surface);
+  border-right: 1px solid var(--nt-border);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -144,7 +164,7 @@ button {
   border: 0;
   border-radius: 9px;
   background: transparent;
-  color: #475467;
+  color: var(--nt-text-muted);
   display: grid;
   place-items: center;
   gap: 2px;
@@ -166,16 +186,25 @@ button {
 }
 
 .nt-sidebar button.active,
-.nt-sidebar button:hover {
-  background: #eff6ff;
-  color: #1677ff;
+.nt-sidebar button:hover:not(:disabled) {
+  background: var(--nt-accent-soft);
+  color: var(--nt-accent);
+}
+
+.nt-sidebar button.active {
+  box-shadow: inset 2px 0 0 var(--nt-accent);
+}
+
+.nt-sidebar button:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 .nt-quick-menu {
   min-height: 0;
   padding: 8px 6px;
-  background: #ffffff;
-  border-left: 1px solid #e4e9f2;
+  background: var(--nt-surface);
+  border-left: 1px solid var(--nt-border);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -186,7 +215,7 @@ button {
   border: 0;
   border-radius: 9px;
   padding: 5px;
-  color: #475467;
+  color: var(--nt-text-muted);
   background: transparent;
   display: grid;
   place-items: center;
@@ -194,8 +223,8 @@ button {
 }
 
 .nt-quick-menu button:hover {
-  background: #eff6ff;
-  color: #1677ff;
+  background: var(--nt-accent-soft);
+  color: var(--nt-accent);
 }
 
 .nt-quick-menu span {
@@ -222,11 +251,16 @@ button {
 .nt-asset-trigger,
 .nt-tool-btn {
   height: 38px;
-  border: 1px solid #e4e9f2;
+  border: 1px solid var(--nt-border);
   border-radius: 8px;
-  color: #101828;
-  background: #ffffff;
+  color: var(--nt-text);
+  background: var(--nt-surface-alt);
   font-weight: 700;
+}
+
+.nt-asset-trigger:hover,
+.nt-tool-btn:hover {
+  border-color: var(--nt-accent);
 }
 
 .nt-asset-trigger {
@@ -237,6 +271,7 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
 .nt-asset-trigger span {
@@ -254,10 +289,10 @@ button {
   width: 380px;
   max-width: calc(100vw - 120px);
   padding: 12px;
-  border: 1px solid #e4e9f2;
+  border: 1px solid var(--nt-border);
   border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.12);
+  background: var(--nt-surface-raised);
+  box-shadow: var(--nt-shadow);
 }
 
 .nt-asset-tabs {
@@ -273,16 +308,22 @@ button {
   border: 0;
   border-radius: 8px;
   padding: 9px 10px;
-  color: #344054;
-  background: #f3f6fb;
+  color: var(--nt-text-muted);
+  background: var(--nt-surface-alt);
   font-weight: 700;
+}
+
+.nt-asset-tabs button:hover,
+.nt-asset-list button:hover,
+.nt-floating button:hover {
+  color: var(--nt-text);
 }
 
 .nt-asset-tabs button.active,
 .nt-asset-list button.active,
 .nt-floating button.active {
   color: #ffffff;
-  background: #1677ff;
+  background: var(--nt-accent);
 }
 
 .nt-asset-list {
@@ -297,8 +338,12 @@ button {
 }
 
 .nt-asset-list span {
-  color: #667085;
+  color: var(--nt-text-muted);
   font-size: 12px;
+}
+
+.nt-asset-list button.active span {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .nt-toolbar-left {
@@ -335,18 +380,18 @@ button {
 
 .nt-chart-types button {
   height: 38px;
-  border: 1px solid #e4e9f2;
+  border: 1px solid var(--nt-border);
   border-radius: 8px;
   padding: 0 12px;
-  color: #344054;
-  background: #ffffff;
+  color: var(--nt-text-muted);
+  background: var(--nt-surface-alt);
   font-weight: 700;
 }
 
 .nt-chart-types button.active {
-  color: #1677ff;
-  background: #eff6ff;
-  border-color: #bfdbfe;
+  color: var(--nt-accent);
+  background: var(--nt-accent-soft);
+  border-color: var(--nt-accent);
 }
 
 .nt-floating {
@@ -356,7 +401,7 @@ button {
 
 .nt-floating h3 {
   margin: 0 0 10px;
-  color: #101828;
+  color: var(--nt-text);
   font-size: 14px;
 }
 
@@ -386,7 +431,7 @@ button {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #ffffff;
+  background: var(--nt-surface);
 }
 
 .nt-chart-canvas {
@@ -398,18 +443,18 @@ button {
 .nt-trade-panel {
   min-height: 0;
   padding: 12px;
-  border-left: 1px solid #e4e9f2;
-  background: #ffffff;
+  border-left: 1px solid var(--nt-border);
+  background: var(--nt-surface);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  color: #101828;
+  color: var(--nt-text);
 }
 
 .nt-white-field h3 {
   margin: 0 0 6px;
-  color: #475467;
+  color: var(--nt-text-muted);
   font-size: 12px;
   font-weight: 700;
 }
@@ -420,10 +465,10 @@ button {
   display: grid;
   grid-template-columns: 1fr 58px;
   align-items: center;
-  border: 1px solid #e4e9f2;
+  border: 1px solid var(--nt-border);
   border-radius: 8px;
   overflow: hidden;
-  background: #f8fafc;
+  background: var(--nt-surface-alt);
 }
 
 .nt-white-input strong,
@@ -433,7 +478,7 @@ button {
   border: 0;
   outline: 0;
   padding: 0 10px;
-  color: #101828;
+  color: var(--nt-text);
   background: transparent;
   font-size: 13px;
   font-weight: 900;
@@ -443,15 +488,19 @@ button {
   height: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border-left: 1px solid #e4e9f2;
+  border-left: 1px solid var(--nt-border);
 }
 
 .nt-white-input button {
   border: 0;
-  color: #475467;
-  background: #ffffff;
+  color: var(--nt-text-muted);
+  background: var(--nt-surface-raised);
   font-size: 14px;
   font-weight: 900;
+}
+
+.nt-white-input button:hover {
+  color: var(--nt-accent);
 }
 
 .nt-white-expiry {
@@ -463,7 +512,7 @@ button {
 
 .nt-white-expiry span,
 .nt-white-field small {
-  color: #667085;
+  color: var(--nt-text-muted);
   font-size: 10px;
   font-weight: 700;
 }
@@ -471,25 +520,25 @@ button {
 .nt-white-payout {
   padding: 10px;
   border-radius: 9px;
-  background: #f8fafc;
-  border: 1px dashed #d0d5dd;
+  background: linear-gradient(135deg, rgba(22, 199, 132, 0.14), rgba(22, 199, 132, 0.04));
+  border: 1px dashed rgba(22, 199, 132, 0.4);
   display: grid;
   gap: 3px;
   text-align: center;
 }
 
 .nt-white-payout span {
-  color: #667085;
+  color: var(--nt-text-muted);
   font-size: 12px;
 }
 
 .nt-white-payout strong {
-  color: #16a34a;
+  color: var(--nt-buy);
   font-size: 18px;
 }
 
 .nt-white-payout small {
-  color: #16a34a;
+  color: var(--nt-buy);
   font-weight: 700;
 }
 
@@ -498,28 +547,49 @@ button {
 .nt-ai {
   height: 46px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 10px;
   color: #ffffff;
   font-size: 15px;
   font-weight: 900;
+  letter-spacing: 0.02em;
 }
 
 .nt-buy {
-  background: #22c55e;
+  background: linear-gradient(135deg, #1fdb8e, #0fae71);
+  box-shadow: 0 10px 24px rgba(22, 199, 132, 0.32);
+}
+
+.nt-buy:hover:not(:disabled) {
+  box-shadow: 0 12px 28px rgba(22, 199, 132, 0.48);
+  transform: translateY(-1px);
 }
 
 .nt-sell {
-  background: #ef4444;
+  background: linear-gradient(135deg, #ff5b72, #e0293f);
+  box-shadow: 0 10px 24px rgba(246, 70, 93, 0.32);
+}
+
+.nt-sell:hover:not(:disabled) {
+  box-shadow: 0 12px 28px rgba(246, 70, 93, 0.48);
+  transform: translateY(-1px);
 }
 
 .nt-ai {
-  background: #0ea5e9;
+  background: linear-gradient(135deg, #4cb0ff, #1f74e0);
+  box-shadow: 0 10px 24px rgba(58, 160, 255, 0.3);
+}
+
+.nt-ai:hover {
+  box-shadow: 0 12px 28px rgba(58, 160, 255, 0.46);
+  transform: translateY(-1px);
 }
 
 .nt-buy:disabled,
 .nt-sell:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
 .nt-white-sentiment {
@@ -532,25 +602,25 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #667085;
+  color: var(--nt-text-muted);
   font-size: 11px;
 }
 
 .nt-white-sentiment .bar {
   height: 6px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #22c55e 0 62%, #ef4444 62% 100%);
+  background: linear-gradient(90deg, #1fdb8e 0 62%, #ff5b72 62% 100%);
 }
 
 .nt-white-sentiment small {
-  color: #ef4444;
+  color: var(--nt-sell);
   text-align: right;
   font-size: 10px;
 }
 
 .nt-white-return {
   margin: 0;
-  color: #667085;
+  color: var(--nt-text-muted);
   font-size: 11px;
   text-align: center;
 }
@@ -641,15 +711,15 @@ button {
     grid-template-columns: repeat(5, 1fr);
     gap: 4px;
     padding: 5px;
-    background: #ffffff;
-    border-top: 1px solid #e4e9f2;
+    background: var(--nt-surface);
+    border-top: 1px solid var(--nt-border);
   }
 
   .nt-bottom-nav button {
     border: 0;
     border-radius: 9px;
-    color: #475467;
-    background: #f3f6fb;
+    color: var(--nt-text-muted);
+    background: var(--nt-surface-alt);
   }
 
   .nt-bottom-nav span {
@@ -722,7 +792,7 @@ button {
     height: 248px;
     padding: 8px;
     gap: 6px;
-    border-top: 1px solid #e4e9f2;
+    border-top: 1px solid var(--nt-border);
   }
 
   .nt-white-field {
@@ -773,10 +843,10 @@ button {
   max-width: 210px;
   padding: 4px 7px;
   border-radius: 8px;
-  color: #344054;
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid #e4e9f2;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+  color: var(--nt-text);
+  background: rgba(17, 21, 31, 0.9);
+  border: 1px solid var(--nt-border);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
   font-size: 10px;
   font-weight: 700;
   overflow: hidden;
@@ -795,8 +865,8 @@ button {
   bottom: -4px;
   width: 4px;
   border-radius: 999px;
-  background: #101828;
-  opacity: 0.45;
+  background: #ffffff;
+  opacity: 0.6;
 }
 
 @media (max-width: 980px) {
@@ -824,7 +894,7 @@ button {
 
 .nt-indicator-section h4 {
   margin: 0 0 8px;
-  color: #475467;
+  color: var(--nt-text-muted);
   font-size: 12px;
   font-weight: 800;
 }
@@ -837,20 +907,20 @@ button {
 
 .nt-indicator-section button {
   min-height: 34px;
-  border: 1px solid #e4e9f2;
+  border: 1px solid var(--nt-border);
   border-radius: 8px;
   padding: 6px 9px;
-  color: #344054;
-  background: #ffffff;
+  color: var(--nt-text-muted);
+  background: var(--nt-surface-alt);
   font-size: 12px;
   font-weight: 700;
   text-align: left;
 }
 
 .nt-indicator-section button.active {
-  color: #1677ff;
-  background: #eff6ff;
-  border-color: #bfdbfe;
+  color: var(--nt-accent);
+  background: var(--nt-accent-soft);
+  border-color: var(--nt-accent);
 }
 
 @media (max-width: 768px) {

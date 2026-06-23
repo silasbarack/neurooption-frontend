@@ -125,7 +125,7 @@ export default function TradingPanel({
         <div
           className="bar"
           style={{
-            background: `linear-gradient(90deg, #22c55e 0 ${sentiment}%, #ef4444 ${sentiment}% 100%)`,
+            background: `linear-gradient(90deg, #1fdb8e 0 ${sentiment}%, #ff5b72 ${sentiment}% 100%)`,
           }}
         >
           <i style={{ left: `${sentiment}%` }} />

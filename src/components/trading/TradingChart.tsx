@@ -1211,7 +1211,7 @@ function drawGrid(
   columns: number,
   rows: number,
 ) {
-  context.strokeStyle = "#edf1f6";
+  context.strokeStyle = "rgba(255, 255, 255, 0.045)";
   context.lineWidth = 1;
 
   for (let i = 0; i <= columns; i += 1) {
@@ -1242,17 +1242,17 @@ function drawBottomPanel(
   bottom: number,
   candleGap: number,
 ) {
-  context.fillStyle = panelIndex % 2 === 0 ? "#fbfdff" : "#f8fbff";
+  context.fillStyle = panelIndex % 2 === 0 ? "#141925" : "#10141d";
   context.fillRect(left, top, right - left, bottom - top);
 
-  context.strokeStyle = "#dbe4f0";
+  context.strokeStyle = "rgba(255, 255, 255, 0.08)";
   context.lineWidth = 1;
   context.beginPath();
   context.moveTo(left, top);
   context.lineTo(right, top);
   context.stroke();
 
-  context.fillStyle = "#475467";
+  context.fillStyle = "#9aa4b8";
   context.font = "800 11px Roboto, sans-serif";
   context.textAlign = "left";
   context.textBaseline = "top";
@@ -1278,7 +1278,7 @@ function drawBottomPanel(
   const indexToX = (index: number) =>
     left + (index / Math.max(visibleLength - 1, 1)) * (right - left);
 
-  context.strokeStyle = "#eef2f7";
+  context.strokeStyle = "rgba(255, 255, 255, 0.05)";
   context.lineWidth = 1;
 
   for (let i = 1; i < 3; i += 1) {
@@ -1381,11 +1381,11 @@ function TradingChartComponent({
     const height = rect.height;
 
     context.clearRect(0, 0, width, height);
-    context.fillStyle = "#ffffff";
+    context.fillStyle = "#11151f";
     context.fillRect(0, 0, width, height);
 
     if (candles.length < 2) {
-      context.fillStyle = "#667085";
+      context.fillStyle = "#7d8aa0";
       context.font = "800 14px Roboto, sans-serif";
       context.textAlign = "center";
       context.textBaseline = "middle";
@@ -1524,7 +1524,7 @@ function TradingChartComponent({
 
     drawTextPill(context, formatDuration(remaining), expiryX - 92, top + 16, "#1677ff");
 
-    context.fillStyle = "#64748b";
+    context.fillStyle = "#9aa4b8";
     context.font = "900 13px Roboto, sans-serif";
     context.textAlign = "center";
     context.textBaseline = "middle";
@@ -1571,7 +1571,7 @@ function TradingChartComponent({
       context.fillText(series.name, left + index * 96, top + 8);
     });
 
-    context.fillStyle = "#64748b";
+    context.fillStyle = "#9aa4b8";
     context.font = "800 11px Roboto, sans-serif";
     context.textAlign = "right";
     context.textBaseline = "middle";
