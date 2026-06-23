@@ -596,7 +596,7 @@ function drawTextPill(
   background: string,
   foreground = "#ffffff",
 ) {
-  context.font = "800 11px Roboto, sans-serif";
+  context.font = "800 11px 'Noto Sans', sans-serif";
   const pillWidth = context.measureText(text).width + 14;
 
   context.fillStyle = background;
@@ -1253,7 +1253,7 @@ function drawBottomPanel(
   context.stroke();
 
   context.fillStyle = "#9aa4b8";
-  context.font = "800 11px Roboto, sans-serif";
+  context.font = "800 11px 'Noto Sans', sans-serif";
   context.textAlign = "left";
   context.textBaseline = "top";
   context.fillText(panel.title, left + 8, top + 5);
@@ -1386,7 +1386,7 @@ function TradingChartComponent({
 
     if (candles.length < 2) {
       context.fillStyle = "#7d8aa0";
-      context.font = "800 14px Roboto, sans-serif";
+      context.font = "800 14px 'Noto Sans', sans-serif";
       context.textAlign = "center";
       context.textBaseline = "middle";
       context.fillText("Loading backend OTC candles...", width / 2, height / 2);
@@ -1525,12 +1525,12 @@ function TradingChartComponent({
     drawTextPill(context, formatDuration(remaining), expiryX - 92, top + 16, "#1677ff");
 
     context.fillStyle = "#9aa4b8";
-    context.font = "900 13px Roboto, sans-serif";
+    context.font = "900 13px 'Noto Sans', sans-serif";
     context.textAlign = "center";
     context.textBaseline = "middle";
     context.fillText(timeframe, expiryX - 28, chartBottom - 44);
 
-    context.font = "800 12px Roboto, sans-serif";
+    context.font = "800 12px 'Noto Sans', sans-serif";
     context.fillText(formatDuration(remaining).slice(3), expiryX - 28, chartBottom - 25);
 
     activeTrades.forEach((trade) => {
@@ -1565,14 +1565,14 @@ function TradingChartComponent({
 
     overlaySeries.slice(0, 6).forEach((series, index) => {
       context.fillStyle = series.color;
-      context.font = "800 11px Roboto, sans-serif";
+      context.font = "800 11px 'Noto Sans', sans-serif";
       context.textAlign = "left";
       context.textBaseline = "top";
       context.fillText(series.name, left + index * 96, top + 8);
     });
 
     context.fillStyle = "#9aa4b8";
-    context.font = "800 11px Roboto, sans-serif";
+    context.font = "800 11px 'Noto Sans', sans-serif";
     context.textAlign = "right";
     context.textBaseline = "middle";
 
