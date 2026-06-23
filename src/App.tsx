@@ -12,6 +12,8 @@ import FinancePage from "./pages/FinancePage";
 import MarketPage from "./pages/MarketPage";
 import ChatPage from "./pages/ChatPage";
 import HelpPage from "./pages/HelpPage";
+import AchievementsPage from "./pages/AchievementsPage";
+import TournamentsPage from "./pages/TournamentsPage";
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const token = localStorage.getItem("neurooption_token");
@@ -89,6 +91,24 @@ export default function App() {
           element={
             <RequireAuth>
               <ProfilePage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/achievements"
+          element={
+            <RequireAuth>
+              <AchievementsPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/tournaments"
+          element={
+            <RequireAuth>
+              <TournamentsPage />
             </RequireAuth>
           }
         />
