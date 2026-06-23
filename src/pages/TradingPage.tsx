@@ -1011,6 +1011,15 @@ export default function TradingPage() {
 
               {assetMenuOpen && (
                 <div className="nt-asset-menu">
+                  <button
+                    type="button"
+                    className="nt-floating-close"
+                    onClick={() => setAssetMenuOpen(false)}
+                    aria-label="Close"
+                  >
+                    ✕
+                  </button>
+
                   <div className="nt-asset-tabs">
                     {assetCategories.map((category) => (
                       <button
@@ -1108,7 +1117,7 @@ export default function TradingPage() {
         />
       </section>
 
-      <TradingBottomNav onPanelOpen={setEmptyPanel} />
+      <TradingBottomNav onPanelOpen={setEmptyPanel} onFullscreen={handleFullscreen} />
 
       <TradeResultPopup items={resultPopups} onDismiss={handleDismissResultPopup} />
 

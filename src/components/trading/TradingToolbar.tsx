@@ -173,6 +173,15 @@ export default function TradingToolbar({
 
           {timeframeOpen && (
             <div className="nt-floating nt-timeframes">
+              <button
+                type="button"
+                className="nt-floating-close"
+                onClick={onTimeframeToggle}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+
               {TIMEFRAMES.map((item) => (
                 <button
                   key={item}
@@ -216,10 +225,16 @@ export default function TradingToolbar({
       </div>
 
       {indicatorsOpen && (
-        <div
-          className="nt-floating nt-indicators"
-          style={{ width: 410, maxHeight: 560, overflow: "auto" }}
-        >
+        <div className="nt-floating nt-indicators">
+          <button
+            type="button"
+            className="nt-floating-close"
+            onClick={onIndicatorsToggle}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+
           <h3>Indicators</h3>
 
           <div style={{ display: "grid", gap: 6 }}>
@@ -239,7 +254,7 @@ export default function TradingToolbar({
                     gridTemplateColumns: "1fr 34px",
                     gap: 6,
                     alignItems: "center",
-                    borderBottom: "1px solid #eef2f7",
+                    borderBottom: "1px solid var(--nt-border)",
                     paddingBottom: 5,
                   }}
                 >
@@ -263,8 +278,9 @@ export default function TradingToolbar({
                     style={{
                       height: 32,
                       borderRadius: 8,
-                      border: "1px solid #d7e1ee",
-                      background: active ? "#e0f2fe" : "#f8fafc",
+                      border: "1px solid var(--nt-border)",
+                      background: active ? "var(--nt-accent-soft)" : "var(--nt-surface-alt)",
+                      color: "var(--nt-text)",
                       cursor: "pointer",
                       fontWeight: 900,
                     }}
@@ -280,6 +296,15 @@ export default function TradingToolbar({
 
       {drawingOpen && (
         <div className="nt-floating nt-drawings">
+          <button
+            type="button"
+            className="nt-floating-close"
+            onClick={onDrawingToggle}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+
           <h3>Drawing tools</h3>
           <div>
             {DRAWING_TOOLS.map((tool) => (

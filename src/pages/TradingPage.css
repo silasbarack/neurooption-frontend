@@ -383,7 +383,7 @@ body,
 
 @media (max-width: 768px) {
   :root {
-    --nt-header-height: 54px;
+    --nt-header-height: 50px;
   }
 
   .nt-page {
@@ -392,19 +392,45 @@ body,
 
   .nt-page-body {
     grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-rows: auto auto;
     padding: 4px;
+    align-items: start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nt-sidebar {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: calc(100dvh - var(--nt-header-height) - 8px);
+    overflow-y: auto;
   }
 
   .nt-main-chart {
     grid-column: 2;
-    height: calc(100dvh - var(--nt-header-height) - 303px);
-    min-height: 360px;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    height: 58vh;
+    min-height: 300px;
   }
 
   .nt-page-asset {
-    top: 48px;
-    left: 10px;
-    z-index: 30;
+    position: static;
+    z-index: auto;
+    flex: 0 0 auto;
+    padding: 8px 8px 0;
+  }
+
+  .nt-chart-canvas-wrap {
+    position: relative;
+    inset: auto;
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   .nt-chart-footer {
@@ -413,14 +439,15 @@ body,
 
   .nt-trade-panel,
   .nt-pocket-panel {
-    position: fixed;
-    left: 44px;
-    right: 0;
-    bottom: 54px;
-    height: 245px;
-    z-index: 60;
-    overflow: hidden;
-    border-radius: 14px 14px 0 0;
+    grid-column: 2;
+    grid-row: 2;
+    position: static;
+    width: 100%;
+    height: auto;
+    margin-top: 2px;
+    border-radius: 14px;
+    border-left: 0;
+    border-top: 1px solid var(--nt-border);
   }
 
   .nt-pocket-actions {
@@ -433,12 +460,16 @@ body,
     min-height: 56px;
   }
 
+  .nt-quick-menu {
+    display: none;
+  }
+
   .nt-bottom-nav {
     position: fixed;
     z-index: 70;
     right: 0;
     bottom: 0;
     left: 0;
-    height: 54px;
+    height: 58px;
   }
 }
