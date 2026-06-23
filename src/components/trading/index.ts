@@ -8,6 +8,8 @@ export { default as AssetSelector } from "./AssetSelector";
 export { default as TradingToolbar } from "./TradingToolbar";
 export { default as TradingChart } from "./TradingChart";
 export { default as TradingPanel } from "./TradingPanel";
+export { default as TradeResultPopup } from "./TradeResultPopup";
+export type { TradeOutcome, TradeResultPopupItem } from "./TradeResultPopup";
 
 export * from "./trading.types";
 export * from "./trading.constants";

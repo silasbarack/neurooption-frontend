@@ -4,6 +4,7 @@ import "./TradingPage.css";
 import {
   ASSETS,
   BOTTOM_INDICATORS,
+  TradeResultPopup,
   TradingBottomNav,
   TradingChart,
   TradingHeader,
@@ -22,6 +23,7 @@ import type {
   Currency,
   ResultMarker,
   TradeMarker,
+  TradeResultPopupItem,
   TradeSide,
 } from "../components/trading";
 
@@ -378,11 +380,32 @@ function tradeToResultMarker(trade: BackendTrade): ResultMarker {
   };
 }
 
+function tradeToResultPopupItem(trade: BackendTrade): TradeResultPopupItem {
+  const outcome =
+    trade.status === "WON" ? "won" : trade.status === "DRAW" ? "draw" : "lost";
+
+  const amount =
+    outcome === "lost"
+      ? -Number(trade.stakeAmount)
+      : Number(trade.resultAmount ?? 0);
+
+  const sign = amount > 0 ? "+" : amount < 0 ? "-" : "";
+
+  return {
+    id: trade.id,
+    outcome,
+    side: trade.side,
+    asset: trade.asset,
+    amountText: `${sign}${formatMoney(Math.abs(amount), trade.currency)}`,
+  };
+}
+
 export default function TradingPage() {
   const candlesRef = React.useRef<Candle[]>(INITIAL_CANDLES);
   const expirySecondsRef = React.useRef(45);
   const fetchingTradingStateRef = React.useRef(false);
   const serverOffsetRef = React.useRef(0);
+  const seenSettledTradeIdsRef = React.useRef<Set<string> | null>(null);
 
   const [accountType, setAccountType] = React.useState<AccountType>("QT Demo");
   const [currency, setCurrency] = React.useState<Currency>("USD");
@@ -424,6 +447,7 @@ export default function TradingPage() {
   const [candles, setCandles] = React.useState<Candle[]>(INITIAL_CANDLES);
   const [activeTrades, setActiveTrades] = React.useState<TradeMarker[]>([]);
   const [resultMarkers, setResultMarkers] = React.useState<ResultMarker[]>([]);
+  const [resultPopups, setResultPopups] = React.useState<TradeResultPopupItem[]>([]);
 
   const [openTrades, setOpenTrades] = React.useState<BackendTrade[]>([]);
   const [tradeHistory, setTradeHistory] = React.useState<BackendTrade[]>([]);
@@ -560,12 +584,32 @@ export default function TradingPage() {
         setWalletBalance(Number(wallet.balance));
         setActiveTrades(open.map(tradeToMarker));
 
-        setResultMarkers(
-          history
-            .filter((trade) => trade.status !== "PENDING")
-            .slice(0, 12)
-            .map(tradeToResultMarker)
-        );
+        const settled = history.filter((trade) => trade.status !== "PENDING");
+
+        setResultMarkers(settled.slice(0, 12).map(tradeToResultMarker));
+
+        if (seenSettledTradeIdsRef.current === null) {
+          // First load: just remember what's already settled, don't pop up
+          // a result for trades that finished before this page was opened.
+          seenSettledTradeIdsRef.current = new Set(
+            settled.map((trade) => trade.id)
+          );
+        } else {
+          const newlySettled = settled.filter(
+            (trade) => !seenSettledTradeIdsRef.current!.has(trade.id)
+          );
+
+          if (newlySettled.length > 0) {
+            for (const trade of newlySettled) {
+              seenSettledTradeIdsRef.current.add(trade.id);
+            }
+
+            setResultPopups((current) => [
+              ...current,
+              ...newlySettled.map(tradeToResultPopupItem),
+            ]);
+          }
+        }
       } finally {
         fetchingTradingStateRef.current = false;
       }
@@ -867,6 +911,10 @@ export default function TradingPage() {
     }
   }
 
+  const handleDismissResultPopup = React.useCallback((id: string) => {
+    setResultPopups((current) => current.filter((item) => item.id !== id));
+  }, []);
+
   const bottomIndicatorCount = Math.min(
     4,
     selectedIndicators.filter((indicator) =>
@@ -1004,6 +1052,8 @@ export default function TradingPage() {
       </section>
 
       <TradingBottomNav onPanelOpen={setEmptyPanel} />
+
+      <TradeResultPopup items={resultPopups} onDismiss={handleDismissResultPopup} />
 
       {tradeError && <div className="nt-trade-error">{tradeError}</div>}
 

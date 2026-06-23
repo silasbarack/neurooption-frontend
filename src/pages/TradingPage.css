@@ -129,6 +129,82 @@ body,
   font-weight: 700;
 }
 
+.nt-result-toast-stack {
+  position: fixed;
+  z-index: 115;
+  top: calc(var(--nt-header-height) + 14px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.nt-result-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.18);
+  font-weight: 700;
+  white-space: nowrap;
+  animation: nt-result-toast-in 0.18s ease-out;
+}
+
+.nt-result-toast-won {
+  color: #166534;
+  background: #ecfdf3;
+  border-color: #bbf7d0;
+}
+
+.nt-result-toast-lost {
+  color: #991b1b;
+  background: #fff1f2;
+  border-color: #fecaca;
+}
+
+.nt-result-toast-draw {
+  color: #475467;
+  background: #f3f6fb;
+  border-color: #e4e9f2;
+}
+
+.nt-result-toast-icon {
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.nt-result-toast-outcome {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.nt-result-toast-meta {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.nt-result-toast-amount {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+@keyframes nt-result-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .nt-empty-panel {
   position: fixed;
   z-index: 120;
