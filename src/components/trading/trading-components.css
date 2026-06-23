@@ -56,8 +56,8 @@ button {
   place-items: center;
   border-radius: 50%;
   color: #ffffff;
-  background: linear-gradient(135deg, #3aa0ff, #1158d6);
-  box-shadow: 0 4px 14px rgba(58, 160, 255, 0.4);
+  background: linear-gradient(135deg, #00b4ff, #0a6fd6);
+  box-shadow: 0 4px 14px rgba(0, 154, 249, 0.4);
   font-size: 19px;
   font-weight: 900;
 }
@@ -117,13 +117,13 @@ button {
   border-radius: 8px;
   padding: 0 16px;
   color: #ffffff;
-  background: linear-gradient(135deg, #4cb0ff, #1f74e0);
-  box-shadow: 0 6px 16px rgba(58, 160, 255, 0.35);
+  background: linear-gradient(135deg, #00b4ff, #0a6fd6);
+  box-shadow: 0 6px 16px rgba(0, 154, 249, 0.35);
   font-weight: 900;
 }
 
 .nt-top-up:hover {
-  box-shadow: 0 8px 20px rgba(58, 160, 255, 0.5);
+  box-shadow: 0 8px 20px rgba(0, 154, 249, 0.5);
   transform: translateY(-1px);
 }
 
@@ -578,12 +578,12 @@ button {
 }
 
 .nt-ai {
-  background: linear-gradient(135deg, #4cb0ff, #1f74e0);
-  box-shadow: 0 10px 24px rgba(58, 160, 255, 0.3);
+  background: linear-gradient(135deg, #00b4ff, #009cff);
+  box-shadow: 0 10px 24px var(--nt-ai-glow-half, rgba(0, 156, 255, 0.5));
 }
 
 .nt-ai:hover {
-  box-shadow: 0 12px 28px rgba(58, 160, 255, 0.46);
+  box-shadow: 0 12px 28px var(--nt-ai-glow, rgba(0, 156, 255, 1));
   transform: translateY(-1px);
 }
 

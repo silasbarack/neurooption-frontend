@@ -2,21 +2,29 @@
   --nt-header-height: 58px;
   --nt-page-gap: 12px;
 
-  --nt-bg: #0a0d14;
-  --nt-surface: #11151f;
-  --nt-surface-alt: #161b27;
-  --nt-surface-raised: #1a2030;
+  --nt-bg: #191c30;
+  --nt-surface: #1f2238;
+  --nt-surface-alt: #242842;
+  --nt-surface-raised: #262b48;
   --nt-border: rgba(255, 255, 255, 0.08);
   --nt-border-soft: rgba(255, 255, 255, 0.05);
-  --nt-text: #eef1f6;
+  --nt-text: #ffffff;
   --nt-text-muted: #8b93a7;
   --nt-text-faint: #5b6478;
-  --nt-accent: #3aa0ff;
-  --nt-accent-soft: rgba(58, 160, 255, 0.14);
+  --nt-accent: #009af9;
+  --nt-accent-soft: rgba(0, 154, 249, 0.16);
   --nt-buy: #16c784;
   --nt-buy-strong: #0fae71;
   --nt-sell: #f6465d;
   --nt-sell-strong: #e0293f;
+  --nt-ai-glow: rgba(0, 156, 255, 1);
+  --nt-ai-glow-half: rgba(0, 156, 255, 0.5);
+  --nt-alert-success-bg: #172832;
+  --nt-alert-success-border: #035843;
+  --nt-alert-error-bg: #2a212f;
+  --nt-alert-error-border: #76292d;
+  --nt-alert-info-bg: rgba(57, 74, 116, 0.3);
+  --nt-alert-info-border: #394a74;
   --nt-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
 }
 
@@ -81,6 +89,8 @@ body,
   min-height: 0;
   overflow: hidden;
   background: var(--nt-surface);
+  cursor: default;
+  user-select: none;
 }
 
 .nt-chart-canvas {
@@ -90,6 +100,9 @@ body,
   image-rendering: auto;
   transform: translateZ(0);
   backface-visibility: hidden;
+  touch-action: none;
+  cursor: inherit;
+  user-select: none;
 }
 
 .nt-page-asset {
@@ -142,11 +155,10 @@ body,
   bottom: 24px;
   max-width: min(420px, calc(100vw - 48px));
   padding: 12px 16px;
-  border: 1px solid rgba(246, 70, 93, 0.35);
-  border-left: 3px solid var(--nt-sell);
+  border: 1px solid var(--nt-alert-error-border);
   border-radius: 10px;
-  color: #ffb3bd;
-  background: #1c1320;
+  color: #ffffff;
+  background: var(--nt-alert-error-bg);
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5);
   font-weight: 700;
 }
@@ -168,28 +180,38 @@ body,
   gap: 10px;
   padding: 10px 18px;
   border-radius: 12px;
-  border: 1px solid var(--nt-border);
-  border-left: 3px solid transparent;
+  border: 1px solid transparent;
   background: var(--nt-surface-raised);
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5);
+  color: #ffffff;
   font-weight: 700;
   white-space: nowrap;
   animation: nt-result-toast-in 0.18s ease-out;
 }
 
 .nt-result-toast-won {
-  color: #5be8a8;
-  border-left-color: var(--nt-buy);
+  border-color: var(--nt-alert-success-border);
+  background: var(--nt-alert-success-bg);
+}
+
+.nt-result-toast-won .nt-result-toast-icon,
+.nt-result-toast-won .nt-result-toast-amount {
+  color: #1fdb8e;
 }
 
 .nt-result-toast-lost {
-  color: #ff8b9a;
-  border-left-color: var(--nt-sell);
+  border-color: var(--nt-alert-error-border);
+  background: var(--nt-alert-error-bg);
+}
+
+.nt-result-toast-lost .nt-result-toast-icon,
+.nt-result-toast-lost .nt-result-toast-amount {
+  color: #ff5b72;
 }
 
 .nt-result-toast-draw {
-  color: var(--nt-text-muted);
-  border-left-color: var(--nt-text-faint);
+  border-color: var(--nt-alert-info-border);
+  background: var(--nt-alert-info-bg);
 }
 
 .nt-result-toast-icon {
