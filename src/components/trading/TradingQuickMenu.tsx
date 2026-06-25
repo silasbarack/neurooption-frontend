@@ -1,28 +1,27 @@
-type EmptyPanel = "openTrades" | "history" | "signals" | null;
+import { useNavigate } from "react-router-dom";
 
 type TradingQuickMenuProps = {
   onFullscreen: () => void;
-  onPanelOpen: (panel: EmptyPanel) => void;
 };
 
 const items: Array<{
   icon: string;
   label: string;
-  action?: EmptyPanel | "fullscreen";
+  path?: string;
+  action?: "fullscreen";
 }> = [
-  { icon: "↻", label: "Open trades", action: "openTrades" },
-  { icon: "🕘", label: "History", action: "history" },
-  { icon: "📡", label: "Signals", action: "signals" },
-  { icon: "👥", label: "Social Trading" },
-  { icon: "◎", label: "Express Trades" },
+  { icon: "↻", label: "Open trades", path: "/open-trades" },
+  { icon: "🕘", label: "History", path: "/history" },
+  { icon: "📡", label: "Signals", path: "/signals" },
+  { icon: "👥", label: "Social Trading", path: "/social-trading" },
+  { icon: "◎", label: "Express Trades", path: "/express-trades" },
   { icon: "⌨", label: "Hotkeys" },
   { icon: "⛶", label: "Full screen", action: "fullscreen" },
 ];
 
-export default function TradingQuickMenu({
-  onFullscreen,
-  onPanelOpen,
-}: TradingQuickMenuProps) {
+export default function TradingQuickMenu({ onFullscreen }: TradingQuickMenuProps) {
+  const navigate = useNavigate();
+
   return (
     <aside className="nt-quick-menu">
       {items.map((item) => (
@@ -35,8 +34,8 @@ export default function TradingQuickMenu({
               return;
             }
 
-            if (item.action) {
-              onPanelOpen(item.action);
+            if (item.path) {
+              navigate(item.path);
             }
           }}
         >

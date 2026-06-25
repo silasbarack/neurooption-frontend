@@ -14,6 +14,11 @@ import ChatPage from "./pages/ChatPage";
 import HelpPage from "./pages/HelpPage";
 import AchievementsPage from "./pages/AchievementsPage";
 import TournamentsPage from "./pages/TournamentsPage";
+import OpenTradesPage from "./pages/OpenTradesPage";
+import HistoryPage from "./pages/HistoryPage";
+import SignalsPage from "./pages/SignalsPage";
+import SocialTradingPage from "./pages/SocialTradingPage";
+import ExpressTradesPage from "./pages/ExpressTradesPage";
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const token = localStorage.getItem("neurooption_token");
@@ -109,6 +114,51 @@ export default function App() {
           element={
             <RequireAuth>
               <TournamentsPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/open-trades"
+          element={
+            <RequireAuth>
+              <OpenTradesPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/history"
+          element={
+            <RequireAuth>
+              <HistoryPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/signals"
+          element={
+            <RequireAuth>
+              <SignalsPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/social-trading"
+          element={
+            <RequireAuth>
+              <SocialTradingPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/express-trades"
+          element={
+            <RequireAuth>
+              <ExpressTradesPage />
             </RequireAuth>
           }
         />

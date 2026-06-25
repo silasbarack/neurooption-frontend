@@ -4,7 +4,7 @@ export default function FinancePage() {
   return (
     <main style={styles.page}>
       <section style={styles.card}>
-        <h1>Finance</h1>
+        <h1 style={styles.heading}>Finance</h1>
         <p>Deposits, withdrawals, transactions, and payment gateways will appear here.</p>
         <Link style={styles.link} to="/trading">Back to Trading</Link>
       </section>
@@ -28,6 +28,9 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "20px",
     maxWidth: "620px",
     width: "100%",
+  },
+  heading: {
+    color: "#fff",
   },
   link: {
     color: "#74f2a7",

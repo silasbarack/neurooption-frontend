@@ -13,3 +13,4 @@ export type { TradeOutcome, TradeResultPopupItem } from "./TradeResultPopup";
 
 export * from "./trading.types";
 export * from "./trading.constants";
+export * from "./tradesApi";

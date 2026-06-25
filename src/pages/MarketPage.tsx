@@ -4,7 +4,7 @@ export default function MarketPage() {
   return (
     <main style={styles.page}>
       <section style={styles.card}>
-        <h1>Market</h1>
+        <h1 style={styles.heading}>Market</h1>
         <p>Assets, OTC markets, real markets, payout percentages, and trading sessions will appear here.</p>
         <Link style={styles.link} to="/trading">Back to Trading</Link>
       </section>
@@ -28,6 +28,9 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "20px",
     maxWidth: "620px",
     width: "100%",
+  },
+  heading: {
+    color: "#fff",
   },
   link: {
     color: "#74f2a7",

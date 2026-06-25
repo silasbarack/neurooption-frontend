@@ -105,6 +105,40 @@ body {
   top: 7px;
 }
 
+.auth-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 24px;
+}
+
+.auth-logo-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #35baf6 0%, #244ff0 100%);
+  color: #ffffff;
+  font-size: 19px;
+  font-weight: 800;
+  flex: 0 0 auto;
+}
+
+.auth-logo h1 {
+  margin: 0;
+  color: #293245;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.auth-card h2 {
+  color: #1c2433;
+  text-align: center;
+}
+
 .auth-brand {
   font-size: 25px;
   line-height: 1;

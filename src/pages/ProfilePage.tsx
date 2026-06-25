@@ -71,6 +71,7 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: "0 22px 80px rgba(0,0,0,0.35)",
   },
   title: {
+    color: "#fff",
     marginBottom: "24px",
   },
   row: {

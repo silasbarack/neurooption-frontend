@@ -18,6 +18,7 @@ import type {
   AccountType,
   Asset,
   AssetCategory,
+  BackendTrade,
   Candle,
   ChartType,
   Currency,
@@ -25,6 +26,13 @@ import type {
   TradeMarker,
   TradeResultPopupItem,
   TradeSide,
+} from "../components/trading";
+
+import {
+  API_BASE_URL,
+  fetchJson,
+  formatMoney,
+  USER_ID,
 } from "../components/trading";
 
 import {
@@ -42,8 +50,6 @@ import {
   type MarketCandleUpdate,
   type MarketPriceUpdate,
 } from "../components/trading/marketSocket";
-
-type EmptyPanel = "openTrades" | "history" | "signals" | null;
 
 type BackendAsset = {
   symbol: string;
@@ -80,51 +86,10 @@ type BackendWalletResponse = {
   updatedAt?: string;
 };
 
-type BackendTradeStatus = "PENDING" | "WON" | "LOST" | "DRAW";
-
-type BackendTrade = {
-  id: string;
-  userId: string;
-  asset: string;
-  timeframe: string;
-  side: TradeSide;
-  accountType: AccountType;
-  currency: Currency;
-
-  stakeAmount: number;
-  stakeUsd: number;
-
-  payoutPercent: number;
-  expectedProfitAmount: number;
-  expectedProfitUsd: number;
-  expectedReturnAmount: number;
-  expectedReturnUsd: number;
-
-  entryPrice: number;
-  entryTime: number;
-  expirySeconds: number;
-  expiryTime: number;
-
-  status: BackendTradeStatus;
-  closePrice?: number;
-  settledAt?: number;
-
-  resultAmount?: number;
-  resultUsd?: number;
-  profitAmount?: number;
-  profitUsd?: number;
-};
-
 type PlaceTradeResponse = {
   trade: BackendTrade;
   wallet: BackendWalletResponse;
 };
-
-const API_BASE_URL = (
-  (import.meta.env.VITE_API_URL as string | undefined) || "http://localhost:4000"
-).replace(/\/$/, "");
-
-const USER_ID = "demo-user";
 
 const MIN_EXPIRY_SECONDS = 5;
 const MAX_EXPIRY_SECONDS = 5 * 60 * 60;
@@ -148,22 +113,6 @@ const VALID_CATEGORIES: AssetCategory[] = [
   "Indices",
   "Commodities",
 ];
-
-const CURRENCY_SYMBOLS: Record<Currency, string> = {
-  USD: "$",
-  KES: "KES",
-  UGX: "UGX",
-  TZS: "TZS",
-  NGN: "NGN",
-  XOF: "XOF",
-  EUR: "€",
-  CAD: "CAD",
-  JPY: "¥",
-  CNY: "¥",
-  AOA: "AOA",
-  ZAR: "R",
-  BRL: "R$",
-};
 
 const DEFAULT_SELECTED_INDICATORS = ["Moving Average", "MACD"];
 
@@ -214,37 +163,6 @@ function normalizeAsset(asset: BackendAsset): Asset {
   };
 }
 
-function formatMoney(value: number, currency: Currency) {
-  const symbol = CURRENCY_SYMBOLS[currency];
-
-  const decimals =
-    currency === "JPY" ||
-    currency === "UGX" ||
-    currency === "TZS" ||
-    currency === "XOF"
-      ? 0
-      : 2;
-
-  const safeValue = Number.isFinite(value) ? value : 0;
-
-  const formatted = safeValue.toLocaleString("en-US", {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  });
-
-  if (
-    currency === "USD" ||
-    currency === "EUR" ||
-    currency === "JPY" ||
-    currency === "ZAR" ||
-    currency === "BRL"
-  ) {
-    return `${symbol}${formatted}`;
-  }
-
-  return `${currency} ${formatted}`;
-}
-
 function formatExpiry(totalSeconds: number) {
   const safeSeconds = clamp(
     totalSeconds,
@@ -292,29 +210,6 @@ function calculateSentiment(candles: Candle[]) {
   const trendPressure = ((lastClose - firstClose) / firstClose) * 9000;
 
   return Math.round(clamp(40 + bullishRatio * 18 + trendPressure, 20, 60));
-}
-
-function getEmptyPanelTitle(panel: EmptyPanel) {
-  if (panel === "openTrades") return "Open trades";
-  if (panel === "history") return "Trades history";
-  if (panel === "signals") return "Signals";
-  return "";
-}
-
-async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-    },
-    signal,
-  });
-
-  if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
-  }
-
-  return response.json() as Promise<T>;
 }
 
 async function postJson<TResponse, TBody>(
@@ -451,12 +346,8 @@ export default function TradingPage() {
   const [resultMarkers, setResultMarkers] = React.useState<ResultMarker[]>([]);
   const [resultPopups, setResultPopups] = React.useState<TradeResultPopupItem[]>([]);
 
-  const [openTrades, setOpenTrades] = React.useState<BackendTrade[]>([]);
-  const [tradeHistory, setTradeHistory] = React.useState<BackendTrade[]>([]);
-
   const [nowMs, setNowMs] = React.useState(INITIAL_NOW_MS);
   const [sentiment, setSentiment] = React.useState(50);
-  const [emptyPanel, setEmptyPanel] = React.useState<EmptyPanel>(null);
 
   const stakeAmount = Number(amount);
   const safeStakeAmount = Number.isFinite(stakeAmount)
@@ -623,8 +514,6 @@ export default function TradingPage() {
           ),
         ]);
 
-        setOpenTrades(open);
-        setTradeHistory(history);
         setWalletBalance(Number(wallet.balance));
         setActiveTrades(open.map(tradeToMarker));
 
@@ -953,7 +842,6 @@ export default function TradingPage() {
       setPayout(Number(response.trade.payoutPercent));
       setWalletBalance(Number(response.wallet.balance));
 
-      setOpenTrades((current) => [response.trade, ...current]);
       setActiveTrades((current) => [tradeToMarker(response.trade), ...current]);
 
       await loadTradingState();
@@ -1111,87 +999,14 @@ export default function TradingPage() {
           onTrade={handleTrade}
         />
 
-        <TradingQuickMenu
-          onFullscreen={handleFullscreen}
-          onPanelOpen={setEmptyPanel}
-        />
+        <TradingQuickMenu onFullscreen={handleFullscreen} />
       </section>
 
-      <TradingBottomNav onPanelOpen={setEmptyPanel} onFullscreen={handleFullscreen} />
+      <TradingBottomNav onFullscreen={handleFullscreen} />
 
       <TradeResultPopup items={resultPopups} onDismiss={handleDismissResultPopup} />
 
       {tradeError && <div className="nt-trade-error">{tradeError}</div>}
-
-      {emptyPanel && (
-        <section className="nt-empty-panel">
-          <div className="nt-empty-card">
-            <button
-              type="button"
-              className="nt-empty-close"
-              onClick={() => setEmptyPanel(null)}
-            >
-              ×
-            </button>
-
-            <h2>{getEmptyPanelTitle(emptyPanel)}</h2>
-
-            {emptyPanel === "openTrades" && (
-              <>
-                {openTrades.length === 0 ? (
-                  <p>No open trades yet.</p>
-                ) : (
-                  <div className="nt-panel-list">
-                    {openTrades.map((trade) => (
-                      <div key={trade.id} className="nt-panel-row">
-                        <strong>
-                          {trade.side} {trade.asset}
-                        </strong>
-                        <span>
-                          {formatMoney(trade.stakeAmount, trade.currency)} •{" "}
-                          {trade.status}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-
-            {emptyPanel === "history" && (
-              <>
-                {tradeHistory.length === 0 ? (
-                  <p>No closed trades yet.</p>
-                ) : (
-                  <div className="nt-panel-list">
-                    {tradeHistory.slice(0, 20).map((trade) => (
-                      <div key={trade.id} className="nt-panel-row">
-                        <strong>
-                          {trade.status} • {trade.side} {trade.asset}
-                        </strong>
-                        <span>
-                          Entry {trade.entryPrice} → Close{" "}
-                          {trade.closePrice ?? "-"} • Profit{" "}
-                          {formatMoney(trade.profitAmount ?? 0, trade.currency)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-
-            {emptyPanel === "signals" && (
-              <>
-                <p>No signals yet.</p>
-                <small>
-                  Signals will appear here when your signal service is connected.
-                </small>
-              </>
-            )}
-          </div>
-        </section>
-      )}
     </main>
   );
 }

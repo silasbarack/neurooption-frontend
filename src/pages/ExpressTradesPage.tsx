@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 
-export default function ChatPage() {
+export default function ExpressTradesPage() {
   return (
     <main style={styles.page}>
       <section style={styles.card}>
-        <h1 style={styles.heading}>Chat</h1>
-        <p>Live support chat and user messages will appear here.</p>
+        <h1 style={styles.heading}>Express Trades</h1>
+        <p>Place express trades with shorter expiry windows here.</p>
         <Link style={styles.link} to="/trading">Back to Trading</Link>
       </section>
     </main>
