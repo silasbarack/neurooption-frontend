@@ -1,6 +1,7 @@
 import "./trading-components.css";
 
 export { default as TradingHeader } from "./TradingHeader";
+export { default as AccountBalanceSelector } from "./AccountBalanceSelector";
 export { default as TradingSidebar } from "./TradingSidebar";
 export { default as TradingQuickMenu } from "./TradingQuickMenu";
 export { default as TradingBottomNav } from "./TradingBottomNav";

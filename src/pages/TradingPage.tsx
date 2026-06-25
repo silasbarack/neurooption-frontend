@@ -738,12 +738,6 @@ export default function TradingPage() {
     document.documentElement.requestFullscreen().catch(() => undefined);
   }
 
-  function handleTopUp() {
-    window.alert(
-      "Deposit placeholder: connect this button to your NeuroOption deposit flow."
-    );
-  }
-
   function handleAssetChange(asset: Asset) {
     showSyntheticMarket(asset, timeframe);
     setSelectedAsset(asset);
@@ -892,10 +886,9 @@ export default function TradingPage() {
       <TradingHeader
         accountType={accountType}
         currency={currency}
-        balanceText={formatMoney(walletBalance, currency)}
+        balance={walletBalance}
         onAccountChange={setAccountType}
         onCurrencyChange={setCurrency}
-        onTopUp={handleTopUp}
         onFullscreen={handleFullscreen}
       />
 

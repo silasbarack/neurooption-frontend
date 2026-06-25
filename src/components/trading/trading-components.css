@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800;900&display=swap");
 
 html,
 body,
@@ -31,7 +31,7 @@ button {
 }
 
 .nt-header {
-  height: 58px;
+  height: 88px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -90,41 +90,138 @@ button {
   min-width: 0;
 }
 
-.nt-account-bar select {
-  height: 38px;
-  max-width: 110px;
-  border: 1px solid var(--nt-border);
-  border-radius: 9px;
-  padding: 0 10px;
-  color: var(--nt-text);
-  background: var(--nt-surface-alt);
-  font-weight: 700;
-  outline: none;
+.account-balance-selector {
+  position: relative;
+  font-family: "Noto Sans", Arial, sans-serif;
+  background: #151a2d;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 10px 14px;
+  min-width: 240px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.nt-balance {
-  min-width: 124px;
-  color: var(--nt-text);
-  text-align: right;
-  font-size: 15px;
-  font-weight: 900;
+.balance-info {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.balance-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.balance-main-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.balance-amount {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.nt-top-up {
-  height: 38px;
-  border: 0;
-  border-radius: 8px;
-  padding: 0 16px;
+.balance-arrow {
+  flex: 0 0 auto;
   color: #ffffff;
-  background: linear-gradient(135deg, #00b4ff, #0a6fd6);
-  box-shadow: 0 6px 16px rgba(0, 154, 249, 0.35);
-  font-weight: 900;
+  font-size: 18px;
 }
 
-.nt-top-up:hover {
-  box-shadow: 0 8px 20px rgba(0, 154, 249, 0.5);
-  transform: translateY(-1px);
+.deposit-shortcut-btn {
+  flex: 0 0 auto;
+  width: 54px;
+  height: 54px;
+  border: none;
+  border-radius: 14px;
+  background: #22c55e;
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.08s ease;
+}
+
+.deposit-shortcut-btn:hover {
+  filter: brightness(1.1);
+}
+
+.deposit-shortcut-btn:active {
+  transform: translateY(1px);
+}
+
+.balance-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 280px;
+  background: #151a2d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+  z-index: 95;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.balance-dropdown-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.balance-dropdown-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.balance-dropdown-currencies {
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.balance-dropdown-option {
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.balance-dropdown-option:hover {
+  border-color: var(--nt-accent);
+}
+
+.balance-dropdown-option.active {
+  border-color: var(--nt-accent);
+  background: rgba(0, 154, 249, 0.18);
+  color: var(--nt-accent);
 }
 
 .nt-fullscreen {
@@ -751,30 +848,40 @@ button {
     justify-content: flex-end;
   }
 
-  .nt-account-bar select {
-    max-width: 92px;
-    height: 52px;
-    font-size: 12px;
+  .account-balance-selector {
+    min-width: 0;
+    flex: 1;
+    padding: 6px 10px;
+    gap: 8px;
   }
 
-  .nt-balance {
-    min-width: 92px;
-    max-width: 112px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .balance-top-row {
+    font-size: 11px;
+  }
+
+  .balance-amount {
+    font-size: 19px;
+  }
+
+  .balance-arrow {
     font-size: 14px;
   }
 
-  .nt-top-up {
-    width: 54px;
+  .deposit-shortcut-btn {
+    width: 52px;
     height: 52px;
-    padding: 0;
     font-size: 0;
   }
 
-  .nt-top-up::after {
+  .deposit-shortcut-btn::after {
     content: "💳";
-    font-size: 24px;
+    font-size: 22px;
+  }
+
+  .balance-dropdown {
+    left: auto;
+    right: 0;
+    min-width: 240px;
   }
 
   .nt-avatar {
@@ -947,22 +1054,41 @@ button {
     gap: 6px;
   }
 
-  .nt-account-bar select {
-    max-width: 64px;
-    height: 40px;
-    padding: 0 4px;
-    font-size: 10px;
+  .account-balance-selector {
+    min-width: 0;
+    flex: 1;
+    padding: 3px 8px;
+    gap: 6px;
+    border-radius: 10px;
   }
 
-  .nt-balance {
-    min-width: 66px;
-    max-width: 88px;
-    font-size: 12px;
+  .balance-top-row {
+    font-size: 9px;
+    margin-bottom: 2px;
   }
 
-  .nt-top-up {
+  .balance-amount {
+    font-size: 13px;
+  }
+
+  .balance-arrow {
+    font-size: 11px;
+  }
+
+  .deposit-shortcut-btn {
     width: 40px;
     height: 40px;
+    border-radius: 10px;
+  }
+
+  .deposit-shortcut-btn::after {
+    font-size: 18px;
+  }
+
+  .balance-dropdown {
+    right: 0;
+    min-width: 220px;
+    padding: 10px;
   }
 
   .nt-fullscreen {

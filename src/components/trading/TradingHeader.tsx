@@ -1,23 +1,21 @@
 import type { AccountType, Currency } from "./trading.types";
-import { CURRENCIES } from "./trading.constants";
+import AccountBalanceSelector from "./AccountBalanceSelector";
 
 type TradingHeaderProps = {
   accountType: AccountType;
   currency: Currency;
-  balanceText: string;
+  balance: number;
   onAccountChange: (value: AccountType) => void;
   onCurrencyChange: (value: Currency) => void;
-  onTopUp: () => void;
   onFullscreen: () => void;
 };
 
 export default function TradingHeader({
   accountType,
   currency,
-  balanceText,
+  balance,
   onAccountChange,
   onCurrencyChange,
-  onTopUp,
   onFullscreen,
 }: TradingHeaderProps) {
   return (
@@ -31,30 +29,14 @@ export default function TradingHeader({
       </div>
 
       <div className="nt-account-bar">
-        <select
-          value={accountType}
-          onChange={(event) => onAccountChange(event.target.value as AccountType)}
-        >
-          <option value="QT Demo">QT Demo</option>
-          <option value="QT Real">QT Real</option>
-        </select>
-
-        <select
-          value={currency}
-          onChange={(event) => onCurrencyChange(event.target.value as Currency)}
-        >
-          {CURRENCIES.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-
-        <strong className="nt-balance">{balanceText}</strong>
-
-        <button type="button" className="nt-top-up" onClick={onTopUp}>
-          TOP UP
-        </button>
+        <AccountBalanceSelector
+          accountType={accountType}
+          currency={currency}
+          balance={balance}
+          onAccountTypeChange={onAccountChange}
+          onCurrencyChange={onCurrencyChange}
+          depositPath="/finance"
+        />
 
         <button type="button" className="nt-fullscreen" onClick={onFullscreen}>
           ⛶
