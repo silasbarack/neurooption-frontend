@@ -1,10 +1,25 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import {
-  fetchOpenTrades,
-  formatMoney,
-  type BackendTrade,
-} from "../components/trading/tradesApi";
+import { PageHeader, StatusBadge, DataTable, EmptyState } from "../components/common";
+import type { DataTableColumn } from "../components/common";
+import { fetchOpenTrades, formatMoney, type BackendTrade } from "../components/trading/tradesApi";
+
+// Live "time left until expiry" — ticks every second from the trade's
+// real expiryTime, no fake price data involved.
+function Countdown({ expiryTime }: { expiryTime: number }) {
+  const [now, setNow] = React.useState(Date.now());
+
+  React.useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const remainingMs = Math.max(0, expiryTime - now);
+  const seconds = Math.floor(remainingMs / 1000);
+  const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const ss = String(seconds % 60).padStart(2, "0");
+
+  return <span className={remainingMs === 0 ? "np-text-muted" : ""}>{mm}:{ss}</span>;
+}
 
 export default function OpenTradesPage() {
   const [trades, setTrades] = React.useState<BackendTrade[]>([]);
@@ -21,75 +36,65 @@ export default function OpenTradesPage() {
     return () => controller.abort();
   }, []);
 
+  const totalAtRisk = trades.reduce((sum, t) => sum + Number(t.stakeAmount), 0);
+
+  const columns: Array<DataTableColumn<BackendTrade>> = [
+    { key: "asset", header: "Asset", render: (t) => <strong>{t.asset}</strong> },
+    {
+      key: "side",
+      header: "Direction",
+      render: (t) => <StatusBadge tone={t.side === "BUY" ? "success" : "danger"}>{t.side}</StatusBadge>,
+    },
+    { key: "investment", header: "Investment", align: "right", render: (t) => formatMoney(t.stakeAmount, t.currency) },
+    { key: "entry", header: "Entry Price", align: "right", render: (t) => t.entryPrice },
+    { key: "expiry", header: "Time Left", align: "right", render: (t) => <Countdown expiryTime={t.expiryTime} /> },
+    { key: "payout", header: "Payout", align: "right", render: (t) => `+${t.payoutPercent}%` },
+    {
+      key: "profit",
+      header: "Potential Profit",
+      align: "right",
+      render: (t) => <span className="np-text-success">{formatMoney(t.expectedProfitAmount, t.currency)}</span>,
+    },
+    { key: "status", header: "Status", render: () => <StatusBadge tone="info">Pending</StatusBadge> },
+  ];
+
   return (
-    <main style={styles.page}>
-      <section style={styles.card}>
-        <h1 style={styles.heading}>Open trades</h1>
-
-        {loading && <p>Loading...</p>}
-
-        {!loading && trades.length === 0 && <p>No open trades yet.</p>}
+    <main className="np-page">
+      <div className="np-container np-container-wide">
+        <PageHeader title="Open Trades" subtitle="All of your currently active positions." />
 
         {!loading && trades.length > 0 && (
-          <div style={styles.list}>
-            {trades.map((trade) => (
-              <div key={trade.id} style={styles.row}>
-                <strong>
-                  {trade.side} {trade.asset}
-                </strong>
-                <span style={styles.rowMeta}>
-                  {formatMoney(trade.stakeAmount, trade.currency)} • {trade.status}
-                </span>
-              </div>
-            ))}
-          </div>
+          <section className="np-section np-grid np-grid-3">
+            <div className="np-stat-card">
+              <div className="np-stat-card-label">Open Positions</div>
+              <div className="np-stat-card-value">{trades.length}</div>
+            </div>
+            <div className="np-stat-card np-tone-warning">
+              <div className="np-stat-card-label">Total At Risk</div>
+              <div className="np-stat-card-value">{formatMoney(totalAtRisk, trades[0]?.currency ?? "USD")}</div>
+            </div>
+          </section>
         )}
 
-        <Link style={styles.link} to="/trading">
-          Back to Trading
-        </Link>
-      </section>
+        <section className="np-section">
+          {loading ? (
+            <p className="np-text-muted">Loading open trades...</p>
+          ) : (
+            <DataTable
+              columns={columns}
+              rows={trades}
+              rowKey={(t) => t.id}
+              emptyState={
+                <EmptyState
+                  icon="📭"
+                  title="No open trades yet"
+                  description="Trades you place on the Trading screen will appear here while they're active."
+                />
+              }
+            />
+          )}
+        </section>
+      </div>
     </main>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  page: {
-    minHeight: "100vh",
-    background: "#070b14",
-    color: "#fff",
-    fontFamily: "Roboto, sans-serif",
-    display: "grid",
-    placeItems: "center",
-    padding: "24px",
-  },
-  heading: {
-    color: "#fff",
-  },
-  card: {
-    background: "#111827",
-    padding: "28px",
-    borderRadius: "20px",
-    maxWidth: "620px",
-    width: "100%",
-  },
-  list: {
-    display: "grid",
-    gap: "10px",
-    margin: "16px 0",
-  },
-  row: {
-    display: "grid",
-    gap: "4px",
-    padding: "12px 14px",
-    borderRadius: "12px",
-    background: "#1a2233",
-  },
-  rowMeta: {
-    color: "#9aa4b8",
-    fontSize: "13px",
-  },
-  link: {
-    color: "#74f2a7",
-  },
-};

@@ -1,4 +1,5 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 import "./TradingPage.css";
 
 import {
@@ -297,6 +298,7 @@ function tradeToResultPopupItem(trade: BackendTrade): TradeResultPopupItem {
 }
 
 export default function TradingPage() {
+  const location = useLocation();
   const candlesRef = React.useRef<Candle[]>(INITIAL_CANDLES);
   const expirySecondsRef = React.useRef(45);
   const fetchingTradingStateRef = React.useRef(false);
@@ -343,6 +345,7 @@ export default function TradingPage() {
 
   const [candles, setCandles] = React.useState<Candle[]>(INITIAL_CANDLES);
   const [activeTrades, setActiveTrades] = React.useState<TradeMarker[]>([]);
+  const [openTrades, setOpenTrades] = React.useState<BackendTrade[]>([]);
   const [resultMarkers, setResultMarkers] = React.useState<ResultMarker[]>([]);
   const [resultPopups, setResultPopups] = React.useState<TradeResultPopupItem[]>([]);
 
@@ -516,6 +519,7 @@ export default function TradingPage() {
 
         setWalletBalance(Number(wallet.balance));
         setActiveTrades(open.map(tradeToMarker));
+        setOpenTrades(open);
 
         const settled = history.filter((trade) => trade.status !== "PENDING");
 
@@ -747,6 +751,19 @@ export default function TradingPage() {
     setAssetMenuOpen(false);
     loadHistoricalCandles(asset, timeframe).catch(() => undefined);
   }
+
+  // Allow other pages (e.g. Market) to deep-link into a specific asset via
+  // navigate("/trading", { state: { symbol } }).
+  React.useEffect(() => {
+    const requestedSymbol = (location.state as { symbol?: string } | null)?.symbol;
+    if (!requestedSymbol) return;
+
+    const match = ASSETS.find((asset) => asset.symbol === requestedSymbol);
+    if (match) {
+      handleAssetChange(match);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleTimeframeChange(nextTimeframe: string) {
     showSyntheticMarket(selectedAsset, nextTimeframe);
@@ -994,6 +1011,7 @@ export default function TradingPage() {
           expectedReturnText={formatMoney(expectedReturn, currency)}
           canTrade={canTrade}
           sentiment={sentiment}
+          openTrades={openTrades}
           onAdjustExpiry={handleAdjustExpiry}
           onAmountChange={setAmount}
           onTrade={handleTrade}

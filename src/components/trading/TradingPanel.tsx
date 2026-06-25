@@ -1,4 +1,7 @@
+import { Link } from "react-router-dom";
 import type { Currency, TradeSide } from "./trading.types";
+import type { BackendTrade } from "./tradesApi";
+import { formatMoney } from "./tradesApi";
 
 type ExpiryParts = {
   hours: number;
@@ -16,6 +19,7 @@ type TradingPanelProps = {
   expectedReturnText: string;
   canTrade: boolean;
   sentiment: number;
+  openTrades: BackendTrade[];
   onAdjustExpiry: (unit: "hours" | "minutes" | "seconds", delta: number) => void;
   onAmountChange: (amount: string) => void;
   onTrade: (side: TradeSide) => void;
@@ -31,6 +35,7 @@ export default function TradingPanel({
   expectedReturnText,
   canTrade,
   sentiment,
+  openTrades,
   onAdjustExpiry,
   onAmountChange,
   onTrade,
@@ -135,6 +140,27 @@ export default function TradingPanel({
       </section>
 
       <p className="nt-white-return">Expected return: {expectedReturnText}</p>
+
+      <section className="nt-open-trades">
+        <div className="nt-open-trades-head">
+          <h3>Open Trades ({openTrades.length})</h3>
+          <Link to="/open-trades">View all →</Link>
+        </div>
+
+        {openTrades.length === 0 ? (
+          <p className="nt-open-trades-empty">No open trades right now.</p>
+        ) : (
+          <ul className="nt-open-trades-list">
+            {openTrades.slice(0, 4).map((trade) => (
+              <li key={trade.id} className={trade.side === "BUY" ? "buy" : "sell"}>
+                <span className="nt-open-trade-asset">{trade.asset}</span>
+                <span className="nt-open-trade-side">{trade.side}</span>
+                <span className="nt-open-trade-amount">{formatMoney(trade.stakeAmount, trade.currency)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </aside>
   );
 }
