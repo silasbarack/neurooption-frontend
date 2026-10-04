@@ -11,7 +11,7 @@ export default function Logo({
 
   return (
     <img
-      src="/neurooption-logo.jpg"
+      src="/neurooption-logo-v2.jpg"
       alt="NeuroOption"
       className={classes}
       loading={loading}
