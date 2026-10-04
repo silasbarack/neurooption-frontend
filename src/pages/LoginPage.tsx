@@ -8,7 +8,33 @@ import {
   translate,
   type LanguageCode,
 } from "../i18n/authI18n";
-import "./AuthPages.css";
+import {
+  ArrowRight,
+  ChartCandlestick,
+  CircleAlert,
+  CircleCheck,
+  Eye,
+  EyeOff,
+  Globe,
+  Layers,
+  LoaderCircle,
+  Lock,
+  Mail,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
+import "./LoginPage.css";
+
+// Decorative candles for the market preview: [open, close, high, low] in px
+// from the bottom of a 120px chart.
+const PREVIEW_CANDLES: Array<[number, number, number, number]> = [
+  [21, 51, 68, 8], [46, 29, 61, 21], [25, 51, 63, 17], [46, 36, 55, 25],
+  [31, 53, 61, 19], [49, 68, 85, 38], [63, 38, 76, 29], [34, 46, 57, 21],
+  [42, 66, 76, 27], [61, 46, 74, 31], [42, 70, 85, 31], [66, 53, 76, 40],
+  [49, 68, 85, 38], [63, 81, 95, 55], [76, 55, 85, 42], [51, 76, 89, 42],
+  [72, 63, 89, 55], [59, 81, 89, 46], [76, 91, 104, 61], [87, 68, 104, 57],
+  [63, 87, 98, 49],
+];
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -63,23 +89,22 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="auth-shell auth-premium-shell">
-      <header className="auth-topbar auth-premium-topbar">
-        <Link to="/" className="auth-brand-link" aria-label="NeuroOption home">
-          <Logo className="auth-approved-logo" />
+    <main className="lp">
+      <header className="lp-header">
+        <Link to="/" className="lp-brand" aria-label="NeuroOption home">
+          <Logo className="lp-logo" />
         </Link>
 
-        <nav className="auth-nav" aria-label="Primary navigation">
+        <nav className="lp-nav" aria-label="Primary navigation">
           <Link to="/trading">Trading</Link>
           <a href="#markets">Markets</a>
           <a href="#platform">Platform</a>
           <a href="#security">Security</a>
         </nav>
 
-        <div className="auth-language">
-          <span aria-hidden="true">◎</span>
+        <label className="lp-language">
+          <Globe size={16} aria-hidden="true" />
           <select
-            className="auth-language-select"
             value={language}
             onChange={(event) => setLanguage(event.target.value as LanguageCode)}
             aria-label="Language"
@@ -90,203 +115,186 @@ export default function LoginPage() {
               </option>
             ))}
           </select>
-        </div>
+        </label>
       </header>
 
-      <section className="auth-premium-grid">
-        <aside className="auth-hero-panel">
-          <div className="auth-eyebrow">FAST OTC MARKET EXPERIENCE</div>
+      <section className="lp-main">
+        <div className="lp-hero" id="platform">
+          <span className="lp-eyebrow">
+            <i aria-hidden="true" />
+            Fast OTC market experience
+          </span>
           <h1>
             Trade with clarity.
             <span>React in real time.</span>
           </h1>
-          <p className="auth-hero-copy">
+          <p className="lp-lead">
             NeuroOption brings OTC assets, responsive candlestick charts and
             streamlined account controls into one focused trading workspace.
           </p>
 
-          <div className="auth-feature-list">
-            <div>
-              <span className="auth-feature-icon">↯</span>
-              <section>
-                <strong>Low-latency market stream</strong>
-                <small>WebSocket-driven price and candle updates.</small>
-              </section>
-            </div>
-            <div>
-              <span className="auth-feature-icon">▥</span>
-              <section>
-                <strong>OTC & multi-asset markets</strong>
-                <small>Forex, crypto, indices, stocks and commodities.</small>
-              </section>
-            </div>
-            <div>
-              <span className="auth-feature-icon">◇</span>
-              <section>
-                <strong>Secure account access</strong>
-                <small>Token-based sessions with protected account routes.</small>
-              </section>
-            </div>
-          </div>
-
-          <div className="auth-hero-stats">
-            <div><strong>S5</strong><span>fast timeframe</span></div>
-            <div><strong>4×/s</strong><span>market tick target</span></div>
-            <div><strong>24/7</strong><span>OTC availability</span></div>
-          </div>
-        </aside>
-
-        <div className="auth-login-column">
-          <div className="auth-card auth-premium-card">
-            <div className="auth-card-brand">
-              <Logo className="auth-approved-logo auth-approved-logo-card" />
-            </div>
-
-            <div className="auth-card-heading">
-              <span>SIGN IN TO YOUR ACCOUNT</span>
-              <h2>{tt("signIn")}</h2>
-              <p>
-                {tt("notRegistered")}{" "}
-                <Link to="/register">{tt("registration")}</Link>
-              </p>
-            </div>
-
-            {message && (
-              <div className={`auth-alert ${success ? "success" : ""}`}>
-                {message}
+          <div className="lp-market" id="markets" aria-label="Market preview">
+            <div className="lp-market-head">
+              <div>
+                <span className="lp-market-pair">EUR/USD OTC</span>
+                <strong className="lp-market-price">1.08742</strong>
               </div>
-            )}
-
-            <form className="auth-form" onSubmit={handleSubmit}>
-              <label className="auth-premium-field" htmlFor="email">
-                <span>{tt("email")}</span>
-                <div>
-                  <i aria-hidden="true">✉</i>
-                  <input
-                    id="email"
-                    className="auth-input"
-                    type="email"
-                    autoComplete="email"
-                    value={email}
-                    placeholder="you@example.com"
-                    onChange={(event) => setEmail(event.target.value)}
-                    required
+              <span className="lp-market-change">+0.08%</span>
+            </div>
+            <div className="lp-market-chart" aria-hidden="true">
+              {PREVIEW_CANDLES.map(([open, close, high, low], index) => (
+                <span key={index} className={close >= open ? "up" : "down"}>
+                  <b style={{ bottom: `${low}px`, height: `${high - low}px` }} />
+                  <i
+                    style={{
+                      bottom: `${Math.min(open, close)}px`,
+                      height: `${Math.max(3, Math.abs(close - open))}px`,
+                    }}
                   />
-                </div>
-              </label>
+                </span>
+              ))}
+            </div>
+            <div className="lp-market-actions">
+              <div className="lp-market-payout">
+                <span>Payout</span>
+                <strong>85%</strong>
+              </div>
+              <span className="lp-market-buy">Buy</span>
+              <span className="lp-market-sell">Sell</span>
+            </div>
+          </div>
 
-              <label className="auth-premium-field" htmlFor="password">
-                <span>{tt("password")}</span>
-                <div>
-                  <i aria-hidden="true">⌑</i>
-                  <input
-                    id="password"
-                    className="auth-input"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
-                    value={password}
-                    placeholder={tt("password")}
-                    onChange={(event) => setPassword(event.target.value)}
-                    required
-                  />
-                  <button
-                    className="auth-password-toggle"
-                    type="button"
-                    onClick={() => setShowPassword((current) => !current)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? "Hide" : "Show"}
-                  </button>
-                </div>
-              </label>
+          <ul className="lp-features" id="security">
+            <li>
+              <span className="lp-feature-icon"><Zap size={18} /></span>
+              <div>
+                <strong>Low-latency stream</strong>
+                <small>Live price and candle updates</small>
+              </div>
+            </li>
+            <li>
+              <span className="lp-feature-icon"><Layers size={18} /></span>
+              <div>
+                <strong>Multi-asset markets</strong>
+                <small>Forex, crypto, indices and more</small>
+              </div>
+            </li>
+            <li>
+              <span className="lp-feature-icon"><ShieldCheck size={18} /></span>
+              <div>
+                <strong>Secure access</strong>
+                <small>Protected, token-based sessions</small>
+              </div>
+            </li>
+          </ul>
+        </div>
 
-              <div className="auth-options">
-                <label className="auth-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(event) => setRememberMe(event.target.checked)}
-                  />
-                  <span>{tt("rememberMe")}</span>
-                </label>
+        <div className="lp-card">
+          <div className="lp-card-head">
+            <span className="lp-card-icon"><ChartCandlestick size={22} /></span>
+            <h2>{tt("signIn")}</h2>
+            <p>Welcome back. Sign in to continue to your trading workspace.</p>
+          </div>
 
-                <Link to="/forgot-password" className="auth-recovery">
+          {message && (
+            <div className={`lp-alert ${success ? "is-success" : "is-error"}`} role="alert">
+              {success ? <CircleCheck size={18} /> : <CircleAlert size={18} />}
+              <span>{message}</span>
+            </div>
+          )}
+
+          <form className="lp-form" onSubmit={handleSubmit}>
+            <div className="lp-field">
+              <label htmlFor="email">{tt("email")}</label>
+              <div className="lp-input">
+                <Mail size={18} aria-hidden="true" />
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  placeholder="you@example.com"
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="lp-field">
+              <div className="lp-field-row">
+                <label htmlFor="password">{tt("password")}</label>
+                <Link to="/forgot-password" className="lp-link">
                   {tt("passwordRecovery")}
                 </Link>
               </div>
-
-              <button className="auth-button auth-primary-cta" type="submit" disabled={loading}>
-                <span>{loading ? tt("signingIn") : tt("signIn")}</span>
-                <b aria-hidden="true">→</b>
-              </button>
-
-              <div className="auth-divider"><span>or</span></div>
-
-              <Link className="auth-create-account" to="/register">
-                {tt("registration")}
-              </Link>
-            </form>
-
-            <div className="auth-security-note">
-              <span aria-hidden="true">✓</span>
-              <p>
-                <strong>Protected session</strong>
-                <small>Your credentials are sent only to the NeuroOption API.</small>
-              </p>
+              <div className="lp-input">
+                <Lock size={18} aria-hidden="true" />
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  value={password}
+                  placeholder="Enter your password"
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                />
+                <button
+                  className="lp-eye"
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
+
+            <label className="lp-check">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(event) => setRememberMe(event.target.checked)}
+              />
+              <span>{tt("rememberMe")}</span>
+            </label>
+
+            <button className="lp-submit" type="submit" disabled={loading}>
+              {loading ? (
+                <>
+                  <LoaderCircle size={18} className="lp-spin" aria-hidden="true" />
+                  <span>{tt("signingIn")}</span>
+                </>
+              ) : (
+                <>
+                  <span>{tt("signIn")}</span>
+                  <ArrowRight size={18} aria-hidden="true" />
+                </>
+              )}
+            </button>
+          </form>
+
+          <p className="lp-register">
+            {tt("notRegistered")}{" "}
+            <Link to="/register" className="lp-link">
+              {tt("registration")}
+            </Link>
+          </p>
+
+          <div className="lp-trust">
+            <ShieldCheck size={16} aria-hidden="true" />
+            <span>Encrypted connection. Your credentials are sent only to NeuroOption.</span>
           </div>
         </div>
-
-        <aside className="auth-market-preview" id="markets">
-          <div className="auth-preview-head">
-            <div>
-              <span>EUR/USD OTC</span>
-              <strong>1.08742</strong>
-            </div>
-            <b>+0.08%</b>
-          </div>
-
-          <div className="auth-preview-timeframes">
-            <span>S5</span><span>S10</span><span>S30</span><span className="active">M1</span><span>M5</span>
-          </div>
-
-          <div className="auth-preview-chart" aria-label="Decorative candlestick market preview">
-            {[
-              42, 54, 48, 66, 60, 76, 69, 88, 80, 96, 84, 102, 94, 112, 104,
-              122, 114, 130, 119, 138, 126, 146, 136, 154,
-            ].map((height, index) => (
-              <i
-                key={index}
-                className={index % 4 === 1 ? "down" : "up"}
-                style={{
-                  height: `${Math.max(24, height * 0.72)}px`,
-                  transform: `translateY(${(index % 5) * 4}px)`,
-                }}
-              />
-            ))}
-            <span className="auth-preview-price-line" />
-          </div>
-
-          <div className="auth-preview-tradebox">
-            <div>
-              <span>Payout</span>
-              <strong>85%</strong>
-            </div>
-            <button type="button" className="preview-buy">▲ BUY</button>
-            <button type="button" className="preview-sell">▼ SELL</button>
-          </div>
-          <p>Preview only. Sign in to access the live trading workspace.</p>
-        </aside>
       </section>
 
-      <footer className="auth-premium-footer">
-        <span>© 2026 NeuroOption</span>
-        <div>
+      <footer className="lp-footer">
+        <span>&copy; 2026 NeuroOption</span>
+        <nav aria-label="Legal">
           <a href="#terms">Terms</a>
           <a href="#privacy">{tt("privacy")}</a>
           <a href="#contacts">{tt("contacts")}</a>
-        </div>
-        <strong>21+</strong>
+        </nav>
+        <span className="lp-age">21+</span>
       </footer>
     </main>
   );
