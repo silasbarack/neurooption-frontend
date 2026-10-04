@@ -7,8 +7,8 @@ import "./AuthLayout.css";
 
 type AuthLayoutProps = {
   children: ReactNode;
-  /** Two columns (brand panel + card) or a single centred card. */
-  variant?: "split" | "single";
+  /** Intro content stacked above the card, or a single centred card. */
+  variant?: "stacked" | "single";
   language?: LanguageCode;
   onLanguageChange?: (language: LanguageCode) => void;
   privacyLabel?: string;
@@ -17,7 +17,7 @@ type AuthLayoutProps = {
 
 export default function AuthLayout({
   children,
-  variant = "split",
+  variant = "stacked",
   language,
   onLanguageChange,
   privacyLabel = "Privacy policy",
@@ -57,7 +57,7 @@ export default function AuthLayout({
         )}
       </header>
 
-      <section className={`lp-main${variant === "single" ? " is-single" : ""}`}>
+      <section className={`lp-main ${variant === "single" ? "is-single" : "is-stacked"}`}>
         {children}
       </section>
 

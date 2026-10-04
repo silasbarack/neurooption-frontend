@@ -846,6 +846,76 @@
   color: var(--lp-accent);
 }
 
+/* Stacked layout: intro content centred above the card */
+.lp-main.is-stacked {
+  grid-template-columns: minmax(0, 560px);
+  justify-content: center;
+  gap: 28px;
+  padding-top: 8px;
+}
+
+.is-stacked .lp-hero {
+  text-align: center;
+}
+
+.is-stacked .lp-hero h1 {
+  margin: 14px 0 10px;
+  font-size: clamp(28px, 3.4vw, 36px);
+}
+
+.is-stacked .lp-hero h1 span {
+  display: inline;
+}
+
+.is-stacked .lp-hero h1 span::before {
+  content: " ";
+}
+
+.is-stacked .lp-lead {
+  max-width: none;
+  margin: 0 auto 20px;
+  font-size: 15px;
+}
+
+.is-stacked .lp-market,
+.is-stacked .lp-features,
+.is-stacked .lp-benefits {
+  max-width: none;
+  margin-inline: auto;
+  text-align: start;
+}
+
+.is-stacked .lp-market {
+  padding: 14px 16px;
+}
+
+.is-stacked .lp-market-chart {
+  height: 84px;
+  margin: 10px 0 0;
+}
+
+.is-stacked .lp-market-actions {
+  display: none;
+}
+
+.is-stacked .lp-features {
+  margin-top: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.is-stacked .lp-benefits {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.is-stacked .lp-benefits li {
+  padding: 12px 14px;
+}
+
+.is-stacked .lp-card {
+  order: 0;
+}
+
 /* Responsive */
 @media (max-width: 1080px) {
   .lp-main {
@@ -911,7 +981,9 @@
     font-size: 24px;
   }
 
-  .lp-features {
+  .lp-features,
+  .is-stacked .lp-features,
+  .is-stacked .lp-benefits {
     grid-template-columns: 1fr;
   }
 
