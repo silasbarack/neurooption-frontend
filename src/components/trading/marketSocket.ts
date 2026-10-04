@@ -33,6 +33,12 @@ export function getMarketSocket(baseUrl: string) {
   if (!socket) {
     socket = io(`${baseUrl}/market`, {
       transports: ["websocket"],
+      upgrade: false,
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 250,
+      reconnectionDelayMax: 1500,
+      timeout: 5000,
     });
   }
 
