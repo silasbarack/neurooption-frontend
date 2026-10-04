@@ -65,10 +65,7 @@ export default function LoginPage() {
     <main className="auth-shell auth-premium-shell">
       <header className="auth-topbar auth-premium-topbar">
         <Link to="/" className="auth-brand-link" aria-label="NeuroOption home">
-          <span className="auth-logo-mark" aria-hidden="true" />
-          <span className="auth-brand">
-            <strong>Neuro</strong><em>Option</em>
-          </span>
+          <img className="auth-approved-logo" src="/neurooption-logo.jpg" alt="NeuroOption" />
         </Link>
 
         <nav className="auth-nav" aria-label="Primary navigation">
@@ -141,10 +138,7 @@ export default function LoginPage() {
         <div className="auth-login-column">
           <div className="auth-card auth-premium-card">
             <div className="auth-card-brand">
-              <span className="auth-logo-mark" aria-hidden="true" />
-              <span className="auth-brand">
-                <strong>Neuro</strong><em>Option</em>
-              </span>
+              <img className="auth-approved-logo auth-approved-logo-card" src="/neurooption-logo.jpg" alt="NeuroOption" />
             </div>
 
             <div className="auth-card-heading">
