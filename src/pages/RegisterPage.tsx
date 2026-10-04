@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../api/auth.api";
+import Logo from "../components/branding/Logo";
 import {
   languages,
   translate,
@@ -93,7 +94,7 @@ export default function RegisterPage() {
         <div>
           <div className="auth-card">
             <div className="auth-logo-row">
-              <img className="auth-approved-logo auth-approved-logo-card" src="/neurooption-logo.png" alt="NeuroOption" />
+              <Logo className="auth-approved-logo auth-approved-logo-card" />
             </div>
 
             <h1 className="auth-title">{tt("registration")}</h1>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Logo from "../components/branding/Logo";
 import "./AuthPages.css";
 
 type DeleteResponse = {
@@ -72,7 +73,7 @@ export default function DeleteAccountPage() {
   return (
     <main className="auth-page">
       <section className="auth-card">
-        <img className="auth-approved-logo auth-approved-logo-card" src="/neurooption-logo.png" alt="NeuroOption" />
+        <Logo className="auth-approved-logo auth-approved-logo-card" />
 
         <h2>Delete Account</h2>
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Logo from "../components/branding/Logo";
 import "./AuthPages.css";
 
 type ForgotPasswordResponse = { message?: string; data?: { message?: string } };
@@ -44,7 +45,7 @@ export default function ForgotPasswordPage() {
   return (
     <main className="auth-page auth-recovery-page">
       <section className="auth-card auth-recovery-card">
-        <img className="auth-approved-logo auth-approved-logo-card" src="/neurooption-logo.png" alt="NeuroOption" />
+        <Logo className="auth-approved-logo auth-approved-logo-card" />
         <h2>Forgot Password</h2>
         <p className="auth-subtitle">Enter your email and we’ll send a secure six-digit verification code.</p>
 

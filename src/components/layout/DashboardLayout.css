@@ -25,6 +25,16 @@
   font-size: 22px;
   font-weight: 800;
   color: #dbeafe;
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.dashboard-brand-logo {
+  display: block;
+  width: 178px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 .dashboard-brand-icon {
@@ -80,6 +90,10 @@
   .dashboard-sidebar {
     width: 78px;
     padding: 18px 10px;
+  }
+
+  .dashboard-brand-logo {
+    width: 58px;
   }
 
   .dashboard-brand span,

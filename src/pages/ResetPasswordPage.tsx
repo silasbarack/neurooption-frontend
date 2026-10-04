@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import Logo from "../components/branding/Logo";
 import "./AuthPages.css";
 
 type ResetPasswordResponse = { message?: string; data?: { message?: string } };
@@ -48,7 +49,7 @@ export default function ResetPasswordPage() {
   return (
     <main className="auth-page auth-recovery-page">
       <section className="auth-card auth-recovery-card">
-        <img className="auth-approved-logo auth-approved-logo-card" src="/neurooption-logo.png" alt="NeuroOption" />
+        <Logo className="auth-approved-logo auth-approved-logo-card" />
         <h2>Verify & Reset Password</h2>
         <p className="auth-subtitle">Enter the code sent to your email, then choose a new password.</p>
 

@@ -1,5 +1,6 @@
 import type { AccountType, Currency } from "./trading.types";
 import AccountBalanceSelector from "./AccountBalanceSelector";
+import Logo from "../branding/Logo";
 
 type TradingHeaderProps = {
   accountType: AccountType;
@@ -21,7 +22,7 @@ export default function TradingHeader({
   return (
     <header className="nt-header">
       <div className="nt-brand">
-        <img className="nt-brand-approved-logo" src="/neurooption-logo.png" alt="NeuroOption" />
+        <Logo className="nt-brand-approved-logo" />
         <button type="button" className="nt-star">
           ★
         </button>

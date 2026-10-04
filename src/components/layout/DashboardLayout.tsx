@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import Logo from "../branding/Logo";
 import "./DashboardLayout.css";
 
 type DashboardLayoutProps = {
@@ -18,10 +19,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="dashboard-layout">
       <aside className="dashboard-sidebar">
-        <div className="dashboard-brand">
-          <div className="dashboard-brand-icon">N</div>
-          <span>NeuroOption</span>
-        </div>
+        <NavLink to="/trading" className="dashboard-brand" aria-label="NeuroOption trading home">
+          <Logo className="dashboard-brand-logo" markOnlyBelow={900} />
+        </NavLink>
 
         <nav className="dashboard-nav">
           <NavLink to="/trading">Trading</NavLink>
