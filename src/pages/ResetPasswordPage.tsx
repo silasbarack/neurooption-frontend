@@ -48,7 +48,7 @@ export default function ResetPasswordPage() {
   return (
     <main className="auth-page auth-recovery-page">
       <section className="auth-card auth-recovery-card">
-        <img className="auth-approved-logo auth-approved-logo-card" src="/neurooption-logo.jpg" alt="NeuroOption" />
+        <img className="auth-approved-logo auth-approved-logo-card" src="/neurooption-logo.svg" alt="NeuroOption" />
         <h2>Verify & Reset Password</h2>
         <p className="auth-subtitle">Enter the code sent to your email, then choose a new password.</p>
 

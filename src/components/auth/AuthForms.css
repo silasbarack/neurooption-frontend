@@ -43,6 +43,13 @@
   background: linear-gradient(135deg, #4fc3f7, #2858ff);
 }
 
+.auth-logo-image {
+  display: block;
+  width: 220px;
+  max-width: 100%;
+  height: auto;
+}
+
 .auth-logo-row h1 {
   font-size: 34px;
   font-weight: 500;

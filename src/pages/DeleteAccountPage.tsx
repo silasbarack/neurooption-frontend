@@ -72,10 +72,7 @@ export default function DeleteAccountPage() {
   return (
     <main className="auth-page">
       <section className="auth-card">
-        <div className="auth-logo">
-          <div className="auth-logo-icon">N</div>
-          <h1>NeuroOption</h1>
-        </div>
+        <img className="auth-approved-logo auth-approved-logo-card" src="/neurooption-logo.svg" alt="NeuroOption" />
 
         <h2>Delete Account</h2>
 

@@ -93,7 +93,7 @@ export default function RegisterPage() {
         <div>
           <div className="auth-card">
             <div className="auth-logo-row">
-              <img className="auth-approved-logo auth-approved-logo-card" src="/neurooption-logo.jpg" alt="NeuroOption" />
+              <img className="auth-approved-logo auth-approved-logo-card" src="/neurooption-logo.svg" alt="NeuroOption" />
             </div>
 
             <h1 className="auth-title">{tt("registration")}</h1>
