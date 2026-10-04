@@ -12,8 +12,7 @@ export default function AuthCard({ title, subtitle, children }: AuthCardProps) {
     <main className="auth-page">
       <section className="auth-card">
         <div className="auth-logo-row">
-          <div className="auth-logo-icon">N</div>
-          <h1>NeuroOption</h1>
+          <img className="auth-logo-image" src="/neurooption-logo.png" alt="NeuroOption" />
         </div>
 
         <h2>{title}</h2>

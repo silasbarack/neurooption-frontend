@@ -763,11 +763,27 @@ body {
   .auth-premium-footer { width: calc(100% - 28px); }
 }
 
-.auth-approved-logo{display:block;width:210px;max-width:100%;height:auto;object-fit:contain}
-.auth-approved-logo-card{width:220px;margin:0 auto}
+.auth-approved-logo{display:block;width:230px;max-width:100%;height:auto;object-fit:contain}
+.auth-approved-logo-card{width:290px;margin:0 auto}
 .auth-recovery-page{background:linear-gradient(180deg,#f7fbfe 0%,#edf5f9 100%)}
 .auth-recovery-card{max-width:470px;border:1px solid #dfe8ef;border-radius:22px;box-shadow:0 24px 70px rgba(34,67,98,.12)}
 .auth-recovery-card h2{text-align:center;color:#10203a;margin-top:20px}
 .auth-recovery-card .auth-subtitle{text-align:center;color:#718497;line-height:1.6}
 .auth-code-input{text-align:center;font-size:28px!important;font-weight:800!important;letter-spacing:.32em;color:#0b8ec2!important}
-@media(max-width:780px){.auth-approved-logo{width:180px}.auth-approved-logo-card{width:190px}}
+@media(max-width:780px){.auth-approved-logo{width:190px}.auth-approved-logo-card{width:250px}}
+
+/* Password recovery forms */
+.auth-recovery-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;box-sizing:border-box}
+.auth-recovery-card{box-sizing:border-box;padding:36px 34px 28px}
+.auth-recovery-card .auth-form{text-align:left;display:flex;flex-direction:column;gap:8px;margin-top:22px}
+.auth-recovery-card .auth-form label{font-size:13px;font-weight:600;color:#4b5f73;margin-top:6px}
+.auth-recovery-card .auth-form input{box-sizing:border-box;width:100%;height:50px;padding:0 16px;border:1px solid #d7e3ec;border-radius:12px;background:#f8fbfd;color:#10203a;font-size:15px;outline:none;transition:border-color .15s,box-shadow .15s}
+.auth-recovery-card .auth-form input:focus{border-color:#0b8ec2;background:#fff;box-shadow:0 0 0 4px rgba(11,142,194,.12)}
+.auth-recovery-card .auth-form button{margin-top:14px;height:52px;border:0;border-radius:12px;background:linear-gradient(90deg,#1167ca,#13b9b2);color:#fff;font-size:14px;font-weight:800;letter-spacing:.06em;cursor:pointer;box-shadow:0 12px 26px rgba(17,103,202,.22)}
+.auth-recovery-card .auth-form button:disabled{opacity:.65;cursor:wait}
+.auth-recovery-card .auth-success,.auth-recovery-card .auth-error{padding:12px 14px;border-radius:12px;font-size:14px;line-height:1.5}
+.auth-recovery-card .auth-success{background:#e9f9f1;border:1px solid #bfe9d3;color:#127a4a}
+.auth-recovery-card .auth-error{background:#fff1f1;border:1px solid #f6c9c9;color:#b42318}
+.auth-recovery-card .auth-subtitle a{color:#0b8ec2;font-weight:600;text-decoration:none}
+.auth-recovery-card .auth-subtitle a:hover{text-decoration:underline}
+@media(max-width:480px){.auth-recovery-card{padding:28px 20px 22px}}

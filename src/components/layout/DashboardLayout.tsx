@@ -20,7 +20,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="dashboard-layout">
       <aside className="dashboard-sidebar">
         <NavLink to="/trading" className="dashboard-brand" aria-label="NeuroOption trading home">
-          <Logo className="dashboard-brand-logo" />
+          <Logo className="dashboard-brand-logo" markOnlyBelow={900} />
         </NavLink>
 
         <nav className="dashboard-nav">
