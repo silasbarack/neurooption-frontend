@@ -1,8 +1,17 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Logo from "../components/branding/Logo";
-import "./AuthPages.css";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CircleAlert,
+  CircleCheck,
+  KeyRound,
+  LoaderCircle,
+  Mail,
+  MailCheck,
+} from "lucide-react";
+import AuthLayout from "../components/auth/AuthLayout";
 
 type ForgotPasswordResponse = { message?: string; data?: { message?: string } };
 
@@ -33,7 +42,7 @@ export default function ForgotPasswordPage() {
       setMessage(result.message || result.data?.message || "If the account exists, a six-digit verification code has been sent.");
       window.setTimeout(() => {
         navigate(`/reset-password?email=${encodeURIComponent(normalizedEmail)}`);
-      }, 650);
+      }, 1200);
     } catch (error) {
       setSuccess(false);
       setMessage(error instanceof Error ? error.message : "Cannot connect to backend");
@@ -43,22 +52,74 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="auth-page auth-recovery-page">
-      <section className="auth-card auth-recovery-card">
-        <Logo className="auth-approved-logo auth-approved-logo-card" />
-        <h2>Forgot Password</h2>
-        <p className="auth-subtitle">Enter your email and we’ll send a secure six-digit verification code.</p>
+    <AuthLayout variant="single">
+      <div className="lp-card">
+        <div className="lp-card-head">
+          <span className="lp-card-icon"><KeyRound size={22} aria-hidden="true" /></span>
+          <h2>Forgot your password?</h2>
+          <p>
+            Enter the email you registered with and we'll send you a
+            six-digit verification code to reset your password.
+          </p>
+        </div>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-          {message && <div className={success ? "auth-success" : "auth-error"}>{message}</div>}
-          <label htmlFor="email">Email address</label>
-          <input id="email" type="email" placeholder="you@example.com" value={email}
-            onChange={(event) => setEmail(event.target.value)} required />
-          <button type="submit" disabled={loading}>{loading ? "SENDING..." : "SEND 6-DIGIT CODE"}</button>
+        {message && (
+          <div className={`lp-alert ${success ? "is-success" : "is-error"}`} role="alert">
+            {success ? <CircleCheck size={18} /> : <CircleAlert size={18} />}
+            <span>{message}</span>
+          </div>
+        )}
+
+        <form className="lp-form" onSubmit={handleSubmit}>
+          <div className="lp-field">
+            <label htmlFor="email">Email address</label>
+            <div className="lp-input">
+              <Mail size={18} aria-hidden="true" />
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <button className="lp-submit" type="submit" disabled={loading}>
+            {loading ? (
+              <>
+                <LoaderCircle size={18} className="lp-spin" aria-hidden="true" />
+                <span>Sending code...</span>
+              </>
+            ) : (
+              <>
+                <span>Send verification code</span>
+                <ArrowRight size={18} aria-hidden="true" />
+              </>
+            )}
+          </button>
         </form>
 
-        <p className="auth-subtitle">Remembered your password? <Link to="/login">Sign in</Link></p>
-      </section>
-    </main>
+        <div className="lp-steps-note">
+          <MailCheck size={18} aria-hidden="true" />
+          <span>
+            The code expires in 10 minutes. Check your spam folder if it doesn't
+            arrive within a minute.
+          </span>
+        </div>
+
+        <div className="lp-card-foot">
+          <Link to="/login" className="lp-back">
+            <ArrowLeft size={16} aria-hidden="true" />
+            Back to sign in
+          </Link>
+          <Link to="/reset-password" className="lp-link">
+            I already have a code
+          </Link>
+        </div>
+      </div>
+    </AuthLayout>
   );
 }

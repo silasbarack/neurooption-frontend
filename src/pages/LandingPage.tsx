@@ -1,13 +1,13 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   ArrowRight,
   BadgeCheck,
   BarChart3,
   ChartCandlestick,
-  CircleDollarSign,
+  ChevronDown,
   Clock,
   Gamepad2,
-  Globe,
   Layers,
   LineChart,
   LogIn,
@@ -18,8 +18,10 @@ import {
   UserPlus,
   Users,
   Wallet,
+  Zap,
 } from "lucide-react";
 import Logo from "../components/branding/Logo";
+import HeroDashboard from "../components/landing/HeroDashboard";
 import "./LandingPage.css";
 
 const STATS = [
@@ -112,7 +114,44 @@ const SECURITY = [
   },
 ];
 
+const FAQ = [
+  {
+    q: "Is it free to open a NeuroOption account?",
+    a: "Yes. Registration is free and takes less than a minute. Every account includes a demo account with a practice balance, so you can learn the platform before depositing any money.",
+  },
+  {
+    q: "What is the minimum amount I can trade?",
+    a: "You choose the amount for each trade in the trade panel. Start small while you learn, and never trade money you cannot afford to lose.",
+  },
+  {
+    q: "Which markets can I trade?",
+    a: "Forex pairs such as EUR/USD and USD/JPY, cryptocurrencies such as BTC/USD and ETH/USD, gold (XAU/USD), indices, stocks and OTC assets that remain available on weekends and outside regular market hours.",
+  },
+  {
+    q: "Can I use NeuroOption on my phone?",
+    a: "Yes. NeuroOption runs in your browser and adapts to phones, tablets and computers, so there is nothing to install.",
+  },
+  {
+    q: "How do I recover my password?",
+    a: "Choose \u201cPassword recovery\u201d on the sign-in page and enter your email. We send a six-digit verification code that is valid for 10 minutes, which you use to set a new password.",
+  },
+  {
+    q: "Why do I need to verify my identity?",
+    a: "Identity verification (KYC) protects your account and makes sure withdrawals are paid only to the rightful owner.",
+  },
+];
+
 export default function LandingPage() {
+  const { hash } = useLocation();
+
+  // Links like "/#features" from other pages land at the top of a fresh
+  // render, so scroll to the requested section once it exists.
+  useEffect(() => {
+    if (!hash) return;
+    const target = document.getElementById(hash.slice(1));
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [hash]);
+
   return (
     <main className="lnd">
       <header className="lnd-header">
@@ -122,19 +161,19 @@ export default function LandingPage() {
           </Link>
 
           <nav className="lnd-nav" aria-label="Primary navigation">
-            <a href="#about">About</a>
-            <a href="#features">Features</a>
+            <a href="#features">Trading</a>
             <a href="#markets">Markets</a>
-            <a href="#how-it-works">How it works</a>
+            <a href="#how-it-works">Platform</a>
             <a href="#security">Security</a>
+            <a href="#about">About</a>
           </nav>
 
           <div className="lnd-header-actions">
-            <Link to="/login" className="lnd-btn lnd-btn-ghost">
-              Log in
+            <Link to="/login" className="lnd-btn lnd-btn-dark-outline">
+              Sign in
             </Link>
-            <Link to="/register" className="lnd-btn lnd-btn-primary">
-              Sign up
+            <Link to="/register" className="lnd-btn lnd-btn-blue">
+              Register
             </Link>
           </div>
         </div>
@@ -143,71 +182,126 @@ export default function LandingPage() {
       <section className="lnd-hero">
         <div className="lnd-hero-bg" aria-hidden="true" />
         <div className="lnd-hero-inner">
-          <span className="lnd-pill">
-            <i aria-hidden="true" />
-            Live OTC &amp; multi-asset trading platform
-          </span>
-          <h1>
-            Trade the markets with
-            <span> clarity and speed.</span>
-          </h1>
-          <p>
-            NeuroOption is an online trading platform built for fast, informed
-            decisions. Follow live prices on professional charts, analyse them
-            with 20+ indicators and place short-term trades on currencies,
-            crypto, commodities and more, all from one clean workspace on your
-            phone or computer.
-          </p>
-          <div className="lnd-hero-cta">
-            <Link to="/register" className="lnd-btn lnd-btn-primary lnd-btn-lg">
-              Create free account
-              <ArrowRight size={18} aria-hidden="true" />
-            </Link>
-            <Link to="/login" className="lnd-btn lnd-btn-glass lnd-btn-lg">
-              Log in
-            </Link>
+          <div className="lnd-hero-copy">
+            <span className="lnd-eyebrow-dark">
+              Smart trading <i aria-hidden="true">&bull;</i> Brighter possibilities
+            </span>
+            <h1>
+              Trade Smarter
+              <br />
+              With <span>NeuroOption</span>
+            </h1>
+            <p>
+              A modern trading platform for a smarter tomorrow. Access global
+              markets, powerful tools and real opportunities, all in one place.
+            </p>
+            <div className="lnd-hero-cta">
+              <Link to="/register" className="lnd-btn lnd-btn-blue lnd-btn-lg">
+                Start Trading
+                <ArrowRight size={18} aria-hidden="true" />
+              </Link>
+              <Link to="/register" className="lnd-btn lnd-btn-dark-outline lnd-btn-lg">
+                <BarChart3 size={18} aria-hidden="true" />
+                Try Demo
+              </Link>
+            </div>
+            <ul className="lnd-trust">
+              <li>
+                <ShieldCheck size={20} aria-hidden="true" />
+                <span><strong>Secure &amp; encrypted</strong>Protected sessions</span>
+              </li>
+              <li>
+                <Zap size={20} aria-hidden="true" />
+                <span><strong>Fast execution</strong>Real-time quotes</span>
+              </li>
+              <li>
+                <BarChart3 size={20} aria-hidden="true" />
+                <span><strong>Global markets</strong>24/7 OTC access</span>
+              </li>
+            </ul>
           </div>
-          <ul className="lnd-hero-notes">
-            <li><BadgeCheck size={16} aria-hidden="true" /> Free demo account</li>
-            <li><Globe size={16} aria-hidden="true" /> 15 languages</li>
-            <li><CircleDollarSign size={16} aria-hidden="true" /> 13 account currencies</li>
-          </ul>
+
+          <p className="lnd-motto" aria-hidden="true">
+            Discipline
+            <br />
+            creates
+            <br />
+            freedom
+          </p>
         </div>
 
-        <div className="lnd-stats">
-          {STATS.map((stat) => (
-            <div key={stat.value + stat.label}>
-              <strong>{stat.value}</strong>
-              <span>{stat.label}</span>
-            </div>
-          ))}
+        <div className="lnd-dashboard">
+          <HeroDashboard />
         </div>
       </section>
 
       <section className="lnd-section" id="about">
         <div className="lnd-about">
-          <div>
+          <div className="lnd-about-side">
             <span className="lnd-kicker">What is NeuroOption?</span>
             <h2>A complete trading workspace, designed to be simple.</h2>
+            <div className="lnd-about-stats">
+              {STATS.map((stat) => (
+                <div key={stat.value + stat.label}>
+                  <strong>{stat.value}</strong>
+                  <span>{stat.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="lnd-about-copy">
-            <p>
-              NeuroOption gives you everything you need to follow the markets and
-              act on your ideas. Prices stream to your screen in real time and
-              are drawn as clear candlestick charts, so you can see momentum,
-              trends and reversals as they happen.
+            <p className="lnd-about-lead">
+              NeuroOption is an online trading platform that brings live
+              market prices, professional charting and simple, fixed-time
+              trades together in one clean workspace that runs in your browser
+              on a phone, tablet or computer.
             </p>
+            <h3>How trading on NeuroOption works</h3>
             <p>
-              Each trade is straightforward: choose an asset, set your amount
-              and expiry time, and decide whether the price will finish higher
-              or lower. The potential payout is shown before you confirm, so you
-              always know what is at stake.
+              Every trade starts with a simple question: will the price of an
+              asset be higher or lower when the timer runs out? You choose the
+              asset, the amount you want to invest and an expiry time, from a
+              few seconds to several hours. Before you confirm, NeuroOption
+              shows the exact payout you will receive if your forecast is
+              correct. If the price moves the other way, you lose the amount you
+              invested in that trade, so you always know your maximum risk up
+              front.
             </p>
+            <h3>Professional tools without the clutter</h3>
             <p>
-              New traders can learn on a free demo account, while experienced
-              traders get advanced indicators, multiple chart types, signals and
-              social trading tools. Your account works in your own language and
-              currency, from Kenyan shillings and Naira to US dollars and euros.
+              Prices stream to your screen in real time and are drawn as
+              candlesticks, Heiken Ashi, bars or a simple line. Switch between
+              14 timeframes, from 5-second candles for fast decisions to hourly
+              and daily views for the bigger picture. More than 20 technical
+              indicators, including moving averages, Bollinger Bands, RSI, MACD,
+              Ichimoku, Alligator, ADX and ATR, can be added and tuned with a
+              few taps, and drawing tools help you mark trends, support and
+              resistance.
+            </p>
+            <h3>Learn first, then trade for real</h3>
+            <p>
+              Every new account includes a demo account with a practice
+              balance, so you can explore every feature and test your strategy
+              without risking money. When you feel ready, switch to your real
+              account in one tap. Deposits and withdrawals are handled from the
+              Finance section, and identity verification (KYC) keeps your
+              withdrawals going only to you.
+            </p>
+            <h3>Built for traders everywhere</h3>
+            <p>
+              NeuroOption speaks your language, with 15 languages including
+              English, Kiswahili, French, Arabic, Hausa, Yor&ugrave;b&aacute;
+              and Chinese, and lets you hold your balance in 13 currencies,
+              from Kenyan shillings, Ugandan shillings and Naira to US dollars,
+              euros and rand. OTC markets stay open around the clock, including
+              weekends, so you can trade when it suits you.
+            </p>
+            <h3>More than a chart</h3>
+            <p>
+              Follow trading signals, see what other traders are doing through
+              social trading, compete in tournaments and unlock achievements
+              as you grow. Your full trade history is always available, so you
+              can review every decision and keep improving.
             </p>
           </div>
         </div>
@@ -291,6 +385,24 @@ export default function LandingPage() {
             first. Services are for users aged 21 and over.
           </p>
         </aside>
+      </section>
+
+      <section className="lnd-section lnd-section-tint" id="faq">
+        <div className="lnd-section-head">
+          <span className="lnd-kicker">FAQ</span>
+          <h2>Questions traders often ask</h2>
+        </div>
+        <div className="lnd-faq">
+          {FAQ.map((item) => (
+            <details key={item.q}>
+              <summary>
+                {item.q}
+                <ChevronDown size={18} aria-hidden="true" />
+              </summary>
+              <p>{item.a}</p>
+            </details>
+          ))}
+        </div>
       </section>
 
       <section className="lnd-cta" id="get-started">
