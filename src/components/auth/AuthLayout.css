@@ -478,8 +478,7 @@
   color: var(--lp-accent);
 }
 
-.lp-input input[type="password"],
-.lp-input input#password {
+.lp-input input.has-toggle {
   padding-inline-end: 48px;
 }
 
@@ -641,6 +640,212 @@
   font-weight: 700;
 }
 
+/* Shared auth page pieces */
+.lp-header-spacer {
+  width: 120px;
+}
+
+.lp-main.is-single {
+  grid-template-columns: minmax(0, 460px);
+  justify-content: center;
+}
+
+.lp-benefits {
+  max-width: 520px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 14px;
+}
+
+.lp-benefits li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--lp-line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.lp-benefits .lp-feature-icon {
+  width: 38px;
+  height: 38px;
+}
+
+.lp-benefits strong {
+  display: block;
+  color: var(--lp-navy);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.lp-benefits small {
+  display: block;
+  margin-top: 2px;
+  color: var(--lp-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.lp-input.is-invalid input {
+  border-color: #f2a3ad;
+  background: #fff8f9;
+}
+
+.lp-input.is-invalid input:focus {
+  border-color: var(--lp-red);
+  box-shadow: 0 0 0 4px rgba(239, 84, 102, 0.12);
+}
+
+.lp-field-error {
+  margin: 6px 0 0;
+  color: #c0283b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.lp-hint {
+  margin: 6px 0 0;
+  color: var(--lp-muted);
+  font-size: 12px;
+}
+
+.lp-strength {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  color: var(--lp-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.lp-strength-bars {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  flex: 1;
+}
+
+.lp-strength-bars i {
+  height: 4px;
+  border-radius: 999px;
+  background: #e3eaf1;
+  transition: background 0.2s ease;
+}
+
+.lp-strength.is-0 span { color: #c0283b; }
+.lp-strength.is-1 .lp-strength-bars i:nth-child(-n + 1) { background: #ef5466; }
+.lp-strength.is-1 span { color: #c0283b; }
+.lp-strength.is-2 .lp-strength-bars i:nth-child(-n + 2) { background: #f5a524; }
+.lp-strength.is-2 span { color: #b26b00; }
+.lp-strength.is-3 .lp-strength-bars i:nth-child(-n + 3) { background: #13b9b2; }
+.lp-strength.is-3 span { color: #0e8f8a; }
+.lp-strength.is-4 .lp-strength-bars i { background: var(--lp-green); }
+.lp-strength.is-4 span { color: #0f8a5f; }
+
+.lp-check-top {
+  align-items: flex-start;
+  line-height: 1.5;
+}
+
+.lp-check-top input {
+  margin-top: 2px;
+  flex: 0 0 auto;
+}
+
+.lp-code {
+  width: 100%;
+  height: 60px;
+  padding: 0 16px;
+  border: 1px solid var(--lp-line);
+  border-radius: 12px;
+  background: var(--lp-field);
+  color: var(--lp-navy);
+  font: 800 28px/1 "Plus Jakarta Sans", Roboto, Arial, sans-serif;
+  letter-spacing: 0.5em;
+  text-align: center;
+  text-indent: 0.5em;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.lp-code::placeholder {
+  color: #c9d4df;
+}
+
+.lp-code:focus {
+  border-color: var(--lp-accent);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(11, 142, 194, 0.12);
+}
+
+.lp-text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--lp-accent);
+  font: 600 14px "Plus Jakarta Sans", Roboto, Arial, sans-serif;
+  cursor: pointer;
+}
+
+.lp-text-button:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.lp-text-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.lp-steps-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f1f8fc;
+  color: #4f6378;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.lp-steps-note svg {
+  flex: 0 0 auto;
+  color: var(--lp-accent);
+}
+
+.lp-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--lp-line);
+}
+
+.lp-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--lp-navy);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.lp-back:hover {
+  color: var(--lp-accent);
+}
+
 /* Responsive */
 @media (max-width: 1080px) {
   .lp-main {
@@ -654,7 +859,8 @@
 }
 
 @media (max-width: 900px) {
-  .lp-nav {
+  .lp-nav,
+  .lp-header-spacer {
     display: none;
   }
 

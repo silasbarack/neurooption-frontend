@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   ArrowRight,
   BadgeCheck,
@@ -113,6 +114,16 @@ const SECURITY = [
 ];
 
 export default function LandingPage() {
+  const { hash } = useLocation();
+
+  // Links like "/#features" from other pages land at the top of a fresh
+  // render, so scroll to the requested section once it exists.
+  useEffect(() => {
+    if (!hash) return;
+    const target = document.getElementById(hash.slice(1));
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [hash]);
+
   return (
     <main className="lnd">
       <header className="lnd-header">
