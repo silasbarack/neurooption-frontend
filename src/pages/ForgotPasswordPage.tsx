@@ -44,7 +44,7 @@ export default function ForgotPasswordPage() {
   return (
     <main className="auth-page auth-recovery-page">
       <section className="auth-card auth-recovery-card">
-        <img className="auth-approved-logo auth-approved-logo-card" src="/neurooption-logo.svg" alt="NeuroOption" />
+        <img className="auth-approved-logo auth-approved-logo-card" src="/neurooption-logo.png" alt="NeuroOption" />
         <h2>Forgot Password</h2>
         <p className="auth-subtitle">Enter your email and we’ll send a secure six-digit verification code.</p>
 

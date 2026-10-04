@@ -21,7 +21,7 @@ export default function TradingHeader({
   return (
     <header className="nt-header">
       <div className="nt-brand">
-        <img className="nt-brand-approved-logo" src="/neurooption-logo.svg" alt="NeuroOption" />
+        <img className="nt-brand-approved-logo" src="/neurooption-logo.png" alt="NeuroOption" />
         <button type="button" className="nt-star">
           ★
         </button>

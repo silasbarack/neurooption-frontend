@@ -763,14 +763,14 @@ body {
   .auth-premium-footer { width: calc(100% - 28px); }
 }
 
-.auth-approved-logo{display:block;width:210px;max-width:100%;height:auto;object-fit:contain}
-.auth-approved-logo-card{width:220px;margin:0 auto}
+.auth-approved-logo{display:block;width:230px;max-width:100%;height:auto;object-fit:contain}
+.auth-approved-logo-card{width:290px;margin:0 auto}
 .auth-recovery-page{background:linear-gradient(180deg,#f7fbfe 0%,#edf5f9 100%)}
 .auth-recovery-card{max-width:470px;border:1px solid #dfe8ef;border-radius:22px;box-shadow:0 24px 70px rgba(34,67,98,.12)}
 .auth-recovery-card h2{text-align:center;color:#10203a;margin-top:20px}
 .auth-recovery-card .auth-subtitle{text-align:center;color:#718497;line-height:1.6}
 .auth-code-input{text-align:center;font-size:28px!important;font-weight:800!important;letter-spacing:.32em;color:#0b8ec2!important}
-@media(max-width:780px){.auth-approved-logo{width:180px}.auth-approved-logo-card{width:190px}}
+@media(max-width:780px){.auth-approved-logo{width:190px}.auth-approved-logo-card{width:250px}}
 
 /* Password recovery forms */
 .auth-recovery-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;box-sizing:border-box}
