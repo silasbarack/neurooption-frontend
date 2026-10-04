@@ -1410,3 +1410,7 @@ button {
 }
 .nt-bottom-nav { background:#fff; border-top-color:#dfe8ef; }
 .nt-bottom-nav button { color:#6f8194; background:#f5f8fb; }
+
+.nt-brand-approved-logo{display:block;width:185px;max-width:34vw;height:42px;object-fit:contain;object-position:left center}
+@media(max-width:980px){.nt-brand-approved-logo{width:145px;height:40px}}
+@media(max-width:768px){.nt-brand-approved-logo{width:112px;height:34px}}
