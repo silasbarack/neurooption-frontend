@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../api/auth.api";
+import Logo from "../components/branding/Logo";
 import {
   languages,
   translate,
@@ -65,7 +66,7 @@ export default function LoginPage() {
     <main className="auth-shell auth-premium-shell">
       <header className="auth-topbar auth-premium-topbar">
         <Link to="/" className="auth-brand-link" aria-label="NeuroOption home">
-          <img className="auth-approved-logo" src="/neurooption-logo.jpg" alt="NeuroOption" />
+          <Logo className="auth-approved-logo" />
         </Link>
 
         <nav className="auth-nav" aria-label="Primary navigation">
@@ -138,7 +139,7 @@ export default function LoginPage() {
         <div className="auth-login-column">
           <div className="auth-card auth-premium-card">
             <div className="auth-card-brand">
-              <img className="auth-approved-logo auth-approved-logo-card" src="/neurooption-logo.jpg" alt="NeuroOption" />
+              <Logo className="auth-approved-logo auth-approved-logo-card" />
             </div>
 
             <div className="auth-card-heading">
