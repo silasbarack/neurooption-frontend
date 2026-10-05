@@ -27,53 +27,66 @@ import BrandLogo from "../components/branding/BrandLogo";
 import AssetIcon from "../components/markets/AssetIcon";
 import { FALLBACK_QUOTES, formatChange, useQuotes } from "../components/markets/useQuotes";
 import MenuDrawer from "../components/shell/MenuDrawer";
+import { GlobalMarketsSection, MarketTicker, PlatformStats } from "../components/landing/PublicHomepageSections";
 import type { MarketQuote } from "../api/account.api";
 import { getToken } from "../utils/storage";
 import "./LandingPage.css";
+import "./LandingReference.css";
 
 type NavGroup = { label: string; links: Array<{ label: string; to: string }> };
 
 const NAV: NavGroup[] = [
   {
+    label: "Trading",
+    links: [
+      { label: "Trade now", to: "/trading" },
+      { label: "Open trades", to: "/open-trades" },
+      { label: "Trading history", to: "/history" },
+    ],
+  },
+  {
     label: "Markets",
     links: [
       { label: "All markets", to: "/markets" },
       { label: "Forex", to: "/markets" },
-      { label: "Cryptocurrencies", to: "/markets" },
-      { label: "Commodities", to: "/markets" },
-      { label: "Stocks & indices", to: "/markets" },
+      { label: "Crypto", to: "/markets" },
+      { label: "Stocks", to: "/markets" },
+      { label: "OTC markets", to: "/markets" },
     ],
   },
   {
-    label: "Trading",
-    links: [
-      { label: "Trade now", to: "/trading" },
-      { label: "Social trading", to: "/social-trading" },
-      { label: "Tournaments", to: "/tournaments" },
-      { label: "Achievements", to: "/achievements" },
-    ],
-  },
-  {
-    label: "Platform",
+    label: "Platforms",
     links: [
       { label: "Web platform", to: "/trading" },
-      { label: "Features", to: "/#experience" },
-      { label: "Every device", to: "/#devices" },
-    ],
-  },
-  {
-    label: "Education",
-    links: [
-      { label: "Help centre", to: "/help" },
-      { label: "Practise on demo", to: "/trading" },
+      { label: "Mobile experience", to: "/#devices" },
     ],
   },
   {
     label: "About",
     links: [
       { label: "Why NeuroOption", to: "/#why" },
-      { label: "Our community", to: "/#community" },
-      { label: "Contact us", to: "/help" },
+      { label: "Global community", to: "/#community" },
+    ],
+  },
+  {
+    label: "Promotions",
+    links: [
+      { label: "Tournaments", to: "/tournaments" },
+      { label: "Achievements", to: "/achievements" },
+    ],
+  },
+  {
+    label: "Learn",
+    links: [
+      { label: "Practise on demo", to: "/trading" },
+      { label: "Help centre", to: "/help" },
+    ],
+  },
+  {
+    label: "Support",
+    links: [
+      { label: "Help centre", to: "/help" },
+      { label: "Contact support", to: "/help" },
     ],
   },
 ];
@@ -351,6 +364,27 @@ function HeroArt({ quotes }: { quotes: MarketQuote[] }) {
           </div>
         </div>
         <div className="hp-laptop-base" />
+      </div>
+      <div className="hp-hero-phone">
+        <div className="hp-hero-phone-notch" />
+        <div className="hp-hero-phone-head">
+          <img src="/neurooption-mark.svg" alt="" />
+          <span>EUR/USD OTC</span>
+          <b>{price.toFixed(5)}</b>
+        </div>
+        <div className="hp-hero-phone-chart">
+          <CandleChart count={25} seed={31} trend={0.45} width={220} height={180} showGrid={false} />
+          <span className="hp-hero-phone-expiry">00:28</span>
+        </div>
+        <div className="hp-hero-phone-fields">
+          <span><small>Time</small><b>1 min</b></span>
+          <span><small>Amount</small><b>$100</b></span>
+        </div>
+        <div className="hp-hero-phone-profit">
+          <span><small>Payout</small><b>+{payout}%</b></span>
+          <span><small>Profit</small><b>{"$"}{(100 + payout).toFixed(2)}</b></span>
+        </div>
+        <div className="hp-hero-phone-actions"><span>BUY</span><span>SELL</span></div>
       </div>
       <span className="hp-float is-price">
         <b>{price.toFixed(5)}</b>
@@ -701,38 +735,48 @@ export default function LandingPage() {
         <section className="hp-hero">
           <div className="hp-wrap hp-hero-inner">
             <div className="hp-hero-copy">
-              <p className="hp-eyebrow">A smarter way to trade</p>
+              <p className="hp-eyebrow">Turn insight into opportunity</p>
               <h1>
-                Global markets.
-                <span>Your next move.</span>
+                Trade Smarter
+                <span>with NeuroOption</span>
               </h1>
               <p className="hp-lead">
-                NeuroOption gives you access to a wide range of markets with a powerful, intuitive platform built for
-                real opportunities.
+                Access global markets with a modern trading platform, real market conditions and powerful tools —
+                designed for traders of all levels.
               </p>
               <div className="hp-hero-cta">
                 <Link to={startPath} className="hp-btn hp-btn-primary hp-btn-lg">
-                  {signedIn ? "Start trading" : "Create account"} <ArrowRight size={17} aria-hidden="true" />
+                  <span className="hp-cta-desktop">Start Trading</span>
+                  <span className="hp-cta-mobile">{signedIn ? "Start Trading" : "Create Free Account"}</span>
+                  <ArrowRight size={17} aria-hidden="true" />
                 </Link>
                 <Link to="/trading" className="hp-btn hp-btn-ghost hp-btn-lg">
-                  Explore platform
+                  <span className="hp-cta-desktop">Try Demo Free</span>
+                  <span className="hp-cta-mobile">Try Demo Trading</span>
                 </Link>
               </div>
               <ul className="hp-hero-points">
                 <li>
-                  <Timer size={17} aria-hidden="true" /> Fast execution
+                  <ShieldCheck size={17} aria-hidden="true" /> Secure &amp; Trusted
                 </li>
                 <li>
-                  <ShieldCheck size={17} aria-hidden="true" /> Secure and reliable
+                  <Timer size={17} aria-hidden="true" /> Fast Execution
                 </li>
                 <li>
-                  <Globe size={17} aria-hidden="true" /> Global access
+                  <BarChart3 size={17} aria-hidden="true" /> 100+ Assets
+                </li>
+                <li>
+                  <Globe size={17} aria-hidden="true" /> Global Access
                 </li>
               </ul>
             </div>
             <HeroArt quotes={quotes} />
           </div>
         </section>
+
+        <MarketTicker quotes={quotes} />
+        <PlatformStats />
+        <GlobalMarketsSection />
 
         <section id="experience" className="hp-section hp-light">
           <div className="hp-wrap">

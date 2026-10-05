@@ -1,0 +1,177 @@
+/* Gold-led application theme from the approved mobile NeuroOption references.
+   Existing business logic is untouched; these are visual token and shell overrides. */
+:root {
+  --neo-bg: #04090f;
+  --neo-bg-2: #071019;
+  --neo-panel: #0a131d;
+  --neo-panel-2: #0d1824;
+  --neo-panel-3: #122130;
+  --neo-line: rgba(255, 230, 170, 0.10);
+  --neo-line-strong: rgba(255, 224, 149, 0.20);
+  --neo-text: #f2f1ed;
+  --neo-muted: #929aa4;
+  --neo-faint: #69727c;
+  --neo-accent: #f5b82e;
+  --neo-accent-2: #ffd468;
+  --neo-accent-ink: #171105;
+  --neo-accent-soft: rgba(245, 184, 46, 0.13);
+  --background-primary: var(--neo-bg);
+  --background-secondary: var(--neo-bg-2);
+  --background-elevated: var(--neo-panel-2);
+  --surface: var(--neo-panel);
+  --surface-hover: var(--neo-panel-3);
+  --border: var(--neo-line);
+  --text-primary: var(--neo-text);
+  --text-secondary: var(--neo-muted);
+  --brand-gold: var(--neo-accent);
+  --positive: var(--neo-green);
+  --negative: var(--neo-red);
+}
+
+.neo-shell {
+  background:
+    radial-gradient(900px 420px at 84% -12%, rgba(245, 184, 46, 0.06), transparent 62%),
+    var(--neo-bg);
+}
+
+.neo-topbar {
+  border-bottom-color: rgba(245,184,46,.1);
+  background: rgba(4, 9, 15, 0.92);
+}
+
+.neo-topnav a.is-active,
+.neo-drawer-nav a.is-active,
+.neo-drawer-nav a.is-active svg:first-child,
+.neo-bottomnav a.is-active {
+  color: var(--neo-accent);
+}
+
+.neo-topnav a.is-active::after { background: var(--neo-accent); }
+
+.neo-drawer-panel {
+  border-left-color: rgba(245,184,46,.13);
+  background: linear-gradient(180deg, #09121b, #04090f);
+}
+
+.neo-drawer-nav a:hover,
+.neo-drawer-nav a.is-active { background: rgba(245,184,46,.08); }
+
+.neo-btn-primary {
+  border-color: #f6c34c;
+  background: linear-gradient(180deg, #ffd468, #f2b42a);
+  box-shadow: 0 8px 22px rgba(245, 184, 46, 0.2);
+  color: #171105;
+}
+
+.neo-btn-primary:hover { box-shadow: 0 10px 28px rgba(245, 184, 46, 0.3); }
+
+.neo-btn-outline:hover {
+  border-color: rgba(245,184,46,.48);
+  background: rgba(245,184,46,.05);
+}
+
+.neo-tabs button.is-active {
+  background: rgba(245,184,46,.12);
+  color: #f4c64f;
+  box-shadow: inset 0 0 0 1px rgba(245,184,46,.32);
+}
+
+.neo-input:focus {
+  border-color: var(--neo-accent);
+  box-shadow: 0 0 0 3px rgba(245,184,46,.12);
+}
+
+.neo-avatar {
+  background: linear-gradient(135deg, #d6a221, #80610d);
+  box-shadow: 0 0 0 2px rgba(245,184,46,.24);
+  color: #fff8df;
+}
+
+.neo-bottomnav {
+  border-top-color: rgba(245,184,46,.12);
+  background: rgba(4, 9, 15, 0.97);
+}
+
+.mk-star:hover,
+.mk-star.is-on,
+.mk-payout { color: #f3c34d; }
+
+.mk-row:not(.mk-row-head):hover { background: rgba(245,184,46,.035); }
+.mk-row:focus-visible { outline-color: var(--neo-accent); }
+
+.ac-switch button.is-active {
+  border-color: rgba(245,184,46,.48);
+  background: rgba(245,184,46,.1);
+  color: #f8f1de;
+}
+
+.ac-progress-icon {
+  background: rgba(245,184,46,.14);
+  color: #f0bf43;
+}
+
+.ac-tile:hover { border-color: rgba(245,184,46,.35); }
+.ac-tile:hover svg { color: var(--neo-accent); }
+
+.soc-rank,
+.soc-risk.is-medium { color: #f3c34d; }
+
+.ach-hero {
+  background:
+    radial-gradient(260px 180px at 50% 20%, rgba(245, 184, 46, 0.2), transparent 70%),
+    linear-gradient(180deg, #101923, #09121b);
+}
+
+.ach-tabs button.is-active,
+.soc-tabs button.is-active { color: #f4c64f; }
+
+.nt-premium .nt-sidebar button.active,
+.nt-premium .nt-quick-menu button:hover,
+.nt-premium .nt-chart-types button.active,
+.nt-premium .nt-asset-tabs button.active,
+.nt-premium .nt-asset-list button.active,
+.nt-premium .nt-floating button.active { color: #f2c24a; }
+
+.nt-premium .nt-sidebar button.active::before { background: #f2c24a; }
+
+.nt-premium .deposit-shortcut-btn {
+  border-color: #f3c249;
+  background: linear-gradient(180deg, #ffd468, #f2b42a);
+  color: #171105;
+}
+
+.fin .neo-tabs button.is-active,
+.fin-link-btn { color: #f1c14a; }
+
+.fin-pay:focus-visible,
+.fin-input:focus-visible { outline-color: #f3c249; }
+
+@media (max-width: 900px) {
+  .neo-shell-main { padding-right: 12px; padding-left: 12px; }
+  .neo-topbar-inner { border-bottom: 1px solid rgba(245,184,46,.04); }
+
+  .mk-head { display: grid; gap: 12px; }
+  .mk-head h1 { font-size: 24px; }
+
+  .mk-tabs {
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .mk-tabs button {
+    min-height: 34px;
+    border: 1px solid var(--neo-line);
+    background: #0a131d;
+  }
+
+  .mk-tabs button:nth-child(n + 6) { display: none; }
+  .mk-table { border-radius: 12px; }
+  .mk-row { min-height: 63px; background: #09121b; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neo-btn,
+  .neo-card,
+  .neo-drawer-panel { transition: none; }
+}

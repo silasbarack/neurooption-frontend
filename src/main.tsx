@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import './styles/neo.css'
+import './styles/reference-theme.css'
 import App from './App.tsx'
 
 // Keep the splash up long enough to read as a deliberate load rather than a
