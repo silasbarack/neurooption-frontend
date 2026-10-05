@@ -3,16 +3,21 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight,
   BarChart3,
+  CandlestickChart,
   ChevronDown,
+  ClipboardList,
   Gem,
   Globe,
   GraduationCap,
   Headset,
+  History,
   Languages,
   Menu,
   ShieldCheck,
   SlidersHorizontal,
   Timer,
+  Trophy,
+  UserRound,
   Users,
   Wallet,
   Zap,
@@ -103,12 +108,13 @@ const COMMUNITY = [
   { icon: Headset, text: "A growing global community" },
 ];
 
-const HERO_CARDS = [
-  { symbol: "EUR/USD OTC", name: "EUR/USD", className: "is-eur" },
-  { symbol: "Gold OTC", name: "Gold", className: "is-gold" },
-  { symbol: "BTC/USD OTC", name: "Bitcoin", className: "is-btc" },
-  { symbol: "Tesla OTC", name: "Tesla", className: "is-tsla" },
-  { symbol: "US 500 OTC", name: "S&P 500", className: "is-spx" },
+const RAIL_ICONS = [CandlestickChart, BarChart3, Wallet, ClipboardList, Trophy, Users, UserRound];
+const PHONE_TABS = [
+  { icon: CandlestickChart, label: "Trade" },
+  { icon: BarChart3, label: "Markets" },
+  { icon: ClipboardList, label: "Open" },
+  { icon: History, label: "History" },
+  { icon: UserRound, label: "Profile" },
 ];
 
 const FOOTER = [
@@ -197,46 +203,157 @@ function Sparkline({ seed, change, color }: { seed: number; change: number; colo
   );
 }
 
+type Candle = { o: number; c: number; h: number; l: number };
+
+/** Deterministic candle series, so the mockups look the same on every render. */
+function buildCandles(count: number, seed: number, trend: number): Candle[] {
+  let state = seed * 2654435761;
+  const rand = () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+  const out: Candle[] = [];
+  let price = 100;
+  for (let i = 0; i < count; i++) {
+    const swing = Math.sin(i / 5.5) * 1.1 + Math.sin(i / 13) * 0.7;
+    const open = price;
+    const close = open + trend + swing * 0.4 + (rand() - 0.5) * 2.4;
+    out.push({
+      o: open,
+      c: close,
+      h: Math.max(open, close) + rand() * 1.3,
+      l: Math.min(open, close) - rand() * 1.3,
+    });
+    price = close;
+  }
+  return out;
+}
+
+function CandleChart({
+  count,
+  seed,
+  trend,
+  width,
+  height,
+  showGrid = true,
+}: {
+  count: number;
+  seed: number;
+  trend: number;
+  width: number;
+  height: number;
+  showGrid?: boolean;
+}) {
+  const candles = buildCandles(count, seed, trend);
+  const high = Math.max(...candles.map((k) => k.h));
+  const low = Math.min(...candles.map((k) => k.l));
+  const pad = height * 0.08;
+  const y = (value: number) => pad + ((high - value) / (high - low || 1)) * (height - pad * 2);
+  const step = width / count;
+  const body = Math.max(1.6, step * 0.58);
+  const last = candles[candles.length - 1];
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="hp-candles" aria-hidden="true">
+      {showGrid &&
+        [0.2, 0.4, 0.6, 0.8].map((fraction) => (
+          <line key={fraction} x1="0" x2={width} y1={height * fraction} y2={height * fraction} className="hp-candle-grid" />
+        ))}
+      {candles.map((candle, index) => {
+        const x = index * step + step / 2;
+        const up = candle.c >= candle.o;
+        const top = y(Math.max(candle.o, candle.c));
+        return (
+          <g key={index} className={up ? "is-up" : "is-down"}>
+            <line x1={x} x2={x} y1={y(candle.h)} y2={y(candle.l)} strokeWidth={Math.max(0.7, step * 0.1)} />
+            <rect x={x - body / 2} width={body} y={top} height={Math.max(1, Math.abs(y(candle.o) - y(candle.c)))} />
+          </g>
+        );
+      })}
+      <line x1="0" x2={width} y1={y(last.c)} y2={y(last.c)} className="hp-candle-last" />
+    </svg>
+  );
+}
+
+/** Laptop running the trading workspace, for the hero. */
 function HeroArt({ quotes }: { quotes: MarketQuote[] }) {
+  const eur = quoteFor(quotes, "EUR/USD OTC");
+  const price = eur?.price ?? 1.06942;
+  const change = eur?.changePercent ?? 0;
+  const payout = eur?.payout ?? 92;
+  const ticks = Array.from({ length: 5 }, (_, i) => (price + (2 - i) * 0.0012).toFixed(4));
+
   return (
     <div className="hp-stage" aria-hidden="true">
       <div className="hp-glow" />
-      <div className="hp-columns">
-        {Array.from({ length: 7 }, (_, i) => (
-          <i key={i} />
-        ))}
-      </div>
-      <svg className="hp-wave" viewBox="0 0 600 260" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="hp-wave-a" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#1d4ed8" stopOpacity="0" />
-            <stop offset="0.45" stopColor="#60a5fa" stopOpacity="0.9" />
-            <stop offset="1" stopColor="#c4b5fd" stopOpacity="0.2" />
-          </linearGradient>
-        </defs>
-        {Array.from({ length: 9 }, (_, i) => (
-          <path
-            key={i}
-            d={`M-20 ${210 - i * 4} C 140 ${150 - i * 9}, 260 ${250 - i * 3}, 400 ${150 - i * 6} S 560 ${60 + i * 5}, 640 ${40 + i * 4}`}
-            stroke="url(#hp-wave-a)"
-            strokeWidth={i === 4 ? 3 : 1}
-            fill="none"
-            opacity={1 - Math.abs(i - 4) * 0.18}
-          />
-        ))}
-      </svg>
-      <div className="hp-rock" />
-      {HERO_CARDS.map((card) => {
-        const quote = quoteFor(quotes, card.symbol);
-        const change = quote?.changePercent ?? 0;
-        return (
-          <div key={card.symbol} className={`hp-glass ${card.className}`}>
-            <AssetIcon symbol={card.symbol} category={quote?.category} size={26} />
-            <b>{card.name}</b>
-            <span className={change >= 0 ? "is-up" : "is-down"}>{formatChange(change)}</span>
+      <div className="hp-laptop">
+        <div className="hp-lid">
+          <div className="hp-screen">
+            <div className="hp-app-top">
+              <img src="/neurooption-mark.svg" alt="" className="hp-app-mark" />
+              <span className="hp-app-pair">
+                EUR/USD OTC <ChevronDown size={9} aria-hidden="true" />
+              </span>
+              <span className="hp-app-tabs">
+                <i className="is-on">Trade</i>
+                <i>Markets</i>
+                <i>Finance</i>
+              </span>
+              <span className="hp-app-balance">
+                <small>Demo</small>
+                $70,000.00
+              </span>
+              <span className="hp-app-deposit">Deposit</span>
+            </div>
+
+            <div className="hp-app-body">
+              <div className="hp-app-rail">
+                {RAIL_ICONS.map((Icon, index) => (
+                  <Icon key={index} size={11} strokeWidth={1.9} className={index === 0 ? "is-on" : ""} />
+                ))}
+              </div>
+
+              <div className="hp-app-chart">
+                <CandleChart count={54} seed={9} trend={0.4} width={520} height={250} />
+                <div className="hp-app-axis">
+                  {ticks.map((tick) => (
+                    <span key={tick}>{tick}</span>
+                  ))}
+                </div>
+                <div className="hp-app-timer">00:28</div>
+                <div className="hp-app-volume">
+                  {Array.from({ length: 54 }, (_, i) => (
+                    <i key={i} style={{ height: `${18 + ((i * 41) % 72)}%` }} className={i % 3 === 1 ? "is-down" : ""} />
+                  ))}
+                </div>
+              </div>
+
+              <div className="hp-app-panel">
+                <span className="hp-app-field">
+                  <small>Amount</small>
+                  <b>$100</b>
+                </span>
+                <span className="hp-app-field">
+                  <small>Expiration</small>
+                  <b>1 min</b>
+                </span>
+                <span className="hp-app-payout">
+                  <small>Payout</small>
+                  <b>+{payout}%</b>
+                  <em>${(100 + payout).toFixed(2)}</em>
+                </span>
+                <span className="hp-app-buy">BUY</span>
+                <span className="hp-app-sell">SELL</span>
+              </div>
+            </div>
           </div>
-        );
-      })}
+        </div>
+        <div className="hp-laptop-base" />
+      </div>
+      <span className="hp-float is-price">
+        <b>{price.toFixed(5)}</b>
+        <em className={change >= 0 ? "is-up" : "is-down"}>{formatChange(change)}</em>
+      </span>
     </div>
   );
 }
@@ -341,48 +458,123 @@ function Globe3D() {
   );
 }
 
+function StatusBar() {
+  return (
+    <div className="hp-status" aria-hidden="true">
+      <span>9:41</span>
+      <span className="hp-status-icons">
+        <svg viewBox="0 0 18 12" width="11" height="8" fill="currentColor">
+          <rect x="0" y="8" width="3" height="4" rx="0.6" />
+          <rect x="5" y="5.5" width="3" height="6.5" rx="0.6" />
+          <rect x="10" y="3" width="3" height="9" rx="0.6" />
+          <rect x="15" y="0" width="3" height="12" rx="0.6" opacity="0.45" />
+        </svg>
+        <svg viewBox="0 0 16 12" width="10" height="8" fill="currentColor">
+          <path d="M8 11.4 5.6 8.8a3.4 3.4 0 0 1 4.8 0zM3.3 6.5a6.9 6.9 0 0 1 9.4 0l1.5-1.6a9.1 9.1 0 0 0-12.4 0z" />
+        </svg>
+        <svg viewBox="0 0 26 12" width="16" height="8" fill="none">
+          <rect x="0.6" y="0.6" width="21" height="10.8" rx="3" stroke="currentColor" strokeOpacity="0.5" />
+          <rect x="2.2" y="2.2" width="15" height="7.6" rx="1.8" fill="currentColor" />
+          <path d="M23.4 4.2v3.6a2 2 0 0 0 0-3.6" fill="currentColor" fillOpacity="0.5" />
+        </svg>
+      </span>
+    </div>
+  );
+}
+
+function PhoneTabs({ active }: { active: number }) {
+  return (
+    <div className="hp-tabbar" aria-hidden="true">
+      {PHONE_TABS.map(({ icon: Icon, label }, index) => (
+        <span key={label} className={index === active ? "is-on" : ""}>
+          <Icon size={11} strokeWidth={2} />
+          <small>{label}</small>
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function PhoneMockups({ quotes }: { quotes: MarketQuote[] }) {
   const rows = ["Gold OTC", "Tesla OTC", "Apple OTC", "EUR/USD OTC", "BTC/USD OTC"].map((symbol) => ({
     symbol,
     quote: quoteFor(quotes, symbol),
   }));
   const eur = quoteFor(quotes, "EUR/USD OTC");
+  const change = eur?.changePercent ?? 0;
+
   return (
     <div className="hp-phones" aria-hidden="true">
       <div className="hp-swoosh" />
+
       <div className="hp-phone is-back">
+        <span className="hp-phone-btn is-power" />
         <div className="hp-phone-screen">
-          <b className="hp-phone-title">Markets</b>
-          {rows.map(({ symbol, quote }) => (
-            <div key={symbol} className="hp-phone-row">
-              <AssetIcon symbol={symbol} category={quote?.category} size={14} />
-              <span>{symbol.replace(/ OTC$/, "")}</span>
-              <em className={(quote?.changePercent ?? 0) >= 0 ? "is-up" : "is-down"}>{formatChange(quote?.changePercent ?? 0)}</em>
-            </div>
-          ))}
+          <span className="hp-notch" />
+          <StatusBar />
+          <div className="hp-phone-head">
+            <img src="/neurooption-mark.svg" alt="" />
+            <b>Markets</b>
+          </div>
+          <div className="hp-phone-chips">
+            <i className="is-on">All</i>
+            <i>Forex</i>
+            <i>Crypto</i>
+            <i>Stocks</i>
+          </div>
+          <div className="hp-phone-list">
+            {rows.map(({ symbol, quote }) => (
+              <div key={symbol} className="hp-phone-row">
+                <AssetIcon symbol={symbol} category={quote?.category} size={15} />
+                <span>
+                  <b>{symbol.replace(/ OTC$/, "")}</b>
+                  <small>{quote ? quote.price.toLocaleString("en-US", { maximumFractionDigits: quote.precision }) : "—"}</small>
+                </span>
+                <em className={(quote?.changePercent ?? 0) >= 0 ? "is-up" : "is-down"}>
+                  {formatChange(quote?.changePercent ?? 0)}
+                </em>
+              </div>
+            ))}
+          </div>
+          <PhoneTabs active={1} />
+          <span className="hp-home-bar" />
         </div>
       </div>
+
       <div className="hp-phone is-front">
+        <span className="hp-phone-btn is-power" />
+        <span className="hp-phone-btn is-vol" />
         <div className="hp-phone-screen">
-          <b className="hp-phone-title">EUR/USD</b>
-          <span className="hp-phone-price">{eur ? eur.price.toFixed(5) : "1.06942"}</span>
-          <svg viewBox="0 0 120 70" className="hp-phone-chart">
-            {Array.from({ length: 22 }, (_, i) => {
-              const base = 52 - i * 1.6 + Math.sin(i * 1.3) * 7;
-              const up = i % 3 !== 1;
-              const h = 5 + ((i * 7) % 9);
-              return (
-                <g key={i} className={up ? "is-up" : "is-down"}>
-                  <line x1={4 + i * 5.2} x2={4 + i * 5.2} y1={base - h - 3} y2={base + 3} />
-                  <rect x={2.2 + i * 5.2} y={base - h} width="3.6" height={h} />
-                </g>
-              );
-            })}
-          </svg>
+          <span className="hp-notch" />
+          <StatusBar />
+          <div className="hp-phone-head">
+            <img src="/neurooption-mark.svg" alt="" />
+            <b>EUR/USD OTC</b>
+            <em className={change >= 0 ? "is-up" : "is-down"}>{formatChange(change)}</em>
+          </div>
+          <div className="hp-phone-quote">
+            <b>{(eur?.price ?? 1.06942).toFixed(5)}</b>
+            <span className="hp-phone-timer">00:28</span>
+          </div>
+          <div className="hp-phone-chart">
+            <CandleChart count={26} seed={21} trend={0.5} width={200} height={150} showGrid={false} />
+          </div>
+          <div className="hp-phone-controls">
+            <span>
+              <small>Time</small>
+              <b>1 min</b>
+            </span>
+            <span>
+              <small>Amount</small>
+              <b>$100</b>
+            </span>
+          </div>
           <div className="hp-phone-actions">
             <span className="is-buy">Buy</span>
             <span className="is-sell">Sell</span>
           </div>
+          <PhoneTabs active={0} />
+          <span className="hp-home-bar" />
         </div>
       </div>
     </div>
