@@ -161,18 +161,18 @@ export default function LandingPage() {
           </Link>
 
           <nav className="lnd-nav" aria-label="Primary navigation">
-            <a href="#features">Trading</a>
+            <a href="#platform">Platform</a>
+            <a href="#features">Features</a>
             <a href="#markets">Markets</a>
-            <a href="#how-it-works">Platform</a>
             <a href="#security">Security</a>
             <a href="#about">About</a>
           </nav>
 
           <div className="lnd-header-actions">
-            <Link to="/login" className="lnd-btn lnd-btn-dark-outline">
+            <Link to="/login" className="lnd-btn lnd-btn-outline">
               Sign in
             </Link>
-            <Link to="/register" className="lnd-btn lnd-btn-blue">
+            <Link to="/register" className="lnd-btn lnd-btn-primary">
               Register
             </Link>
           </div>
@@ -180,11 +180,11 @@ export default function LandingPage() {
       </header>
 
       <section className="lnd-hero">
-        <div className="lnd-hero-bg" aria-hidden="true" />
         <div className="lnd-hero-inner">
           <div className="lnd-hero-copy">
-            <span className="lnd-eyebrow-dark">
-              Smart trading <i aria-hidden="true">&bull;</i> Brighter possibilities
+            <span className="lnd-pill">
+              <i aria-hidden="true" />
+              Smart trading &bull; Brighter possibilities
             </span>
             <h1>
               Trade Smarter
@@ -192,15 +192,17 @@ export default function LandingPage() {
               With <span>NeuroOption</span>
             </h1>
             <p>
-              A modern trading platform for a smarter tomorrow. Access global
-              markets, powerful tools and real opportunities, all in one place.
+              A modern trading platform for a smarter tomorrow. Follow live
+              markets on professional charts, practise free on a demo account
+              and trade currencies, crypto and commodities from your phone or
+              laptop.
             </p>
             <div className="lnd-hero-cta">
-              <Link to="/register" className="lnd-btn lnd-btn-blue lnd-btn-lg">
+              <Link to="/register" className="lnd-btn lnd-btn-primary lnd-btn-lg">
                 Start Trading
                 <ArrowRight size={18} aria-hidden="true" />
               </Link>
-              <Link to="/register" className="lnd-btn lnd-btn-dark-outline lnd-btn-lg">
+              <Link to="/register" className="lnd-btn lnd-btn-outline lnd-btn-lg">
                 <BarChart3 size={18} aria-hidden="true" />
                 Try Demo
               </Link>
@@ -221,17 +223,74 @@ export default function LandingPage() {
             </ul>
           </div>
 
-          <p className="lnd-motto" aria-hidden="true">
-            Discipline
-            <br />
-            creates
-            <br />
-            freedom
-          </p>
+          <div className="lnd-hero-visual">
+            <img
+              className="lnd-hero-photo"
+              src="/landing/people/traders-reviewing-charts.jpg"
+              alt="Two traders reviewing market charts on a laptop"
+              width="1400"
+              height="788"
+            />
+            <div className="lnd-float lnd-float-quote" aria-hidden="true">
+              <small>EUR/USD OTC</small>
+              <strong>1.08231</strong>
+              <em>+0.12%</em>
+              <svg viewBox="0 0 100 32">
+                <polyline points="0,26 12,22 22,24 34,16 46,18 58,10 70,13 82,6 100,4" />
+              </svg>
+            </div>
+            <div className="lnd-float lnd-float-demo" aria-hidden="true">
+              <span><Gamepad2 size={18} /></span>
+              <div>
+                <strong>Free demo account</strong>
+                <small>Practise risk-free</small>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
 
+      <section className="lnd-section lnd-platform" id="platform">
+        <div className="lnd-section-head">
+          <span className="lnd-kicker">The platform</span>
+          <h2>Everything you need in one trading workspace</h2>
+          <p>Live charts, a clear trade panel and every market at a glance, on desktop and mobile.</p>
+        </div>
         <div className="lnd-dashboard">
           <HeroDashboard />
+        </div>
+      </section>
+
+      <section className="lnd-section lnd-people">
+        <div className="lnd-people-grid">
+          <figure className="lnd-photo lnd-photo-tall">
+            <img src="/landing/people/trader-two-laptops.jpg" alt="Trader following live charts on two laptops" loading="lazy" width="800" height="1200" />
+          </figure>
+          <figure className="lnd-photo">
+            <img src="/landing/people/woman-trading-laptop.jpg" alt="Woman trading on a laptop in a bright office" loading="lazy" width="1000" height="563" />
+          </figure>
+          <figure className="lnd-photo">
+            <img src="/landing/people/home-office-trader.jpg" alt="Trader working on a laptop at home" loading="lazy" width="1000" height="667" />
+          </figure>
+        </div>
+        <div className="lnd-people-copy">
+          <span className="lnd-kicker">Trade your way</span>
+          <h2>Built for real people, wherever they trade</h2>
+          <p>
+            Whether you follow the markets from the office, from home or on the
+            move, NeuroOption keeps everything you need in one place: live
+            prices, clear charts and a simple trade panel that works the same on
+            a laptop and a phone.
+          </p>
+          <ul className="lnd-checks">
+            <li><BadgeCheck size={18} aria-hidden="true" /> Start on a free demo account</li>
+            <li><BadgeCheck size={18} aria-hidden="true" /> Trade in your currency and language</li>
+            <li><BadgeCheck size={18} aria-hidden="true" /> Review every trade in your history</li>
+          </ul>
+          <Link to="/register" className="lnd-btn lnd-btn-primary lnd-btn-lg">
+            Create free account
+            <ArrowRight size={18} aria-hidden="true" />
+          </Link>
         </div>
       </section>
 
@@ -325,6 +384,9 @@ export default function LandingPage() {
       </section>
 
       <section className="lnd-section" id="markets">
+        <figure className="lnd-markets-photo">
+          <img src="/landing/people/chart-analysis.jpg" alt="Analysing a candlestick chart on a tablet" loading="lazy" width="1000" height="668" />
+        </figure>
         <div className="lnd-section-head">
           <span className="lnd-kicker">Markets</span>
           <h2>Trade the assets you follow</h2>
@@ -439,7 +501,7 @@ export default function LandingPage() {
             <a href="#privacy">Privacy policy</a>
             <a href="#contacts">Contacts</a>
           </nav>
-          <span>&copy; 2026 NeuroOption &middot; 21+</span>
+          <span>&copy; 2026 NeuroOption &middot; 21+ &middot; Photos: Unsplash</span>
         </div>
       </footer>
     </main>
