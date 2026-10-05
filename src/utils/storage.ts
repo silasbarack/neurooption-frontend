@@ -7,12 +7,14 @@ export function saveToken(token: string): void {
   localStorage.setItem(TOKEN_KEY, token);
 }
 
+// Sign-in stores the token in localStorage ("remember me") or sessionStorage.
 export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+  return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
 }
 
 export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(TOKEN_KEY);
 }
 
 export function saveUser(user: AuthUser): void {
