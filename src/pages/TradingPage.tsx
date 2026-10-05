@@ -118,7 +118,8 @@ const VALID_CATEGORIES: AssetCategory[] = [
   "Commodities",
 ];
 
-const DEFAULT_SELECTED_INDICATORS = ["Moving Average", "MACD"];
+// A new trader starts on a clean chart; indicators are opt-in from the toolbar.
+const DEFAULT_SELECTED_INDICATORS: string[] = [];
 
 function timeframeToSeconds(timeframe: string) {
   const normalized = timeframe.trim().toUpperCase();

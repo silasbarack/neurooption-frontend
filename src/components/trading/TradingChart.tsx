@@ -199,19 +199,27 @@ function timeframeToSeconds(timeframe: string) {
   return 60;
 }
 
-function getVisibleCandleCount(timeframe: string) {
+const MAX_VISIBLE_CANDLES = 120;
+const MIN_VISIBLE_CANDLES = 28;
+/** Keeps candles readable: narrower screens simply show fewer of them. */
+const MIN_CANDLE_SLOT_PX = 7;
+
+function getVisibleCandleCount(timeframe: string, plotWidth: number) {
   const seconds = timeframeToSeconds(timeframe);
 
-  if (seconds <= 15) return 104;
-  if (seconds <= 30) return 100;
-  if (seconds <= 60) return 96;
-  if (seconds <= 180) return 90;
-  if (seconds <= 300) return 86;
-  if (seconds <= 900) return 80;
-  if (seconds <= 1800) return 74;
-  if (seconds <= 3600) return 68;
+  const byTimeframe =
+    seconds <= 15 ? 120
+    : seconds <= 60 ? 110
+    : seconds <= 300 ? 96
+    : seconds <= 1800 ? 84
+    : 68;
 
-  return 60;
+  const byWidth = Math.floor(Math.max(plotWidth, 0) / MIN_CANDLE_SLOT_PX);
+
+  return Math.max(
+    MIN_VISIBLE_CANDLES,
+    Math.min(MAX_VISIBLE_CANDLES, byTimeframe, byWidth || byTimeframe),
+  );
 }
 
 function formatDuration(totalSeconds: number) {
@@ -1347,6 +1355,12 @@ function TradingChartComponent({
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const [resizeVersion, setResizeVersion] = React.useState(0);
+  const drawRef = React.useRef<() => void>(() => {});
+  const serverSkewRef = React.useRef(0);
+
+  React.useEffect(() => {
+    serverSkewRef.current = nowMs - Date.now();
+  }, [nowMs]);
 
   React.useEffect(() => {
     const container = containerRef.current;
@@ -1363,16 +1377,37 @@ function TradingChartComponent({
   }, []);
 
   React.useEffect(() => {
+    let frame = 0;
+
+    const loop = () => {
+      drawRef.current();
+      frame = window.requestAnimationFrame(loop);
+    };
+
+    frame = window.requestAnimationFrame(loop);
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  React.useEffect(() => {
+    drawRef.current = () => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
 
     if (!canvas || !context) return;
 
+    const liveNowMs = Date.now() + serverSkewRef.current;
+
     const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
 
-    canvas.width = Math.max(1, Math.floor(rect.width * dpr));
-    canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+    // Reassigning width/height reallocates the backing store, so only resize
+    // when the box actually changed.
+    const nextWidth = Math.max(1, Math.floor(rect.width * dpr));
+    const nextHeight = Math.max(1, Math.floor(rect.height * dpr));
+
+    if (canvas.width !== nextWidth) canvas.width = nextWidth;
+    if (canvas.height !== nextHeight) canvas.height = nextHeight;
 
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
     context.imageSmoothingEnabled = false;
@@ -1396,7 +1431,16 @@ function TradingChartComponent({
 
     const normalizedIndicators = uniqueCanonicalIndicators(selectedIndicators);
     const fullCandles = candles.slice(-MAX_HISTORY_CANDLES);
-    const visibleLength = Math.min(getVisibleCandleCount(timeframe), fullCandles.length);
+
+    const left = 18;
+    const rightSpace = 84;
+    const right = width - rightSpace;
+    const chartWidth = right - left;
+
+    const visibleLength = Math.min(
+      getVisibleCandleCount(timeframe, chartWidth),
+      fullCandles.length,
+    );
     const visibleCandlesRaw = fullCandles.slice(-visibleLength);
     const renderCandles =
       chartType === "Heiken Ashi" ? heikenAshi(visibleCandlesRaw) : visibleCandlesRaw;
@@ -1428,9 +1472,6 @@ function TradingChartComponent({
           ),
     );
 
-    const left = 18;
-    const rightSpace = 84;
-    const right = width - rightSpace;
     // Desktop overlays the toolbar on the chart; phones place it above.
     const top = width < 560 ? 26 : 64;
     const footer = 26;
@@ -1445,7 +1486,6 @@ function TradingChartComponent({
       bottomPanels.length > 0 ? bottomAreaHeight / bottomPanels.length : 0;
     const chartBottom = height - footer - bottomAreaHeight;
     const chartHeight = Math.max(chartBottom - top, 120);
-    const chartWidth = right - left;
     const candleGap = chartWidth / Math.max(visibleLength - 1, 1);
     const candleWidth = clamp(Math.floor(candleGap * 0.66), 3, 10);
 
@@ -1462,11 +1502,25 @@ function TradingChartComponent({
     const priceToY = (price: number) =>
   Math.round(top + ((max - price) / (max - min)) * chartHeight) + 0.5;
 
+    const candleIntervalMs = timeframeToSeconds(timeframe) * 1000;
+    const newestCandleStart = renderCandles[renderCandles.length - 1]?.time ?? 0;
+    const candleProgress = clamp(
+      (liveNowMs - newestCandleStart) / Math.max(candleIntervalMs, 1),
+      0,
+      1,
+    );
+    const scrollOffset = candleProgress * candleGap;
+
     const indexToX = (index: number) =>
-      Math.round(left + (index / Math.max(visibleLength - 1, 1)) * chartWidth) +
-      0.5;
+      Math.round(left + (index / Math.max(visibleLength - 1, 1)) * chartWidth) + 0.5;
 
     drawGrid(context, left, right, top, chartBottom, 8, 6);
+
+    context.save();
+    context.beginPath();
+    context.rect(left - candleWidth, top, chartWidth + candleWidth, chartBottom - top);
+    context.clip();
+    context.translate(-scrollOffset, 0);
 
     drawCandles(context, renderCandles, chartType, indexToX, priceToY, candleWidth);
 
@@ -1487,6 +1541,8 @@ function TradingChartComponent({
         series.width ?? 1.35,
       );
     });
+
+    context.restore();
 
     const latest = renderCandles[renderCandles.length - 1];
     const latestY = priceToY(latest.close);
@@ -1510,7 +1566,7 @@ function TradingChartComponent({
 
     const remaining = Math.max(
       0,
-      Math.round((nowMs + expirySeconds * 1000 - Date.now()) / 1000),
+      Math.round((liveNowMs + expirySeconds * 1000 - Date.now()) / 1000),
     );
 
     const expiryX = right - 8;
@@ -1606,6 +1662,7 @@ function TradingChartComponent({
         candleGap,
       );
     });
+    };
   }, [
     activeTrades,
     asset,
@@ -1614,7 +1671,6 @@ function TradingChartComponent({
     expirySeconds,
     indicatorSettings,
     indicatorStyles,
-    nowMs,
     resultMarkers,
     resizeVersion,
     selectedIndicators,
