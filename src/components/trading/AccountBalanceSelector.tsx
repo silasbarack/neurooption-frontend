@@ -1,3 +1,4 @@
+import { ChevronDown, Plus } from "lucide-react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import type { AccountType, Currency } from "./trading.types";
@@ -67,7 +68,7 @@ export default function AccountBalanceSelector({
 
         <div className="balance-main-row">
           <span className="balance-amount">{balanceText}</span>
-          <span className="balance-arrow">{open ? "▲" : "▼"}</span>
+          <ChevronDown size={16} className={`balance-arrow${open ? " is-open" : ""}`} aria-hidden="true" />
         </div>
       </div>
 
@@ -77,7 +78,8 @@ export default function AccountBalanceSelector({
         aria-label="Deposit funds"
         onClick={() => navigate(depositPath)}
       >
-        +
+        <Plus size={18} aria-hidden="true" />
+        <span>Deposit</span>
       </button>
 
       {open && (

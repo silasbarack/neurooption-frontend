@@ -1,4 +1,14 @@
 import { Link } from "react-router-dom";
+import {
+  ArrowDownRight,
+  ArrowRight,
+  ArrowUpRight,
+  Clock,
+  Coins,
+  Minus,
+  Plus,
+  Sparkles,
+} from "lucide-react";
 import type { Currency, TradeSide } from "./trading.types";
 import type { BackendTrade } from "./tradesApi";
 import { formatMoney } from "./tradesApi";
@@ -10,6 +20,9 @@ type ExpiryParts = {
 };
 
 type TradingPanelProps = {
+  assetSymbol?: string;
+  priceText?: string;
+  changePercent?: number;
   expiryText: string;
   expiryParts: ExpiryParts;
   amount: string;
@@ -26,6 +39,9 @@ type TradingPanelProps = {
 };
 
 export default function TradingPanel({
+  assetSymbol,
+  priceText,
+  changePercent = 0,
   expiryText,
   expiryParts,
   amount,
@@ -45,17 +61,30 @@ export default function TradingPanel({
 
   return (
     <aside className="nt-trade-panel nt-white-panel">
-      <section className="nt-white-field">
-        <h3>Time ⓘ</h3>
+      {assetSymbol && priceText && (
+        <section className="nt-panel-ticker" aria-label="Selected asset">
+          <div>
+            <small>{assetSymbol}</small>
+            <strong>{priceText}</strong>
+          </div>
+          <span className={changePercent >= 0 ? "is-up" : "is-down"}>
+            {changePercent >= 0 ? "+" : ""}
+            {changePercent.toFixed(2)}%
+          </span>
+        </section>
+      )}
+
+      <section className="nt-white-field nt-field-time">
+        <h3><Clock size={14} aria-hidden="true" /> Expiration</h3>
 
         <div className="nt-white-input">
           <strong>{expiryText}</strong>
           <div>
-            <button type="button" onClick={() => onAdjustExpiry("seconds", -1)}>
-              −
+            <button type="button" onClick={() => onAdjustExpiry("seconds", -1)} aria-label="Decrease expiration">
+              <Minus size={14} />
             </button>
-            <button type="button" onClick={() => onAdjustExpiry("seconds", 1)}>
-              +
+            <button type="button" onClick={() => onAdjustExpiry("seconds", 1)} aria-label="Increase expiration">
+              <Plus size={14} />
             </button>
           </div>
         </div>
@@ -67,8 +96,8 @@ export default function TradingPanel({
         </div>
       </section>
 
-      <section className="nt-white-field">
-        <h3>Amount ⓘ</h3>
+      <section className="nt-white-field nt-field-amount">
+        <h3><Coins size={14} aria-hidden="true" /> Amount</h3>
 
         <label className="nt-white-input">
           <input
@@ -81,11 +110,12 @@ export default function TradingPanel({
             <button
               type="button"
               onClick={() => onAmountChange(String(Math.max(1, numericAmount - 1)))}
+              aria-label="Decrease amount"
             >
-              −
+              <Minus size={14} />
             </button>
-            <button type="button" onClick={() => onAmountChange(String(numericAmount + 1))}>
-              +
+            <button type="button" onClick={() => onAmountChange(String(numericAmount + 1))} aria-label="Increase amount">
+              <Plus size={14} />
             </button>
           </div>
         </label>
@@ -105,11 +135,14 @@ export default function TradingPanel({
         disabled={!canTrade}
         onClick={() => onTrade("BUY")}
       >
-        ↗ BUY
+        <span>Buy</span>
+        <em className="nt-btn-payout">{payout}%</em>
+        <ArrowUpRight size={20} aria-hidden="true" />
       </button>
 
       <button type="button" className="nt-ai">
-        AI TRADING
+        <Sparkles size={16} aria-hidden="true" />
+        AI trading
       </button>
 
       <button
@@ -118,7 +151,9 @@ export default function TradingPanel({
         disabled={!canTrade}
         onClick={() => onTrade("SELL")}
       >
-        ↘ SELL
+        <span>Sell</span>
+        <em className="nt-btn-payout">{payout}%</em>
+        <ArrowDownRight size={20} aria-hidden="true" />
       </button>
 
       <section className="nt-white-sentiment">
@@ -144,7 +179,7 @@ export default function TradingPanel({
       <section className="nt-open-trades">
         <div className="nt-open-trades-head">
           <h3>Open Trades ({openTrades.length})</h3>
-          <Link to="/open-trades">View all →</Link>
+          <Link to="/open-trades">View all <ArrowRight size={13} aria-hidden="true" /></Link>
         </div>
 
         {openTrades.length === 0 ? (
