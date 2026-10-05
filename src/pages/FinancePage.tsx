@@ -1,6 +1,24 @@
 import React from "react";
-import { PageHeader, StatCard, StatusBadge, DataTable, EmptyState } from "../components/common";
-import type { DataTableColumn } from "../components/common";
+import { Link } from "react-router-dom";
+import type { LucideIcon } from "lucide-react";
+import {
+  ArrowDownLeft,
+  ArrowLeft,
+  ArrowUpRight,
+  Bitcoin,
+  CircleCheck,
+  Clock,
+  CreditCard,
+  Gamepad2,
+  Landmark,
+  Plus,
+  Receipt,
+  ShieldCheck,
+  Smartphone,
+  Wallet,
+} from "lucide-react";
+import Logo from "../components/branding/Logo";
+import "./FinancePage.css";
 import { API_BASE_URL, USER_ID, fetchJson, formatMoney } from "../components/trading";
 import { MOCK_TRANSACTIONS, PAYMENT_METHODS, type Transaction } from "../data/mockData";
 
@@ -12,6 +30,14 @@ const TRANSACTION_STATUS_TONE: Record<Transaction["status"], "success" | "warnin
   Completed: "success",
   Pending: "warning",
   Failed: "danger",
+};
+
+const METHOD_ICONS: Record<string, LucideIcon> = {
+  mpesa: Smartphone,
+  airtel: Smartphone,
+  bank: Landmark,
+  card: CreditCard,
+  binance: Bitcoin,
 };
 
 export default function FinancePage() {
@@ -80,103 +106,145 @@ export default function FinancePage() {
     window.setTimeout(() => setWithdrawSubmitted(false), 3000);
   }
 
-  const columns: Array<DataTableColumn<Transaction>> = [
-    { key: "date", header: "Date", render: (t) => t.date },
-    { key: "type", header: "Type", render: (t) => t.type },
-    { key: "method", header: "Method", render: (t) => t.method },
-    {
-      key: "amount",
-      header: "Amount",
-      align: "right",
-      render: (t) => (t.type === "Deposit" ? "+" : "-") + formatMoney(t.amount, "USD"),
-    },
-    {
-      key: "status",
-      header: "Status",
-      render: (t) => <StatusBadge tone={TRANSACTION_STATUS_TONE[t.status]}>{t.status}</StatusBadge>,
-    },
-  ];
+  const selectedMethod = PAYMENT_METHODS.find((m) => m.id === withdrawMethod);
 
   return (
-    <main className="np-page">
-      <div className="np-container">
-        <PageHeader
-          title="Finance"
-          subtitle="Manage deposits, withdrawals, and your transaction history."
-          actions={
-            <>
-              <button type="button" className="np-btn np-btn-primary" onClick={() => paymentMethodsRef.current?.scrollIntoView({ behavior: "smooth" })}>
-                + Deposit
-              </button>
-              <button type="button" className="np-btn" onClick={() => withdrawRef.current?.scrollIntoView({ behavior: "smooth" })}>
-                Withdraw
-              </button>
-            </>
-          }
-        />
+    <main className="fin">
+      <header className="fin-header">
+        <div className="fin-header-inner">
+          <Link to="/" className="fin-brand" aria-label="NeuroOption home">
+            <Logo className="fin-logo" />
+          </Link>
+          <Link to="/trading" className="fin-back">
+            <ArrowLeft size={16} aria-hidden="true" />
+            Back to trading
+          </Link>
+        </div>
+      </header>
 
-        <section className="np-section np-grid np-grid-2">
-          <StatCard
-            label="Demo Account"
-            value={demoBalance !== null ? formatMoney(demoBalance, "USD") : "—"}
-            hint="QT Demo · practice funds"
-          />
-          <StatCard
-            label="Real Account"
-            value={realBalance !== null ? formatMoney(realBalance, "USD") : "—"}
-            hint="QT Real · live funds"
-            tone="success"
-          />
-        </section>
-
-        <section className="np-section np-grid np-grid-3">
-          <StatCard label="Total Deposited" value={formatMoney(totalDeposits, "USD")} hint="All-time completed deposits" />
-          <StatCard label="Total Withdrawn" value={formatMoney(totalWithdrawals, "USD")} hint="All-time completed withdrawals" />
-          <StatCard label="Pending Transactions" value={String(pendingCount)} hint="Awaiting confirmation" tone={pendingCount > 0 ? "warning" : "default"} />
-        </section>
-
-        <section className="np-section">
-          <div className="np-section-head">
-            <h2>Recent Transactions</h2>
+      <div className="fin-container">
+        <section className="fin-titlebar">
+          <div>
+            <span className="fin-kicker">Wallet</span>
+            <h1>Finance</h1>
+            <p>Manage deposits, withdrawals and your transaction history.</p>
           </div>
-
-          <DataTable
-            columns={columns}
-            rows={transactions}
-            rowKey={(t) => t.id}
-            emptyState={<EmptyState icon="🧾" title="No transactions yet" description="Your deposits and withdrawals will show up here." />}
-          />
+          <div className="fin-actions">
+            <button
+              type="button"
+              className="fin-btn fin-btn-green"
+              onClick={() => paymentMethodsRef.current?.scrollIntoView({ behavior: "smooth" })}
+            >
+              <Plus size={17} aria-hidden="true" />
+              Deposit
+            </button>
+            <button
+              type="button"
+              className="fin-btn fin-btn-ghost"
+              onClick={() => withdrawRef.current?.scrollIntoView({ behavior: "smooth" })}
+            >
+              <ArrowUpRight size={17} aria-hidden="true" />
+              Withdraw
+            </button>
+          </div>
         </section>
 
-        <section className="np-section" ref={paymentMethodsRef}>
-          <div className="np-section-head">
-            <h2>Payment Methods</h2>
-          </div>
+        <section className="fin-balances">
+          <article className="fin-balance is-real">
+            <div className="fin-balance-head">
+              <span className="fin-balance-icon"><Wallet size={20} aria-hidden="true" /></span>
+              <span className="fin-badge">QT Real</span>
+            </div>
+            <small>Real account balance</small>
+            <strong>{realBalance !== null ? formatMoney(realBalance, "USD") : "—"}</strong>
+            <p>Live funds available for trading and withdrawal</p>
+          </article>
+          <article className="fin-balance">
+            <div className="fin-balance-head">
+              <span className="fin-balance-icon"><Gamepad2 size={20} aria-hidden="true" /></span>
+              <span className="fin-badge is-demo">QT Demo</span>
+            </div>
+            <small>Demo account balance</small>
+            <strong>{demoBalance !== null ? formatMoney(demoBalance, "USD") : "—"}</strong>
+            <p>Practice funds, no real money at risk</p>
+          </article>
+        </section>
 
-          <div className="np-grid np-grid-3">
-            {PAYMENT_METHODS.map((method) => (
-              <div key={method.id} className="np-card">
-                <div style={{ fontSize: 28, marginBottom: 8 }}>{method.icon}</div>
-                <div style={{ fontWeight: 800, marginBottom: 4 }}>{method.name}</div>
-                <div className="np-text-muted" style={{ fontSize: 13 }}>
-                  {method.description}
-                </div>
+        <section className="fin-stats">
+          <div className="fin-stat">
+            <span className="fin-stat-icon is-green"><ArrowDownLeft size={18} aria-hidden="true" /></span>
+            <div>
+              <small>Total deposited</small>
+              <strong>{formatMoney(totalDeposits, "USD")}</strong>
+            </div>
+          </div>
+          <div className="fin-stat">
+            <span className="fin-stat-icon is-blue"><ArrowUpRight size={18} aria-hidden="true" /></span>
+            <div>
+              <small>Total withdrawn</small>
+              <strong>{formatMoney(totalWithdrawals, "USD")}</strong>
+            </div>
+          </div>
+          <div className="fin-stat">
+            <span className={`fin-stat-icon ${pendingCount > 0 ? "is-amber" : "is-muted"}`}><Clock size={18} aria-hidden="true" /></span>
+            <div>
+              <small>Pending transactions</small>
+              <strong>{pendingCount}</strong>
+            </div>
+          </div>
+        </section>
+
+        <div className="fin-columns">
+          <section className="fin-card fin-transactions">
+            <div className="fin-card-head">
+              <h2>Recent transactions</h2>
+              <span>{transactions.length} total</span>
+            </div>
+
+            {transactions.length === 0 ? (
+              <div className="fin-empty">
+                <Receipt size={28} aria-hidden="true" />
+                <strong>No transactions yet</strong>
+                <span>Your deposits and withdrawals will show up here.</span>
               </div>
-            ))}
-          </div>
-        </section>
+            ) : (
+              <ul className="fin-tx-list">
+                {transactions.map((t) => {
+                  const isDeposit = t.type === "Deposit";
+                  return (
+                    <li key={t.id}>
+                      <span className={`fin-tx-icon ${isDeposit ? "is-in" : "is-out"}`}>
+                        {isDeposit ? <ArrowDownLeft size={17} aria-hidden="true" /> : <ArrowUpRight size={17} aria-hidden="true" />}
+                      </span>
+                      <div className="fin-tx-main">
+                        <strong>{t.type}</strong>
+                        <small>{t.method} &middot; {t.date}</small>
+                      </div>
+                      <div className="fin-tx-side">
+                        <strong className={isDeposit ? "is-in" : "is-out"}>
+                          {(isDeposit ? "+" : "-") + formatMoney(t.amount, "USD")}
+                        </strong>
+                        <span className={`fin-status is-${TRANSACTION_STATUS_TONE[t.status]}`}>{t.status}</span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
 
-        <section className="np-section" ref={withdrawRef}>
-          <div className="np-card">
-            <h3 className="np-card-title">Request a Withdrawal</h3>
-            <p className="np-card-subtitle">Withdrawals are reviewed and typically clear within 24-48 hours.</p>
+          <div className="fin-side">
+            <section className="fin-card" ref={withdrawRef}>
+              <div className="fin-card-head">
+                <h2>Request a withdrawal</h2>
+              </div>
+              <p className="fin-card-sub">Withdrawals are reviewed and typically clear within 24-48 hours.</p>
 
-            <form onSubmit={handleRequestWithdrawal}>
-              <div className="np-field">
+              <form className="fin-form" onSubmit={handleRequestWithdrawal}>
                 <label htmlFor="withdraw-method">Method</label>
                 <select
                   id="withdraw-method"
-                  className="np-select"
+                  className="fin-input"
                   value={withdrawMethod}
                   onChange={(event) => setWithdrawMethod(event.target.value)}
                 >
@@ -186,34 +254,64 @@ export default function FinancePage() {
                     </option>
                   ))}
                 </select>
-              </div>
 
-              <div className="np-field">
                 <label htmlFor="withdraw-amount">Amount (USD)</label>
-                <input
-                  id="withdraw-amount"
-                  className="np-input"
-                  type="number"
-                  min={10}
-                  placeholder="100"
-                  value={withdrawAmount}
-                  onChange={(event) => setWithdrawAmount(event.target.value)}
-                />
-              </div>
+                <div className="fin-amount">
+                  <span>$</span>
+                  <input
+                    id="withdraw-amount"
+                    className="fin-input"
+                    type="number"
+                    min={10}
+                    placeholder="100"
+                    value={withdrawAmount}
+                    onChange={(event) => setWithdrawAmount(event.target.value)}
+                  />
+                </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <button type="submit" className="np-btn np-btn-success" disabled={!withdrawAmount || Number(withdrawAmount) <= 0}>
-                  Request Withdrawal
+                <button
+                  type="submit"
+                  className="fin-btn fin-btn-blue fin-btn-block"
+                  disabled={!withdrawAmount || Number(withdrawAmount) <= 0}
+                >
+                  Request withdrawal{selectedMethod ? ` via ${selectedMethod.name}` : ""}
                 </button>
+
                 {withdrawSubmitted && (
-                  <span className="np-text-success" style={{ fontSize: 13 }}>
+                  <p className="fin-success" role="status">
+                    <CircleCheck size={16} aria-hidden="true" />
                     Withdrawal request submitted!
-                  </span>
+                  </p>
                 )}
+              </form>
+
+              <p className="fin-note">
+                <ShieldCheck size={15} aria-hidden="true" />
+                Withdrawals are paid only to verified (KYC) account holders.
+              </p>
+            </section>
+
+            <section className="fin-card" ref={paymentMethodsRef}>
+              <div className="fin-card-head">
+                <h2>Payment methods</h2>
               </div>
-            </form>
+              <ul className="fin-methods">
+                {PAYMENT_METHODS.map((method) => {
+                  const Icon = METHOD_ICONS[method.id] ?? CreditCard;
+                  return (
+                    <li key={method.id}>
+                      <span className="fin-method-icon"><Icon size={18} aria-hidden="true" /></span>
+                      <div>
+                        <strong>{method.name}</strong>
+                        <small>{method.description}</small>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
           </div>
-        </section>
+        </div>
       </div>
     </main>
   );
