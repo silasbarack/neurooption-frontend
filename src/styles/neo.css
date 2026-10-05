@@ -310,23 +310,36 @@ textarea {
   }
 }
 
-/* The approved logo has navy lettering, so it always sits on a light plate. */
+/* The approved logo: navy mark + gold text on dark background. */
 .neo-brand {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
   padding: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
   text-decoration: none;
-  line-height: 0;
+  line-height: 1;
 }
 
 .neo-brand .neurooption-logo {
   display: block;
   width: auto;
   height: 26px;
-  filter: brightness(0.85);
+  filter: brightness(1.2) contrast(1.15);
+}
+
+.neo-brand::after {
+  content: "NeuroOption";
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  background: linear-gradient(180deg, #ffd062, #f5b82e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 .neo-brand-sm {
