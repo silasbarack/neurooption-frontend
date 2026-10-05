@@ -6,7 +6,7 @@ import { fetchOpenTrades, formatMoney, type BackendTrade } from "../components/t
 // Live "time left until expiry" — ticks every second from the trade's
 // real expiryTime, no fake price data involved.
 function Countdown({ expiryTime }: { expiryTime: number }) {
-  const [now, setNow] = React.useState(Date.now());
+  const [now, setNow] = React.useState(() => Date.now());
 
   React.useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 1000);

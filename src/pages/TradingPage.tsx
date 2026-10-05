@@ -318,10 +318,15 @@ export default function TradingPage() {
   const [tradeSubmitting, setTradeSubmitting] = React.useState(false);
   const [tradeError, setTradeError] = React.useState<string | null>(null);
 
+  // Other pages deep-link into an asset via navigate("/trading", { state: { symbol } }).
+  const requestedSymbol = (location.state as { symbol?: string } | null)?.symbol;
+  const initialAsset =
+    ASSETS.find((asset) => asset.symbol === requestedSymbol) ?? DEFAULT_ASSET;
+
   const [availableAssets, setAvailableAssets] = React.useState<Asset[]>(ASSETS);
-  const [selectedAsset, setSelectedAsset] = React.useState<Asset>(DEFAULT_ASSET);
+  const [selectedAsset, setSelectedAsset] = React.useState<Asset>(initialAsset);
   const [activeCategory, setActiveCategory] = React.useState<AssetCategory>(
-    DEFAULT_ASSET.category
+    initialAsset.category
   );
   const [assetMenuOpen, setAssetMenuOpen] = React.useState(false);
 
@@ -602,7 +607,10 @@ export default function TradingPage() {
         if (nextAssets.length > 0) {
           setAvailableAssets(nextAssets);
 
+          // The backend list is much larger than the built-in fallback, so a
+          // deep-linked symbol may only become available here.
           const preferred =
+            nextAssets.find((asset) => asset.symbol === requestedSymbol) ??
             nextAssets.find((asset) => asset.symbol === DEFAULT_ASSET.symbol) ??
             nextAssets.find((asset) => asset.symbol === "EUR/USD OTC") ??
             nextAssets[0];
@@ -624,7 +632,7 @@ export default function TradingPage() {
     return () => {
       cancelled = true;
     };
-  }, [showSyntheticMarket, loadHistoricalCandles, timeframe]);
+  }, [showSyntheticMarket, loadHistoricalCandles, timeframe, requestedSymbol]);
 
   // Live price/candle feed: subscribe to this asset+timeframe room on the
   // backend's market WebSocket, which ticks continuously regardless of
@@ -749,24 +757,6 @@ export default function TradingPage() {
     setAssetMenuOpen(false);
     loadHistoricalCandles(asset, timeframe).catch(() => undefined);
   }
-
-  // Allow other pages (e.g. Market) to deep-link into a specific asset via
-  // navigate("/trading", { state: { symbol } }).
-  // The backend list (loaded after mount) has many more assets than the
-  // built-in fallback, so retry the match once it arrives.
-  const requestedSymbolHandledRef = React.useRef(false);
-  React.useEffect(() => {
-    if (requestedSymbolHandledRef.current) return;
-    const requestedSymbol = (location.state as { symbol?: string } | null)?.symbol;
-    if (!requestedSymbol) return;
-
-    const match = availableAssets.find((asset) => asset.symbol === requestedSymbol);
-    if (match) {
-      requestedSymbolHandledRef.current = true;
-      handleAssetChange(match);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [availableAssets]);
 
   function handleTimeframeChange(nextTimeframe: string) {
     showSyntheticMarket(selectedAsset, nextTimeframe);
