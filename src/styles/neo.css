@@ -316,10 +316,14 @@ textarea {
   }
 }
 
-/* The NeuroOption logo: blue "N" mark with a white wordmark, for dark surfaces. */
+/* The approved logo has navy lettering, so it always sits on a light plate. */
 .neo-brand {
   display: inline-flex;
   align-items: center;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
   text-decoration: none;
   line-height: 0;
 }
@@ -327,15 +331,19 @@ textarea {
 .neo-brand .neurooption-logo {
   display: block;
   width: auto;
-  height: 30px;
+  height: 26px;
+}
+
+.neo-brand-sm {
+  padding: 5px 9px;
 }
 
 .neo-brand-sm .neurooption-logo {
-  height: 24px;
+  height: 21px;
 }
 
 .neo-brand-lg .neurooption-logo {
-  height: 36px;
+  height: 32px;
 }
 
 .neo-sr-only {

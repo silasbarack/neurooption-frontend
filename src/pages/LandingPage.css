@@ -406,9 +406,18 @@
   background: #0a1223;
 }
 
+/* The approved logo has navy lettering, so the mockups show it on a plate. */
 .hp-app-mark {
-  width: 11px;
-  height: 11px;
+  display: inline-flex;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: #fff;
+  line-height: 0;
+}
+
+.hp-app-mark img {
+  width: auto;
+  height: 8px;
 }
 
 .hp-app-pair {
@@ -1132,9 +1141,17 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.hp-phone-head img {
-  width: 12px;
-  height: 12px;
+.hp-phone-mark {
+  display: inline-flex;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: #fff;
+  line-height: 0;
+}
+
+.hp-phone-mark img {
+  width: auto;
+  height: 9px;
 }
 
 .hp-phone-head b {

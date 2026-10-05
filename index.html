@@ -2,12 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/neurooption-mark.svg" />
-    <link rel="alternate icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="preload" as="image" href="/neurooption-logo.svg" />
+    <link rel="preload" as="image" href="/neurooption-logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#060b16" />
+    <meta name="theme-color" content="#050a18" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -24,8 +23,8 @@
         gap: 26px;
         padding: 24px;
         background:
-          radial-gradient(circle at 50% 40%, rgba(245, 184, 46, 0.12), transparent 46%),
-          #060b16;
+          radial-gradient(circle at 50% 40%, rgba(47, 107, 255, 0.16), transparent 46%),
+          #050a18;
         font-family: "Noto Sans", Arial, sans-serif;
         transition: opacity 0.45s ease, visibility 0.45s ease;
       }
@@ -35,8 +34,12 @@
         pointer-events: none;
       }
       .app-splash-logo {
-        width: min(260px, 62vw);
+        width: min(280px, 66vw);
         height: auto;
+        padding: 14px 20px;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
         animation: app-splash-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both,
           app-splash-breathe 2.4s ease-in-out 0.7s infinite;
       }
@@ -51,7 +54,7 @@
         width: 100%;
         height: 100%;
         border-radius: inherit;
-        background: linear-gradient(90deg, #ffd062, #f5b82e);
+        background: linear-gradient(90deg, #5b8cff, #2f6bff);
         transform-origin: left center;
         transform: scaleX(0.04);
         animation: app-splash-progress 2.6s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
@@ -90,7 +93,7 @@
   </head>
   <body>
     <div id="app-splash" role="status" aria-live="polite" aria-label="Loading NeuroOption">
-      <img class="app-splash-logo" src="/neurooption-logo.svg" alt="NeuroOption" />
+      <img class="app-splash-logo" src="/neurooption-logo.png" alt="NeuroOption" />
       <div class="app-splash-track"><div class="app-splash-bar"></div></div>
       <p class="app-splash-text">Preparing your trading workspace</p>
     </div>

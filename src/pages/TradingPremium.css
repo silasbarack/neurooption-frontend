@@ -51,7 +51,10 @@
 .nt-premium .nt-brand-plate {
   display: inline-flex;
   align-items: center;
-  padding: 0;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: #fff; /* the approved logo has navy lettering */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
 .nt-premium .nt-brand-approved-logo {
@@ -680,8 +683,13 @@
     gap: 8px;
   }
 
+  .nt-premium .nt-brand-plate {
+    padding: 4px 8px;
+    border-radius: 9px;
+  }
+
   .nt-premium .nt-brand-approved-logo {
-    width: 120px;
+    width: 104px;
     height: 24px;
   }
 

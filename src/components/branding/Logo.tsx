@@ -14,7 +14,7 @@ export default function Logo({
 
   const img = (
     <img
-      src="/neurooption-logo.svg"
+      src="/neurooption-logo.png"
       alt="NeuroOption"
       className={classes}
       loading={loading}
@@ -27,7 +27,7 @@ export default function Logo({
 
   return (
     <picture>
-      <source media={`(max-width: ${markOnlyBelow}px)`} srcSet="/neurooption-mark.svg" />
+      <source media={`(max-width: ${markOnlyBelow}px)`} srcSet="/apple-touch-icon.png" />
       {img}
     </picture>
   );

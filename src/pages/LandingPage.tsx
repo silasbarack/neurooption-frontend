@@ -290,7 +290,9 @@ function HeroArt({ quotes }: { quotes: MarketQuote[] }) {
         <div className="hp-lid">
           <div className="hp-screen">
             <div className="hp-app-top">
-              <img src="/neurooption-mark.svg" alt="" className="hp-app-mark" />
+              <span className="hp-app-mark">
+                <img src="/neurooption-logo.png" alt="" />
+              </span>
               <span className="hp-app-pair">
                 EUR/USD OTC <ChevronDown size={9} aria-hidden="true" />
               </span>
@@ -513,7 +515,9 @@ function PhoneMockups({ quotes }: { quotes: MarketQuote[] }) {
           <span className="hp-notch" />
           <StatusBar />
           <div className="hp-phone-head">
-            <img src="/neurooption-mark.svg" alt="" />
+            <span className="hp-phone-mark">
+              <img src="/neurooption-logo.png" alt="" />
+            </span>
             <b>Markets</b>
           </div>
           <div className="hp-phone-chips">
@@ -548,7 +552,9 @@ function PhoneMockups({ quotes }: { quotes: MarketQuote[] }) {
           <span className="hp-notch" />
           <StatusBar />
           <div className="hp-phone-head">
-            <img src="/neurooption-mark.svg" alt="" />
+            <span className="hp-phone-mark">
+              <img src="/neurooption-logo.png" alt="" />
+            </span>
             <b>EUR/USD OTC</b>
             <em className={change >= 0 ? "is-up" : "is-down"}>{formatChange(change)}</em>
           </div>
