@@ -1,4 +1,5 @@
 import React from "react";
+import { Activity, Clock3, Ellipsis, PenLine, X } from "lucide-react";
 import type { ChartType } from "./trading.types";
 import { DRAWING_TOOLS, INDICATORS, TIMEFRAMES } from "./trading.constants";
 import {
@@ -168,7 +169,7 @@ export default function TradingToolbar({
       <div className="nt-toolbar-left">
         <div className="nt-tool-wrap">
           <button type="button" className="nt-tool-btn" onClick={onTimeframeToggle}>
-            📊 {timeframe}
+            <Clock3 size={15} aria-hidden="true" /> {timeframe}
           </button>
 
           {timeframeOpen && (
@@ -179,7 +180,7 @@ export default function TradingToolbar({
                 onClick={onTimeframeToggle}
                 aria-label="Close"
               >
-                ✕
+                <X size={15} />
               </button>
 
               {TIMEFRAMES.map((item) => (
@@ -197,15 +198,15 @@ export default function TradingToolbar({
         </div>
 
         <button type="button" className="nt-tool-btn" onClick={onIndicatorsToggle}>
-          Indicators
+          <Activity size={15} aria-hidden="true" /> Indicators
         </button>
 
         <button type="button" className="nt-tool-btn" onClick={onDrawingToggle}>
-          ✎ {selectedTool}
+          <PenLine size={15} aria-hidden="true" /> {selectedTool}
         </button>
 
-        <button type="button" className="nt-tool-btn compact">
-          •••
+        <button type="button" className="nt-tool-btn compact" aria-label="More tools">
+          <Ellipsis size={17} aria-hidden="true" />
         </button>
       </div>
 
@@ -232,7 +233,7 @@ export default function TradingToolbar({
             onClick={onIndicatorsToggle}
             aria-label="Close"
           >
-            ✕
+            <X size={15} />
           </button>
 
           <h3>Indicators</h3>
@@ -302,7 +303,7 @@ export default function TradingToolbar({
             onClick={onDrawingToggle}
             aria-label="Close"
           >
-            ✕
+            <X size={15} />
           </button>
 
           <h3>Drawing tools</h3>

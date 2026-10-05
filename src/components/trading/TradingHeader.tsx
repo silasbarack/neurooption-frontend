@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Bell, Maximize, Star } from "lucide-react";
 import type { AccountType, Currency } from "./trading.types";
 import AccountBalanceSelector from "./AccountBalanceSelector";
 import Logo from "../branding/Logo";
@@ -11,6 +14,27 @@ type TradingHeaderProps = {
   onFullscreen: () => void;
 };
 
+// Sign-in keeps the user in localStorage ("remember me") or sessionStorage.
+function readUserInitials(): string {
+  for (const storage of [localStorage, sessionStorage]) {
+    try {
+      const user = JSON.parse(storage.getItem("neurooption_user") || "null");
+      const name: string = (user?.fullName || user?.name || user?.email || "").trim();
+      if (name) {
+        const parts = name.split(/[\s@._-]+/).filter(Boolean);
+        return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "NO";
+      }
+    } catch {
+      // Ignore malformed stored data and fall through to the default.
+    }
+  }
+  return "NO";
+}
+
+function formatUtc(date: Date): string {
+  return date.toISOString().slice(11, 19);
+}
+
 export default function TradingHeader({
   accountType,
   currency,
@@ -19,13 +43,28 @@ export default function TradingHeader({
   onCurrencyChange,
   onFullscreen,
 }: TradingHeaderProps) {
+  const [initials] = useState(readUserInitials);
+  const [clock, setClock] = useState(() => formatUtc(new Date()));
+
+  useEffect(() => {
+    const id = window.setInterval(() => setClock(formatUtc(new Date())), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
   return (
     <header className="nt-header">
       <div className="nt-brand">
-        <Logo className="nt-brand-approved-logo" />
-        <button type="button" className="nt-star">
-          ★
+        <Link to="/" className="nt-brand-plate" aria-label="NeuroOption home">
+          <Logo className="nt-brand-approved-logo" />
+        </Link>
+        <button type="button" className="nt-star" aria-label="Favourites">
+          <Star size={16} aria-hidden="true" />
         </button>
+        <div className="nt-market-status" aria-label="Market status">
+          <i aria-hidden="true" />
+          <span>Market open</span>
+          <time>{clock} UTC</time>
+        </div>
       </div>
 
       <div className="nt-account-bar">
@@ -38,11 +77,17 @@ export default function TradingHeader({
           depositPath="/finance"
         />
 
-        <button type="button" className="nt-fullscreen" onClick={onFullscreen}>
-          ⛶
+        <button type="button" className="nt-fullscreen nt-header-icon" aria-label="Notifications">
+          <Bell size={17} aria-hidden="true" />
         </button>
 
-        <span className="nt-avatar">SM</span>
+        <button type="button" className="nt-fullscreen" onClick={onFullscreen} aria-label="Full screen">
+          <Maximize size={17} aria-hidden="true" />
+        </button>
+
+        <Link to="/profile" className="nt-avatar" aria-label="Profile">
+          {initials}
+        </Link>
       </div>
     </header>
   );

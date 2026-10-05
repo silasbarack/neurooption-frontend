@@ -1,22 +1,32 @@
 import { useNavigate } from "react-router-dom";
+import type { LucideIcon } from "lucide-react";
+import {
+  History,
+  Keyboard,
+  Maximize,
+  Radio,
+  RefreshCcw,
+  Users,
+  Zap,
+} from "lucide-react";
 
 type TradingQuickMenuProps = {
   onFullscreen: () => void;
 };
 
 const items: Array<{
-  icon: string;
+  icon: LucideIcon;
   label: string;
   path?: string;
   action?: "fullscreen";
 }> = [
-  { icon: "↻", label: "Open trades", path: "/open-trades" },
-  { icon: "🕘", label: "History", path: "/history" },
-  { icon: "📡", label: "Signals", path: "/signals" },
-  { icon: "👥", label: "Social Trading", path: "/social-trading" },
-  { icon: "◎", label: "Express Trades", path: "/express-trades" },
-  { icon: "⌨", label: "Hotkeys" },
-  { icon: "⛶", label: "Full screen", action: "fullscreen" },
+  { icon: RefreshCcw, label: "Open trades", path: "/open-trades" },
+  { icon: History, label: "History", path: "/history" },
+  { icon: Radio, label: "Signals", path: "/signals" },
+  { icon: Users, label: "Social Trading", path: "/social-trading" },
+  { icon: Zap, label: "Express Trades", path: "/express-trades" },
+  { icon: Keyboard, label: "Hotkeys" },
+  { icon: Maximize, label: "Full screen", action: "fullscreen" },
 ];
 
 export default function TradingQuickMenu({ onFullscreen }: TradingQuickMenuProps) {
@@ -24,7 +34,7 @@ export default function TradingQuickMenu({ onFullscreen }: TradingQuickMenuProps
 
   return (
     <aside className="nt-quick-menu">
-      {items.map((item) => (
+      {items.map(({ icon: Icon, ...item }) => (
         <button
           key={item.label}
           type="button"
@@ -39,7 +49,7 @@ export default function TradingQuickMenu({ onFullscreen }: TradingQuickMenuProps
             }
           }}
         >
-          <span>{item.icon}</span>
+          <span><Icon size={18} strokeWidth={1.9} aria-hidden="true" /></span>
           <small>{item.label}</small>
         </button>
       ))}

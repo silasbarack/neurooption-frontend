@@ -1,16 +1,29 @@
 import { useNavigate, useLocation } from "react-router-dom";
+import type { LucideIcon } from "lucide-react";
+import {
+  Bot,
+  CandlestickChart,
+  CircleHelp,
+  Gem,
+  Gift,
+  MessageCircle,
+  ShoppingBag,
+  Trophy,
+  UserRound,
+  Wallet,
+} from "lucide-react";
 
-const items: Array<[string, string, string?]> = [
-  ["📈", "Trading", "/trading"],
-  ["💵", "Finance", "/finance"],
-  ["👤", "Profile", "/profile"],
-  ["🛒", "Market", "/market"],
-  ["💎", "Achievements", "/achievements"],
-  ["🏆", "Tournaments", "/tournaments"],
-  ["💬", "Chat", "/chat"],
-  ["?", "Help", "/help"],
-  ["🎁", "Promo"],
-  ["🤖", "Autotrading"],
+const items: Array<[LucideIcon, string, string?]> = [
+  [CandlestickChart, "Trading", "/trading"],
+  [Wallet, "Finance", "/finance"],
+  [UserRound, "Profile", "/profile"],
+  [ShoppingBag, "Market", "/market"],
+  [Gem, "Achievements", "/achievements"],
+  [Trophy, "Tournaments", "/tournaments"],
+  [MessageCircle, "Chat", "/chat"],
+  [CircleHelp, "Help", "/help"],
+  [Gift, "Promo"],
+  [Bot, "Autotrading"],
 ];
 
 export default function TradingSidebar() {
@@ -19,15 +32,16 @@ export default function TradingSidebar() {
 
   return (
     <aside className="nt-sidebar">
-      {items.map(([icon, label, path]) => (
+      {items.map(([Icon, label, path]) => (
         <button
           key={label}
           type="button"
           className={path && location.pathname === path ? "active" : ""}
           onClick={path ? () => navigate(path) : undefined}
           disabled={!path}
+          title={path ? label : `${label} (coming soon)`}
         >
-          <span>{icon}</span>
+          <span><Icon size={19} strokeWidth={1.9} aria-hidden="true" /></span>
           <small>{label}</small>
         </button>
       ))}

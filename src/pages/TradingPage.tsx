@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
+import { ArrowLeft, ChevronDown, ChevronUp, X } from "lucide-react";
 import "./TradingPage.css";
 
 import {
@@ -51,6 +52,7 @@ import {
   type MarketCandleUpdate,
   type MarketPriceUpdate,
 } from "../components/trading/marketSocket";
+import "./TradingPremium.css";
 
 type BackendAsset = {
   symbol: string;
@@ -877,12 +879,21 @@ export default function TradingPage() {
       BOTTOM_INDICATORS.includes(indicator)
     ).length
   );
+  // Live price and change across the loaded candles for the asset bar.
+  const lastCandle = candles[candles.length - 1];
+  const firstCandle = candles[0];
+  const lastPrice = lastCandle?.close;
+  const changePercent =
+    lastCandle && firstCandle && firstCandle.open
+      ? ((lastCandle.close - firstCandle.open) / firstCandle.open) * 100
+      : 0;
+
   const chartLayoutStyle = {
     "--nt-indicator-space": `${bottomIndicatorCount * 100}px`,
   } as React.CSSProperties;
 
   return (
-    <main className="nt-page nt-light-page">
+    <main className="nt-page nt-premium">
       <TradingHeader
         accountType={accountType}
         currency={currency}
@@ -904,7 +915,7 @@ export default function TradingPage() {
                 onClick={() => setAssetMenuOpen((current) => !current)}
               >
                 <span>{selectedAsset.symbol}</span>
-                <b>⌄</b>
+                <ChevronDown size={16} aria-hidden="true" />
               </button>
 
               {assetMenuOpen && (
@@ -915,7 +926,7 @@ export default function TradingPage() {
                     onClick={() => setAssetMenuOpen(false)}
                     aria-label="Close"
                   >
-                    ✕
+                    <X size={16} />
                   </button>
 
                   <div className="nt-asset-tabs">
@@ -951,6 +962,7 @@ export default function TradingPage() {
                 </div>
               )}
             </div>
+
           </div>
 
           <TradingToolbar
@@ -989,12 +1001,15 @@ export default function TradingPage() {
           />
 
           <div className="nt-chart-footer">
-            <button type="button">←</button>
-            <button type="button">{timeframe} ▴</button>
+            <button type="button" aria-label="Scroll back"><ArrowLeft size={14} /></button>
+            <button type="button">{timeframe} <ChevronUp size={14} aria-hidden="true" /></button>
           </div>
         </section>
 
         <TradingPanel
+          assetSymbol={selectedAsset.symbol}
+          priceText={lastPrice !== undefined ? lastPrice.toFixed(selectedAsset.precision) : undefined}
+          changePercent={changePercent}
           expiryText={formatExpiry(expirySeconds)}
           expiryParts={expiryParts}
           amount={amount}
