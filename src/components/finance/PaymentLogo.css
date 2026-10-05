@@ -1,0 +1,19 @@
+/* Payment brand marks sit on their own white/dark plate inside the tile. */
+.pay-logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.pay-logo-art {
+  display: flex;
+  width: 100%;
+  line-height: 0;
+}
+
+.pay-logo-art svg {
+  width: 100%;
+  height: auto;
+}

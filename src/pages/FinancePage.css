@@ -1069,19 +1069,20 @@ select.fin-input option {
   cursor: default;
 }
 
-.fin-pay:disabled .fin-pay-tile {
-  filter: saturate(0.6) brightness(0.85);
+.fin-pay:disabled .fin-pay-text,
+.fin-pay:disabled .fin-pay-chev {
+  opacity: 0.75;
 }
 
 .fin-pay-tile {
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  width: 64px;
-  height: 52px;
+  width: 70px;
+  height: 46px;
+  padding: 3px;
   overflow: hidden;
-  border-radius: 10px;
-  font-weight: 900;
+  border-radius: 8px;
   line-height: 1;
 }
 
@@ -1110,30 +1111,8 @@ select.fin-input option {
   color: var(--fin-faint);
 }
 
-.tile-mpesa { background: #fff; }
-.tile-airtel { background: #e40000; color: #fff; font-size: 14px; letter-spacing: -0.02em; }
-.tile-equitel { background: #fff; color: #a32a29; font-size: 12px; }
-.tile-binance { background: #14151a; color: #f3ba2f; }
-.tile-mastercard { background: #111827; }
-.tile-visa { background: #1a1f71; color: #fff; font-size: 17px; font-style: italic; letter-spacing: 0.02em; }
-
-.tile-mastercard i {
-  display: flex;
-}
-
-.tile-mastercard i::before,
-.tile-mastercard i::after {
-  content: "";
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #eb001b;
-}
-
-.tile-mastercard i::after {
-  margin-left: -9px;
-  background: #f79e1b;
-  mix-blend-mode: screen;
+.fin-pay-tile {
+  background: #fff;
 }
 
 .fin-card.is-plain {

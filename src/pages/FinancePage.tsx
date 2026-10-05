@@ -15,6 +15,7 @@ import {
 import AppShell from "../components/shell/AppShell";
 import { refreshAccount } from "../components/shell/useAccount";
 import MpesaLogo from "../components/finance/MpesaLogo";
+import PaymentLogo, { type PaymentBrand } from "../components/finance/PaymentLogo";
 import MpesaDepositDialog from "../components/finance/MpesaDepositDialog";
 import { financeApi, type FinanceOverview, type FinanceStatus } from "../api";
 import "./FinancePage.css";
@@ -46,12 +47,17 @@ const TABS: Array<{ key: Tab; label: string }> = [
 ];
 
 // Shown as "Coming soon" until each provider is connected.
-const OTHER_METHODS = [
-  { name: "Airtel Money", detail: "Instant deposit", currencies: "KES", tile: "tile-airtel", mark: "airtel" },
-  { name: "Equitel", detail: "Instant deposit", currencies: "KES", tile: "tile-equitel", mark: "equitel" },
-  { name: "Binance Pay", detail: "Crypto deposit", currencies: "USDT, BTC, BNB", tile: "tile-binance", mark: "◆" },
-  { name: "Mastercard", detail: "Card payment", currencies: "KES, USD, EUR", tile: "tile-mastercard", mark: "" },
-  { name: "Visa", detail: "Card payment", currencies: "KES, USD, EUR", tile: "tile-visa", mark: "VISA" },
+const OTHER_METHODS: Array<{
+  name: string;
+  detail: string;
+  currencies: string;
+  brand: PaymentBrand;
+}> = [
+  { name: "Airtel Money", detail: "Instant deposit", currencies: "KES", brand: "airtel" },
+  { name: "Equitel", detail: "Instant deposit", currencies: "KES", brand: "equitel" },
+  { name: "Binance Pay", detail: "Crypto deposit", currencies: "USDT, BTC, BNB", brand: "binance" },
+  { name: "Mastercard", detail: "Card payment", currencies: "KES, USD, EUR", brand: "mastercard" },
+  { name: "Visa", detail: "Card payment", currencies: "KES, USD, EUR", brand: "visa" },
 ];
 
 function formatKes(value: number): string {
@@ -200,7 +206,7 @@ export default function FinancePage() {
                       onClick={() => setDepositOpen(true)}
                       disabled={!mpesaReady}
                     >
-                      <span className="fin-pay-tile tile-mpesa">
+                      <span className="fin-pay-tile">
                         <MpesaLogo />
                       </span>
                       <span className="fin-pay-text">
@@ -218,8 +224,8 @@ export default function FinancePage() {
                   {OTHER_METHODS.map((method) => (
                     <li key={method.name}>
                       <button type="button" className="fin-pay" disabled>
-                        <span className={`fin-pay-tile ${method.tile}`} aria-hidden="true">
-                          {method.mark || <i />}
+                        <span className="fin-pay-tile">
+                          <PaymentLogo brand={method.brand} label={method.name} />
                         </span>
                         <span className="fin-pay-text">
                           <b>{method.name}</b>

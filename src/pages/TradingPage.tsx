@@ -301,6 +301,13 @@ function tradeToResultPopupItem(trade: BackendTrade): TradeResultPopupItem {
   };
 }
 
+/** Keep the last good value when the backend sends something unparseable,
+    so a malformed response never shows the user "NaN" in place of money. */
+function toFiniteNumber(value: unknown, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 export default function TradingPage() {
   const location = useLocation();
   const candlesRef = React.useRef<Candle[]>(INITIAL_CANDLES);
@@ -488,7 +495,7 @@ export default function TradingPage() {
           signal
         );
 
-        setWalletBalance(Number(data.balance));
+        setWalletBalance((previous) => toFiniteNumber(data.balance, previous));
       } finally {
         setWalletLoading(false);
       }
@@ -526,7 +533,7 @@ export default function TradingPage() {
           ),
         ]);
 
-        setWalletBalance(Number(wallet.balance));
+        setWalletBalance((previous) => toFiniteNumber(wallet.balance, previous));
         setActiveTrades(open.map(tradeToMarker));
         setOpenTrades(open);
 
@@ -849,8 +856,8 @@ export default function TradingPage() {
         expirySeconds: expirySecondsRef.current,
       });
 
-      setPayout(Number(response.trade.payoutPercent));
-      setWalletBalance(Number(response.wallet.balance));
+      setPayout((previous) => toFiniteNumber(response.trade.payoutPercent, previous));
+      setWalletBalance((previous) => toFiniteNumber(response.wallet.balance, previous));
 
       setActiveTrades((current) => [tradeToMarker(response.trade), ...current]);
 
