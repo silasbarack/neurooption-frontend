@@ -8,10 +8,10 @@
   --fin-text: var(--neo-text);
   --fin-muted: var(--neo-muted);
   --fin-faint: var(--neo-faint);
-  --fin-blue: var(--neo-gold);
+  --fin-blue: var(--neo-accent);
   --fin-green: var(--neo-green);
   --fin-red: var(--neo-red);
-  --fin-amber: var(--neo-gold);
+  --fin-amber: var(--neo-accent);
 
   text-align: start;
   color: var(--fin-text);
@@ -154,9 +154,9 @@
 }
 
 .fin-btn-blue {
-  background: linear-gradient(180deg, var(--neo-gold-2), var(--neo-gold));
-  color: var(--neo-gold-ink);
-  box-shadow: 0 10px 24px rgba(245, 184, 46, 0.25);
+  background: linear-gradient(180deg, var(--neo-accent-2), var(--neo-accent));
+  color: var(--neo-accent-ink);
+  box-shadow: 0 10px 24px rgba(47, 107, 255, 0.25);
 }
 
 .fin-btn-green:hover:not(:disabled),
@@ -183,7 +183,7 @@
 .fin-btn:focus-visible,
 .fin-back:focus-visible,
 .fin-input:focus-visible {
-  outline: 3px solid rgba(245, 184, 46, 0.45);
+  outline: 3px solid rgba(47, 107, 255, 0.45);
   outline-offset: 2px;
 }
 
@@ -996,9 +996,9 @@ select.fin-input option {
   display: grid;
   min-width: 220px;
   padding: 14px 18px;
-  border: 1px solid rgba(245, 184, 46, 0.3);
+  border: 1px solid rgba(47, 107, 255, 0.3);
   border-radius: 14px;
-  background: linear-gradient(160deg, rgba(245, 184, 46, 0.1), rgba(13, 22, 40, 0.8));
+  background: linear-gradient(160deg, rgba(47, 107, 255, 0.1), rgba(13, 22, 40, 0.8));
 }
 
 .fin-real small {
@@ -1061,7 +1061,7 @@ select.fin-input option {
 }
 
 .fin-pay:hover:not(:disabled) {
-  border-color: rgba(245, 184, 46, 0.5);
+  border-color: rgba(47, 107, 255, 0.5);
   transform: translateY(-1px);
 }
 

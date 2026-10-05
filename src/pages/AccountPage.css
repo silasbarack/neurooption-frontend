@@ -69,8 +69,8 @@
 }
 
 .ac-switch button.is-active {
-  border-color: rgba(245, 184, 46, 0.6);
-  background: var(--neo-gold-soft);
+  border-color: rgba(47, 107, 255, 0.6);
+  background: var(--neo-accent-soft);
   color: var(--neo-text);
 }
 
@@ -140,12 +140,12 @@
 }
 
 .ac-tile:hover {
-  border-color: rgba(245, 184, 46, 0.45);
+  border-color: rgba(47, 107, 255, 0.45);
   transform: translateY(-2px);
 }
 
 .ac-tile:hover svg {
-  color: var(--neo-gold);
+  color: var(--neo-accent);
 }
 
 .ac-progress {

@@ -73,7 +73,7 @@ export default function MenuDrawer({ open, onClose }: MenuDrawerProps) {
             </button>
           ) : (
             <>
-              <Link to="/register" className="neo-btn neo-btn-gold neo-btn-block" onClick={onClose}>
+              <Link to="/register" className="neo-btn neo-btn-primary neo-btn-block" onClick={onClose}>
                 Create Account
               </Link>
               <Link to="/login" className="neo-btn neo-btn-outline neo-btn-block" onClick={onClose}>

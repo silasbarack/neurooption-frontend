@@ -12,8 +12,8 @@
   --nt-text: #e8eef6;
   --nt-text-muted: #8a97ab;
   --nt-text-faint: #5d6a7e;
-  --nt-accent: #f5b82e;
-  --nt-accent-soft: rgba(245, 184, 46, 0.14);
+  --nt-accent: #2f6bff;
+  --nt-accent-soft: rgba(47, 107, 255, 0.14);
   --nt-buy: #22c55e;
   --nt-buy-strong: #16a34a;
   --nt-sell: #ef4444;
@@ -23,7 +23,7 @@
 
   font-family: "Noto Sans", Arial, sans-serif;
   background:
-    radial-gradient(1200px 500px at 70% -10%, rgba(245, 184, 46, 0.08), transparent 60%),
+    radial-gradient(1200px 500px at 70% -10%, rgba(47, 107, 255, 0.08), transparent 60%),
     radial-gradient(900px 400px at 0% 100%, rgba(59, 130, 246, 0.05), transparent 60%),
     var(--nt-bg);
 }
@@ -51,15 +51,12 @@
 .nt-premium .nt-brand-plate {
   display: inline-flex;
   align-items: center;
-  padding: 6px 12px;
-  border-radius: 12px;
-  background: #fff; /* the approved logo has navy lettering */
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  padding: 0;
 }
 
 .nt-premium .nt-brand-approved-logo {
-  width: 170px;
-  height: 34px;
+  width: 166px;
+  height: 32px;
 }
 
 .nt-premium .nt-star,
@@ -200,8 +197,8 @@
 
 .nt-premium .balance-dropdown-option.active,
 .nt-premium .balance-dropdown-option:hover {
-  border-color: rgba(245, 184, 46, 0.5);
-  background: rgba(245, 184, 46, 0.16);
+  border-color: rgba(47, 107, 255, 0.5);
+  background: rgba(47, 107, 255, 0.16);
   color: #fff;
 }
 
@@ -211,8 +208,8 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ffd062, #c98a0c);
-  color: #1a1200;
+  background: linear-gradient(135deg, #5b8cff, #1d4ed8);
+  color: #ffffff;
   font-size: 14px;
   font-weight: 800;
   text-decoration: none;
@@ -263,8 +260,8 @@
 
 .nt-premium .nt-sidebar button.active {
   position: relative;
-  background: rgba(245, 184, 46, 0.14);
-  color: #ffd062;
+  background: rgba(47, 107, 255, 0.14);
+  color: #5b8cff;
   box-shadow: none;
 }
 
@@ -276,7 +273,7 @@
   bottom: 10px;
   width: 3px;
   border-radius: 0 3px 3px 0;
-  background: #f5b82e;
+  background: #2f6bff;
 }
 
 .nt-premium .nt-sidebar button:disabled {
@@ -344,7 +341,7 @@
 
 .nt-premium .nt-chart-types button.active {
   border-color: transparent;
-  background: rgba(245, 184, 46, 0.18);
+  background: rgba(47, 107, 255, 0.18);
   color: #fff;
 }
 
@@ -416,8 +413,8 @@
 .nt-premium .nt-asset-tabs button.active,
 .nt-premium .nt-asset-list button.active,
 .nt-premium .nt-floating button.active {
-  border-color: rgba(245, 184, 46, 0.5);
-  background: rgba(245, 184, 46, 0.18);
+  border-color: rgba(47, 107, 255, 0.5);
+  background: rgba(47, 107, 255, 0.18);
   color: #fff;
 }
 
@@ -461,8 +458,8 @@
 }
 
 .nt-premium .nt-white-input:focus-within {
-  border-color: rgba(245, 184, 46, 0.6);
-  box-shadow: 0 0 0 3px rgba(245, 184, 46, 0.15);
+  border-color: rgba(47, 107, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.15);
 }
 
 .nt-premium .nt-white-input strong,
@@ -572,9 +569,9 @@
   justify-content: center;
   gap: 8px;
   min-height: 42px;
-  border: 1px solid rgba(245, 184, 46, 0.4);
+  border: 1px solid rgba(47, 107, 255, 0.4);
   border-radius: 11px;
-  background: rgba(245, 184, 46, 0.1);
+  background: rgba(47, 107, 255, 0.1);
   color: #9cc3ff;
   font-size: 13px;
   font-weight: 700;
@@ -585,7 +582,7 @@
 }
 
 .nt-premium .nt-ai:hover {
-  background: rgba(245, 184, 46, 0.18);
+  background: rgba(47, 107, 255, 0.18);
   color: #fff;
 }
 
@@ -619,7 +616,7 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  color: #ffd062;
+  color: #5b8cff;
   font-weight: 700;
   text-decoration: none;
 }
@@ -683,13 +680,8 @@
     gap: 8px;
   }
 
-  .nt-premium .nt-brand-plate {
-    padding: 4px 8px;
-    border-radius: 9px;
-  }
-
   .nt-premium .nt-brand-approved-logo {
-    width: 104px;
+    width: 120px;
     height: 24px;
   }
 
@@ -982,8 +974,8 @@
   }
 
   .nt-premium .nt-tool-btn.compact.active {
-    border-color: rgba(245, 184, 46, 0.5);
-    background: rgba(245, 184, 46, 0.18);
+    border-color: rgba(47, 107, 255, 0.5);
+    background: rgba(47, 107, 255, 0.18);
     color: #fff;
   }
 
@@ -1154,11 +1146,11 @@
   }
 
   .nt-premium .nt-bottom-nav button.is-center {
-    border: 1px solid rgba(245, 184, 46, 0.55);
+    border: 1px solid rgba(47, 107, 255, 0.55);
     background:
-      radial-gradient(120% 90% at 50% 0%, rgba(245, 184, 46, 0.35), rgba(245, 184, 46, 0.08));
+      radial-gradient(120% 90% at 50% 0%, rgba(47, 107, 255, 0.35), rgba(47, 107, 255, 0.08));
     color: #fff;
-    box-shadow: 0 8px 22px rgba(245, 184, 46, 0.25);
+    box-shadow: 0 8px 22px rgba(47, 107, 255, 0.25);
   }
 }
 

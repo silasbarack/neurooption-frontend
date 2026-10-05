@@ -103,7 +103,7 @@ export default function SocialTradingPage() {
                     <div className="soc-name">
                       <b>
                         {trader.name}
-                        {trader.top && <Crown size={14} className="neo-gold-text" aria-label="Top trader" />}
+                        {trader.top && <Crown size={14} className="neo-accent-text" aria-label="Top trader" />}
                       </b>
                       <span className="soc-gain">+{trader.gain.toFixed(1)}%</span>
                       <small>Last 30 days</small>
@@ -114,7 +114,7 @@ export default function SocialTradingPage() {
                     </div>
                     <button
                       type="button"
-                      className={`neo-btn neo-btn-sm ${active ? "neo-btn-outline" : "neo-btn-gold"}`}
+                      className={`neo-btn neo-btn-sm ${active ? "neo-btn-outline" : "neo-btn-primary"}`}
                       onClick={() => toggle(trader.id)}
                       aria-pressed={active}
                     >

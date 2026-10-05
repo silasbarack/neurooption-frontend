@@ -118,7 +118,7 @@ export default function AccountPage() {
 
           {mode === "real" ? (
             <div className="ac-actions">
-              <Link to="/finance" className="neo-btn neo-btn-gold neo-btn-lg">
+              <Link to="/finance" className="neo-btn neo-btn-primary neo-btn-lg">
                 Deposit
               </Link>
               <Link to="/finance?tab=withdraw" className="neo-btn neo-btn-outline neo-btn-lg">
@@ -127,7 +127,7 @@ export default function AccountPage() {
             </div>
           ) : (
             <div className="ac-actions">
-              <Link to="/trading" className="neo-btn neo-btn-gold neo-btn-lg">
+              <Link to="/trading" className="neo-btn neo-btn-primary neo-btn-lg">
                 Practise now
               </Link>
               <Link to="/finance" className="neo-btn neo-btn-outline neo-btn-lg">

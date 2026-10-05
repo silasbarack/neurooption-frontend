@@ -226,7 +226,7 @@ export default function FinancePage() {
                           <small>{method.detail}</small>
                           <small>{method.currencies}</small>
                         </span>
-                        <span className="neo-badge neo-badge-gold">Coming soon</span>
+                        <span className="neo-badge neo-badge-accent">Coming soon</span>
                       </button>
                     </li>
                   ))}

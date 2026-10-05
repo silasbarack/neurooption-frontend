@@ -274,7 +274,7 @@
 }
 
 .soc-rank {
-  color: var(--neo-gold);
+  color: var(--neo-accent);
   font-size: 13px;
   font-weight: 800;
 }
@@ -339,7 +339,7 @@
 }
 
 .soc-risk.is-low { color: var(--neo-green); }
-.soc-risk.is-medium { color: var(--neo-gold); }
+.soc-risk.is-medium { color: var(--neo-accent); }
 .soc-risk.is-high { color: var(--neo-red); }
 
 .soc-empty {

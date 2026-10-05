@@ -2,9 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/neurooption-mark.svg" />
+    <link rel="alternate icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="preload" as="image" href="/neurooption-logo.png" />
+    <link rel="preload" as="image" href="/neurooption-logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#060b16" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -36,10 +37,6 @@
       .app-splash-logo {
         width: min(260px, 62vw);
         height: auto;
-        padding: 14px 22px;
-        border-radius: 16px;
-        background: #fff;
-        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
         animation: app-splash-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both,
           app-splash-breathe 2.4s ease-in-out 0.7s infinite;
       }
@@ -93,7 +90,7 @@
   </head>
   <body>
     <div id="app-splash" role="status" aria-live="polite" aria-label="Loading NeuroOption">
-      <img class="app-splash-logo" src="/neurooption-logo.png" alt="NeuroOption" />
+      <img class="app-splash-logo" src="/neurooption-logo.svg" alt="NeuroOption" />
       <div class="app-splash-track"><div class="app-splash-bar"></div></div>
       <p class="app-splash-text">Preparing your trading workspace</p>
     </div>

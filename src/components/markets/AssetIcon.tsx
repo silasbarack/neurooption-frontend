@@ -115,6 +115,9 @@ const GLYPHS: Record<string, Glyph> = {
   NETFLIX: { text: "N", bg: "#e50914" },
 };
 
+// Index symbols ("US 500", "UK100", "JP225") show their country's flag.
+const INDEX_FLAGS: Record<string, string> = { US: "USD", UK: "GBP", JP: "JPY", AU: "AUD", EU: "EUR" };
+
 function baseSymbol(symbol: string) {
   return symbol.replace(/\s*OTC$/i, "").trim();
 }
@@ -160,6 +163,22 @@ export default function AssetIcon({ symbol, category, size = 32 }: AssetIconProp
             <g clipPath={`url(#flag-clip-${code})`}>{FLAGS[code]}</g>
           </svg>
         ))}
+      </span>
+    );
+  }
+
+  const indexFlag = category === "Indices" ? INDEX_FLAGS[baseSymbol(symbol).toUpperCase().slice(0, 2)] : undefined;
+  if (indexFlag && FLAGS[indexFlag]) {
+    return (
+      <span className="asset-icon asset-icon-pair" style={{ width: size, height: size }} aria-hidden="true">
+        <svg viewBox="0 0 24 24" width={size} height={size}>
+          <defs>
+            <clipPath id={`flag-clip-index-${indexFlag}`}>
+              <circle cx="12" cy="12" r="12" />
+            </clipPath>
+          </defs>
+          <g clipPath={`url(#flag-clip-index-${indexFlag})`}>{FLAGS[indexFlag]}</g>
+        </svg>
       </span>
     );
   }

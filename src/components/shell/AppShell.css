@@ -2,7 +2,7 @@
   min-height: 100vh;
   min-height: 100dvh;
   background:
-    radial-gradient(900px 420px at 85% -10%, rgba(245, 184, 46, 0.06), transparent 60%),
+    radial-gradient(900px 420px at 85% -10%, rgba(47, 107, 255, 0.06), transparent 60%),
     radial-gradient(800px 420px at 0% 0%, rgba(59, 130, 246, 0.06), transparent 60%),
     var(--neo-bg);
   color: var(--neo-text);
@@ -51,7 +51,7 @@
 }
 
 .neo-topnav a.is-active {
-  color: var(--neo-gold);
+  color: var(--neo-accent);
 }
 
 .neo-topnav a.is-active::after {
@@ -62,7 +62,7 @@
   left: 12px;
   height: 2px;
   border-radius: 2px;
-  background: var(--neo-gold);
+  background: var(--neo-accent);
 }
 
 .neo-topbar-right {
@@ -106,9 +106,9 @@
   flex: 0 0 auto;
   place-items: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--neo-gold-2), #c98a0c);
-  box-shadow: 0 0 0 2px rgba(245, 184, 46, 0.25);
-  color: var(--neo-gold-ink);
+  background: linear-gradient(135deg, var(--neo-accent-2), #1d4ed8);
+  box-shadow: 0 0 0 2px rgba(47, 107, 255, 0.25);
+  color: var(--neo-accent-ink);
   font-weight: 800;
 }
 
@@ -213,12 +213,12 @@
 
 .neo-drawer-nav a:hover,
 .neo-drawer-nav a.is-active {
-  background: rgba(245, 184, 46, 0.08);
+  background: rgba(47, 107, 255, 0.08);
 }
 
 .neo-drawer-nav a.is-active,
 .neo-drawer-nav a.is-active svg:first-child {
-  color: var(--neo-gold);
+  color: var(--neo-accent);
 }
 
 .neo-drawer-chev {
@@ -336,7 +336,7 @@
   }
 
   .neo-bottomnav a.is-active {
-    color: var(--neo-gold);
+    color: var(--neo-accent);
   }
 }
 

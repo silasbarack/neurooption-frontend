@@ -4,9 +4,9 @@
   --au-muted: #8d99b0;
   --au-line: rgba(148, 170, 205, 0.18);
   --au-field: #08101f;
-  --au-teal: #ffd062;
-  --au-blue: #f5b82e;
-  --au-accent: #f5b82e;
+  --au-teal: #5b8cff;
+  --au-blue: #2f6bff;
+  --au-accent: #2f6bff;
   --au-green: #22c55e;
   --au-red: #ef4444;
 
@@ -1005,24 +1005,18 @@
 }
 
 
-/* ---------- Navy and gold theme ---------- */
+/* ---------- Dark blue theme ---------- */
 .au {
   background:
-    linear-gradient(180deg, rgba(6, 11, 22, 0.55) 0%, rgba(6, 11, 22, 0.9) 45%, #060b16 100%),
-    url("/landing/hero-mountains.jpg") center top / cover no-repeat,
-    #060b16;
+    radial-gradient(700px 420px at 85% 10%, rgba(47, 107, 255, 0.28), transparent 65%),
+    radial-gradient(500px 320px at 0% 0%, rgba(124, 58, 237, 0.16), transparent 70%),
+    linear-gradient(180deg, #050a18 0%, #071029 100%);
 }
 
 .au-header {
   border-bottom: 1px solid var(--au-line);
 }
 
-.au-brand {
-  padding: 6px 12px;
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
-}
 
 .au-logo {
   width: 160px;
@@ -1047,8 +1041,8 @@
 }
 
 .au-eyebrow {
-  background: rgba(245, 184, 46, 0.12);
-  color: #f5b82e;
+  background: rgba(47, 107, 255, 0.12);
+  color: #2f6bff;
 }
 
 .au-card {
@@ -1059,12 +1053,12 @@
 
 .au-card-icon,
 .au-submit {
-  background: linear-gradient(180deg, #ffd062, #f5b82e);
-  color: #1a1200;
+  background: linear-gradient(180deg, #5b8cff, #2f6bff);
+  color: #ffffff;
 }
 
 .au-submit:hover:not(:disabled) {
-  box-shadow: 0 10px 26px rgba(245, 184, 46, 0.3);
+  box-shadow: 0 10px 26px rgba(47, 107, 255, 0.3);
 }
 
 .au-input input,
@@ -1082,7 +1076,7 @@
 .au-code:focus {
   border-color: var(--au-accent);
   background: #0b1528;
-  box-shadow: 0 0 0 3px rgba(245, 184, 46, 0.16);
+  box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.16);
 }
 
 .au-input input::placeholder,
@@ -1127,8 +1121,8 @@
 
 .au-hero h1 span {
   background: none;
-  -webkit-text-fill-color: #f5b82e;
-  color: #f5b82e;
+  -webkit-text-fill-color: #2f6bff;
+  color: #2f6bff;
 }
 
 .au-footer {
@@ -1142,7 +1136,7 @@
 }
 
 .au-steps-note {
-  background: rgba(245, 184, 46, 0.08);
+  background: rgba(47, 107, 255, 0.08);
   color: var(--au-text);
 }
 

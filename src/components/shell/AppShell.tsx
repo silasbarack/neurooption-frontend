@@ -64,7 +64,7 @@ export default function AppShell({ children, title, backTo, wide }: AppShellProp
                 <strong>{formatKes(account.real.balance)}</strong>
               </Link>
             )}
-            <Link to="/finance" className="neo-btn neo-btn-gold neo-btn-sm neo-topbar-deposit">
+            <Link to="/finance" className="neo-btn neo-btn-primary neo-btn-sm neo-topbar-deposit">
               <Plus size={15} aria-hidden="true" />
               Deposit
             </Link>

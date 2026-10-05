@@ -193,7 +193,7 @@ export default function AchievementsPage() {
                 </li>
               ))}
               <li className="ach-task-cta">
-                <Link to="/trading" className="neo-btn neo-btn-gold">
+                <Link to="/trading" className="neo-btn neo-btn-primary">
                   Trade now to earn XP
                 </Link>
               </li>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 208 40" fill="none">
+  <defs>
+    <linearGradient id="nm" x1="3" y1="35" x2="33" y2="5" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1d4ed8"/>
+      <stop offset="0.55" stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#7cc4ff"/>
+    </linearGradient>
+    <linearGradient id="nd" x1="11" y1="5" x2="25" y2="35" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#60a5fa"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+  <path d="M3 35V12l8-7v30z" fill="url(#nm)"/>
+  <path d="M11 5l14 19v11L11 16z" fill="url(#nd)"/>
+  <path d="M25 5h8v23l-8 7z" fill="url(#nm)"/>
+  <text x="44" y="28.5" fill="#ffffff" font-family="'Noto Sans','Segoe UI',Helvetica,Arial,sans-serif" font-size="23" font-weight="700" letter-spacing="-0.4" textLength="160" lengthAdjust="spacingAndGlyphs">NeuroOption</text>
+</svg>

@@ -156,7 +156,7 @@ export default function MarketsPage() {
                 >
                   <Star size={17} fill={favorite ? "currentColor" : "none"} />
                 </button>
-                <span className="neo-btn neo-btn-gold neo-btn-sm mk-trade">Trade</span>
+                <span className="neo-btn neo-btn-primary neo-btn-sm mk-trade">Trade</span>
               </span>
             </div>
           );
