@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
+import { getToken } from "./utils/storage";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -23,7 +24,7 @@ import ExpressTradesPage from "./pages/ExpressTradesPage";
 import RouteTransition from "./components/layout/RouteTransition";
 
 function RequireAuth({ children }: { children: ReactNode }) {
-  const token = localStorage.getItem("neurooption_token");
+  const token = getToken();
 
   if (!token) {
     return <Navigate to="/login" replace />;
