@@ -153,13 +153,22 @@
 }
 .hp-hero-phone-head {
   display: grid;
-  grid-template-columns: 15px minmax(0, 1fr);
+  grid-template-columns: 30px minmax(0, 1fr);
   gap: 1px 5px;
   align-items: center;
   margin-top: 7px;
   font-size: 6px;
 }
-.hp-hero-phone-head img { grid-row: span 2; width: 15px; }
+/* The approved logo has navy lettering, so it sits on a light plate. */
+.hp-hero-phone-mark {
+  display: inline-flex;
+  grid-row: span 2;
+  padding: 2px 3px;
+  border-radius: 3px;
+  background: #fff;
+  line-height: 0;
+}
+.hp-hero-phone-mark img { width: 100%; height: auto; }
 .hp-hero-phone-head span { color: #a9b1bb; }
 .hp-hero-phone-head b { font-size: 7px; }
 .hp-hero-phone-chart {

@@ -368,7 +368,9 @@ function HeroArt({ quotes }: { quotes: MarketQuote[] }) {
       <div className="hp-hero-phone">
         <div className="hp-hero-phone-notch" />
         <div className="hp-hero-phone-head">
-          <img src="/neurooption-mark.svg" alt="" />
+          <span className="hp-hero-phone-mark">
+            <img src="/neurooption-logo.png" alt="" />
+          </span>
           <span>EUR/USD OTC</span>
           <b>{price.toFixed(5)}</b>
         </div>
