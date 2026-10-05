@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
-
 .lp {
   --lp-navy: #0f1f3a;
   --lp-text: #3b4b5f;
@@ -20,7 +18,7 @@
   flex-direction: column;
   text-align: start;
   color: var(--lp-text);
-  font-family: "Plus Jakarta Sans", Roboto, Arial, sans-serif;
+  font-family: "Noto Sans", Arial, sans-serif;
   background:
     radial-gradient(900px 520px at 12% -10%, rgba(19, 185, 178, 0.12), transparent 60%),
     radial-gradient(800px 520px at 100% 0%, rgba(17, 103, 202, 0.10), transparent 60%),
@@ -91,7 +89,7 @@
   outline: none;
   background: transparent;
   color: var(--lp-navy);
-  font: 600 14px "Plus Jakarta Sans", Roboto, Arial, sans-serif;
+  font: 600 14px "Noto Sans", Arial, sans-serif;
   cursor: pointer;
 }
 
@@ -455,7 +453,7 @@
   border-radius: 12px;
   background: var(--lp-field);
   color: var(--lp-navy);
-  font: 500 15px "Plus Jakarta Sans", Roboto, Arial, sans-serif;
+  font: 500 15px "Noto Sans", Arial, sans-serif;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
@@ -543,7 +541,7 @@
   border-radius: 12px;
   background: linear-gradient(90deg, var(--lp-blue), var(--lp-teal));
   color: #fff;
-  font: 700 16px "Plus Jakarta Sans", Roboto, Arial, sans-serif;
+  font: 700 16px "Noto Sans", Arial, sans-serif;
   cursor: pointer;
   box-shadow: 0 14px 28px rgba(17, 103, 202, 0.24);
   transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
@@ -764,7 +762,7 @@
   border-radius: 12px;
   background: var(--lp-field);
   color: var(--lp-navy);
-  font: 800 28px/1 "Plus Jakarta Sans", Roboto, Arial, sans-serif;
+  font: 800 28px/1 "Noto Sans", Arial, sans-serif;
   letter-spacing: 0.5em;
   text-align: center;
   text-indent: 0.5em;
@@ -790,7 +788,7 @@
   border: 0;
   background: none;
   color: var(--lp-accent);
-  font: 600 14px "Plus Jakarta Sans", Roboto, Arial, sans-serif;
+  font: 600 14px "Noto Sans", Arial, sans-serif;
   cursor: pointer;
 }
 

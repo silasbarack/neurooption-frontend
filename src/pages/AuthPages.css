@@ -1,12 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;800&display=swap");
-
 :root {
-  font-family: Roboto, Arial, Helvetica, sans-serif;
+  font-family: "Noto Sans", Arial, sans-serif;
 }
 
 body {
   margin: 0;
-  font-family: Roboto, Arial, Helvetica, sans-serif;
+  font-family: "Noto Sans", Arial, sans-serif;
   background: #f4f7fb;
 }
 
@@ -220,7 +218,7 @@ body {
   background: transparent;
   color: #1f2937;
   font-size: 16px;
-  font-family: Roboto, Arial, sans-serif;
+  font-family: "Noto Sans", Arial, sans-serif;
 }
 
 .auth-input::placeholder {
@@ -266,7 +264,7 @@ body {
   border-radius: 7px;
   background: linear-gradient(90deg, #2ab9ed 0%, #1d56e8 100%);
   color: white;
-  font-family: Roboto, Arial, sans-serif;
+  font-family: "Noto Sans", Arial, sans-serif;
   font-size: 15px;
   font-weight: 800;
   letter-spacing: 0.8px;
