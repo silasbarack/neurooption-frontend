@@ -1,130 +1,143 @@
-import React from "react";
-import { PageHeader, StatusBadge } from "../components/common";
-import type { BadgeTone } from "../components/common";
-import { MOCK_TRADERS, type RiskScore } from "../data/mockData";
+import { useState } from "react";
+import { Crown, Info } from "lucide-react";
 
-const RISK_TONE: Record<RiskScore, BadgeTone> = {
-  Low: "success",
-  Medium: "warning",
-  High: "danger",
+import AppShell from "../components/shell/AppShell";
+import Avatar from "../components/shell/Avatar";
+import "./CommunityPages.css";
+
+type Trader = {
+  id: string;
+  name: string;
+  gain: number;
+  copiers: number;
+  winRate: number;
+  risk: "Low" | "Medium" | "High";
+  top?: boolean;
+  seed: number;
 };
 
-export default function SocialTradingPage() {
-  const [following, setFollowing] = React.useState<Set<string>>(new Set());
+// Preview data until copy trading goes live.
+const TRADERS: Trader[] = [
+  { id: "t1", name: "ProFX Ken", gain: 342.6, copiers: 1245, winRate: 78, risk: "Medium", top: true, seed: 3 },
+  { id: "t2", name: "GlobalTrader", gain: 278.1, copiers: 980, winRate: 74, risk: "Low", seed: 11 },
+  { id: "t3", name: "Nairobi Trader", gain: 215.4, copiers: 642, winRate: 71, risk: "Medium", seed: 23 },
+  { id: "t4", name: "AlphaInvest", gain: 198.7, copiers: 411, winRate: 69, risk: "Low", seed: 31 },
+  { id: "t5", name: "PipHunter", gain: 156.2, copiers: 388, winRate: 67, risk: "High", seed: 47 },
+  { id: "t6", name: "CandleQueen", gain: 131.9, copiers: 301, winRate: 66, risk: "Medium", seed: 59 },
+];
 
-  function toggleFollow(id: string) {
-    setFollowing((current) => {
-      const next = new Set(current);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
+function sparkPath(seed: number) {
+  let state = seed;
+  const rand = () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+  let y = 30;
+  const points: string[] = [];
+  for (let i = 0; i <= 30; i++) {
+    y = Math.max(4, Math.min(34, y - 0.7 + (rand() - 0.45) * 6));
+    points.push(`${(i / 30) * 300},${y.toFixed(1)}`);
+  }
+  return `M${points.join(" L")}`;
+}
+
+export default function SocialTradingPage() {
+  const [tab, setTab] = useState<"top" | "following" | "leaderboard">("top");
+  const [following, setFollowing] = useState<string[]>([]);
+
+  const list =
+    tab === "following"
+      ? TRADERS.filter((trader) => following.includes(trader.id))
+      : tab === "leaderboard"
+        ? [...TRADERS].sort((a, b) => b.winRate - a.winRate)
+        : TRADERS;
+
+  function toggle(id: string) {
+    setFollowing((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
   }
 
   return (
-    <main className="np-page">
-      <div className="np-container">
-        <PageHeader title="Social Trading" subtitle="Follow and copy strategies from top performing traders." />
-
-        <div className="np-card" style={{ marginBottom: 20, borderLeft: "3px solid var(--np-warning)" }}>
-          <strong>⚠️ Risk warning:</strong>{" "}
-          <span className="np-text-muted">
-            Copying other traders does not guarantee profits. Past performance is not indicative of future
-            results.
-          </span>
+    <AppShell title="Social Trading">
+      <div className="soc">
+        <div className="soc-head">
+          <h1>Social Trading</h1>
+          <p>Follow top traders and see how they perform. One-tap copy trading is launching soon.</p>
         </div>
 
-        <section className="np-section np-grid np-grid-3">
-          {MOCK_TRADERS.map((trader) => {
-            const isFollowing = following.has(trader.id);
-            return (
-              <div key={trader.id} className="np-card">
-                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                  <div className="np-avatar" style={{ width: 46, height: 46, fontSize: 15 }}>
-                    {trader.initials}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 800 }}>{trader.name}</div>
-                    <div className="np-text-muted" style={{ fontSize: 12 }}>
-                      #{trader.rank} · {trader.followers.toLocaleString()} followers
-                    </div>
-                  </div>
-                </div>
+        <div className="neo-tabs soc-tabs" role="tablist">
+          {[
+            ["top", "Top Traders"],
+            ["following", `My Following${following.length ? ` (${following.length})` : ""}`],
+            ["leaderboard", "Leaderboard"],
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={tab === key}
+              className={tab === key ? "is-active" : ""}
+              onClick={() => setTab(key as typeof tab)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
-                <div className="np-grid np-grid-3" style={{ gap: 8, margin: "14px 0" }}>
-                  <div>
-                    <div className="np-text-muted" style={{ fontSize: 11 }}>
-                      Win Rate
-                    </div>
-                    <div style={{ fontWeight: 800 }}>{trader.winRate}%</div>
-                  </div>
-                  <div>
-                    <div className="np-text-muted" style={{ fontSize: 11 }}>
-                      Profit
-                    </div>
-                    <div className="np-text-success" style={{ fontWeight: 800 }}>
-                      +{trader.profitPercent}%
-                    </div>
-                  </div>
-                  <div>
-                    <div className="np-text-muted" style={{ fontSize: 11 }}>
-                      Risk
-                    </div>
-                    <StatusBadge tone={RISK_TONE[trader.riskScore]}>{trader.riskScore}</StatusBadge>
-                  </div>
-                </div>
+        <p className="soc-preview">
+          <Info size={15} aria-hidden="true" />
+          Preview: these trader profiles are illustrative while copy trading is being launched. Past performance does
+          not guarantee future results.
+        </p>
 
-                <button
-                  type="button"
-                  className={isFollowing ? "np-btn" : "np-btn np-btn-primary"}
-                  style={{ width: "100%" }}
-                  onClick={() => toggleFollow(trader.id)}
-                >
-                  {isFollowing ? "Following" : "Follow / Copy"}
-                </button>
-              </div>
-            );
-          })}
-        </section>
-
-        <section className="np-section">
-          <div className="np-section-head">
-            <h2>Leaderboard</h2>
+        {list.length === 0 ? (
+          <div className="neo-card soc-empty">You are not following anyone yet. Tap Copy on a trader to follow them.</div>
+        ) : (
+          <div className="soc-grid">
+            {list.map((trader, index) => {
+              const active = following.includes(trader.id);
+              return (
+                <article key={trader.id} className="soc-card neo-card">
+                  <div className="soc-card-top">
+                    {tab === "leaderboard" && <span className="soc-rank">#{index + 1}</span>}
+                    <Avatar name={trader.name} size={44} />
+                    <div className="soc-name">
+                      <b>
+                        {trader.name}
+                        {trader.top && <Crown size={14} className="neo-gold-text" aria-label="Top trader" />}
+                      </b>
+                      <span className="soc-gain">+{trader.gain.toFixed(1)}%</span>
+                      <small>Last 30 days</small>
+                    </div>
+                    <div className="soc-copiers">
+                      <b>{trader.copiers.toLocaleString()}</b>
+                      <small>Copiers</small>
+                    </div>
+                    <button
+                      type="button"
+                      className={`neo-btn neo-btn-sm ${active ? "neo-btn-outline" : "neo-btn-gold"}`}
+                      onClick={() => toggle(trader.id)}
+                      aria-pressed={active}
+                    >
+                      {active ? "Following" : "Copy"}
+                    </button>
+                  </div>
+                  <svg viewBox="0 0 300 38" preserveAspectRatio="none" className="soc-spark" aria-hidden="true">
+                    <path d={sparkPath(trader.seed)} />
+                  </svg>
+                  <div className="soc-meta">
+                    <span>
+                      Win rate <b>{trader.winRate}%</b>
+                    </span>
+                    <span>
+                      Risk <b className={`soc-risk is-${trader.risk.toLowerCase()}`}>{trader.risk}</b>
+                    </span>
+                  </div>
+                </article>
+              );
+            })}
           </div>
-
-          <div className="np-table-wrap">
-            <table className="np-table">
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Trader</th>
-                  <th style={{ textAlign: "right" }}>Win Rate</th>
-                  <th style={{ textAlign: "right" }}>Profit</th>
-                  <th>Risk</th>
-                </tr>
-              </thead>
-              <tbody>
-                {MOCK_TRADERS.map((trader) => (
-                  <tr key={trader.id}>
-                    <td>#{trader.rank}</td>
-                    <td style={{ fontWeight: 700 }}>{trader.name}</td>
-                    <td style={{ textAlign: "right" }}>{trader.winRate}%</td>
-                    <td style={{ textAlign: "right" }} className="np-text-success">
-                      +{trader.profitPercent}%
-                    </td>
-                    <td>
-                      <StatusBadge tone={RISK_TONE[trader.riskScore]}>{trader.riskScore}</StatusBadge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+        )}
       </div>
-    </main>
+    </AppShell>
   );
 }

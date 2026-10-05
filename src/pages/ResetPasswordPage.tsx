@@ -93,24 +93,24 @@ export default function ResetPasswordPage() {
 
   return (
     <AuthLayout variant="single">
-      <div className="lp-card">
-        <div className="lp-card-head">
-          <span className="lp-card-icon"><ShieldCheck size={22} aria-hidden="true" /></span>
+      <div className="au-card">
+        <div className="au-card-head">
+          <span className="au-card-icon"><ShieldCheck size={22} aria-hidden="true" /></span>
           <h2>Reset your password</h2>
           <p>Enter the six-digit code we emailed you, then choose a new password.</p>
         </div>
 
         {message && (
-          <div className={`lp-alert ${success ? "is-success" : "is-error"}`} role="alert">
+          <div className={`au-alert ${success ? "is-success" : "is-error"}`} role="alert">
             {success ? <CircleCheck size={18} /> : <CircleAlert size={18} />}
             <span>{message}</span>
           </div>
         )}
 
-        <form className="lp-form" onSubmit={handleSubmit}>
-          <div className="lp-field">
+        <form className="au-form" onSubmit={handleSubmit}>
+          <div className="au-field">
             <label htmlFor="email">Email address</label>
-            <div className="lp-input">
+            <div className="au-input">
               <Mail size={18} aria-hidden="true" />
               <input
                 id="email"
@@ -124,22 +124,22 @@ export default function ResetPasswordPage() {
             </div>
           </div>
 
-          <div className="lp-field">
-            <div className="lp-field-row">
+          <div className="au-field">
+            <div className="au-field-row">
               <label htmlFor="code">Verification code</label>
               <button
                 type="button"
-                className="lp-text-button"
+                className="au-text-button"
                 onClick={resendCode}
                 disabled={resending}
               >
-                <RotateCw size={14} className={resending ? "lp-spin" : undefined} aria-hidden="true" />
+                <RotateCw size={14} className={resending ? "au-spin" : undefined} aria-hidden="true" />
                 {resending ? "Sending..." : "Resend code"}
               </button>
             </div>
             <input
               id="code"
-              className="lp-code"
+              className="au-code"
               inputMode="numeric"
               autoComplete="one-time-code"
               pattern="[0-9]{6}"
@@ -149,12 +149,12 @@ export default function ResetPasswordPage() {
               aria-describedby="code-hint"
               required
             />
-            <p id="code-hint" className="lp-hint">The code is valid for 10 minutes.</p>
+            <p id="code-hint" className="au-hint">The code is valid for 10 minutes.</p>
           </div>
 
-          <div className="lp-field">
+          <div className="au-field">
             <label htmlFor="password">New password</label>
-            <div className="lp-input">
+            <div className="au-input">
               <Lock size={18} aria-hidden="true" />
               <input
                 id="password"
@@ -168,7 +168,7 @@ export default function ResetPasswordPage() {
                 required
               />
               <button
-                className="lp-eye"
+                className="au-eye"
                 type="button"
                 onClick={() => setShowPassword((current) => !current)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
@@ -178,9 +178,9 @@ export default function ResetPasswordPage() {
             </div>
           </div>
 
-          <div className="lp-field">
+          <div className="au-field">
             <label htmlFor="confirmPassword">Confirm new password</label>
-            <div className={`lp-input${mismatch ? " is-invalid" : ""}`}>
+            <div className={`au-input${mismatch ? " is-invalid" : ""}`}>
               <Lock size={18} aria-hidden="true" />
               <input
                 id="confirmPassword"
@@ -194,13 +194,13 @@ export default function ResetPasswordPage() {
                 required
               />
             </div>
-            {mismatch && <p className="lp-field-error">Passwords do not match.</p>}
+            {mismatch && <p className="au-field-error">Passwords do not match.</p>}
           </div>
 
-          <button className="lp-submit" type="submit" disabled={loading}>
+          <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
               <>
-                <LoaderCircle size={18} className="lp-spin" aria-hidden="true" />
+                <LoaderCircle size={18} className="au-spin" aria-hidden="true" />
                 <span>Resetting...</span>
               </>
             ) : (
@@ -209,12 +209,12 @@ export default function ResetPasswordPage() {
           </button>
         </form>
 
-        <div className="lp-card-foot">
-          <Link to="/login" className="lp-back">
+        <div className="au-card-foot">
+          <Link to="/login" className="au-back">
             <ArrowLeft size={16} aria-hidden="true" />
             Back to sign in
           </Link>
-          <Link to="/forgot-password" className="lp-link">
+          <Link to="/forgot-password" className="au-link">
             Use a different email
           </Link>
         </div>

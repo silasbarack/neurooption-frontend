@@ -1,29 +1,21 @@
-/* Finance page: premium dark wallet, matching the trading workspace. */
+/* Finance page (inside AppShell): deposit methods, withdrawals and history. */
 
 .fin {
-  --fin-bg: #080c13;
-  --fin-card: #0f141e;
-  --fin-card-2: #141a26;
-  --fin-line: rgba(255, 255, 255, 0.07);
-  --fin-text: #e8eef6;
-  --fin-muted: #8a97ab;
-  --fin-faint: #5d6a7e;
-  --fin-blue: #2f86ff;
-  --fin-green: #22c55e;
-  --fin-red: #ef4444;
-  --fin-amber: #f5b942;
+  --fin-bg: var(--neo-bg);
+  --fin-card: var(--neo-panel);
+  --fin-card-2: var(--neo-panel-2);
+  --fin-line: var(--neo-line);
+  --fin-text: var(--neo-text);
+  --fin-muted: var(--neo-muted);
+  --fin-faint: var(--neo-faint);
+  --fin-blue: var(--neo-gold);
+  --fin-green: var(--neo-green);
+  --fin-red: var(--neo-red);
+  --fin-amber: var(--neo-gold);
 
-  box-sizing: border-box;
-  height: 100%;
-  min-height: 100vh;
-  overflow-y: auto;
   text-align: start;
   color: var(--fin-text);
-  font-family: "Noto Sans", Arial, sans-serif;
-  background:
-    radial-gradient(1200px 500px at 70% -10%, rgba(47, 134, 255, 0.1), transparent 60%),
-    radial-gradient(900px 400px at 0% 100%, rgba(47, 134, 255, 0.05), transparent 60%),
-    var(--fin-bg);
+  font-family: var(--neo-font);
 }
 
 .fin *,
@@ -162,9 +154,9 @@
 }
 
 .fin-btn-blue {
-  background: linear-gradient(180deg, #4b97ff, #1f6fff);
-  color: #fff;
-  box-shadow: 0 10px 24px rgba(31, 111, 255, 0.3);
+  background: linear-gradient(180deg, var(--neo-gold-2), var(--neo-gold));
+  color: var(--neo-gold-ink);
+  box-shadow: 0 10px 24px rgba(245, 184, 46, 0.25);
 }
 
 .fin-btn-green:hover:not(:disabled),
@@ -191,7 +183,7 @@
 .fin-btn:focus-visible,
 .fin-back:focus-visible,
 .fin-input:focus-visible {
-  outline: 3px solid rgba(47, 134, 255, 0.45);
+  outline: 3px solid rgba(245, 184, 46, 0.45);
   outline-offset: 2px;
 }
 
@@ -975,5 +967,199 @@ select.fin-input option {
 
   .fin-spin {
     animation-duration: 2s;
+  }
+}
+
+/* ---------- Layout inside AppShell ---------- */
+.fin-page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.fin-page-head h1 {
+  margin: 0 0 4px;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.fin-page-head p {
+  margin: 0;
+  color: var(--fin-muted);
+  font-size: 14px;
+}
+
+.fin-real {
+  display: grid;
+  min-width: 220px;
+  padding: 14px 18px;
+  border: 1px solid rgba(245, 184, 46, 0.3);
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(245, 184, 46, 0.1), rgba(13, 22, 40, 0.8));
+}
+
+.fin-real small {
+  color: var(--fin-muted);
+  font-size: 12px;
+}
+
+.fin-real strong {
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-real span {
+  color: var(--fin-faint);
+  font-size: 12px;
+}
+
+.fin-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.fin-tabs {
+  margin-bottom: 14px;
+}
+
+.fin-tab-history {
+  display: none;
+}
+
+.fin-section-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.fin-paylist {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fin-pay {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 10px 14px 10px 10px;
+  border: 1px solid var(--fin-line);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--neo-panel-2), var(--neo-panel));
+  color: var(--fin-text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+
+.fin-pay:hover:not(:disabled) {
+  border-color: rgba(245, 184, 46, 0.5);
+  transform: translateY(-1px);
+}
+
+.fin-pay:disabled {
+  cursor: default;
+}
+
+.fin-pay:disabled .fin-pay-tile {
+  filter: saturate(0.6) brightness(0.85);
+}
+
+.fin-pay-tile {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 64px;
+  height: 52px;
+  overflow: hidden;
+  border-radius: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.fin-pay-tile .mpesa-logo {
+  width: 54px;
+  height: auto;
+}
+
+.fin-pay-text {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+
+.fin-pay-text b {
+  font-size: 15px;
+}
+
+.fin-pay-text small {
+  color: var(--fin-muted);
+  font-size: 12px;
+}
+
+.fin-pay-chev {
+  color: var(--fin-faint);
+}
+
+.tile-mpesa { background: #fff; }
+.tile-airtel { background: #e40000; color: #fff; font-size: 14px; letter-spacing: -0.02em; }
+.tile-equitel { background: #fff; color: #a32a29; font-size: 12px; }
+.tile-binance { background: #14151a; color: #f3ba2f; }
+.tile-mastercard { background: #111827; }
+.tile-visa { background: #1a1f71; color: #fff; font-size: 17px; font-style: italic; letter-spacing: 0.02em; }
+
+.tile-mastercard i {
+  display: flex;
+}
+
+.tile-mastercard i::before,
+.tile-mastercard i::after {
+  content: "";
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #eb001b;
+}
+
+.tile-mastercard i::after {
+  margin-left: -9px;
+  background: #f79e1b;
+  mix-blend-mode: screen;
+}
+
+.fin-card.is-plain {
+  padding: 18px;
+}
+
+@media (max-width: 900px) {
+  .fin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fin-page-head h1 {
+    display: none;
+  }
+
+  .fin-real {
+    width: 100%;
+  }
+
+  .fin-tab-history {
+    display: block;
+  }
+
+  .fin-grid[data-tab="deposit"] .fin-history,
+  .fin-grid[data-tab="withdraw"] .fin-history,
+  .fin-grid[data-tab="history"] .fin-main {
+    display: none;
   }
 }

@@ -35,6 +35,7 @@ import {
   fetchJson,
   formatMoney,
   USER_ID,
+  authHeaders,
 } from "../components/trading";
 
 import {
@@ -225,6 +226,7 @@ async function postJson<TResponse, TBody>(
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
+      ...authHeaders(),
     },
     body: JSON.stringify(body),
     signal,
@@ -750,16 +752,21 @@ export default function TradingPage() {
 
   // Allow other pages (e.g. Market) to deep-link into a specific asset via
   // navigate("/trading", { state: { symbol } }).
+  // The backend list (loaded after mount) has many more assets than the
+  // built-in fallback, so retry the match once it arrives.
+  const requestedSymbolHandledRef = React.useRef(false);
   React.useEffect(() => {
+    if (requestedSymbolHandledRef.current) return;
     const requestedSymbol = (location.state as { symbol?: string } | null)?.symbol;
     if (!requestedSymbol) return;
 
-    const match = ASSETS.find((asset) => asset.symbol === requestedSymbol);
+    const match = availableAssets.find((asset) => asset.symbol === requestedSymbol);
     if (match) {
+      requestedSymbolHandledRef.current = true;
       handleAssetChange(match);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [availableAssets]);
 
   function handleTimeframeChange(nextTimeframe: string) {
     showSyntheticMarket(selectedAsset, nextTimeframe);
@@ -1028,7 +1035,7 @@ export default function TradingPage() {
         <TradingQuickMenu onFullscreen={handleFullscreen} />
       </section>
 
-      <TradingBottomNav onFullscreen={handleFullscreen} />
+      <TradingBottomNav />
 
       <TradeResultPopup items={resultPopups} onDismiss={handleDismissResultPopup} />
 

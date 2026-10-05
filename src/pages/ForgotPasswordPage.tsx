@@ -53,9 +53,9 @@ export default function ForgotPasswordPage() {
 
   return (
     <AuthLayout variant="single">
-      <div className="lp-card">
-        <div className="lp-card-head">
-          <span className="lp-card-icon"><KeyRound size={22} aria-hidden="true" /></span>
+      <div className="au-card">
+        <div className="au-card-head">
+          <span className="au-card-icon"><KeyRound size={22} aria-hidden="true" /></span>
           <h2>Forgot your password?</h2>
           <p>
             Enter the email you registered with and we'll send you a
@@ -64,16 +64,16 @@ export default function ForgotPasswordPage() {
         </div>
 
         {message && (
-          <div className={`lp-alert ${success ? "is-success" : "is-error"}`} role="alert">
+          <div className={`au-alert ${success ? "is-success" : "is-error"}`} role="alert">
             {success ? <CircleCheck size={18} /> : <CircleAlert size={18} />}
             <span>{message}</span>
           </div>
         )}
 
-        <form className="lp-form" onSubmit={handleSubmit}>
-          <div className="lp-field">
+        <form className="au-form" onSubmit={handleSubmit}>
+          <div className="au-field">
             <label htmlFor="email">Email address</label>
-            <div className="lp-input">
+            <div className="au-input">
               <Mail size={18} aria-hidden="true" />
               <input
                 id="email"
@@ -87,10 +87,10 @@ export default function ForgotPasswordPage() {
             </div>
           </div>
 
-          <button className="lp-submit" type="submit" disabled={loading}>
+          <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
               <>
-                <LoaderCircle size={18} className="lp-spin" aria-hidden="true" />
+                <LoaderCircle size={18} className="au-spin" aria-hidden="true" />
                 <span>Sending code...</span>
               </>
             ) : (
@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
           </button>
         </form>
 
-        <div className="lp-steps-note">
+        <div className="au-steps-note">
           <MailCheck size={18} aria-hidden="true" />
           <span>
             The code expires in 10 minutes. Check your spam folder if it doesn't
@@ -110,12 +110,12 @@ export default function ForgotPasswordPage() {
           </span>
         </div>
 
-        <div className="lp-card-foot">
-          <Link to="/login" className="lp-back">
+        <div className="au-card-foot">
+          <Link to="/login" className="au-back">
             <ArrowLeft size={16} aria-hidden="true" />
             Back to sign in
           </Link>
-          <Link to="/reset-password" className="lp-link">
+          <Link to="/reset-password" className="au-link">
             I already have a code
           </Link>
         </div>

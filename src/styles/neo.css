@@ -1,0 +1,357 @@
+/* NeuroOption design system: deep navy surfaces, gold accent, Noto Sans.
+   Loaded once from main.tsx; every page builds on these tokens. */
+
+:root {
+  --neo-bg: #060b16;
+  --neo-bg-2: #08101f;
+  --neo-panel: #0d1628;
+  --neo-panel-2: #111c31;
+  --neo-panel-3: #16233c;
+  --neo-line: rgba(148, 170, 205, 0.13);
+  --neo-line-strong: rgba(148, 170, 205, 0.24);
+  --neo-text: #eef2f8;
+  --neo-muted: #8d99b0;
+  --neo-faint: #5f6c84;
+  --neo-gold: #f5b82e;
+  --neo-gold-2: #ffd062;
+  --neo-gold-ink: #1a1200;
+  --neo-gold-soft: rgba(245, 184, 46, 0.14);
+  --neo-green: #22c55e;
+  --neo-green-soft: rgba(34, 197, 94, 0.14);
+  --neo-red: #ef4444;
+  --neo-red-soft: rgba(239, 68, 68, 0.14);
+  --neo-blue: #3b82f6;
+  --neo-radius: 14px;
+  --neo-radius-sm: 10px;
+  --neo-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  --neo-font: "Noto Sans", Arial, sans-serif;
+  --neo-bottom-nav: 64px;
+
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--neo-bg);
+}
+
+body {
+  margin: 0;
+  color: var(--neo-text);
+  font-family: var(--neo-font);
+  font-size: 16px;
+  /* Unitless, so smaller text doesn't inherit the old root's 26px lines. */
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+
+h1,
+h2,
+h3 {
+  color: inherit;
+  letter-spacing: normal;
+}
+
+#root {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border: 0;
+  text-align: left;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* ---------- Buttons ---------- */
+.neo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: var(--neo-radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+}
+
+.neo-btn:active {
+  transform: translateY(1px);
+}
+
+.neo-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.neo-btn-gold {
+  background: linear-gradient(180deg, var(--neo-gold-2), var(--neo-gold));
+  color: var(--neo-gold-ink);
+  box-shadow: 0 8px 22px rgba(245, 184, 46, 0.22);
+}
+
+.neo-btn-gold:hover {
+  box-shadow: 0 10px 28px rgba(245, 184, 46, 0.34);
+}
+
+.neo-btn-outline {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--neo-line-strong);
+  color: var(--neo-text);
+}
+
+.neo-btn-outline:hover {
+  border-color: rgba(245, 184, 46, 0.55);
+  background: rgba(245, 184, 46, 0.06);
+}
+
+.neo-btn-ghost {
+  background: transparent;
+  color: var(--neo-muted);
+}
+
+.neo-btn-ghost:hover {
+  color: var(--neo-text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.neo-btn-green {
+  background: linear-gradient(180deg, #2bd46a, #17a34a);
+  color: #fff;
+}
+
+.neo-btn-red {
+  background: linear-gradient(180deg, #f25757, #d92d2d);
+  color: #fff;
+}
+
+.neo-btn-lg {
+  min-height: 50px;
+  padding: 0 24px;
+  font-size: 15px;
+}
+
+.neo-btn-sm {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.neo-btn-block {
+  width: 100%;
+}
+
+.neo-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--neo-line);
+  border-radius: 10px;
+  background: var(--neo-panel);
+  color: var(--neo-text);
+  cursor: pointer;
+}
+
+.neo-icon-btn:hover {
+  border-color: var(--neo-line-strong);
+}
+
+/* ---------- Surfaces ---------- */
+.neo-card {
+  background: linear-gradient(180deg, var(--neo-panel-2), var(--neo-panel));
+  border: 1px solid var(--neo-line);
+  border-radius: var(--neo-radius);
+}
+
+.neo-eyebrow {
+  margin: 0 0 10px;
+  color: var(--neo-gold);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.neo-gold-text {
+  color: var(--neo-gold);
+}
+
+.neo-up {
+  color: var(--neo-green);
+}
+
+.neo-down {
+  color: var(--neo-red);
+}
+
+/* ---------- Segmented tabs ---------- */
+.neo-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  overflow-x: auto;
+  border: 1px solid var(--neo-line);
+  border-radius: 12px;
+  background: var(--neo-panel);
+  scrollbar-width: none;
+}
+
+.neo-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.neo-tabs button {
+  flex: 1 0 auto;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--neo-muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.neo-tabs button:hover {
+  color: var(--neo-text);
+}
+
+.neo-tabs button.is-active {
+  background: var(--neo-gold-soft);
+  color: var(--neo-gold);
+  box-shadow: inset 0 0 0 1px rgba(245, 184, 46, 0.4);
+}
+
+/* ---------- Inputs ---------- */
+.neo-field {
+  display: grid;
+  gap: 7px;
+}
+
+.neo-field > span {
+  color: var(--neo-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.neo-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--neo-line-strong);
+  border-radius: var(--neo-radius-sm);
+  background: var(--neo-bg-2);
+  color: var(--neo-text);
+  font-size: 15px;
+  outline: none;
+}
+
+.neo-input:focus {
+  border-color: var(--neo-gold);
+  box-shadow: 0 0 0 3px rgba(245, 184, 46, 0.16);
+}
+
+.neo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.neo-badge-green {
+  background: var(--neo-green-soft);
+  color: var(--neo-green);
+}
+
+.neo-badge-gold {
+  background: var(--neo-gold-soft);
+  color: var(--neo-gold);
+}
+
+.neo-badge-muted {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--neo-muted);
+}
+
+.neo-badge-red {
+  background: var(--neo-red-soft);
+  color: var(--neo-red);
+}
+
+.neo-skeleton {
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04));
+  background-size: 200% 100%;
+  animation: neo-shimmer 1.3s linear infinite;
+}
+
+@keyframes neo-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* The approved logo has navy lettering, so it always sits on a light plate. */
+.neo-brand {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  text-decoration: none;
+  line-height: 0;
+}
+
+.neo-brand .neurooption-logo {
+  display: block;
+  width: auto;
+  height: 26px;
+  filter: brightness(0.85);
+}
+
+.neo-brand-sm {
+  padding: 0;
+}
+
+.neo-brand-sm .neurooption-logo {
+  height: 21px;
+}
+
+.neo-brand-lg .neurooption-logo {
+  height: 32px;
+}
+
+.neo-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neo-skeleton {
+    animation: none;
+  }
+}

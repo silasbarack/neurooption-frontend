@@ -11,7 +11,9 @@ import DeleteAccountPage from "./pages/DeleteAccountPage";
 import ProfilePage from "./pages/ProfilePage";
 import TradingPage from "./pages/TradingPage";
 import FinancePage from "./pages/FinancePage";
-import MarketPage from "./pages/MarketPage";
+import MarketsPage from "./pages/MarketsPage";
+import AccountPage from "./pages/AccountPage";
+import AppShell from "./components/shell/AppShell";
 import ChatPage from "./pages/ChatPage";
 import HelpPage from "./pages/HelpPage";
 import AchievementsPage from "./pages/AchievementsPage";
@@ -22,6 +24,17 @@ import SignalsPage from "./pages/SignalsPage";
 import SocialTradingPage from "./pages/SocialTradingPage";
 import ExpressTradesPage from "./pages/ExpressTradesPage";
 import RouteTransition from "./components/layout/RouteTransition";
+
+/** Older content pages rendered inside the new app frame. */
+function Shelled({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <RequireAuth>
+      <AppShell title={title}>
+        <div className="neo-legacy">{children}</div>
+      </AppShell>
+    </RequireAuth>
+  );
+}
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const token = getToken();
@@ -68,30 +81,27 @@ export default function App() {
             }
           />
 
-          <Route
-            path="/market"
-            element={
-              <RequireAuth>
-                <MarketPage />
-              </RequireAuth>
-            }
-          />
+          <Route path="/markets" element={<MarketsPage />} />
+          <Route path="/market" element={<Navigate to="/markets" replace />} />
+          <Route path="/deposit" element={<Navigate to="/finance" replace />} />
+          <Route path="/withdraw" element={<Navigate to="/finance?tab=withdraw" replace />} />
+          <Route path="/transactions" element={<Navigate to="/finance?tab=history" replace />} />
 
           <Route
             path="/chat"
             element={
-              <RequireAuth>
+              <Shelled title="Chat">
                 <ChatPage />
-              </RequireAuth>
+              </Shelled>
             }
           />
 
           <Route
             path="/help"
             element={
-              <RequireAuth>
+              <Shelled title="Support">
                 <HelpPage />
-              </RequireAuth>
+              </Shelled>
             }
           />
 
@@ -99,8 +109,17 @@ export default function App() {
             path="/profile"
             element={
               <RequireAuth>
-                <ProfilePage />
+                <AccountPage />
               </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/settings"
+            element={
+              <Shelled title="Settings">
+                <ProfilePage />
+              </Shelled>
             }
           />
 
@@ -116,36 +135,36 @@ export default function App() {
           <Route
             path="/tournaments"
             element={
-              <RequireAuth>
+              <Shelled title="Tournaments">
                 <TournamentsPage />
-              </RequireAuth>
+              </Shelled>
             }
           />
 
           <Route
             path="/open-trades"
             element={
-              <RequireAuth>
+              <Shelled title="Open Trades">
                 <OpenTradesPage />
-              </RequireAuth>
+              </Shelled>
             }
           />
 
           <Route
             path="/history"
             element={
-              <RequireAuth>
+              <Shelled title="History">
                 <HistoryPage />
-              </RequireAuth>
+              </Shelled>
             }
           />
 
           <Route
             path="/signals"
             element={
-              <RequireAuth>
+              <Shelled title="Signals">
                 <SignalsPage />
-              </RequireAuth>
+              </Shelled>
             }
           />
 
@@ -161,22 +180,22 @@ export default function App() {
           <Route
             path="/express-trades"
             element={
-              <RequireAuth>
+              <Shelled title="Express Trades">
                 <ExpressTradesPage />
-              </RequireAuth>
+              </Shelled>
             }
           />
 
           <Route
             path="/delete-account"
             element={
-              <RequireAuth>
+              <Shelled title="Delete Account">
                 <DeleteAccountPage />
-              </RequireAuth>
+              </Shelled>
             }
           />
 
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </RouteTransition>
     </BrowserRouter>

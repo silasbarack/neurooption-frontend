@@ -80,8 +80,8 @@ export default function LoginPage() {
       privacyLabel={tt("privacy")}
       contactsLabel={tt("contacts")}
     >
-      <div className="lp-hero" id="platform">
-        <span className="lp-eyebrow">
+      <div className="au-hero" id="platform">
+        <span className="au-eyebrow">
           <i aria-hidden="true" />
           Fast OTC market experience
         </span>
@@ -89,20 +89,20 @@ export default function LoginPage() {
           Trade with clarity.
           <span>React in real time.</span>
         </h1>
-        <p className="lp-lead">
+        <p className="au-lead">
           NeuroOption brings OTC assets, responsive candlestick charts and
           streamlined account controls into one focused trading workspace.
         </p>
 
-        <div className="lp-market" id="markets" aria-label="Market preview">
-          <div className="lp-market-head">
+        <div className="au-market" id="markets" aria-label="Market preview">
+          <div className="au-market-head">
             <div>
-              <span className="lp-market-pair">EUR/USD OTC</span>
-              <strong className="lp-market-price">1.08742</strong>
+              <span className="au-market-pair">EUR/USD OTC</span>
+              <strong className="au-market-price">1.08742</strong>
             </div>
-            <span className="lp-market-change">+0.08%</span>
+            <span className="au-market-change">+0.08%</span>
           </div>
-          <div className="lp-market-chart" aria-hidden="true">
+          <div className="au-market-chart" aria-hidden="true">
             {PREVIEW_CANDLES.map(([open, close, high, low], index) => (
               <span key={index} className={close >= open ? "up" : "down"}>
                 <b style={{ bottom: `${low}px`, height: `${high - low}px` }} />
@@ -115,33 +115,33 @@ export default function LoginPage() {
               </span>
             ))}
           </div>
-          <div className="lp-market-actions">
-            <div className="lp-market-payout">
+          <div className="au-market-actions">
+            <div className="au-market-payout">
               <span>Payout</span>
               <strong>85%</strong>
             </div>
-            <span className="lp-market-buy">Buy</span>
-            <span className="lp-market-sell">Sell</span>
+            <span className="au-market-buy">Buy</span>
+            <span className="au-market-sell">Sell</span>
           </div>
         </div>
 
-        <ul className="lp-features" id="security">
+        <ul className="au-features" id="security">
           <li>
-            <span className="lp-feature-icon"><Zap size={18} /></span>
+            <span className="au-feature-icon"><Zap size={18} /></span>
             <div>
               <strong>Low-latency stream</strong>
               <small>Live price and candle updates</small>
             </div>
           </li>
           <li>
-            <span className="lp-feature-icon"><Layers size={18} /></span>
+            <span className="au-feature-icon"><Layers size={18} /></span>
             <div>
               <strong>Multi-asset markets</strong>
               <small>Forex, crypto, indices and more</small>
             </div>
           </li>
           <li>
-            <span className="lp-feature-icon"><ShieldCheck size={18} /></span>
+            <span className="au-feature-icon"><ShieldCheck size={18} /></span>
             <div>
               <strong>Secure access</strong>
               <small>Protected, token-based sessions</small>
@@ -150,24 +150,24 @@ export default function LoginPage() {
         </ul>
       </div>
 
-      <div className="lp-card">
-        <div className="lp-card-head">
-          <span className="lp-card-icon"><ChartCandlestick size={22} /></span>
+      <div className="au-card">
+        <div className="au-card-head">
+          <span className="au-card-icon"><ChartCandlestick size={22} /></span>
           <h2>{tt("signIn")}</h2>
           <p>Welcome back. Sign in to continue to your trading workspace.</p>
         </div>
 
         {message && (
-          <div className={`lp-alert ${success ? "is-success" : "is-error"}`} role="alert">
+          <div className={`au-alert ${success ? "is-success" : "is-error"}`} role="alert">
             {success ? <CircleCheck size={18} /> : <CircleAlert size={18} />}
             <span>{message}</span>
           </div>
         )}
 
-        <form className="lp-form" onSubmit={handleSubmit}>
-          <div className="lp-field">
+        <form className="au-form" onSubmit={handleSubmit}>
+          <div className="au-field">
             <label htmlFor="email">{tt("email")}</label>
-            <div className="lp-input">
+            <div className="au-input">
               <Mail size={18} aria-hidden="true" />
               <input
                 id="email"
@@ -181,14 +181,14 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="lp-field">
-            <div className="lp-field-row">
+          <div className="au-field">
+            <div className="au-field-row">
               <label htmlFor="password">{tt("password")}</label>
-              <Link to="/forgot-password" className="lp-link">
+              <Link to="/forgot-password" className="au-link">
                 {tt("passwordRecovery")}
               </Link>
             </div>
-            <div className="lp-input">
+            <div className="au-input">
               <Lock size={18} aria-hidden="true" />
               <input
                 id="password"
@@ -201,7 +201,7 @@ export default function LoginPage() {
                 required
               />
               <button
-                className="lp-eye"
+                className="au-eye"
                 type="button"
                 onClick={() => setShowPassword((current) => !current)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
@@ -211,7 +211,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <label className="lp-check">
+          <label className="au-check">
             <input
               type="checkbox"
               checked={rememberMe}
@@ -220,10 +220,10 @@ export default function LoginPage() {
             <span>{tt("rememberMe")}</span>
           </label>
 
-          <button className="lp-submit" type="submit" disabled={loading}>
+          <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
               <>
-                <LoaderCircle size={18} className="lp-spin" aria-hidden="true" />
+                <LoaderCircle size={18} className="au-spin" aria-hidden="true" />
                 <span>{tt("signingIn")}</span>
               </>
             ) : (
@@ -235,14 +235,14 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="lp-register">
+        <p className="au-register">
           {tt("notRegistered")}{" "}
-          <Link to="/register" className="lp-link">
+          <Link to="/register" className="au-link">
             {tt("registration")}
           </Link>
         </p>
 
-        <div className="lp-trust">
+        <div className="au-trust">
           <ShieldCheck size={16} aria-hidden="true" />
           <span>Encrypted connection. Your credentials are sent only to NeuroOption.</span>
         </div>

@@ -1,4 +1,5 @@
 import type { AccountType, Currency, TradeSide } from "./trading.types";
+import { clearToken, getToken } from "../../utils/storage";
 
 export type BackendTradeStatus = "PENDING" | "WON" | "LOST" | "DRAW";
 
@@ -39,7 +40,15 @@ export const API_BASE_URL = (
   (import.meta.env.VITE_API_URL as string | undefined) || "http://localhost:4000"
 ).replace(/\/$/, "");
 
+// The backend takes the user from the sign-in token; this is only the
+// placeholder it uses for guests.
 export const USER_ID = "demo-user";
+
+/** Sends the sign-in token so the trading engine uses the user's own account. */
+export function authHeaders(): Record<string, string> {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 export const CURRENCY_SYMBOLS: Record<Currency, string> = {
   USD: "$",
@@ -93,9 +102,16 @@ export async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T
     method: "GET",
     headers: {
       Accept: "application/json",
+      ...authHeaders(),
     },
     signal,
   });
+
+  if (response.status === 401 && getToken()) {
+    // Expired or revoked session: sign in again rather than show stale data.
+    clearToken();
+    window.location.assign("/login");
+  }
 
   if (!response.ok) {
     throw new Error(`Request failed: ${response.status}`);

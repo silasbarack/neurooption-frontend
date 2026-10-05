@@ -1,0 +1,358 @@
+.neo-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background:
+    radial-gradient(900px 420px at 85% -10%, rgba(245, 184, 46, 0.06), transparent 60%),
+    radial-gradient(800px 420px at 0% 0%, rgba(59, 130, 246, 0.06), transparent 60%),
+    var(--neo-bg);
+  color: var(--neo-text);
+}
+
+/* ---------- Top bar ---------- */
+.neo-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--neo-line);
+  background: rgba(6, 11, 22, 0.88);
+  backdrop-filter: blur(14px);
+}
+
+.neo-topbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  max-width: 1320px;
+  height: 64px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.neo-topnav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.neo-topnav a {
+  position: relative;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--neo-muted);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.neo-topnav a:hover {
+  color: var(--neo-text);
+}
+
+.neo-topnav a.is-active {
+  color: var(--neo-gold);
+}
+
+.neo-topnav a.is-active::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  bottom: -13px;
+  left: 12px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--neo-gold);
+}
+
+.neo-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.neo-balance-chip {
+  display: grid;
+  padding: 5px 12px;
+  border: 1px solid var(--neo-line);
+  border-radius: 10px;
+  background: var(--neo-panel);
+  color: var(--neo-text);
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.neo-balance-chip small {
+  color: var(--neo-green);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.neo-balance-chip strong {
+  font-size: 14px;
+}
+
+.neo-topbar-avatar {
+  display: inline-flex;
+  border-radius: 50%;
+  text-decoration: none;
+}
+
+.neo-avatar {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--neo-gold-2), #c98a0c);
+  box-shadow: 0 0 0 2px rgba(245, 184, 46, 0.25);
+  color: var(--neo-gold-ink);
+  font-weight: 800;
+}
+
+.neo-topbar-back,
+.neo-topbar-title {
+  display: none;
+}
+
+.neo-topbar-menu {
+  display: none;
+}
+
+/* ---------- Main ---------- */
+.neo-shell-main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 24px 56px;
+}
+
+.neo-shell-main.is-wide {
+  max-width: 1320px;
+}
+
+/* ---------- Bottom nav (phones) ---------- */
+.neo-bottomnav {
+  display: none;
+}
+
+/* ---------- Drawer ---------- */
+.neo-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+}
+
+.neo-drawer-scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(2, 5, 12, 0.6);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.neo-drawer-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(360px, 88vw);
+  padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  overflow-y: auto;
+  border-left: 1px solid var(--neo-line);
+  background: linear-gradient(180deg, #0b1424, #070d19);
+  transform: translateX(102%);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.neo-drawer.is-open {
+  pointer-events: auto;
+}
+
+.neo-drawer.is-open .neo-drawer-scrim {
+  opacity: 1;
+}
+
+.neo-drawer.is-open .neo-drawer-panel {
+  transform: none;
+}
+
+.neo-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.neo-drawer-nav {
+  display: grid;
+  gap: 2px;
+}
+
+.neo-drawer-nav a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 10px;
+  border-radius: 10px;
+  color: var(--neo-text);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.neo-drawer-nav a svg:first-child {
+  color: var(--neo-muted);
+}
+
+.neo-drawer-nav a:hover,
+.neo-drawer-nav a.is-active {
+  background: rgba(245, 184, 46, 0.08);
+}
+
+.neo-drawer-nav a.is-active,
+.neo-drawer-nav a.is-active svg:first-child {
+  color: var(--neo-gold);
+}
+
+.neo-drawer-chev {
+  margin-left: auto;
+  color: var(--neo-faint);
+}
+
+.neo-drawer-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.neo-drawer-foot {
+  margin-top: auto;
+  padding-top: 26px;
+  color: var(--neo-faint);
+  font-size: 12px;
+}
+
+.neo-drawer-foot div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.neo-drawer-foot a {
+  color: var(--neo-muted);
+  text-decoration: none;
+}
+
+/* ---------- Tablet ---------- */
+@media (max-width: 1180px) {
+  .neo-topnav a:nth-child(n + 5) {
+    display: none;
+  }
+
+  .neo-topbar-menu {
+    display: inline-grid;
+  }
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 900px) {
+  .neo-topbar-inner {
+    gap: 10px;
+    height: 58px;
+    padding: 0 14px;
+  }
+
+  .neo-topnav,
+  .neo-balance-chip,
+  .neo-topbar-deposit {
+    display: none;
+  }
+
+  .neo-shell.has-title .neo-topbar-brand,
+  .neo-shell.has-title .neo-topbar-avatar {
+    display: none;
+  }
+
+  .neo-shell.has-title .neo-topbar-back {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    margin-left: -6px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--neo-text);
+    cursor: pointer;
+  }
+
+  .neo-shell.has-title .neo-topbar-title {
+    display: block;
+    position: absolute;
+    left: 50%;
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    transform: translateX(-50%);
+  }
+
+  .neo-shell-main {
+    padding: 16px 14px calc(var(--neo-bottom-nav) + 24px + env(safe-area-inset-bottom));
+  }
+
+  .neo-bottomnav {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    height: calc(var(--neo-bottom-nav) + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid var(--neo-line);
+    background: rgba(6, 11, 22, 0.96);
+    backdrop-filter: blur(14px);
+  }
+
+  .neo-bottomnav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--neo-faint);
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .neo-bottomnav a.is-active {
+    color: var(--neo-gold);
+  }
+}
+
+/* Older content pages hosted inside the shell. */
+.neo-legacy .np-page {
+  min-height: 0;
+  background: transparent;
+}
+
+.neo-legacy .np-container {
+  max-width: none;
+  padding: 0;
+}
+
+@media (max-width: 900px) {
+  .neo-legacy .np-page-header-text h1 {
+    display: none;
+  }
+}

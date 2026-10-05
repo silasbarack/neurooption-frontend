@@ -24,13 +24,13 @@ export default function AuthLayout({
   contactsLabel = "Contacts",
 }: AuthLayoutProps) {
   return (
-    <main className="lp">
-      <header className="lp-header">
-        <Link to="/" className="lp-brand" aria-label="NeuroOption home">
-          <Logo className="lp-logo" />
+    <main className="au">
+      <header className="au-header">
+        <Link to="/" className="au-brand" aria-label="NeuroOption home">
+          <Logo className="au-logo" />
         </Link>
 
-        <nav className="lp-nav" aria-label="Primary navigation">
+        <nav className="au-nav" aria-label="Primary navigation">
           <Link to="/">Home</Link>
           <Link to="/#features">Features</Link>
           <Link to="/#markets">Markets</Link>
@@ -38,7 +38,7 @@ export default function AuthLayout({
         </nav>
 
         {language && onLanguageChange ? (
-          <label className="lp-language">
+          <label className="au-language">
             <Globe size={16} aria-hidden="true" />
             <select
               value={language}
@@ -53,22 +53,22 @@ export default function AuthLayout({
             </select>
           </label>
         ) : (
-          <span className="lp-header-spacer" aria-hidden="true" />
+          <span className="au-header-spacer" aria-hidden="true" />
         )}
       </header>
 
-      <section className={`lp-main ${variant === "single" ? "is-single" : "is-stacked"}`}>
+      <section className={`au-main ${variant === "single" ? "is-single" : "is-stacked"}`}>
         {children}
       </section>
 
-      <footer className="lp-footer">
+      <footer className="au-footer">
         <span>&copy; 2026 NeuroOption</span>
         <nav aria-label="Legal">
           <a href="#terms">Terms</a>
           <a href="#privacy">{privacyLabel}</a>
           <a href="#contacts">{contactsLabel}</a>
         </nav>
-        <span className="lp-age">21+</span>
+        <span className="au-age">21+</span>
       </footer>
     </main>
   );

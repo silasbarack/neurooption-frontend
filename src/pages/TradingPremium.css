@@ -3,28 +3,28 @@
    affecting other pages. Palette matches the landing-page dashboard. */
 
 .nt-premium {
-  --nt-bg: #080c13;
-  --nt-surface: #0f141e;
-  --nt-surface-alt: #141a26;
-  --nt-surface-raised: #182030;
-  --nt-border: rgba(255, 255, 255, 0.07);
+  --nt-bg: #060b16;
+  --nt-surface: #0b1424;
+  --nt-surface-alt: #0f1a2e;
+  --nt-surface-raised: #142037;
+  --nt-border: rgba(148, 170, 205, 0.12);
   --nt-border-soft: rgba(255, 255, 255, 0.045);
   --nt-text: #e8eef6;
   --nt-text-muted: #8a97ab;
   --nt-text-faint: #5d6a7e;
-  --nt-accent: #2f86ff;
-  --nt-accent-soft: rgba(47, 134, 255, 0.14);
+  --nt-accent: #f5b82e;
+  --nt-accent-soft: rgba(245, 184, 46, 0.14);
   --nt-buy: #22c55e;
   --nt-buy-strong: #16a34a;
   --nt-sell: #ef4444;
   --nt-sell-strong: #dc2626;
   --nt-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
-  --nt-chart-bg: #11151f;
+  --nt-chart-bg: #080f1d;
 
   font-family: "Noto Sans", Arial, sans-serif;
   background:
-    radial-gradient(1200px 500px at 70% -10%, rgba(47, 134, 255, 0.08), transparent 60%),
-    radial-gradient(900px 400px at 0% 100%, rgba(19, 185, 178, 0.05), transparent 60%),
+    radial-gradient(1200px 500px at 70% -10%, rgba(245, 184, 46, 0.08), transparent 60%),
+    radial-gradient(900px 400px at 0% 100%, rgba(59, 130, 246, 0.05), transparent 60%),
     var(--nt-bg);
 }
 
@@ -200,8 +200,8 @@
 
 .nt-premium .balance-dropdown-option.active,
 .nt-premium .balance-dropdown-option:hover {
-  border-color: rgba(47, 134, 255, 0.5);
-  background: rgba(47, 134, 255, 0.16);
+  border-color: rgba(245, 184, 46, 0.5);
+  background: rgba(245, 184, 46, 0.16);
   color: #fff;
 }
 
@@ -211,8 +211,8 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #2f86ff, #13b9b2);
-  color: #fff;
+  background: linear-gradient(135deg, #ffd062, #c98a0c);
+  color: #1a1200;
   font-size: 14px;
   font-weight: 800;
   text-decoration: none;
@@ -263,8 +263,8 @@
 
 .nt-premium .nt-sidebar button.active {
   position: relative;
-  background: rgba(47, 134, 255, 0.14);
-  color: #6ea8ff;
+  background: rgba(245, 184, 46, 0.14);
+  color: #ffd062;
   box-shadow: none;
 }
 
@@ -276,7 +276,7 @@
   bottom: 10px;
   width: 3px;
   border-radius: 0 3px 3px 0;
-  background: #2f86ff;
+  background: #f5b82e;
 }
 
 .nt-premium .nt-sidebar button:disabled {
@@ -344,7 +344,7 @@
 
 .nt-premium .nt-chart-types button.active {
   border-color: transparent;
-  background: rgba(47, 134, 255, 0.18);
+  background: rgba(245, 184, 46, 0.18);
   color: #fff;
 }
 
@@ -416,8 +416,8 @@
 .nt-premium .nt-asset-tabs button.active,
 .nt-premium .nt-asset-list button.active,
 .nt-premium .nt-floating button.active {
-  border-color: rgba(47, 134, 255, 0.5);
-  background: rgba(47, 134, 255, 0.18);
+  border-color: rgba(245, 184, 46, 0.5);
+  background: rgba(245, 184, 46, 0.18);
   color: #fff;
 }
 
@@ -461,8 +461,8 @@
 }
 
 .nt-premium .nt-white-input:focus-within {
-  border-color: rgba(47, 134, 255, 0.6);
-  box-shadow: 0 0 0 3px rgba(47, 134, 255, 0.15);
+  border-color: rgba(245, 184, 46, 0.6);
+  box-shadow: 0 0 0 3px rgba(245, 184, 46, 0.15);
 }
 
 .nt-premium .nt-white-input strong,
@@ -572,9 +572,9 @@
   justify-content: center;
   gap: 8px;
   min-height: 42px;
-  border: 1px solid rgba(47, 134, 255, 0.4);
+  border: 1px solid rgba(245, 184, 46, 0.4);
   border-radius: 11px;
-  background: rgba(47, 134, 255, 0.1);
+  background: rgba(245, 184, 46, 0.1);
   color: #9cc3ff;
   font-size: 13px;
   font-weight: 700;
@@ -585,7 +585,7 @@
 }
 
 .nt-premium .nt-ai:hover {
-  background: rgba(47, 134, 255, 0.18);
+  background: rgba(245, 184, 46, 0.18);
   color: #fff;
 }
 
@@ -619,7 +619,7 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  color: #6ea8ff;
+  color: #ffd062;
   font-weight: 700;
   text-decoration: none;
 }
@@ -637,7 +637,7 @@
 /* ---------- Mobile bottom bar ---------- */
 .nt-premium .nt-bottom-nav {
   border-top: 1px solid var(--nt-border);
-  background: rgba(10, 14, 22, 0.96);
+  background: rgba(6, 11, 22, 0.96);
   backdrop-filter: blur(14px);
 }
 
@@ -982,8 +982,8 @@
   }
 
   .nt-premium .nt-tool-btn.compact.active {
-    border-color: rgba(47, 134, 255, 0.5);
-    background: rgba(47, 134, 255, 0.18);
+    border-color: rgba(245, 184, 46, 0.5);
+    background: rgba(245, 184, 46, 0.18);
     color: #fff;
   }
 
@@ -1146,15 +1146,19 @@
   }
 
   .nt-premium .nt-bottom-nav button.active {
-    color: #fff;
+    color: var(--nt-accent);
+  }
+
+  .nt-premium .nt-menu-btn {
+    display: inline-grid;
   }
 
   .nt-premium .nt-bottom-nav button.is-center {
-    border: 1px solid rgba(47, 134, 255, 0.55);
+    border: 1px solid rgba(245, 184, 46, 0.55);
     background:
-      radial-gradient(120% 90% at 50% 0%, rgba(47, 134, 255, 0.35), rgba(47, 134, 255, 0.08));
+      radial-gradient(120% 90% at 50% 0%, rgba(245, 184, 46, 0.35), rgba(245, 184, 46, 0.08));
     color: #fff;
-    box-shadow: 0 8px 22px rgba(47, 134, 255, 0.25);
+    box-shadow: 0 8px 22px rgba(245, 184, 46, 0.25);
   }
 }
 

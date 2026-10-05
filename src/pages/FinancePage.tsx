@@ -1,35 +1,23 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import type { LucideIcon } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import {
   ArrowDownLeft,
-  ArrowLeft,
   ArrowUpRight,
-  Bitcoin,
+  ChevronRight,
   CircleAlert,
   CircleCheck,
-  Clock,
-  CreditCard,
-  Gamepad2,
-  Landmark,
   LoaderCircle,
-  Plus,
   Receipt,
   RefreshCcw,
   ShieldCheck,
   Smartphone,
-  Wallet,
 } from "lucide-react";
-import Logo from "../components/branding/Logo";
+import AppShell from "../components/shell/AppShell";
+import { refreshAccount } from "../components/shell/useAccount";
 import MpesaLogo from "../components/finance/MpesaLogo";
 import MpesaDepositDialog from "../components/finance/MpesaDepositDialog";
-import { API_BASE_URL, USER_ID, fetchJson } from "../components/trading";
 import { financeApi, type FinanceOverview, type FinanceStatus } from "../api";
 import "./FinancePage.css";
-
-type WalletResponse = {
-  balance: number;
-};
 
 const STATUS_TONE: Record<FinanceStatus, "success" | "warning" | "danger" | "muted"> = {
   COMPLETED: "success",
@@ -49,11 +37,21 @@ const STATUS_LABEL: Record<FinanceStatus, string> = {
   CANCELLED: "Cancelled",
 };
 
-const OTHER_METHODS: Array<{ name: string; description: string; icon: LucideIcon }> = [
-  { name: "Airtel Money", description: "Mobile money across Africa", icon: Smartphone },
-  { name: "Bank Transfer", description: "1-3 business day settlement", icon: Landmark },
-  { name: "Mastercard / Visa", description: "Card deposits", icon: CreditCard },
-  { name: "Binance Pay", description: "Crypto deposits", icon: Bitcoin },
+type Tab = "deposit" | "withdraw" | "history";
+
+const TABS: Array<{ key: Tab; label: string }> = [
+  { key: "deposit", label: "Deposit" },
+  { key: "withdraw", label: "Withdraw" },
+  { key: "history", label: "History" },
+];
+
+// Shown as "Coming soon" until each provider is connected.
+const OTHER_METHODS = [
+  { name: "Airtel Money", detail: "Instant deposit", currencies: "KES", tile: "tile-airtel", mark: "airtel" },
+  { name: "Equitel", detail: "Instant deposit", currencies: "KES", tile: "tile-equitel", mark: "equitel" },
+  { name: "Binance Pay", detail: "Crypto deposit", currencies: "USDT, BTC, BNB", tile: "tile-binance", mark: "◆" },
+  { name: "Mastercard", detail: "Card payment", currencies: "KES, USD, EUR", tile: "tile-mastercard", mark: "" },
+  { name: "Visa", detail: "Card payment", currencies: "KES, USD, EUR", tile: "tile-visa", mark: "VISA" },
 ];
 
 function formatKes(value: number): string {
@@ -61,8 +59,7 @@ function formatKes(value: number): string {
 }
 
 function formatDate(value: string): string {
-  const date = new Date(value);
-  return date.toLocaleString("en-KE", {
+  return new Date(value).toLocaleString("en-KE", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -72,10 +69,13 @@ function formatDate(value: string): string {
 }
 
 export default function FinancePage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requested = searchParams.get("tab");
+  const tab: Tab = requested === "withdraw" || requested === "history" ? requested : "deposit";
+
   const [overview, setOverview] = React.useState<FinanceOverview | null>(null);
   const [loadError, setLoadError] = React.useState("");
   const [loading, setLoading] = React.useState(true);
-  const [demoBalance, setDemoBalance] = React.useState<number | null>(null);
   const [depositOpen, setDepositOpen] = React.useState(false);
 
   const [withdrawPhone, setWithdrawPhone] = React.useState("");
@@ -83,13 +83,12 @@ export default function FinancePage() {
   const [withdrawing, setWithdrawing] = React.useState(false);
   const [withdrawResult, setWithdrawResult] = React.useState<{ ok: boolean; text: string } | null>(null);
 
-  const withdrawRef = React.useRef<HTMLDivElement>(null);
-
   const loadOverview = React.useCallback(async () => {
     try {
       const data = await financeApi.overview();
       setOverview(data);
       setLoadError("");
+      refreshAccount().catch(() => undefined);
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : "Could not load your finance details.");
     } finally {
@@ -117,30 +116,12 @@ export default function FinancePage() {
     };
   }, []);
 
-  React.useEffect(() => {
-    const controller = new AbortController();
-    fetchJson<WalletResponse>(
-      `${API_BASE_URL}/trading-engine/wallet?userId=${encodeURIComponent(USER_ID)}&accountType=${encodeURIComponent("QT Demo")}&currency=USD`,
-      controller.signal,
-    )
-      .then((demo) => setDemoBalance(Number(demo.balance)))
-      .catch(() => {
-        // Demo wallet unreachable: the card shows a placeholder.
-      });
-    return () => controller.abort();
-  }, []);
-
   const transactions = React.useMemo(() => overview?.transactions ?? [], [overview]);
-  const totalDeposits = transactions
-    .filter((t) => t.type === "Deposit" && t.status === "COMPLETED")
-    .reduce((sum, t) => sum + t.amount, 0);
-  const totalWithdrawals = transactions
-    .filter((t) => t.type === "Withdrawal" && t.status === "COMPLETED")
-    .reduce((sum, t) => sum + t.amount, 0);
-  const pendingCount = transactions.filter((t) => t.status === "PENDING" || t.status === "PROCESSING").length;
+  const mpesaReady = Boolean(overview?.mpesa?.configured);
 
-  const mpesa = overview?.mpesa;
-  const mpesaReady = Boolean(mpesa?.configured);
+  function selectTab(next: Tab) {
+    setSearchParams(next === "deposit" ? {} : { tab: next }, { replace: true });
+  }
 
   async function handleWithdraw(event: React.FormEvent) {
     event.preventDefault();
@@ -164,195 +145,103 @@ export default function FinancePage() {
     }
   }
 
-  return (
-    <main className="fin">
-      <header className="fin-header">
-        <div className="fin-header-inner">
-          <Link to="/" className="fin-brand" aria-label="NeuroOption home">
-            <Logo className="fin-logo" />
-          </Link>
-          <Link to="/trading" className="fin-back">
-            <ArrowLeft size={16} aria-hidden="true" />
-            Back to trading
-          </Link>
-        </div>
-      </header>
+  const title = tab === "withdraw" ? "Withdraw" : tab === "history" ? "Transactions" : "Deposit";
 
-      <div className="fin-container">
-        <section className="fin-titlebar">
+  return (
+    <AppShell title={title}>
+      <div className="fin">
+        <div className="fin-page-head">
           <div>
-            <span className="fin-kicker">Wallet</span>
             <h1>Finance</h1>
             <p>Deposit with M-Pesa, request withdrawals and track every transaction.</p>
           </div>
-          <div className="fin-actions">
-            <button
-              type="button"
-              className="fin-btn fin-btn-green"
-              onClick={() => setDepositOpen(true)}
-              disabled={!mpesaReady}
-              title={mpesaReady ? undefined : "M-Pesa deposits are not available yet"}
-            >
-              <Plus size={17} aria-hidden="true" />
-              Deposit
-            </button>
-            <button
-              type="button"
-              className="fin-btn fin-btn-ghost"
-              onClick={() => withdrawRef.current?.scrollIntoView({ behavior: "smooth" })}
-            >
-              <ArrowUpRight size={17} aria-hidden="true" />
-              Withdraw
-            </button>
+          <div className="fin-real">
+            <small>Real account balance</small>
+            <strong>{overview ? formatKes(overview.wallet.balance) : "—"}</strong>
+            {overview && overview.wallet.locked > 0 && <span>{formatKes(overview.wallet.locked)} reserved for withdrawals</span>}
           </div>
-        </section>
+        </div>
 
         {loadError && (
           <div className="fin-banner is-error" role="alert">
-            <CircleAlert size={18} aria-hidden="true" />
+            <CircleAlert size={16} aria-hidden="true" />
             <span>{loadError}</span>
-            <button type="button" onClick={() => { setLoading(true); void loadOverview(); }}>
-              <RefreshCcw size={14} aria-hidden="true" /> Retry
+            <button type="button" onClick={() => void loadOverview()}>
+              Try again
             </button>
           </div>
         )}
 
-        <section className="fin-balances">
-          <article className="fin-balance is-real">
-            <div className="fin-balance-head">
-              <span className="fin-balance-icon"><Wallet size={20} aria-hidden="true" /></span>
-              <span className="fin-badge">QT Real</span>
-            </div>
-            <small>Real account balance</small>
-            <strong>{overview ? formatKes(overview.wallet.balance) : loading ? "…" : "—"}</strong>
-            <p>
-              {overview && overview.wallet.locked > 0
-                ? `${formatKes(overview.wallet.locked)} held for pending withdrawals`
-                : "Live funds available for trading and withdrawal"}
-            </p>
-          </article>
-          <article className="fin-balance">
-            <div className="fin-balance-head">
-              <span className="fin-balance-icon"><Gamepad2 size={20} aria-hidden="true" /></span>
-              <span className="fin-badge is-demo">QT Demo</span>
-            </div>
-            <small>Demo account balance</small>
-            <strong>
-              {demoBalance !== null
-                ? `$${demoBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                : "—"}
-            </strong>
-            <p>Practice funds, no real money at risk</p>
-          </article>
-        </section>
+        <div className="neo-tabs fin-tabs" role="tablist">
+          {TABS.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              role="tab"
+              aria-selected={tab === item.key}
+              className={`${tab === item.key ? "is-active" : ""} ${item.key === "history" ? "fin-tab-history" : ""}`}
+              onClick={() => selectTab(item.key)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
 
-        <section className="fin-stats">
-          <div className="fin-stat">
-            <span className="fin-stat-icon is-green"><ArrowDownLeft size={18} aria-hidden="true" /></span>
-            <div>
-              <small>Total deposited</small>
-              <strong>{formatKes(totalDeposits)}</strong>
-            </div>
-          </div>
-          <div className="fin-stat">
-            <span className="fin-stat-icon is-blue"><ArrowUpRight size={18} aria-hidden="true" /></span>
-            <div>
-              <small>Total withdrawn</small>
-              <strong>{formatKes(totalWithdrawals)}</strong>
-            </div>
-          </div>
-          <div className="fin-stat">
-            <span className={`fin-stat-icon ${pendingCount > 0 ? "is-amber" : "is-muted"}`}><Clock size={18} aria-hidden="true" /></span>
-            <div>
-              <small>Pending transactions</small>
-              <strong>{pendingCount}</strong>
-            </div>
-          </div>
-        </section>
-
-        <div className="fin-columns">
-          <section className="fin-card fin-transactions">
-            <div className="fin-card-head">
-              <h2>Recent transactions</h2>
-              <button type="button" className="fin-link-btn" onClick={() => void loadOverview()}>
-                <RefreshCcw size={13} aria-hidden="true" /> Refresh
-              </button>
-            </div>
-
-            {loading && !overview ? (
-              <div className="fin-empty">
-                <LoaderCircle size={26} className="fin-spin" aria-hidden="true" />
-                <span>Loading your transactions…</span>
-              </div>
-            ) : transactions.length === 0 ? (
-              <div className="fin-empty">
-                <Receipt size={28} aria-hidden="true" />
-                <strong>No transactions yet</strong>
-                <span>Your M-Pesa deposits and withdrawals will show up here.</span>
-              </div>
-            ) : (
-              <ul className="fin-tx-list">
-                {transactions.map((t) => {
-                  const isDeposit = t.type === "Deposit";
-                  return (
-                    <li key={t.id}>
-                      <span className={`fin-tx-icon ${isDeposit ? "is-in" : "is-out"}`}>
-                        {isDeposit ? <ArrowDownLeft size={17} aria-hidden="true" /> : <ArrowUpRight size={17} aria-hidden="true" />}
+        <div className="fin-grid" data-tab={tab}>
+          <div className="fin-main">
+            {tab !== "withdraw" ? (
+              <section>
+                <h2 className="fin-section-title">Choose Payment Method</h2>
+                <ul className="fin-paylist">
+                  <li>
+                    <button
+                      type="button"
+                      className="fin-pay"
+                      onClick={() => setDepositOpen(true)}
+                      disabled={!mpesaReady}
+                    >
+                      <span className="fin-pay-tile tile-mpesa">
+                        <MpesaLogo />
                       </span>
-                      <div className="fin-tx-main">
-                        <strong>{t.type} &middot; {t.method}</strong>
-                        <small>
-                          {formatDate(t.createdAt)}
-                          {t.reference ? ` · ${t.reference}` : ""}
-                        </small>
-                      </div>
-                      <div className="fin-tx-side">
-                        <strong className={isDeposit ? "is-in" : "is-out"}>
-                          {(isDeposit ? "+" : "-") + formatKes(t.amount)}
-                        </strong>
-                        <span className={`fin-status is-${STATUS_TONE[t.status]}`}>{STATUS_LABEL[t.status]}</span>
-                      </div>
+                      <span className="fin-pay-text">
+                        <b>M-Pesa</b>
+                        <small>Instant deposit</small>
+                        <small>KES</small>
+                      </span>
+                      {mpesaReady ? (
+                        <ChevronRight size={18} className="fin-pay-chev" aria-hidden="true" />
+                      ) : (
+                        <span className="neo-badge neo-badge-muted">{overview ? "Setting up" : "…"}</span>
+                      )}
+                    </button>
+                  </li>
+                  {OTHER_METHODS.map((method) => (
+                    <li key={method.name}>
+                      <button type="button" className="fin-pay" disabled>
+                        <span className={`fin-pay-tile ${method.tile}`} aria-hidden="true">
+                          {method.mark || <i />}
+                        </span>
+                        <span className="fin-pay-text">
+                          <b>{method.name}</b>
+                          <small>{method.detail}</small>
+                          <small>{method.currencies}</small>
+                        </span>
+                        <span className="neo-badge neo-badge-gold">Coming soon</span>
+                      </button>
                     </li>
-                  );
-                })}
-              </ul>
-            )}
-          </section>
-
-          <div className="fin-side">
-            <section className="fin-card fin-mpesa-card">
-              <div className="fin-mpesa-top">
-                <span className="fin-mpesa-badge is-large"><MpesaLogo /></span>
-                <span className={`fin-status ${mpesaReady ? "is-success" : "is-muted"}`}>
-                  {mpesaReady ? "Instant" : "Unavailable"}
-                </span>
-              </div>
-              <h2>Deposit with M-Pesa</h2>
-              <p className="fin-card-sub">
-                Get a payment prompt on your phone and confirm with your M-Pesa PIN. Funds arrive instantly.
-              </p>
-              <button
-                type="button"
-                className="fin-btn fin-btn-green fin-btn-block"
-                onClick={() => setDepositOpen(true)}
-                disabled={!mpesaReady}
-              >
-                <Plus size={17} aria-hidden="true" />
-                Deposit now
-              </button>
-              {!mpesaReady && overview && (
+                  ))}
+                </ul>
                 <p className="fin-note">
-                  <CircleAlert size={14} aria-hidden="true" />
-                  M-Pesa deposits are being set up and will be available soon.
+                  <ShieldCheck size={15} aria-hidden="true" />
+                  M-Pesa sends a prompt to your phone. Enter your PIN to confirm; NeuroOption never asks for your PIN.
                 </p>
-              )}
-            </section>
-
-            <section className="fin-card" ref={withdrawRef}>
-              <div className="fin-card-head">
-                <h2>Request a withdrawal</h2>
-              </div>
-              <p className="fin-card-sub">Withdrawals are reviewed and paid to your M-Pesa, typically within 24-48 hours.</p>
+              </section>
+            ) : (
+              <section className="fin-card is-plain">
+                <div className="fin-card-head">
+                  <h2>Withdraw to M-Pesa</h2>
+                </div>
+                <p className="fin-card-sub">Withdrawals are reviewed and paid to your M-Pesa, typically within 24-48 hours.</p>
 
               <form className="fin-form" onSubmit={handleWithdraw}>
                 <label htmlFor="withdraw-phone">M-Pesa phone number</label>
@@ -413,37 +302,68 @@ export default function FinancePage() {
                 <ShieldCheck size={15} aria-hidden="true" />
                 Withdrawals are paid only to verified (KYC) account holders.
               </p>
-            </section>
-
-            <section className="fin-card">
-              <div className="fin-card-head">
-                <h2>Other payment methods</h2>
-              </div>
-              <ul className="fin-methods">
-                {OTHER_METHODS.map(({ name, description, icon: Icon }) => (
-                  <li key={name}>
-                    <span className="fin-method-icon"><Icon size={18} aria-hidden="true" /></span>
-                    <div>
-                      <strong>{name}</strong>
-                      <small>{description}</small>
-                    </div>
-                    <span className="fin-soon">Coming soon</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+              </section>
+            )}
           </div>
-        </div>
-      </div>
 
-      {depositOpen && mpesa && (
-        <MpesaDepositDialog
-          minAmount={mpesa.minAmount}
-          maxAmount={mpesa.maxAmount}
-          onClose={() => setDepositOpen(false)}
-          onFinished={loadOverview}
-        />
-      )}
-    </main>
+            <section className="fin-card fin-transactions fin-history">
+              <div className="fin-card-head">
+                <h2>Recent transactions</h2>
+                <button type="button" className="fin-link-btn" onClick={() => void loadOverview()}>
+                  <RefreshCcw size={13} aria-hidden="true" /> Refresh
+                </button>
+              </div>
+
+              {loading && !overview ? (
+                <div className="fin-empty">
+                  <LoaderCircle size={26} className="fin-spin" aria-hidden="true" />
+                  <span>Loading your transactions…</span>
+                </div>
+              ) : transactions.length === 0 ? (
+                <div className="fin-empty">
+                  <Receipt size={28} aria-hidden="true" />
+                  <strong>No transactions yet</strong>
+                  <span>Your M-Pesa deposits and withdrawals will show up here.</span>
+                </div>
+              ) : (
+                <ul className="fin-tx-list">
+                  {transactions.map((t) => {
+                    const isDeposit = t.type === "Deposit";
+                    return (
+                      <li key={t.id}>
+                        <span className={`fin-tx-icon ${isDeposit ? "is-in" : "is-out"}`}>
+                          {isDeposit ? <ArrowDownLeft size={17} aria-hidden="true" /> : <ArrowUpRight size={17} aria-hidden="true" />}
+                        </span>
+                        <div className="fin-tx-main">
+                          <strong>{t.type} &middot; {t.method}</strong>
+                          <small>
+                            {formatDate(t.createdAt)}
+                            {t.reference ? ` · ${t.reference}` : ""}
+                          </small>
+                        </div>
+                        <div className="fin-tx-side">
+                          <strong className={isDeposit ? "is-in" : "is-out"}>
+                            {(isDeposit ? "+" : "-") + formatKes(t.amount)}
+                          </strong>
+                          <span className={`fin-status is-${STATUS_TONE[t.status]}`}>{STATUS_LABEL[t.status]}</span>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </section>
+        </div>
+
+        {depositOpen && overview && (
+          <MpesaDepositDialog
+            minAmount={overview.mpesa.minAmount}
+            maxAmount={overview.mpesa.maxAmount}
+            onClose={() => setDepositOpen(false)}
+            onFinished={loadOverview}
+          />
+        )}
+      </div>
+    </AppShell>
   );
 }

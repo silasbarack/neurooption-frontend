@@ -1,29 +1,29 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
 import {
-  Bot,
+  Award,
   CandlestickChart,
+  ChartNoAxesColumn,
   CircleHelp,
-  Gem,
-  Gift,
-  MessageCircle,
-  ShoppingBag,
+  ClipboardList,
+  History,
   Trophy,
   UserRound,
+  Users,
   Wallet,
 } from "lucide-react";
 
 const items: Array<[LucideIcon, string, string?]> = [
-  [CandlestickChart, "Trading", "/trading"],
+  [CandlestickChart, "Trade", "/trading"],
+  [ChartNoAxesColumn, "Markets", "/markets"],
   [Wallet, "Finance", "/finance"],
-  [UserRound, "Profile", "/profile"],
-  [ShoppingBag, "Market", "/market"],
-  [Gem, "Achievements", "/achievements"],
+  [ClipboardList, "Open", "/open-trades"],
+  [History, "History", "/history"],
+  [Users, "Social", "/social-trading"],
   [Trophy, "Tournaments", "/tournaments"],
-  [MessageCircle, "Chat", "/chat"],
-  [CircleHelp, "Help", "/help"],
-  [Gift, "Promo"],
-  [Bot, "Autotrading"],
+  [Award, "Achievements", "/achievements"],
+  [UserRound, "Profile", "/profile"],
+  [CircleHelp, "Support", "/help"],
 ];
 
 export default function TradingSidebar() {

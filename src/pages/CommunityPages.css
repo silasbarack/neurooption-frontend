@@ -1,0 +1,367 @@
+/* ---------- Achievements ---------- */
+.ach {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.ach-hero {
+  display: grid;
+  justify-items: center;
+  padding: 26px 22px;
+  text-align: center;
+  background:
+    radial-gradient(260px 180px at 50% 20%, rgba(245, 184, 46, 0.18), transparent 70%),
+    linear-gradient(180deg, var(--neo-panel-2), var(--neo-panel));
+}
+
+.ach-level {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  filter: drop-shadow(0 10px 26px rgba(245, 184, 46, 0.35));
+}
+
+.ach-level svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ach-level b {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-top: 4px;
+  color: #ffd062;
+  font-size: 34px;
+  font-weight: 900;
+}
+
+.ach-hero h1 {
+  margin: 8px 0 2px;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.ach-hero > p {
+  margin: 0 0 16px;
+  color: var(--neo-muted);
+}
+
+.ach-xp {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+}
+
+.ach-xp span,
+.ach-task-bar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ach-xp i,
+.ach-task-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ffd062, #f5b82e);
+}
+
+.ach-xp small {
+  color: var(--neo-muted);
+  font-size: 12px;
+}
+
+.ach-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  width: 100%;
+  margin: 20px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--neo-line);
+}
+
+.ach-stats dt {
+  color: var(--neo-faint);
+  font-size: 11px;
+}
+
+.ach-stats dd {
+  margin: 2px 0 0;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.ach-tabs {
+  margin-bottom: 14px;
+}
+
+.ach-note {
+  color: var(--neo-red);
+  font-size: 13px;
+}
+
+.ach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.ach-badge {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 18px 10px 14px;
+  text-align: center;
+}
+
+.ach-badge b {
+  font-size: 13px;
+}
+
+.ach-badge small {
+  color: var(--neo-muted);
+  font-size: 11px;
+}
+
+.ach-badge.is-unlocked small {
+  color: var(--neo-green);
+  font-weight: 700;
+}
+
+.ach-medal {
+  --c1: #ffe08a;
+  --c2: #c98a0c;
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+
+.ach-medal svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ach-medal-shield {
+  fill: var(--c2);
+}
+
+.ach-medal-inner {
+  fill: var(--c1);
+}
+
+.ach-medal b {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-bottom: 4px;
+  color: rgba(0, 0, 0, 0.72);
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.ach-medal.tone-silver { --c1: #eef2f7; --c2: #8b98ab; }
+.ach-medal.tone-bronze { --c1: #ffb27a; --c2: #b4521c; }
+.ach-medal.tone-blue { --c1: #93c5fd; --c2: #1d4ed8; }
+.ach-medal.tone-green { --c1: #86efac; --c2: #15803d; }
+.ach-medal.tone-violet { --c1: #d8b4fe; --c2: #7e22ce; }
+
+.ach-medal.is-locked {
+  --c1: #2a3448;
+  --c2: #1a2233;
+}
+
+.ach-medal.is-locked b {
+  color: var(--neo-faint);
+}
+
+.ach-tasks {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ach-tasks li.neo-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+}
+
+.ach-tasks li div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ach-tasks small {
+  color: var(--neo-muted);
+}
+
+.ach-task-cta {
+  margin-top: 6px;
+}
+
+.ach-rewards {
+  padding: 18px;
+}
+
+.ach-rewards ul {
+  margin: 10px 0;
+  padding-left: 18px;
+  color: var(--neo-muted);
+  line-height: 1.8;
+}
+
+.ach-rewards p {
+  margin: 0;
+  color: var(--neo-muted);
+}
+
+/* ---------- Social trading ---------- */
+.soc-head h1 {
+  margin: 0 0 4px;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.soc-head p {
+  margin: 0 0 18px;
+  color: var(--neo-muted);
+}
+
+.soc-tabs {
+  max-width: 520px;
+  margin-bottom: 12px;
+}
+
+.soc-preview {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 16px;
+  color: var(--neo-faint);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.soc-preview svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.soc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px;
+}
+
+.soc-card {
+  padding: 14px 14px 10px;
+}
+
+.soc-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.soc-rank {
+  color: var(--neo-gold);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.soc-name {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.soc-name b {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+}
+
+.soc-gain {
+  color: var(--neo-green);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.soc-name small,
+.soc-copiers small {
+  color: var(--neo-faint);
+  font-size: 11px;
+}
+
+.soc-copiers {
+  display: grid;
+  justify-items: center;
+}
+
+.soc-copiers b {
+  font-size: 14px;
+}
+
+.soc-spark {
+  width: 100%;
+  height: 38px;
+  margin-top: 10px;
+}
+
+.soc-spark path {
+  fill: none;
+  stroke: var(--neo-green);
+  stroke-width: 1.6;
+  vector-effect: non-scaling-stroke;
+}
+
+.soc-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  color: var(--neo-muted);
+  font-size: 12px;
+}
+
+.soc-meta b {
+  color: var(--neo-text);
+}
+
+.soc-risk.is-low { color: var(--neo-green); }
+.soc-risk.is-medium { color: var(--neo-gold); }
+.soc-risk.is-high { color: var(--neo-red); }
+
+.soc-empty {
+  padding: 28px;
+  color: var(--neo-muted);
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .ach {
+    grid-template-columns: 1fr;
+  }
+
+  .soc-head h1 {
+    display: none;
+  }
+
+  .soc-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ach-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Bell, Maximize, Star } from "lucide-react";
+import { Maximize, Menu, Star } from "lucide-react";
 import type { AccountType, Currency } from "./trading.types";
 import AccountBalanceSelector from "./AccountBalanceSelector";
 import Logo from "../branding/Logo";
+import MenuDrawer from "../shell/MenuDrawer";
 
 type TradingHeaderProps = {
   accountType: AccountType;
@@ -45,6 +46,8 @@ export default function TradingHeader({
 }: TradingHeaderProps) {
   const [initials] = useState(readUserInitials);
   const [clock, setClock] = useState(() => formatUtc(new Date()));
+  const [menuOpen, setMenuOpen] = useState(false);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   useEffect(() => {
     const id = window.setInterval(() => setClock(formatUtc(new Date())), 1000);
@@ -77,10 +80,6 @@ export default function TradingHeader({
           depositPath="/finance"
         />
 
-        <button type="button" className="nt-fullscreen nt-header-icon" aria-label="Notifications">
-          <Bell size={17} aria-hidden="true" />
-        </button>
-
         <button type="button" className="nt-fullscreen" onClick={onFullscreen} aria-label="Full screen">
           <Maximize size={17} aria-hidden="true" />
         </button>
@@ -88,7 +87,13 @@ export default function TradingHeader({
         <Link to="/profile" className="nt-avatar" aria-label="Profile">
           {initials}
         </Link>
+
+        <button type="button" className="nt-fullscreen nt-menu-btn" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+          <Menu size={18} aria-hidden="true" />
+        </button>
       </div>
+
+      <MenuDrawer open={menuOpen} onClose={closeMenu} />
     </header>
   );
 }

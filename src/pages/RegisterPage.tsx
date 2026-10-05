@@ -126,8 +126,8 @@ export default function RegisterPage() {
       privacyLabel={tt("privacy")}
       contactsLabel={tt("contacts")}
     >
-      <div className="lp-hero">
-        <span className="lp-eyebrow">
+      <div className="au-hero">
+        <span className="au-eyebrow">
           <i aria-hidden="true" />
           Open your free account
         </span>
@@ -135,16 +135,16 @@ export default function RegisterPage() {
           Start trading in minutes.
           <span>Practise free, go live when ready.</span>
         </h1>
-        <p className="lp-lead">
+        <p className="au-lead">
           Create your NeuroOption account to unlock live charts, a risk-free
           demo balance and the full trading workspace. We'll send a welcome
           email as soon as you're registered.
         </p>
 
-        <ul className="lp-benefits">
+        <ul className="au-benefits">
           {BENEFITS.map(({ icon: Icon, title, text }) => (
             <li key={title}>
-              <span className="lp-feature-icon"><Icon size={18} aria-hidden="true" /></span>
+              <span className="au-feature-icon"><Icon size={18} aria-hidden="true" /></span>
               <div>
                 <strong>{title}</strong>
                 <small>{text}</small>
@@ -154,24 +154,24 @@ export default function RegisterPage() {
         </ul>
       </div>
 
-      <div className="lp-card">
-        <div className="lp-card-head">
-          <span className="lp-card-icon"><UserPlus size={22} aria-hidden="true" /></span>
+      <div className="au-card">
+        <div className="au-card-head">
+          <span className="au-card-icon"><UserPlus size={22} aria-hidden="true" /></span>
           <h2>{tt("registration")}</h2>
           <p>Create your account. It only takes a minute.</p>
         </div>
 
         {message && (
-          <div className={`lp-alert ${success ? "is-success" : "is-error"}`} role="alert">
+          <div className={`au-alert ${success ? "is-success" : "is-error"}`} role="alert">
             {success ? <CircleCheck size={18} /> : <CircleAlert size={18} />}
             <span>{message}</span>
           </div>
         )}
 
-        <form className="lp-form" onSubmit={handleSubmit}>
-          <div className="lp-field">
+        <form className="au-form" onSubmit={handleSubmit}>
+          <div className="au-field">
             <label htmlFor="fullName">{tt("fullName")}</label>
-            <div className="lp-input">
+            <div className="au-input">
               <User size={18} aria-hidden="true" />
               <input
                 id="fullName"
@@ -185,9 +185,9 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <div className="lp-field">
+          <div className="au-field">
             <label htmlFor="email">{tt("email")}</label>
-            <div className="lp-input">
+            <div className="au-input">
               <Mail size={18} aria-hidden="true" />
               <input
                 id="email"
@@ -201,9 +201,9 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <div className="lp-field">
+          <div className="au-field">
             <label htmlFor="password">{tt("password")}</label>
-            <div className="lp-input">
+            <div className="au-input">
               <Lock size={18} aria-hidden="true" />
               <input
                 id="password"
@@ -217,7 +217,7 @@ export default function RegisterPage() {
                 required
               />
               <button
-                className="lp-eye"
+                className="au-eye"
                 type="button"
                 onClick={() => setShowPassword((current) => !current)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
@@ -226,8 +226,8 @@ export default function RegisterPage() {
               </button>
             </div>
             {password && (
-              <div className={`lp-strength is-${strength.score}`} aria-live="polite">
-                <div className="lp-strength-bars" aria-hidden="true">
+              <div className={`au-strength is-${strength.score}`} aria-live="polite">
+                <div className="au-strength-bars" aria-hidden="true">
                   <i /><i /><i /><i />
                 </div>
                 <span>{strength.label}</span>
@@ -235,9 +235,9 @@ export default function RegisterPage() {
             )}
           </div>
 
-          <div className="lp-field">
+          <div className="au-field">
             <label htmlFor="confirmPassword">Confirm password</label>
-            <div className={`lp-input${mismatch ? " is-invalid" : ""}`}>
+            <div className={`au-input${mismatch ? " is-invalid" : ""}`}>
               <Lock size={18} aria-hidden="true" />
               <input
                 id="confirmPassword"
@@ -250,10 +250,10 @@ export default function RegisterPage() {
                 required
               />
             </div>
-            {mismatch && <p className="lp-field-error">Passwords do not match.</p>}
+            {mismatch && <p className="au-field-error">Passwords do not match.</p>}
           </div>
 
-          <label className="lp-check lp-check-top">
+          <label className="au-check au-check-top">
             <input
               type="checkbox"
               checked={accepted}
@@ -262,15 +262,15 @@ export default function RegisterPage() {
             />
             <span>
               I am 21 or older and agree to the{" "}
-              <a href="#terms" className="lp-link">{tt("terms")}</a> and{" "}
-              <a href="#privacy" className="lp-link">{tt("privacy")}</a>.
+              <a href="#terms" className="au-link">{tt("terms")}</a> and{" "}
+              <a href="#privacy" className="au-link">{tt("privacy")}</a>.
             </span>
           </label>
 
-          <button className="lp-submit" type="submit" disabled={loading}>
+          <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
               <>
-                <LoaderCircle size={18} className="lp-spin" aria-hidden="true" />
+                <LoaderCircle size={18} className="au-spin" aria-hidden="true" />
                 <span>{tt("registering")}</span>
               </>
             ) : (
@@ -282,14 +282,14 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="lp-register">
+        <p className="au-register">
           {tt("alreadyRegistered")}{" "}
-          <Link to="/login" className="lp-link">
+          <Link to="/login" className="au-link">
             {tt("signIn")}
           </Link>
         </p>
 
-        <div className="lp-trust">
+        <div className="au-trust">
           <BadgeCheck size={16} aria-hidden="true" />
           <span>Free to join. Trading involves risk; start on the demo account.</span>
         </div>

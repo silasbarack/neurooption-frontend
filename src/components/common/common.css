@@ -3,16 +3,16 @@
    so any page works correctly even when it's the first page loaded. */
 
 .np-page {
-  --np-bg: #0d0f1a;
-  --np-surface: #131726;
-  --np-surface-alt: #1a1f33;
-  --np-surface-raised: #1d2238;
-  --np-border: rgba(255, 255, 255, 0.08);
+  --np-bg: var(--neo-bg, #060b16);
+  --np-surface: var(--neo-panel, #0d1628);
+  --np-surface-alt: var(--neo-panel-2, #111c31);
+  --np-surface-raised: var(--neo-panel-3, #16233c);
+  --np-border: var(--neo-line, rgba(148, 170, 205, 0.13));
   --np-text: #ffffff;
-  --np-text-muted: #93a0b8;
+  --np-text-muted: var(--neo-muted, #8d99b0);
   --np-text-faint: #5f6b85;
-  --np-accent: #009af9;
-  --np-accent-soft: rgba(0, 154, 249, 0.16);
+  --np-accent: var(--neo-gold, #f5b82e);
+  --np-accent-soft: rgba(245, 184, 46, 0.14);
   --np-success: #16c784;
   --np-success-soft: rgba(22, 199, 132, 0.14);
   --np-danger: #f6465d;
@@ -111,8 +111,9 @@
 
 .np-btn-primary {
   border: 0;
-  background: linear-gradient(135deg, #00b4ff, #0a6fd6);
-  box-shadow: 0 8px 20px rgba(0, 154, 249, 0.32);
+  background: linear-gradient(180deg, #ffd062, #f5b82e);
+  box-shadow: 0 8px 20px rgba(245, 184, 46, 0.25);
+  color: #1a1200;
 }
 
 .np-btn-success {
@@ -587,7 +588,7 @@
   padding: 0 5px;
   border-radius: 999px;
   background: var(--np-accent);
-  color: #ffffff;
+  color: #1a1200;
   font-size: 11px;
   font-weight: 800;
   display: grid;
@@ -641,8 +642,8 @@
 }
 
 .np-chat-bubble.user {
-  background: linear-gradient(135deg, #00b4ff, #0a6fd6);
-  color: #ffffff;
+  background: linear-gradient(180deg, #ffd062, #f5b82e);
+  color: #1a1200;
   border-bottom-right-radius: 4px;
 }
 
