@@ -2,8 +2,8 @@
    Layers over LandingPage.css so existing chart/device logic remains intact. */
 
 .hp {
-  --hp-blue: #f5b82e;
-  --hp-blue-2: #ffd468;
+  --hp-blue: #2f6bff;
+  --hp-blue-2: #5b8cff;
   --hp-dark: #03070d;
   --hp-dark-2: #07101a;
   --hp-light: #f6f0e4;
@@ -24,35 +24,35 @@
 .hp-nav-item:hover button,
 .hp-nav-item:focus-within button {
   color: #fff7e6;
-  background: rgba(245, 184, 46, 0.08);
+  background: rgba(47, 107, 255, 0.08);
 }
 .hp-nav-menu {
-  border-color: rgba(245, 184, 46, 0.2);
+  border-color: rgba(47, 107, 255, 0.2);
   background: #0a1119;
 }
 .hp-nav-menu a:hover,
 .hp-nav-menu a:focus-visible {
-  background: rgba(245, 184, 46, 0.1);
-  color: #ffd468;
+  background: rgba(47, 107, 255, 0.1);
+  color: #5b8cff;
 }
 .hp-lang { color: #c8c3b8; }
 
 .hp-btn-primary {
-  border-color: #f7c44a;
-  background: linear-gradient(180deg, #ffd76a, #f2b52a);
-  box-shadow: 0 10px 28px rgba(245, 184, 46, 0.22);
-  color: #171105;
+  border-color: #5b8cff;
+  background: linear-gradient(180deg, #4a84ff, #2454e6);
+  box-shadow: 0 10px 28px rgba(47, 107, 255, 0.3);
+  color: #ffffff;
 }
 .hp-btn-primary:hover {
-  background: linear-gradient(180deg, #ffe290, #f6c247);
-  box-shadow: 0 12px 34px rgba(245, 184, 46, 0.3);
+  background: linear-gradient(180deg, #5b92ff, #2f6bff);
+  box-shadow: 0 12px 34px rgba(47, 107, 255, 0.4);
 }
 .hp-btn-ghost {
   border-color: rgba(255, 255, 255, 0.22);
   background: rgba(3, 8, 14, 0.44);
 }
 .hp-btn-outline {
-  border-color: rgba(179, 130, 20, 0.46);
+  border-color: rgba(47, 107, 255, 0.46);
   background: #fffdf8;
   color: #7d5700;
 }
@@ -62,15 +62,15 @@
 .hp-market-card:focus-visible,
 .hp-category-card:focus-visible,
 .hp-ticker-item:focus-visible {
-  outline-color: rgba(245, 184, 46, 0.7);
+  outline-color: rgba(47, 107, 255, 0.7);
 }
 
 .hp-eyebrow,
-.hp-light .hp-eyebrow { color: #e7b941; }
+.hp-light .hp-eyebrow { color: #7ea7ff; }
 
 .hp-hero {
   background:
-    radial-gradient(760px 430px at 77% 42%, rgba(245, 184, 46, 0.14), transparent 68%),
+    radial-gradient(760px 430px at 77% 42%, rgba(47, 107, 255, 0.14), transparent 68%),
     linear-gradient(90deg, rgba(3, 7, 13, 0.98) 0%, rgba(4, 9, 15, 0.89) 43%, rgba(4, 9, 15, 0.58) 70%, rgba(4, 9, 15, 0.83) 100%),
     linear-gradient(180deg, rgba(4, 8, 14, 0.35), rgba(4, 8, 14, 0.82)),
     url("/landing/hero-mountains.jpg") center 58% / cover no-repeat,
@@ -91,13 +91,13 @@
 .hp-hero h1 span {
   margin-top: 6px;
   background: none;
-  color: #f3c44e;
+  color: #7ea7ff;
   -webkit-text-fill-color: currentColor;
 }
 .hp-lead { max-width: 515px; color: #c4c6c8; }
 .hp-hero-points { gap: 12px 24px; color: #ddd9cf; }
-.hp-hero-points svg { color: #efc34f; }
-.hp-glow { background: radial-gradient(circle, rgba(245, 184, 46, 0.18), transparent 66%); }
+.hp-hero-points svg { color: #7ea7ff; }
+.hp-glow { background: radial-gradient(circle, rgba(47, 107, 255, 0.18), transparent 66%); }
 
 .hp-lid {
   border-color: rgba(244, 214, 145, 0.36);
@@ -113,17 +113,17 @@
 .hp-app-field { background: #111c28; }
 .hp-app-tabs i.is-on,
 .hp-app-balance small,
-.hp-app-rail .is-on { color: #f1c553; }
+.hp-app-rail .is-on { color: #7ea7ff; }
 .hp-app-deposit,
 .hp-app-timer,
 .hp-phone-timer {
-  background: #eab83a;
+  background: #7ea7ff;
   color: #151006;
 }
-.hp-candle-last { stroke: #e5b84b; }
+.hp-candle-last { stroke: #7ea7ff; }
 .hp-float {
   border-color: rgba(244, 214, 145, 0.36);
-  background: linear-gradient(150deg, rgba(245, 184, 46, 0.17), rgba(10, 18, 26, 0.75));
+  background: linear-gradient(150deg, rgba(47, 107, 255, 0.17), rgba(10, 18, 26, 0.75));
 }
 
 .hp-hero-phone {
@@ -189,7 +189,7 @@
   right: 4px;
   padding: 2px 4px;
   border-radius: 4px;
-  background: #eab83a;
+  background: #7ea7ff;
   color: #151006;
   font-size: 6px;
   font-weight: 800;
@@ -215,7 +215,7 @@
 .hp-hero-phone-profit b { font-size: 7px; }
 .hp-hero-phone-profit span { display: grid; justify-items: center; }
 .hp-hero-phone-profit span:first-child b { color: #20c969; }
-.hp-hero-phone-profit span:last-child b { color: #f0c64e; }
+.hp-hero-phone-profit span:last-child b { color: #7ea7ff; }
 .hp-hero-phone-actions span {
   padding: 7px 0;
   border-radius: 6px;
@@ -228,7 +228,7 @@
 
 .hp-ticker {
   border-top: 1px solid rgba(255,255,255,.06);
-  border-bottom: 1px solid rgba(245,184,46,.15);
+  border-bottom: 1px solid rgba(47, 107, 255,.15);
   background: #060c13;
 }
 .hp-ticker-track {
@@ -290,9 +290,9 @@
 .hp-stats-grid span { color: #62666c; font-size: 10px; }
 
 .hp-global-markets {
-  border-top: 1px solid rgba(245,184,46,.13);
+  border-top: 1px solid rgba(47, 107, 255,.13);
   background:
-    radial-gradient(650px 260px at 25% 20%, rgba(245,184,46,.08), transparent 68%),
+    radial-gradient(650px 260px at 25% 20%, rgba(47, 107, 255,.08), transparent 68%),
     #050b12;
 }
 .hp-global-head {
@@ -316,8 +316,8 @@
   gap: 12px;
 }
 .hp-category-card {
-  --cat-accent: #f5b82e;
-  --cat-glow: rgba(245,184,46,.35);
+  --cat-accent: #2f6bff;
+  --cat-glow: rgba(47, 107, 255,.35);
   position: relative;
   display: grid;
   align-content: end;
@@ -357,8 +357,8 @@
   box-shadow: 0 18px 42px rgba(0,0,0,.3);
 }
 .hp-category-card.is-forex { --cat-accent: #4fa2ff; --cat-glow: rgba(38,120,255,.35); }
-.hp-category-card.is-crypto { --cat-accent: #f6a92d; --cat-glow: rgba(246,169,45,.35); }
-.hp-category-card.is-commodities { --cat-accent: #f1c64c; --cat-glow: rgba(241,198,76,.34); }
+.hp-category-card.is-crypto { --cat-accent: #5b8cff; --cat-glow: rgba(91, 140, 255,.35); }
+.hp-category-card.is-commodities { --cat-accent: #7ea7ff; --cat-glow: rgba(126, 167, 255,.34); }
 .hp-category-card.is-stocks { --cat-accent: #e7e9ee; --cat-glow: rgba(182,191,212,.23); }
 .hp-category-card.is-indices { --cat-accent: #9b83ff; --cat-glow: rgba(126,90,255,.3); }
 .hp-category-card.is-otc { --cat-accent: #43d6e6; --cat-glow: rgba(67,214,230,.3); }
@@ -394,7 +394,7 @@
   color: #7f8994;
   font-size: 11px;
 }
-.hp-markets-note svg { color: #d8ab3b; }
+.hp-markets-note svg { color: #5b8cff; }
 
 .hp-light { background: linear-gradient(180deg, #f7f2e8, #efe7d8); }
 .hp-dark { background: linear-gradient(180deg, #050b12, #07111a); }
@@ -403,48 +403,48 @@
   background: linear-gradient(155deg, #fffdf8, #eee4d2);
 }
 .hp-exp-card.is-dark {
-  border-color: rgba(245,184,46,.22);
+  border-color: rgba(47, 107, 255,.22);
   background:
-    radial-gradient(120% 90% at 100% 100%, rgba(245,184,46,.22), transparent 60%),
+    radial-gradient(120% 90% at 100% 100%, rgba(47, 107, 255,.22), transparent 60%),
     linear-gradient(160deg, #111922, #050a10);
 }
 .hp-exp-icon,
 .hp-exp-card.is-dark .hp-exp-icon,
-.hp-why-icon { color: #b77f08; }
+.hp-why-icon { color: #2f6bff; }
 .hp-market-card {
-  border-color: rgba(245,184,46,.12);
+  border-color: rgba(47, 107, 255,.12);
   background: linear-gradient(180deg, #101923, #080f16);
 }
-.hp-market-card:hover { border-color: rgba(245,184,46,.46); }
+.hp-market-card:hover { border-color: rgba(47, 107, 255,.46); }
 .hp-community {
   background:
-    radial-gradient(600px 300px at 20% 50%, rgba(245,184,46,.14), transparent 70%),
+    radial-gradient(600px 300px at 20% 50%, rgba(47, 107, 255,.14), transparent 70%),
     linear-gradient(180deg, #03070d, #071019);
 }
 .hp-community li span {
-  border-color: rgba(245,184,46,.48);
-  color: #e6b83f;
+  border-color: rgba(47, 107, 255,.48);
+  color: #7ea7ff;
 }
 .hp-phone-chips i.is-on {
-  background: rgba(245,184,46,.16);
-  color: #e4b944;
-  box-shadow: inset 0 0 0 1px rgba(245,184,46,.42);
+  background: rgba(47, 107, 255,.16);
+  color: #7ea7ff;
+  box-shadow: inset 0 0 0 1px rgba(47, 107, 255,.42);
 }
-.hp-tabbar span.is-on { color: #e5ba47; }
+.hp-tabbar span.is-on { color: #7ea7ff; }
 .hp-swoosh {
-  background: radial-gradient(closest-side, rgba(245,184,46,.28), rgba(245,184,46,.08) 60%, transparent);
+  background: radial-gradient(closest-side, rgba(47, 107, 255,.28), rgba(47, 107, 255,.08) 60%, transparent);
 }
 .hp-footer {
-  border-top-color: rgba(245,184,46,.12);
+  border-top-color: rgba(47, 107, 255,.12);
   background: #03070d;
 }
 .hp-news-field button {
-  background: #e9b63a;
-  color: #171105;
+  background: #7ea7ff;
+  color: #ffffff;
 }
 .hp-footer-bottom a,
 .hp-footer-news small,
-.hp-text-link { color: #d8ad41 !important; }
+.hp-text-link { color: #5b8cff !important; }
 
 @media (max-width: 900px) {
   .hp-ticker-track {
@@ -512,7 +512,7 @@
     justify-items: center;
     gap: 5px;
     padding: 11px 6px;
-    border: 1px solid rgba(245,184,46,.16);
+    border: 1px solid rgba(47, 107, 255,.16);
     border-radius: 10px;
     background: rgba(6,12,19,.52);
     font-size: 9px;

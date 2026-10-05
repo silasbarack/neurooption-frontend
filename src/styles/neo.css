@@ -331,7 +331,7 @@ textarea {
 .neo-brand .neurooption-logo {
   display: block;
   width: auto;
-  height: 26px;
+  height: 32px;
 }
 
 .neo-brand-sm {
@@ -339,11 +339,11 @@ textarea {
 }
 
 .neo-brand-sm .neurooption-logo {
-  height: 21px;
+  height: 26px;
 }
 
 .neo-brand-lg .neurooption-logo {
-  height: 32px;
+  height: 40px;
 }
 
 .neo-sr-only {

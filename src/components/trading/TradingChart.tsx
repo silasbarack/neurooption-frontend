@@ -1381,7 +1381,8 @@ function TradingChartComponent({
     const height = rect.height;
 
     context.clearRect(0, 0, width, height);
-    context.fillStyle = "#11151f";
+    // Translucent, so the chart wallpaper set in CSS shows faintly behind.
+    context.fillStyle = "rgba(9, 16, 30, 0.84)";
     context.fillRect(0, 0, width, height);
 
     if (candles.length < 2) {
@@ -1580,6 +1581,9 @@ function TradingChartComponent({
     for (let i = 0; i <= 6; i += 1) {
       const price = max - ((max - min) / 6) * i;
       const y = top + (chartHeight / 6) * i;
+
+      // Skip a tick that would collide with the current-price pill.
+      if (Math.abs(y - latestY) < 18) continue;
 
       context.fillText(price.toFixed(asset.precision), width - 10, y);
     }
