@@ -9,10 +9,11 @@ import "./MarketsPage.css";
 
 const TABS = [
   { key: "All", label: "All" },
-  { key: "Favorites", label: "Favorites" },
   { key: "Currencies", label: "Forex" },
   { key: "Cryptocurrencies", label: "Crypto" },
   { key: "Stocks", label: "Stocks" },
+  { key: "OTC", label: "OTC" },
+  { key: "Favorites", label: "Favorites" },
   { key: "Indices", label: "Indices" },
   { key: "Commodities", label: "Commodities" },
 ];
@@ -52,6 +53,7 @@ export default function MarketsPage() {
     return quotes
       .filter((quote) => {
         if (tab === "Favorites") return favorites.includes(quote.symbol);
+        if (tab === "OTC") return quote.symbol.endsWith(" OTC");
         return tab === "All" || quote.category === tab;
       })
       .filter(
