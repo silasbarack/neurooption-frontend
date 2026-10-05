@@ -1430,7 +1430,8 @@ function TradingChartComponent({
     const left = 18;
     const rightSpace = 84;
     const right = width - rightSpace;
-    const top = 64;
+    // Desktop overlays the toolbar on the chart; phones place it above.
+    const top = width < 560 ? 26 : 64;
     const footer = 26;
     const availableHeight = Math.max(height - top - footer, 160);
     const singlePanelHeight = clamp(availableHeight * 0.125, 84, 108);

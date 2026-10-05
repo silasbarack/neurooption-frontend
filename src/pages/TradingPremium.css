@@ -761,10 +761,406 @@
 }
 
 .nt-premium .nt-tool-btn svg {
+  flex: 0 0 auto;
   color: var(--nt-text-muted);
 }
 
 .nt-premium .nt-floating-close {
   display: inline-grid;
   place-items: center;
+}
+
+/* Payout chips inside BUY / SELL are only shown in the phone layout. */
+.nt-premium .nt-btn-payout {
+  display: none;
+}
+
+/* "More" sheet opened from the phone bottom bar */
+.nt-more-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(3, 6, 12, 0.6);
+  backdrop-filter: blur(3px);
+  animation: nt-fade 0.18s ease;
+}
+
+.nt-more-panel {
+  width: 100%;
+  padding: 16px 16px calc(84px + env(safe-area-inset-bottom));
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px 20px 0 0;
+  background: #121926;
+  animation: nt-rise 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.nt-more-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  color: #fff;
+  font-size: 16px;
+}
+
+.nt-more-head button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #c9d4e2;
+}
+
+.nt-more-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.nt-more-grid button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 4px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #c9d4e2;
+}
+
+.nt-more-grid small {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
+@keyframes nt-fade { from { opacity: 0; } }
+@keyframes nt-rise { from { transform: translateY(24px); opacity: 0.6; } }
+
+/* ---------- Phone layout (evenly spaced, no page scrolling) ---------- */
+@media (max-width: 768px) {
+  .nt-premium {
+    --nt-header-height: 58px;
+    --nt-nav-height: 64px;
+  }
+
+  /* Header: avatar | balance | deposit */
+  .nt-premium .nt-header {
+    height: var(--nt-header-height);
+    padding: 8px 12px;
+  }
+
+  .nt-premium .nt-brand {
+    display: none;
+  }
+
+  .nt-premium .nt-account-bar {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .nt-premium .nt-avatar {
+    order: -1;
+    width: 40px;
+    height: 40px;
+    margin-inline-end: auto;
+    font-size: 13px;
+  }
+
+  .nt-premium .nt-header-icon,
+  .nt-premium .nt-fullscreen {
+    display: none;
+  }
+
+  .nt-premium .account-balance-selector {
+    flex: 0 1 auto;
+    padding: 0;
+    gap: 10px;
+    border: 0;
+    background: none;
+  }
+
+  .nt-premium .balance-info {
+    padding: 4px 12px;
+    border: 1px solid var(--nt-border);
+    border-radius: 11px;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .nt-premium .balance-amount {
+    font-size: 17px;
+  }
+
+  .nt-premium .deposit-shortcut-btn {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 11px;
+  }
+
+  /* Body: full-width chart above a compact trade card */
+  .nt-premium .nt-page-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 6px 8px calc(var(--nt-nav-height) + 8px + env(safe-area-inset-bottom));
+    overflow: hidden;
+    align-items: stretch;
+  }
+
+  .nt-premium .nt-sidebar,
+  .nt-premium .nt-quick-menu {
+    display: none;
+  }
+
+  .nt-premium .nt-main-chart {
+    grid-column: 1;
+    grid-row: 1;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    height: auto;
+    min-height: 0;
+    border-radius: 14px;
+  }
+
+  .nt-premium .nt-page-asset {
+    position: static;
+    grid-column: 1;
+    grid-row: 1;
+    padding: 8px 0 6px 8px;
+  }
+
+  .nt-premium .nt-asset-trigger {
+    height: 38px;
+    max-width: 46vw;
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
+  .nt-premium .nt-toolbar-left {
+    position: static;
+    grid-column: 2;
+    grid-row: 1;
+    width: auto;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 6px;
+    padding: 8px 8px 6px 6px;
+  }
+
+  .nt-premium .nt-tool-btn {
+    height: 38px;
+    min-width: 38px;
+    padding: 0 9px;
+    font-size: 12px;
+    transform: none;
+  }
+
+  /* Icon-only Indicators / drawing buttons to keep one tidy row */
+  .nt-premium .nt-toolbar-left > .nt-tool-btn:not(.compact) {
+    width: 38px;
+    padding: 0;
+    font-size: 0;
+  }
+
+  .nt-premium .nt-toolbar-left > .nt-tool-btn:not(.compact) svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .nt-premium .nt-tool-btn::after,
+  .nt-premium .nt-tool-btn.compact::after {
+    content: none;
+  }
+
+  .nt-premium .nt-tool-btn.compact.active {
+    border-color: rgba(47, 134, 255, 0.5);
+    background: rgba(47, 134, 255, 0.18);
+    color: #fff;
+  }
+
+  .nt-premium .nt-chart-types {
+    position: absolute;
+    z-index: 25;
+    top: 52px;
+    right: 8px;
+    display: none;
+    width: auto;
+    flex-wrap: nowrap;
+    padding: 4px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  .nt-premium .nt-chart-types.is-open {
+    display: flex;
+  }
+
+  .nt-premium .nt-chart-types button {
+    flex: 0 0 auto;
+    min-width: 0;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .nt-premium .nt-chart-canvas-wrap {
+    position: relative;
+    inset: auto;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-height: 0;
+  }
+
+  .nt-premium .nt-indicator-stack {
+    top: 54px;
+    left: 10px;
+  }
+
+  /* Trade card: sentiment / time + amount / buy + sell */
+  .nt-premium .nt-trade-panel {
+    grid-column: 1;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "sent sent"
+      "time amount"
+      "buy sell";
+    gap: 10px;
+    margin: 0;
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .nt-premium .nt-panel-ticker,
+  .nt-premium .nt-white-payout,
+  .nt-premium .nt-ai,
+  .nt-premium .nt-white-return,
+  .nt-premium .nt-open-trades,
+  .nt-premium .nt-white-expiry,
+  .nt-premium .nt-field-amount > small {
+    display: none;
+  }
+
+  .nt-premium .nt-field-time { grid-area: time; }
+  .nt-premium .nt-field-amount { grid-area: amount; }
+  .nt-premium .nt-buy { grid-area: buy; }
+  .nt-premium .nt-sell { grid-area: sell; }
+
+  .nt-premium .nt-white-field h3 {
+    margin-bottom: 6px;
+    font-size: 10px;
+  }
+
+  .nt-premium .nt-white-input {
+    height: 44px;
+    padding: 0 4px 0 10px;
+  }
+
+  .nt-premium .nt-white-input strong,
+  .nt-premium .nt-white-input input {
+    min-width: 0;
+    font-size: 15px;
+  }
+
+  .nt-premium .nt-white-input button {
+    width: 26px;
+    height: 32px;
+  }
+
+  .nt-premium .nt-buy,
+  .nt-premium .nt-sell {
+    flex-direction: column;
+    justify-content: center;
+    gap: 1px;
+    min-height: 58px;
+    padding: 0 8px;
+    font-size: 16px;
+    line-height: 1.1;
+  }
+
+  .nt-premium .nt-buy svg,
+  .nt-premium .nt-sell svg {
+    display: none;
+  }
+
+  .nt-premium .nt-btn-payout {
+    display: block;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 800;
+    opacity: 0.92;
+  }
+
+  .nt-premium .nt-white-sentiment {
+    grid-area: sent;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nt-premium .nt-white-sentiment > div:first-child span {
+    display: none;
+  }
+
+  .nt-premium .nt-white-sentiment > div:first-child small {
+    color: var(--nt-buy);
+    font-weight: 800;
+  }
+
+  .nt-premium .nt-white-sentiment > small {
+    color: var(--nt-sell);
+    font-weight: 800;
+  }
+
+  /* Bottom bar: 5 evenly spaced items, highlighted centre */
+  .nt-premium .nt-bottom-nav {
+    height: calc(var(--nt-nav-height) + env(safe-area-inset-bottom));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px env(safe-area-inset-bottom);
+  }
+
+  .nt-premium .nt-bottom-nav button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 52px;
+    border-radius: 14px;
+  }
+
+  .nt-premium .nt-bottom-nav small {
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .nt-premium .nt-bottom-nav button.active {
+    color: #fff;
+  }
+
+  .nt-premium .nt-bottom-nav button.is-center {
+    border: 1px solid rgba(47, 134, 255, 0.55);
+    background:
+      radial-gradient(120% 90% at 50% 0%, rgba(47, 134, 255, 0.35), rgba(47, 134, 255, 0.08));
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(47, 134, 255, 0.25);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nt-more-sheet,
+  .nt-more-panel {
+    animation: none;
+  }
 }

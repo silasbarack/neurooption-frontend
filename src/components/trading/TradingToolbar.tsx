@@ -164,6 +164,9 @@ export default function TradingToolbar({
     closeEditor();
   }
 
+  // On phones the chart-type buttons live behind the "more" button.
+  const [moreOpen, setMoreOpen] = React.useState(false);
+
   return (
     <>
       <div className="nt-toolbar-left">
@@ -205,19 +208,28 @@ export default function TradingToolbar({
           <PenLine size={15} aria-hidden="true" /> {selectedTool}
         </button>
 
-        <button type="button" className="nt-tool-btn compact" aria-label="More tools">
+        <button
+          type="button"
+          className={`nt-tool-btn compact${moreOpen ? " active" : ""}`}
+          aria-label="More tools"
+          aria-expanded={moreOpen}
+          onClick={() => setMoreOpen((current) => !current)}
+        >
           <Ellipsis size={17} aria-hidden="true" />
         </button>
       </div>
 
-      <div className="nt-chart-types">
+      <div className={`nt-chart-types${moreOpen ? " is-open" : ""}`}>
         {(["Candlesticks", "Heiken Ashi", "Bars", "Line"] as ChartType[]).map(
           (item) => (
             <button
               key={item}
               type="button"
               className={item === chartType ? "active" : ""}
-              onClick={() => onChartTypeChange(item)}
+              onClick={() => {
+                onChartTypeChange(item);
+                setMoreOpen(false);
+              }}
             >
               {item}
             </button>

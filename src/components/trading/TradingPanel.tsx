@@ -74,7 +74,7 @@ export default function TradingPanel({
         </section>
       )}
 
-      <section className="nt-white-field">
+      <section className="nt-white-field nt-field-time">
         <h3><Clock size={14} aria-hidden="true" /> Expiration</h3>
 
         <div className="nt-white-input">
@@ -96,7 +96,7 @@ export default function TradingPanel({
         </div>
       </section>
 
-      <section className="nt-white-field">
+      <section className="nt-white-field nt-field-amount">
         <h3><Coins size={14} aria-hidden="true" /> Amount</h3>
 
         <label className="nt-white-input">
@@ -136,6 +136,7 @@ export default function TradingPanel({
         onClick={() => onTrade("BUY")}
       >
         <span>Buy</span>
+        <em className="nt-btn-payout">{payout}%</em>
         <ArrowUpRight size={20} aria-hidden="true" />
       </button>
 
@@ -151,6 +152,7 @@ export default function TradingPanel({
         onClick={() => onTrade("SELL")}
       >
         <span>Sell</span>
+        <em className="nt-btn-payout">{payout}%</em>
         <ArrowDownRight size={20} aria-hidden="true" />
       </button>
 
