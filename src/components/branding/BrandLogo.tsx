@@ -7,7 +7,7 @@ type BrandLogoProps = {
   className?: string;
 };
 
-/** The approved NeuroOption logo on its light plate, linking home. */
+/** The approved NeuroOption logo with text, linking home. */
 export default function BrandLogo({ to = "/", size = "md", className = "" }: BrandLogoProps) {
   const classes = ["neo-brand", size !== "md" ? `neo-brand-${size}` : "", className]
     .filter(Boolean)
@@ -16,6 +16,7 @@ export default function BrandLogo({ to = "/", size = "md", className = "" }: Bra
   return (
     <Link to={to} className={classes} aria-label="NeuroOption home">
       <Logo />
+      <span className="neo-brand-text">NeuroOption</span>
     </Link>
   );
 }

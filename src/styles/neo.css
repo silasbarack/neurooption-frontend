@@ -310,7 +310,7 @@ textarea {
   }
 }
 
-/* The approved logo: navy mark + gold text on dark background. */
+/* The approved logo: navy mark + gold text. */
 .neo-brand {
   display: inline-flex;
   align-items: center;
@@ -330,8 +330,7 @@ textarea {
   filter: brightness(1.2) contrast(1.15);
 }
 
-.neo-brand::after {
-  content: "NeuroOption";
+.neo-brand-text {
   font-size: 13px;
   font-weight: 900;
   letter-spacing: -0.02em;
