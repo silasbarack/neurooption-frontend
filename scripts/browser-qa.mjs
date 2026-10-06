@@ -124,6 +124,17 @@ async function makeContext(options) {
     return route.abort('blockedbyclient');
   });
   const page = await context.newPage();
+  if (process.env.QA_SCENARIO_FILTER) await page.addInitScript(() => {
+    window.__qaFocusEvents=[];
+    const original=HTMLElement.prototype.focus;
+    HTMLElement.prototype.focus=function(options){
+      const entry={label:this.getAttribute('aria-label'),visibility:getComputedStyle(this).visibility,inertAncestor:this.closest('[inert]')?.className,connected:this.isConnected};
+      original.call(this,options);
+      entry.accepted=document.activeElement===this;
+      window.__qaFocusEvents.push(entry);
+      window.__qaFocusEvents=window.__qaFocusEvents.slice(-40);
+    };
+  });
   page.setDefaultTimeout(8000);
   page.on('pageerror',error => telemetry.pageErrors.push(error.message));
   page.on('console',message => {if (message.type() === 'error') telemetry.consoleErrors.push(message.text());});
@@ -138,6 +149,7 @@ async function settle(page) {
 }
 
 async function scenario(name,options,test) {
+  if (process.env.QA_SCENARIO_FILTER && !new RegExp(process.env.QA_SCENARIO_FILTER).test(name)) return;
   const started = Date.now();
   const slug = name.replace(/[^a-z0-9_-]+/gi,'-').toLowerCase();
   const {context,page,telemetry} = await makeContext(options);
@@ -148,7 +160,7 @@ async function scenario(name,options,test) {
     await test(page,telemetry);
     assert.deepEqual(telemetry.mutations,[],'No browser test may submit a backend mutation');
     assert.deepEqual(telemetry.unexpectedRequests,[],'Every backend read must use an explicit isolated fixture');
-  } catch (error) { failure = error.stack || String(error); }
+  } catch (error) { failure = error.stack || String(error); if (name.startsWith('drawer-')) console.log('QA_FOCUS_DIAGNOSTIC '+JSON.stringify(await page.evaluate(()=>({events:window.__qaFocusEvents,active:document.activeElement?.outerHTML.slice(0,300),children:[...document.body.children].map(el=>({class:el.className,inert:el.inert}))})))); }
   try {
     await page.screenshot({path:path.join(artifactDir,slug+'.png'),fullPage:true,animations:'disabled',timeout:12000});
     if (['responsive-home-1440','responsive-home-390','responsive-trading-390','responsive-markets-390','responsive-profile-390','responsive-finance-390','responsive-social-trading-390','responsive-achievements-390'].includes(name)) {
@@ -208,14 +220,15 @@ async function goldTheme(page) {
 async function chartDimensions(page) {
   const canvas = page.locator('.nt-chart-canvas');
   await canvas.waitFor({state:'visible'});
-  await page.waitForFunction(() => {
+  const snapshot=await page.waitForFunction(() => {
     const canvas=document.querySelector('.nt-chart-canvas');
-    return canvas && canvas.width>0 && canvas.height>0;
+    if (!canvas || !canvas.width || !canvas.height) return false;
+    const rect=canvas.getBoundingClientRect();
+    const dpr=Math.min(devicePixelRatio,2);
+    const dimensions={cssWidth:rect.width,cssHeight:rect.height,pixelWidth:canvas.width,pixelHeight:canvas.height,dpr};
+    return Math.abs(canvas.width-rect.width*dpr)<=2 && Math.abs(canvas.height-rect.height*dpr)<=2 ? dimensions : false;
   });
-  const dimensions = await canvas.evaluate(element => {
-    const rect = element.getBoundingClientRect();
-    return {cssWidth:rect.width,cssHeight:rect.height,pixelWidth:element.width,pixelHeight:element.height,dpr:Math.min(devicePixelRatio,2)};
-  });
+  const dimensions=await snapshot.jsonValue();
   assert.ok(dimensions.cssWidth>=200 && dimensions.cssHeight>=180,'Chart collapsed: '+JSON.stringify(dimensions));
   assert.ok(Math.abs(dimensions.pixelWidth-dimensions.cssWidth*dimensions.dpr)<=2 && Math.abs(dimensions.pixelHeight-dimensions.cssHeight*dimensions.dpr)<=2,'Canvas backing dimensions must follow its displayed size: '+JSON.stringify(dimensions));
 }
@@ -244,7 +257,7 @@ try {
         await goldTheme(page);
         if (route.path === '/') {
           await page.locator('.hp-hero').waitFor({state:'visible'});
-          const primaryInk=await page.locator('.hp-hero-cta .hp-btn-primary').evaluate(element=>getComputedStyle(element).color.match(/\\d+/g).slice(0,3).map(Number));
+          const primaryInk=await page.locator('.hp-hero-cta .hp-btn-primary').evaluate(element=>getComputedStyle(element).color.match(/\d+/g).slice(0,3).map(Number));
           assert.ok(primaryInk.every(channel=>channel<90),'Gold CTA needs dark text for accessible contrast');
           assert.ok(await page.locator('.hp-hero-cta a').count()>=2,'Hero must provide account and demo actions');
           assert.ok(await page.locator('.hp-stage,.hp-laptop,.hp-hero-phone,.hp-hero-art,.hp-hero-visual,.hp-hero-devices,.hp-hero-laptop,.hd').count()>0,'Hero must include the trading/device preview');

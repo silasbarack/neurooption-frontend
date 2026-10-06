@@ -609,3 +609,5 @@
 
 /* Override inherited anchor color for accessible gold and cream buttons. */
 .hp .hp-btn-primary{color:var(--neo-accent-ink,#141b27)}.hp .hp-btn-outline{color:#69501a}
+
+.hp-lang select{height:36px;padding:0 4px;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer}.hp-lang option{background:var(--background-secondary);color:var(--text-primary)}

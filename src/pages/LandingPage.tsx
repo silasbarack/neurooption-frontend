@@ -710,7 +710,7 @@ export default function LandingPage() {
           </nav>
           <div className="hp-header-actions">
             <span className="hp-lang">
-              <Globe size={15} aria-hidden="true" /> EN
+              <Globe size={15} aria-hidden="true" /><select aria-label="Language" defaultValue="en"><option value="en">EN</option></select>
             </span>
             {signedIn ? (
               <Link to="/trading" className="hp-btn hp-btn-primary hp-btn-sm">

@@ -60,6 +60,7 @@ jobs:
           if (!ready) throw new Error('Preview server did not start');
           NODE
           node scripts/interaction-regression.mjs 2>&1 | tee artifacts/interaction-regression.log
+          QA_SCENARIO_FILTER="drawer-keyboard|terminal-short" node scripts/browser-qa.mjs 2>&1 | tee artifacts/focus-regression.log
           node scripts/browser-qa.mjs 2>&1 | tee artifacts/browser-qa.log
       - name: Upload screenshots and complete logs
         if: always()

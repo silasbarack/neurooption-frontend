@@ -26,7 +26,14 @@ export default function MenuDrawer({ open, onClose }: MenuDrawerProps) {
     const previousInert = siblings.map((node) => node.inert);
     siblings.forEach((node) => { node.inert = true; });
     document.body.style.overflow = "hidden";
-    const frame = requestAnimationFrame(() => closeRef.current?.focus({ preventScroll: true }));
+    let frame = 0;
+    let attempts = 0;
+    function focusPanel() {
+      closeRef.current?.focus({ preventScroll: true });
+      attempts += 1;
+      if (!panelRef.current?.contains(document.activeElement) && attempts < 32) frame = requestAnimationFrame(focusPanel);
+    }
+    frame = requestAnimationFrame(focusPanel);
     function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") { event.preventDefault(); onClose(); }
       if (event.key !== "Tab") return;
