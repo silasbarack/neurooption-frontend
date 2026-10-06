@@ -16,10 +16,12 @@ import {
 type TradingChartProps = {
   asset: Asset;
   candles: Candle[];
+  candlesRef?: React.MutableRefObject<Candle[]>;
+  marketFrameVersionRef?: React.MutableRefObject<number>;
+  serverOffsetRef?: React.MutableRefObject<number>;
   chartType: ChartType;
   timeframe: string;
   expirySeconds: number;
-  nowMs: number;
   selectedIndicators: string[];
   indicatorSettings?: IndicatorSettingsMap;
   indicatorStyles?: IndicatorStylesMap;
@@ -1352,10 +1354,12 @@ function drawBottomPanel(
 function TradingChartComponent({
   asset,
   candles,
+  candlesRef,
+  marketFrameVersionRef,
+  serverOffsetRef,
   chartType,
   timeframe,
   expirySeconds,
-  nowMs,
   selectedIndicators,
   indicatorSettings = DEFAULT_INDICATOR_SETTINGS,
   indicatorStyles = DEFAULT_INDICATOR_STYLES,
@@ -1366,11 +1370,8 @@ function TradingChartComponent({
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const [resizeVersion, setResizeVersion] = React.useState(0);
   const drawRef = React.useRef<() => void>(() => {});
-  const serverSkewRef = React.useRef(0);
-
-  React.useEffect(() => {
-    serverSkewRef.current = nowMs - Date.now();
-  }, [nowMs]);
+  const lastDrawVersionRef = React.useRef(-1);
+  const lastTimedDrawRef = React.useRef(0);
 
   React.useEffect(() => {
     const container = containerRef.current;
@@ -1389,15 +1390,24 @@ function TradingChartComponent({
   React.useEffect(() => {
     let frame = 0;
 
-    const loop = () => {
-      drawRef.current();
+    const loop = (timestamp: number) => {
+      const marketVersion = marketFrameVersionRef?.current ?? 0;
+      const marketChanged = marketVersion !== lastDrawVersionRef.current;
+      const timedRefresh = timestamp - lastTimedDrawRef.current >= 80;
+
+      if (marketChanged || timedRefresh) {
+        drawRef.current();
+        lastDrawVersionRef.current = marketVersion;
+        lastTimedDrawRef.current = timestamp;
+      }
+
       frame = window.requestAnimationFrame(loop);
     };
 
     frame = window.requestAnimationFrame(loop);
 
     return () => window.cancelAnimationFrame(frame);
-  }, []);
+  }, [marketFrameVersionRef]);
 
   React.useEffect(() => {
     drawRef.current = () => {
@@ -1406,7 +1416,7 @@ function TradingChartComponent({
 
     if (!canvas || !context) return;
 
-    const liveNowMs = Date.now() + serverSkewRef.current;
+    const liveNowMs = Date.now() + (serverOffsetRef?.current ?? 0);
 
     const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
@@ -1429,7 +1439,9 @@ function TradingChartComponent({
     context.fillStyle = "#101725";
     context.fillRect(0, 0, width, height);
 
-    if (candles.length < 2) {
+    const sourceCandles = candlesRef?.current ?? candles;
+
+    if (sourceCandles.length < 2) {
       context.fillStyle = "#7d8aa0";
       context.font = "800 14px 'Noto Sans', sans-serif";
       context.textAlign = "center";
@@ -1439,7 +1451,7 @@ function TradingChartComponent({
     }
 
     const normalizedIndicators = uniqueCanonicalIndicators(selectedIndicators);
-    const fullCandles = candles.slice(-MAX_HISTORY_CANDLES);
+    const fullCandles = sourceCandles.slice(-MAX_HISTORY_CANDLES);
 
     context.font = "800 11px 'Noto Sans', sans-serif";
     const left = width < 560 ? 8 : 14;
@@ -1693,6 +1705,7 @@ function TradingChartComponent({
     activeTrades,
     asset,
     candles,
+    candlesRef,
     chartType,
     expirySeconds,
     indicatorSettings,
@@ -1700,6 +1713,7 @@ function TradingChartComponent({
     resultMarkers,
     resizeVersion,
     selectedIndicators,
+    serverOffsetRef,
     timeframe,
   ]);
 
@@ -1716,8 +1730,10 @@ const TradingChart = React.memo(TradingChartComponent, (previous, next) => {
     previous.chartType === next.chartType &&
     previous.timeframe === next.timeframe &&
     previous.expirySeconds === next.expirySeconds &&
-    previous.nowMs === next.nowMs &&
     previous.candles === next.candles &&
+    previous.candlesRef === next.candlesRef &&
+    previous.marketFrameVersionRef === next.marketFrameVersionRef &&
+    previous.serverOffsetRef === next.serverOffsetRef &&
     previous.selectedIndicators === next.selectedIndicators &&
     previous.indicatorSettings === next.indicatorSettings &&
     previous.indicatorStyles === next.indicatorStyles &&
