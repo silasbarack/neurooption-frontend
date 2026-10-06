@@ -69,7 +69,7 @@ function fixtureCandles(url) {
 
 async function makeContext(options) {
   const width = options.width || 390;
-  const context = await browser.newContext({viewport:{width,height:width>=1024?900:844},deviceScaleFactor:1,reducedMotion:'reduce',serviceWorkers:'block'});
+  const context = await browser.newContext({viewport:{width,height:options.height || (width>=1024?900:844)},deviceScaleFactor:1,reducedMotion:'reduce',serviceWorkers:'block'});
   const telemetry = {pageErrors:[],consoleErrors:[],fixtureHits:[],mutations:[],unexpectedRequests:[],externalRequestsBlocked:0};
   await context.addInitScript(({auth,user}) => {
     if (auth) {
@@ -133,6 +133,7 @@ async function makeContext(options) {
 async function settle(page) {
   await page.locator('body').waitFor({state:'visible'});
   await page.evaluate(() => document.fonts.ready);
+  await page.waitForFunction(() => !document.getElementById('app-splash') || document.getElementById('app-splash').classList.contains('is-hidden'));
   await page.waitForTimeout(180);
 }
 
@@ -150,7 +151,7 @@ async function scenario(name,options,test) {
   } catch (error) { failure = error.stack || String(error); }
   try {
     await page.screenshot({path:path.join(artifactDir,slug+'.png'),fullPage:true,animations:'disabled',timeout:12000});
-    if (['responsive-home-1440','responsive-home-390','responsive-trading-390'].includes(name)) {
+    if (['responsive-home-1440','responsive-home-390','responsive-trading-390','responsive-markets-390','responsive-profile-390','responsive-finance-390','responsive-social-trading-390','responsive-achievements-390'].includes(name)) {
       // Full PNGs remain in the artifact. Export a bounded viewport image for
       // reviewing Actions logs when filesystem/artifact downloads are unavailable.
       let buffer = await page.screenshot({type:'png',fullPage:false,animations:'disabled'});
@@ -313,6 +314,11 @@ try {
       const dialog=page.getByRole('dialog',{name:'Menu',exact:true});
       await dialog.waitFor({state:'visible'});
       assert.equal(await dialog.getAttribute('aria-modal'),'true');
+      console.log('QA_DRAWER_STATE '+JSON.stringify(await page.evaluate(()=>({
+        focus:document.activeElement?.outerHTML?.slice(0,300),
+        drawers:[...document.querySelectorAll('.neo-drawer')].map(node=>({class:node.className,inert:node.inert,visibility:getComputedStyle(node).visibility,close:node.querySelector('.neo-drawer-head button')?.outerHTML?.slice(0,200)})),
+        rootInert:document.getElementById('root')?.inert
+      }))));
       await page.waitForFunction(() => document.querySelector('[role="dialog"][aria-label="Menu"]')?.contains(document.activeElement));
       assert.ok(await page.evaluate(() => Boolean(document.getElementById('root')?.inert)),'Background must be inert while drawer is open');
       await trapFocus(page,dialog);
@@ -391,13 +397,23 @@ try {
       assert.match(await page.locator('.nt-trade-status').innerText(),/payout/i);
     });
   }
+  await scenario('terminal-short-viewport',{path:'/trading',width:360,height:640,auth:true},async page=>{
+    await chartDimensions(page);
+    await page.waitForFunction(()=>document.querySelector('.nt-buy')?.disabled===false);
+    await officialLogo(page);
+    await noOverflow(page);
+    for(const selector of ['.nt-buy','.nt-sell','.nt-white-payout','.nt-bottom-nav','.nt-menu-btn']){
+      const rect=await page.locator(selector).boundingBox();
+      assert.ok(rect && rect.y>=0 && rect.y+rect.height<=640,selector+' must stay usable on a short phone');
+    }
+  });
   await scenario('terminal-controls-and-indicator-dialog',{path:'/trading',width:390,auth:true},async page=>{
     await chartDimensions(page);
     await page.waitForFunction(()=>document.querySelector('.nt-buy')?.disabled===false);
     assert.match(await page.locator('.nt-white-payout').innerText(),/92%/,'Backend payout must drive the preview');
     await page.getByRole('button',{name:'Select chart style',exact:true}).click();
     await page.locator('.nt-chart-types').getByRole('button',{name:'Line',exact:true}).click();
-    assert.ok((await page.locator('.nt-chart-types').getByRole('button',{name:'Line',exact:true}).getAttribute('class')).includes('active'));
+    assert.ok((await page.locator('.nt-chart-types').getByRole('button',{name:'Line',exact:true,includeHidden:true}).getAttribute('class')).includes('active'));
     await page.getByRole('button',{name:'Indicators',exact:true}).click();
     const editorTrigger=page.getByTitle('Edit indicator settings',{exact:true}).first();
     await editorTrigger.click();

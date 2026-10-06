@@ -27,11 +27,9 @@ function hideSplash() {
     const remaining = Math.max(0, SPLASH_MIN_MS - performance.now())
 
     setTimeout(() => {
-      splash.classList.add('is-ready')
-      setTimeout(() => {
-        splash.classList.add('is-hidden')
-        splash.addEventListener('transitionend', () => splash.remove(), { once: true })
-      }, 380)
+      splash.classList.add('is-ready', 'is-hidden')
+      splash.addEventListener('transitionend', () => splash.remove(), { once: true })
+      setTimeout(() => splash.remove(), 250)
     }, remaining)
   })
 }

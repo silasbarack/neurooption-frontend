@@ -1171,3 +1171,5 @@ select.fin-input option {
  .fin-card.is-plain { padding:16px; }
  .fin-tx-main, .fin-tx-side { min-width:0; overflow-wrap:anywhere; }
 }
+
+@media(max-width:900px){.fin-page-head>div:first-child{display:block;width:100%}.fin-page-head h1{display:block;margin:0 0 6px;font-size:26px}.fin-page-head>div:first-child p{display:none}}

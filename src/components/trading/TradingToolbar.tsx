@@ -624,6 +624,7 @@ export default function TradingToolbar({
               style={{
                 display: "flex",
                 justifyContent: "flex-start",
+                flexWrap: "wrap",
                 gap: 10,
                 marginTop: 20,
               }}
@@ -633,7 +634,7 @@ export default function TradingToolbar({
                 onClick={removeEditingIndicator}
                 style={{
                   height: 42,
-                  minWidth: 95,
+                  minWidth: 80,
                   border: "none",
                   borderRadius: 8,
                   background: "rgba(30, 41, 59, 0.28)",
@@ -650,7 +651,7 @@ export default function TradingToolbar({
                 onClick={closeEditor}
                 style={{
                   height: 42,
-                  minWidth: 95,
+                  minWidth: 80,
                   border: "none",
                   borderRadius: 8,
                   background: "var(--nt-surface-alt)",
@@ -667,7 +668,7 @@ export default function TradingToolbar({
                 onClick={saveEditor}
                 style={{
                   height: 42,
-                  minWidth: 95,
+                  minWidth: 80,
                   border: "none",
                   borderRadius: 8,
                   background: "var(--nt-accent)",

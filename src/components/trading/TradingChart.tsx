@@ -606,7 +606,7 @@ function drawTextPill(
 ) {
   context.font = "800 11px 'Noto Sans', sans-serif";
   const pillWidth = context.measureText(text).width + 14;
-  const canvasWidth = context.canvas.width / Math.max(context.getTransform().a, 1);
+  const canvasWidth = context.canvas.width / (context.getTransform().a || 1);
   x = clamp(x, 4, Math.max(4, canvasWidth - pillWidth - 4));
 
   context.fillStyle = background;
