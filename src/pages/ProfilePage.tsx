@@ -26,8 +26,10 @@ export default function ProfilePage() {
   const initialUser = getUser() as StoredUser | null;
   const { account, reload } = useAccount();
 
-  const [fullName, setFullName] = React.useState(initialUser?.fullName || "");
-  const [email, setEmail] = React.useState(initialUser?.email || "");
+  const [fullNameDraft, setFullName] = React.useState<string | null>(null);
+  const [emailDraft, setEmail] = React.useState<string | null>(null);
+  const fullName = fullNameDraft ?? account?.fullName ?? initialUser?.fullName ?? "";
+  const email = emailDraft ?? account?.email ?? initialUser?.email ?? "";
   const [country, setCountry] = React.useState(localStorage.getItem("neurooption_country_preference") || initialUser?.country || "");
   const [accountType, setAccountType] = React.useState<"QT Demo" | "QT Real">("QT Demo");
   const [currency, setCurrency] = React.useState<Currency>("USD");
@@ -35,11 +37,8 @@ export default function ProfilePage() {
   const [saving, setSaving] = React.useState(false);
   const [saveError, setSaveError] = React.useState("");
   const kycStatus = !account ? "Unavailable" : account.kycStatus === "APPROVED" ? "Verified" : account.kycStatus === "PENDING" ? "Pending Review" : account.kycStatus === "REJECTED" ? "Review Required" : "Not Verified";
-  React.useEffect(() => {
-    if (account) { setFullName(account.fullName); setEmail(account.email); }
-  }, [account]);
 
-  const accountId = initialUser?.id || "—";
+  const accountId = account?.accountNumber || account?.id || initialUser?.id || "—";
   const initials = (fullName || "NeuroOption User")
     .split(" ")
     .map((part) => part[0])
@@ -58,6 +57,7 @@ export default function ProfilePage() {
     setSaved(false); setSaveError(""); setSaving(true);
     try {
       const updated = await usersApi.updateProfile({ fullName, email });
+      setFullName(updated.fullName || fullName); setEmail(updated.email || email);
       const stored = getUser();
       if (stored) saveUser({ ...stored, fullName: updated.fullName || fullName, email: updated.email });
       try { if (country) localStorage.setItem("neurooption_country_preference", country); } catch { /* The account update succeeded; local preferences are optional. */ }

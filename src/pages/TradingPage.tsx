@@ -354,9 +354,10 @@ export default function TradingPage() {
   const [selectedTool, setSelectedTool] = React.useState("Cursor");
 
   const [expirySeconds, setExpirySeconds] = React.useState(60);
+  const [clientNowMs, setClientNowMs] = React.useState(INITIAL_NOW_MS);
   const [amount, setAmount] = React.useState("100");
   const { quotes, live, updatedAt } = useQuotes();
-  const payoutQuote = live && Date.now() - updatedAt <= 20000 ? quotes.find((quote) => quote.symbol === selectedAsset.symbol) : undefined;
+  const payoutQuote = live && clientNowMs - updatedAt <= 20000 ? quotes.find((quote) => quote.symbol === selectedAsset.symbol) : undefined;
   const payout = payoutQuote && typeof payoutQuote.payout === "number" && Number.isFinite(payoutQuote.payout) && payoutQuote.payout > 0 && payoutQuote.payout <= 100 ? payoutQuote.payout : null;
   const [favorites, setFavorites] = React.useState<string[]>(() => {
     try { const value: unknown = JSON.parse(localStorage.getItem("neurooption_favorite_assets") || "[]"); return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []; } catch { return []; }
@@ -613,7 +614,9 @@ export default function TradingPage() {
   // ticking in between pushes.
   React.useEffect(() => {
     const intervalId = window.setInterval(() => {
-      setNowMs(Date.now() + serverOffsetRef.current);
+      const clientTime = Date.now();
+      setClientNowMs(clientTime);
+      setNowMs(clientTime + serverOffsetRef.current);
     }, 250);
 
     return () => window.clearInterval(intervalId);
@@ -838,7 +841,7 @@ export default function TradingPage() {
   }
 
   async function handleTrade(side: TradeSide) {
-    if (!canTrade) return;
+    if (!canTrade || Date.now() - updatedAt > 20000) return;
     const requestScope=accountType+"|"+currency;
     const requestVersion=walletVersionRef.current;
 
