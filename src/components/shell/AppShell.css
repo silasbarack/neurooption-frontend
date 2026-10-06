@@ -382,3 +382,5 @@
  .neo-bottomnav a.is-active svg { filter:drop-shadow(0 0 5px rgba(244,199,81,.25)); }
  .neo-shell-main { padding-top:20px; }
 }
+
+.neo-drawer { overflow:clip; }

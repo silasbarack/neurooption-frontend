@@ -6,14 +6,16 @@ import { getToken, getUser } from "../../utils/storage";
 let cached: { token: string; account: AccountSummary } | null = null;
 let inflight: { token: string; promise: Promise<AccountSummary> } | null = null;
 const listeners = new Set<() => void>();
+let latestRequest = 0;
 function subscribe(listener: () => void) {
   listeners.add(listener);
   return () => { listeners.delete(listener); };
 }
-function loadAccount(token: string) {
-  if (inflight?.token === token) return inflight.promise;
+function loadAccount(token: string, force = false) {
+  if (!force && inflight?.token === token) return inflight.promise;
+  const requestId = ++latestRequest;
   const promise = accountApi.me().then((account) => {
-    if (getToken() === token) {
+    if (getToken() === token && requestId === latestRequest) {
       cached = { token, account };
       listeners.forEach((listener) => listener());
     }
@@ -27,7 +29,7 @@ function loadAccount(token: string) {
 export function refreshAccount() {
   const token = getToken();
   if (!token) return Promise.reject(new Error("Please sign in to load your account."));
-  return loadAccount(token);
+  return loadAccount(token, true);
 }
 export function initialsOf(name?: string | null) {
   const parts = (name || "").trim().split(/\s+/).filter(Boolean);

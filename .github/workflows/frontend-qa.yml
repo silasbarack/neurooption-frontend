@@ -1,18 +1,74 @@
-name: Frontend verification
+name: Frontend QA
+
 on:
   push:
     branches: [main, codex/neurooption-responsive-redesign]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
+
 permissions:
   contents: read
+
 concurrency:
   group: frontend-qa-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+  responsive-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Lint
+        run: |
+          mkdir -p artifacts
+          npm run lint 2>&1 | tee artifacts/lint.log
+      - name: Check TypeScript
+        run: npx tsc -b 2>&1 | tee artifacts/typescript.log
+      - name: Build production assets
+        run: npm run build 2>&1 | tee artifacts/build.log
+      - name: Install isolated browser tooling
+        run: npm install --no-save --package-lock=false playwright@1.58.2
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Check browser behavior and responsive layouts
+        env:
+          QA_BASE_URL: http://127.0.0.1:4173
+          QA_ARTIFACT_DIR: artifacts/browser-qa
+        run: |
+          npm run preview -- --host 127.0.0.1 > artifacts/preview.log 2>&1 &
+          preview_pid="$!"
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          node --input-type=module <<'NODE'
+          let ready = false;
+          for (let attempt = 0; attempt < 60; attempt++) {
+            try { ready = (await fetch(process.env.QA_BASE_URL, {signal:AbortSignal.timeout(1000)})).ok; } catch {}
+            if (ready) break;
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+          if (!ready) throw new Error('Preview server did not start');
+          NODE
+          node scripts/interaction-regression.mjs 2>&1 | tee artifacts/interaction-regression.log
+          node scripts/browser-qa.mjs 2>&1 | tee artifacts/browser-qa.log
+      - name: Upload screenshots and complete logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-qa-${{ github.sha }}
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 14
+
+  production-browser:
+    needs: responsive-browser
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,13 +76,60 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run lint
-      - run: npx tsc -b
-      - run: npm run build
       - run: npm install --no-save --package-lock=false playwright@1.58.2
       - run: npx playwright install --with-deps chromium
-      - name: Browser regressions
+      - name: Wait for this exact commit on Render
+        id: deployment
+        env:
+          EXPECTED_COMMIT: ${{ github.sha }}
+          QA_BASE_URL: https://neurooption-frontend.onrender.com
         run: |
-          npm run preview -- --host 127.0.0.1 > /tmp/neurooption-preview.log 2>&1 &
-          node -e "const t=setInterval(async()=>{try{const r=await fetch('http://127.0.0.1:4173');if(r.ok){clearInterval(t);process.exit(0)}}catch{}},250);setTimeout(()=>process.exit(1),30000)"
-          node scripts/interaction-regression.mjs
+          mkdir -p artifacts
+          node --input-type=module <<'NODE' 2>&1 | tee artifacts/deployment.log
+          import assert from 'node:assert/strict';
+          const deadline = Date.now() + 15 * 60 * 1000;
+          let deployed;
+          while (Date.now() < deadline) {
+            try {
+              const response = await fetch(process.env.QA_BASE_URL + '/build-info.json?qa=' + Date.now(), {cache:'no-store', signal:AbortSignal.timeout(15000)});
+              if (response.ok) deployed = await response.json();
+              console.log(JSON.stringify({status:response.status, expected:process.env.EXPECTED_COMMIT, deployed:deployed?.commit}));
+              if (deployed?.commit === process.env.EXPECTED_COMMIT) break;
+            } catch (error) { console.log(error.message); }
+            await new Promise(resolve => setTimeout(resolve, 10000));
+          }
+          assert.equal(deployed?.commit, process.env.EXPECTED_COMMIT, 'Render did not expose this commit within 15 minutes');
+          NODE
+      - name: Smoke-test real public backend reads
+        env:
+          QA_API_URL: https://neurooption-backend.onrender.com
+        run: |
+          node --input-type=module <<'NODE' 2>&1 | tee artifacts/backend-smoke.log
+          import assert from 'node:assert/strict';
+          const base = process.env.QA_API_URL;
+          for (const path of ['/market-data/quotes', '/market-data/assets', '/account/me']) {
+            const response = await fetch(base + path, {signal:AbortSignal.timeout(60000)});
+            const body = await response.json().catch(() => null);
+            console.log(JSON.stringify({path,status:response.status}));
+            if (path === '/account/me') { assert.equal(response.status, 401, 'Unauthenticated account read must be rejected'); continue; }
+            assert.equal(response.status, 200, path + ' must respond successfully');
+            const records = path.endsWith('quotes') ? body?.quotes : body?.assets;
+            assert.ok(Array.isArray(records) && records.length > 0, path + ' must return records');
+            assert.ok(records.every(item => typeof item.symbol === 'string'), path + ' symbols must be valid');
+            if (path.endsWith('quotes')) assert.ok(records.every(item => Number.isFinite(Number(item.price))), 'Public quotes must include valid prices');
+          }
+          NODE
+      - name: Check deployed UI using isolated browser fixtures
+        if: ${{ !cancelled() && steps.deployment.outcome == 'success' }}
+        env:
+          QA_BASE_URL: https://neurooption-frontend.onrender.com
+          QA_ARTIFACT_DIR: artifacts/production-browser
+        run: node scripts/browser-qa.mjs 2>&1 | tee artifacts/production-browser.log
+      - name: Upload production screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-qa-${{ github.sha }}
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 14

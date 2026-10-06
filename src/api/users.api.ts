@@ -1,3 +1,4 @@
+import { getToken as getSessionToken } from "../utils/storage";
 import type {
   DeleteAccountResponse,
   MessageResponse,
@@ -9,7 +10,7 @@ import type {
 const API_URL = import.meta.env.VITE_API_URL || "https://neurooption-backend.onrender.com";
 
 function getToken() {
-  return localStorage.getItem("token") || localStorage.getItem("accessToken") || "";
+  return getSessionToken() || localStorage.getItem("token") || localStorage.getItem("accessToken") || "";
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {

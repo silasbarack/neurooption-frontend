@@ -26,7 +26,7 @@ export default function MenuDrawer({ open, onClose }: MenuDrawerProps) {
     const previousInert = siblings.map((node) => node.inert);
     siblings.forEach((node) => { node.inert = true; });
     document.body.style.overflow = "hidden";
-    const frame = requestAnimationFrame(() => closeRef.current?.focus());
+    const frame = requestAnimationFrame(() => closeRef.current?.focus({ preventScroll: true }));
     function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") { event.preventDefault(); onClose(); }
       if (event.key !== "Tab") return;
@@ -37,9 +37,9 @@ export default function MenuDrawer({ open, onClose }: MenuDrawerProps) {
       const last = focusable[focusable.length - 1];
       if (!first || !last) return;
       if (event.shiftKey && (document.activeElement === first || !panelRef.current?.contains(document.activeElement))) {
-        event.preventDefault(); last.focus();
+        event.preventDefault(); last.focus({ preventScroll: true });
       } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault(); first.focus();
+        event.preventDefault(); first.focus({ preventScroll: true });
       }
     }
     document.addEventListener("keydown", onKey);
@@ -48,7 +48,7 @@ export default function MenuDrawer({ open, onClose }: MenuDrawerProps) {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = previousOverflow;
       siblings.forEach((node, index) => { node.inert = previousInert[index]; });
-      if (previousFocus?.isConnected) previousFocus.focus();
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
     };
   }, [open, onClose]);
 

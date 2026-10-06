@@ -3,6 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { PageHeader, StatusBadge } from "../components/common";
 import { CURRENCIES } from "../components/trading";
 import type { Currency } from "../components/trading";
+import { usersApi } from "../api";
+import { useAccount } from "../components/shell/useAccount";
+import { getUser, saveUser, clearToken, clearUser } from "../utils/storage";
 
 type StoredUser = {
   id?: string;
@@ -11,7 +14,7 @@ type StoredUser = {
   country?: string;
 };
 
-const MOCK_LOGIN_ACTIVITY = [
+const SAMPLE_LOGIN_ACTIVITY = [
   { id: "log-1", device: "Chrome on Windows", location: "Nairobi, KE", time: "Today, 09:12" },
   { id: "log-2", device: "NeuroOption Android App", location: "Nairobi, KE", time: "Yesterday, 21:40" },
   { id: "log-3", device: "Chrome on Windows", location: "Nairobi, KE", time: "3 days ago, 14:05" },
@@ -20,16 +23,21 @@ const MOCK_LOGIN_ACTIVITY = [
 export default function ProfilePage() {
   const navigate = useNavigate();
 
-  const storedUser = localStorage.getItem("neurooption_user");
-  const initialUser: StoredUser | null = storedUser ? JSON.parse(storedUser) : null;
+  const initialUser = getUser() as StoredUser | null;
+  const { account, reload } = useAccount();
 
   const [fullName, setFullName] = React.useState(initialUser?.fullName || "");
   const [email, setEmail] = React.useState(initialUser?.email || "");
-  const [country, setCountry] = React.useState(initialUser?.country || "Kenya");
+  const [country, setCountry] = React.useState(localStorage.getItem("neurooption_country_preference") || initialUser?.country || "");
   const [accountType, setAccountType] = React.useState<"QT Demo" | "QT Real">("QT Demo");
   const [currency, setCurrency] = React.useState<Currency>("USD");
   const [saved, setSaved] = React.useState(false);
-  const [kycStatus, setKycStatus] = React.useState<"Not Verified" | "Pending Review">("Not Verified");
+  const [saving, setSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState("");
+  const kycStatus = !account ? "Unavailable" : account.kycStatus === "APPROVED" ? "Verified" : account.kycStatus === "PENDING" ? "Pending Review" : account.kycStatus === "REJECTED" ? "Review Required" : "Not Verified";
+  React.useEffect(() => {
+    if (account) { setFullName(account.fullName); setEmail(account.email); }
+  }, [account]);
 
   const accountId = initialUser?.id || "—";
   const initials = (fullName || "NeuroOption User")
@@ -40,22 +48,28 @@ export default function ProfilePage() {
     .toUpperCase();
 
   function handleLogout() {
-    localStorage.removeItem("neurooption_token");
-    localStorage.removeItem("neurooption_user");
+    clearToken();
+    clearUser();
     navigate("/login", { replace: true });
   }
 
-  function handleSaveProfile(event: React.FormEvent) {
+  async function handleSaveProfile(event: React.FormEvent) {
     event.preventDefault();
-
-    const updated: StoredUser = { ...initialUser, fullName, email, country };
-    localStorage.setItem("neurooption_user", JSON.stringify(updated));
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 2500);
+    setSaved(false); setSaveError(""); setSaving(true);
+    try {
+      const updated = await usersApi.updateProfile({ fullName, email });
+      const stored = getUser();
+      if (stored) saveUser({ ...stored, fullName: updated.fullName || fullName, email: updated.email });
+      try { if (country) localStorage.setItem("neurooption_country_preference", country); } catch { /* The account update succeeded; local preferences are optional. */ }
+      setSaved(true);
+      await reload();
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Could not save your profile.");
+    } finally { setSaving(false); }
   }
 
   return (
-    <main className="np-page">
+    <section className="np-page" aria-label="Profile settings">
       <div className="np-container">
         <PageHeader title="Profile" subtitle="Manage your account details, preferences, and security." />
 
@@ -114,7 +128,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="np-card">
+          <div className="np-card" id="verification">
             <h3 className="np-card-title">Verification</h3>
             <p className="np-card-subtitle">
               Verify your identity to unlock higher withdrawal limits.
@@ -126,10 +140,10 @@ export default function ProfilePage() {
               type="button"
               className="np-btn np-btn-primary"
               style={{ marginTop: 16 }}
-              disabled={kycStatus === "Pending Review"}
-              onClick={() => setKycStatus("Pending Review")}
+              disabled
+              title="Identity submission is not available in this frontend yet"
             >
-              {kycStatus === "Pending Review" ? "Submitted for Review" : "Start Verification"}
+              {kycStatus === "Verified" ? "Identity Verified" : kycStatus === "Pending Review" ? "Under Review" : "Verification Submission Unavailable"}
             </button>
           </div>
         </section>
@@ -163,7 +177,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="np-field">
-                <label htmlFor="country">Country</label>
+                <label htmlFor="country">Country (local preference)</label>
                 <input
                   id="country"
                   className="np-input"
@@ -175,16 +189,17 @@ export default function ProfilePage() {
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <button type="submit" className="np-btn np-btn-success">
-                Save Changes
+              <button type="submit" className="np-btn np-btn-success" disabled={saving}>
+                {saving ? "Saving…" : "Save Changes"}
               </button>
-              {saved && <span className="np-text-success" style={{ fontSize: 13 }}>Saved!</span>}
+              {saved && <span className="np-text-success" role="status" style={{ fontSize: 13 }}>Saved to your account.</span>}
+              {saveError && <span className="np-text-danger" role="alert" style={{ fontSize: 13 }}>{saveError}</span>}
             </div>
           </form>
         </section>
 
         <section className="np-section np-grid np-grid-2">
-          <div className="np-card">
+          <div className="np-card" id="security">
             <h3 className="np-card-title">Security</h3>
 
             <div style={{ display: "grid", gap: 12 }}>
@@ -200,10 +215,11 @@ export default function ProfilePage() {
           </div>
 
           <div className="np-card">
-            <h3 className="np-card-title">Recent Login Activity</h3>
+            <h3 className="np-card-title">Login Activity Preview</h3>
+            <p className="np-card-subtitle">Illustrative examples. Live security history is not available yet.</p>
 
             <div style={{ display: "grid", gap: 10 }}>
-              {MOCK_LOGIN_ACTIVITY.map((entry) => (
+              {SAMPLE_LOGIN_ACTIVITY.map((entry) => (
                 <div key={entry.id} style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 13 }}>
                   <div>
                     <div style={{ fontWeight: 700 }}>{entry.device}</div>
@@ -227,6 +243,6 @@ export default function ProfilePage() {
           </button>
         </section>
       </div>
-    </main>
+    </section>
   );
 }

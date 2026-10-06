@@ -83,7 +83,7 @@ export default function AppShell({ children, title, backTo, wide }: AppShellProp
 
       <nav className="neo-bottomnav" aria-label="Main">
         {BOTTOM_NAV.map(({ label, path, icon: Icon }) => (
-          <Link key={path} to={path} className={isActivePath(pathname, path) ? "is-active" : ""}>
+          <Link key={path} to={path} className={isActivePath(pathname, path) ? "is-active" : ""} aria-current={isActivePath(pathname, path) ? "page" : undefined}>
             <Icon size={20} aria-hidden="true" />
             <span>{label}</span>
           </Link>

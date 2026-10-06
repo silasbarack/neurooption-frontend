@@ -52,7 +52,7 @@ export default function MpesaDepositDialog({
     const inertStates = siblings.map((node) => node.inert);
     siblings.forEach((node) => { node.inert = true; });
     document.body.style.overflow = "hidden";
-    const frame = requestAnimationFrame(() => panelRef.current?.querySelector<HTMLButtonElement>("button")?.focus());
+    const frame = requestAnimationFrame(() => panelRef.current?.querySelector<HTMLButtonElement>("button")?.focus({ preventScroll: true }));
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") { event.preventDefault(); onClose(); return; }
       if (event.key !== "Tab") return;
@@ -61,8 +61,8 @@ export default function MpesaDepositDialog({
       ) ?? []).filter((node) => node.getClientRects().length);
       const first = items[0], last = items[items.length - 1];
       if (!first || !last) return;
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus({ preventScroll: true }); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus({ preventScroll: true }); }
     };
     document.addEventListener("keydown", onKey);
     return () => {
@@ -70,7 +70,7 @@ export default function MpesaDepositDialog({
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = previousOverflow;
       siblings.forEach((node, index) => { node.inert = inertStates[index]; });
-      if (previousFocus?.isConnected) previousFocus.focus();
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
     };
   }, [onClose]);
 

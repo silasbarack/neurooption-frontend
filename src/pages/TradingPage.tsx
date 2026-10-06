@@ -309,6 +309,11 @@ function toFiniteNumber(value: unknown, fallback: number): number {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function toWalletBalance(value: unknown, fallback: number | null): number | null {
+  if ((typeof value !== "number" && typeof value !== "string") || (typeof value === "string" && !value.trim())) return fallback;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
 export default function TradingPage() {
   const location = useLocation();
   const candlesRef = React.useRef<Candle[]>(INITIAL_CANDLES);
@@ -321,8 +326,8 @@ export default function TradingPage() {
   const [accountType, setAccountType] = React.useState<AccountType>("QT Demo");
   const [currency, setCurrency] = React.useState<Currency>("USD");
 
-  const [walletBalance, setWalletBalance] = React.useState(70000);
-  const [walletLoading, setWalletLoading] = React.useState(false);
+  const [walletBalance, setWalletBalance] = React.useState<number | null>(null);
+  const [walletLoading, setWalletLoading] = React.useState(true);
   const [tradeSubmitting, setTradeSubmitting] = React.useState(false);
   const [tradeError, setTradeError] = React.useState<string | null>(null);
 
@@ -378,7 +383,7 @@ export default function TradingPage() {
   const expectedReturn = safeStakeAmount + expectedProfit;
 
   const canTrade =
-    safeStakeAmount > 0 &&
+    walletBalance !== null && safeStakeAmount > 0 &&
     safeStakeAmount <= walletBalance &&
     !tradeSubmitting &&
     !walletLoading;
@@ -496,7 +501,7 @@ export default function TradingPage() {
           signal
         );
 
-        setWalletBalance((previous) => toFiniteNumber(data.balance, previous));
+        setWalletBalance((previous) => toWalletBalance(data.balance, previous));
       } finally {
         setWalletLoading(false);
       }
@@ -534,7 +539,7 @@ export default function TradingPage() {
           ),
         ]);
 
-        setWalletBalance((previous) => toFiniteNumber(wallet.balance, previous));
+        setWalletBalance((previous) => toWalletBalance(wallet.balance, previous));
         setActiveTrades(open.map(tradeToMarker));
         setOpenTrades(open);
 
@@ -858,7 +863,7 @@ export default function TradingPage() {
       });
 
       setPayout((previous) => toFiniteNumber(response.trade.payoutPercent, previous));
-      setWalletBalance((previous) => toFiniteNumber(response.wallet.balance, previous));
+      setWalletBalance((previous) => toWalletBalance(response.wallet.balance, previous));
 
       setActiveTrades((current) => [tradeToMarker(response.trade), ...current]);
 
@@ -903,8 +908,9 @@ export default function TradingPage() {
         accountType={accountType}
         currency={currency}
         balance={walletBalance}
-        onAccountChange={setAccountType}
-        onCurrencyChange={setCurrency}
+        balanceLoading={walletLoading}
+        onAccountChange={(next) => { if (next !== accountType) { setWalletBalance(null); setWalletLoading(true); setAccountType(next); } }}
+        onCurrencyChange={(next) => { if (next !== currency) { setWalletBalance(null); setWalletLoading(true); setCurrency(next); } }}
         onFullscreen={handleFullscreen}
       />
 
