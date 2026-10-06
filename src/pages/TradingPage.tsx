@@ -104,7 +104,6 @@ const TRADE_RESULT_DISPLAY_MS = 10000;
 const DEFAULT_ASSET =
   ASSETS.find((asset) => asset.symbol === "EUR/USD OTC") ?? ASSETS[0];
 
-const INITIAL_NOW_MS = Date.now();
 const INITIAL_CANDLES: Candle[] = [];
 
 const VALID_CATEGORIES: AssetCategory[] = [
@@ -362,7 +361,7 @@ export default function TradingPage() {
   const [expirySeconds, setExpirySeconds] = React.useState(60);
   const [amount, setAmount] = React.useState("100");
   const { quotes, live, updatedAt } = useQuotes();
-  const payoutQuote = live && Date.now() - updatedAt <= 20000 ? quotes.find((quote) => quote.symbol === selectedAsset.symbol) : undefined;
+  const payoutQuote = live && updatedAt > 0 ? quotes.find((quote) => quote.symbol === selectedAsset.symbol) : undefined;
   const payout = payoutQuote && typeof payoutQuote.payout === "number" && Number.isFinite(payoutQuote.payout) && payoutQuote.payout > 0 && payoutQuote.payout <= 100 ? payoutQuote.payout : null;
   const [favorites, setFavorites] = React.useState<string[]>(() => {
     try { const value: unknown = JSON.parse(localStorage.getItem("neurooption_favorite_assets") || "[]"); return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []; } catch { return []; }
@@ -663,9 +662,6 @@ export default function TradingPage() {
   React.useEffect(() => {
     const socket = getMarketSocket(API_BASE_URL);
     const symbol = selectedAsset.symbol;
-    let clockTimer: number | undefined;
-    let metricsTimer: number | undefined;
-
     const requestResync = () => {
       const current = candlesRef.current;
       const since = current[Math.max(0, current.length - 3)]?.time ?? 0;
@@ -816,8 +812,8 @@ export default function TradingPage() {
 
     if (socket.connected) subscribe();
 
-    clockTimer = window.setInterval(syncClock, 30_000);
-    metricsTimer = window.setInterval(() => {
+    const clockTimer = window.setInterval(syncClock, 30_000);
+    const metricsTimer = window.setInterval(() => {
       socket.emit(MARKET_SOCKET_EVENTS.CLIENT_METRICS, {
         tickAgeMs: lastClientTickAgeRef.current,
         renderDelayMs: lastRenderDelayRef.current,
