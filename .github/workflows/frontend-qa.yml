@@ -3,6 +3,8 @@ name: Frontend QA
 on:
   push:
     branches: [main, codex/neurooption-responsive-redesign]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
