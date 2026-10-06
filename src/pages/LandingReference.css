@@ -159,13 +159,13 @@
   margin-top: 7px;
   font-size: 6px;
 }
-/* The approved logo has navy lettering, so it sits on a light plate. */
+/* The emblem is gold on near-black, so the plate is dark. */
 .hp-hero-phone-mark {
   display: inline-flex;
   grid-row: span 2;
-  padding: 2px 3px;
+  overflow: hidden;
   border-radius: 3px;
-  background: #fff;
+  background: #000;
   line-height: 0;
 }
 .hp-hero-phone-mark img { width: 100%; height: auto; }

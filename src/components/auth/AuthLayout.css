@@ -49,8 +49,8 @@
 
 .au-logo {
   display: block;
-  width: 196px;
-  height: auto;
+  width: auto;
+  height: 54px;
 }
 
 .au-nav {
@@ -935,7 +935,7 @@
   }
 
   .au-logo {
-    width: 150px;
+    height: 40px;
   }
 
   .au-main {
@@ -990,14 +990,11 @@
 }
 
 .au-brand {
-  padding: 9px 16px;
+  padding: 0;
   border-radius: 12px;
+  overflow: hidden;
   background: #000;
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.09);
-}
-
-.au-logo {
-  width: 232px;
 }
 
 
@@ -1228,16 +1225,12 @@
   }
 
   .au-logo {
-    width: 196px;
+    height: 46px;
   }
 }
 
 @media (max-width: 560px) {
   .au-logo {
-    width: 164px;
-  }
-
-  .au-brand {
-    padding: 7px 12px;
+    height: 40px;
   }
 }

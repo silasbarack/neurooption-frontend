@@ -406,18 +406,18 @@
   background: #0a1223;
 }
 
-/* The approved logo has navy lettering, so the mockups show it on a plate. */
+/* The emblem is gold on near-black, so the mockup plates are dark. */
 .hp-app-mark {
   display: inline-flex;
-  padding: 2px 4px;
+  overflow: hidden;
   border-radius: 3px;
-  background: #fff;
+  background: #000;
   line-height: 0;
 }
 
 .hp-app-mark img {
   width: auto;
-  height: 8px;
+  height: 12px;
 }
 
 .hp-app-pair {
@@ -1143,15 +1143,15 @@
 
 .hp-phone-mark {
   display: inline-flex;
-  padding: 2px 4px;
+  overflow: hidden;
   border-radius: 3px;
-  background: #fff;
+  background: #000;
   line-height: 0;
 }
 
 .hp-phone-mark img {
   width: auto;
-  height: 9px;
+  height: 13px;
 }
 
 .hp-phone-head b {

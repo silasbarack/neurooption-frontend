@@ -51,15 +51,15 @@
 .nt-premium .nt-brand-plate {
   display: inline-flex;
   align-items: center;
-  padding: 6px 12px;
-  border-radius: 12px;
-  background: #fff; /* the approved logo has navy lettering */
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  padding: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
 }
 
 .nt-premium .nt-brand-approved-logo {
-  width: 196px;
-  height: 38px;
+  width: auto;
+  height: 46px;
 }
 
 .nt-premium .nt-star,
@@ -672,8 +672,8 @@
 
 @media (max-width: 980px) {
   .nt-premium .nt-brand-approved-logo {
-    width: 164px;
-    height: 34px;
+    width: auto;
+    height: 40px;
   }
 
   .nt-premium .nt-header-icon {
@@ -693,8 +693,8 @@
   }
 
   .nt-premium .nt-brand-approved-logo {
-    width: 104px;
-    height: 24px;
+    width: auto;
+    height: 34px;
   }
 
   .nt-premium .nt-star,

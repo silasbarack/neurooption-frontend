@@ -304,7 +304,7 @@ function HeroArt({ quotes }: { quotes: MarketQuote[] }) {
           <div className="hp-screen">
             <div className="hp-app-top">
               <span className="hp-app-mark">
-                <img src="/neurooption-logo.png" alt="" />
+                <img src="/neurooption-mark.jpg" alt="" />
               </span>
               <span className="hp-app-pair">
                 EUR/USD OTC <ChevronDown size={9} aria-hidden="true" />
@@ -370,7 +370,7 @@ function HeroArt({ quotes }: { quotes: MarketQuote[] }) {
         <div className="hp-hero-phone-notch" /><div className="hp-hero-phone-status"><span>9:41</span><span>Demo preview</span></div>
         <div className="hp-hero-phone-head">
           <span className="hp-hero-phone-mark">
-            <img src="/neurooption-logo.png" alt="" />
+            <img src="/neurooption-mark.jpg" alt="" />
           </span>
           <span>EUR/USD OTC</span>
           <b>{price.toFixed(5)}</b>
@@ -553,7 +553,7 @@ function PhoneMockups({ quotes }: { quotes: MarketQuote[] }) {
           <StatusBar />
           <div className="hp-phone-head">
             <span className="hp-phone-mark">
-              <img src="/neurooption-logo.png" alt="" />
+              <img src="/neurooption-mark.jpg" alt="" />
             </span>
             <b>Markets</b>
           </div>
@@ -590,7 +590,7 @@ function PhoneMockups({ quotes }: { quotes: MarketQuote[] }) {
           <StatusBar />
           <div className="hp-phone-head">
             <span className="hp-phone-mark">
-              <img src="/neurooption-logo.png" alt="" />
+              <img src="/neurooption-mark.jpg" alt="" />
             </span>
             <b>EUR/USD OTC</b>
             <em className={change >= 0 ? "is-up" : "is-down"}>{formatChange(change)}</em>

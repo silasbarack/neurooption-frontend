@@ -192,9 +192,9 @@ async function officialLogo(page) {
   await image.waitFor({state:'visible'});
   const data = await image.evaluate(element => ({loaded:element.complete && element.naturalWidth>0,source:element.currentSrc,width:element.getBoundingClientRect().width,height:element.getBoundingClientRect().height}));
   assert.ok(data.loaded,'Official logo must load');
-  assert.ok(data.source.endsWith('/neurooption-logo.png'),'Official wordmark must be retained: '+data.source);
+  assert.ok(data.source.endsWith('/neurooption-logo.jpg'),'Official wordmark must be retained: '+data.source);
   assert.ok(data.width>40 && data.height>10,'Logo must have usable dimensions');
-  assert.ok(Math.abs(data.width/data.height-900/173)<0.05,'Official logo must retain its aspect ratio');
+  assert.ok(Math.abs(data.width/data.height-720/621)<0.05,'Official logo must retain its aspect ratio');
 }
 
 async function goldTheme(page) {

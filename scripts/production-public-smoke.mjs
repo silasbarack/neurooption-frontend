@@ -27,7 +27,7 @@ async function checkHome(name,screenshot){
   const previousReads=backendReads.length;
   await page.goto(baseURL+'/',{waitUntil:'domcontentloaded',timeout:60000});
   await page.locator('#app-splash,.app-splash').first().waitFor({state:'hidden',timeout:30000});
-  const logo=page.locator('img[src="/neurooption-logo.png"]:visible').first();
+  const logo=page.locator('img[src="/neurooption-logo.jpg"]:visible').first();
   await logo.waitFor({state:'visible'});
   await page.waitForFunction(element=>element.complete && element.naturalWidth>0,await logo.elementHandle());
   await page.waitForFunction(()=>document.querySelector('.hp-market-feed')?.textContent.includes('Market feed connected'),undefined,{timeout:45000});
