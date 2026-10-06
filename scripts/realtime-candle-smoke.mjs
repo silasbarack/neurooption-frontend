@@ -23,16 +23,24 @@ const tickAgeMs=[];
 const globalSequences=[];
 
 await new Promise((resolve,reject)=>{
-  const timeout=setTimeout(()=>reject(new Error('Timed out waiting for a moving EUR/USD OTC M2 candle')),15000);
+  const timeout=setTimeout(()=>{
+    const summary=[...candleBuckets.entries()].map(([time,updates])=>({
+      time,
+      updates:updates.length,
+      distinct:new Set(updates.map(item=>item.close)).size,
+    }));
+    reject(new Error('Timed out waiting for a moving EUR/USD OTC M2 candle: '+JSON.stringify({connected:socket.connected,transport:socket.io.engine?.transport?.name,sequences:globalSequences.length,buckets:summary})));
+  },15000);
 
   socket.on('connect',()=>{
+    socket.emit('subscribe_symbol',{symbol:'EUR/USD OTC',timeframe:'M2'});
+
     const sent=Date.now();
     socket.emit('server_time',{clientSentAt:sent},response=>{
       const received=Date.now();
       if(response && Number.isFinite(response.serverTimestamp)){
         serverOffset=response.serverTimestamp-(sent+(received-sent)/2);
       }
-      socket.emit('subscribe_symbol',{symbol:'EUR/USD OTC',timeframe:'M2'});
     });
   });
 
