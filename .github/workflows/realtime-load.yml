@@ -30,8 +30,8 @@ jobs:
       - run: npm ci
       - name: Run 100 / 500 / 1000 client stages
         env:
-          MARKET_WS_URL: ${{ inputs.market_ws_url }}
-          DURATION_MS: ${{ inputs.duration_ms }}
+          MARKET_WS_URL: https://neurooption-backend.onrender.com
+          DURATION_MS: "15000"
         run: |
           mkdir -p artifacts
           echo "=== metrics before load ===" | tee -a artifacts/realtime-load.log
