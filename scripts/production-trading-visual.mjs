@@ -41,6 +41,21 @@ try{
 
   const samples=[];
   const renderDelays=[];
+  const frameTimes=await canvas.evaluate(async el=>{
+    const times=[];
+    let lastVersion=-1;
+    const started=performance.now();
+    while(performance.now()-started<2000){
+      await new Promise(resolve=>requestAnimationFrame(resolve));
+      const live=el.__neuroLive;
+      if(live && live.renderedAt!==lastVersion){
+        times.push(performance.now());
+        lastVersion=live.renderedAt;
+      }
+    }
+    return times;
+  });
+  const frameIntervals=frameTimes.slice(1).map((value,index)=>value-frameTimes[index]);
   for(let index=0;index<20;index+=1){
     if(index>0) await page.waitForTimeout(500);
     const live=await canvas.evaluate(el=>el.__neuroLive ?? null);
@@ -84,6 +99,15 @@ try{
     p95:percentile(renderDelays,.95),
     p99:percentile(renderDelays,.99),
   };
+  const frameCadence={
+    count:frameIntervals.length,
+    p50:percentile(frameIntervals,.5),
+    p95:percentile(frameIntervals,.95),
+    p99:percentile(frameIntervals,.99),
+  };
+  assert.ok(frameCadence.count>=30,'Expected sustained visual Canvas refresh');
+  assert.ok((frameCadence.p50 ?? Infinity)<=45,'Median Canvas frame interval should be <=45ms');
+  assert.ok((frameCadence.p95 ?? Infinity)<=75,'p95 Canvas frame interval should be <=75ms');
 
   assert.ok(marketReads.some(read=>read.path==='/market-data/assets' && read.status===200),'Trading page must read real production market assets');
   assert.ok(marketReads.some(read=>read.path==='/market-data/candles' && read.status===200),'Trading page must read real production candles');
@@ -102,6 +126,7 @@ try{
       lastClose:activeBucket.list.at(-1).close,
     },
     receiveToRenderMs:renderLatency,
+    visualFrameIntervalMs:frameCadence,
   }));
 }finally{
   await browser.close();

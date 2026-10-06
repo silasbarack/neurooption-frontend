@@ -1405,7 +1405,9 @@ function TradingChartComponent({
     const loop = (timestamp: number) => {
       const marketVersion = marketFrameVersionRef?.current ?? 0;
       const marketChanged = marketVersion !== lastDrawVersionRef.current;
-      const clockRefresh = timestamp - lastTimedDrawRef.current >= 250;
+      // Keep time-axis/expiry motion fluid even between authoritative price
+      // ticks. Vertical price movement still changes only with marketVersion.
+      const clockRefresh = timestamp - lastTimedDrawRef.current >= 33;
 
       // Paint every real market update on the next animation frame. The
       // slower timed refresh exists only for countdown/scroll movement and
