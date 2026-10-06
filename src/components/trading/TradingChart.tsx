@@ -1352,6 +1352,107 @@ function drawBottomPanel(
   context.restore();
 }
 
+
+function drawMountainBackdrop(
+  context: CanvasRenderingContext2D,
+  left: number,
+  right: number,
+  top: number,
+  bottom: number,
+  compact: boolean,
+) {
+  const width = Math.max(1, right - left);
+  const height = Math.max(1, bottom - top);
+  const horizon = top + height * 0.68;
+  const alphaScale = compact ? 0.72 : 1;
+
+  context.save();
+  context.beginPath();
+  context.rect(left, top, width, height);
+  context.clip();
+
+  const mist = context.createLinearGradient(0, top, 0, bottom);
+  mist.addColorStop(0, "rgba(255, 255, 255, 0)");
+  mist.addColorStop(0.58, `rgba(207, 220, 242, ${0.012 * alphaScale})`);
+  mist.addColorStop(1, `rgba(207, 220, 242, ${0.028 * alphaScale})`);
+  context.fillStyle = mist;
+  context.fillRect(left, top, width, height);
+
+  context.beginPath();
+  context.moveTo(left, bottom);
+  context.lineTo(left, horizon + height * 0.08);
+  context.bezierCurveTo(
+    left + width * 0.12,
+    horizon - height * 0.03,
+    left + width * 0.20,
+    horizon - height * 0.10,
+    left + width * 0.30,
+    horizon + height * 0.01,
+  );
+  context.bezierCurveTo(
+    left + width * 0.42,
+    horizon - height * 0.14,
+    left + width * 0.53,
+    horizon - height * 0.18,
+    left + width * 0.63,
+    horizon - height * 0.02,
+  );
+  context.bezierCurveTo(
+    left + width * 0.74,
+    horizon - height * 0.11,
+    left + width * 0.85,
+    horizon - height * 0.05,
+    right,
+    horizon + height * 0.06,
+  );
+  context.lineTo(right, bottom);
+  context.closePath();
+
+  const backRidge = context.createLinearGradient(0, top, 0, bottom);
+  backRidge.addColorStop(0, `rgba(137, 161, 201, ${0.014 * alphaScale})`);
+  backRidge.addColorStop(1, `rgba(137, 161, 201, ${0.055 * alphaScale})`);
+  context.fillStyle = backRidge;
+  context.fill();
+
+  context.beginPath();
+  context.moveTo(left, bottom);
+  context.lineTo(left, horizon + height * 0.15);
+  context.bezierCurveTo(
+    left + width * 0.11,
+    horizon + height * 0.06,
+    left + width * 0.22,
+    horizon + height * 0.02,
+    left + width * 0.34,
+    horizon + height * 0.11,
+  );
+  context.bezierCurveTo(
+    left + width * 0.44,
+    horizon - height * 0.03,
+    left + width * 0.55,
+    horizon - height * 0.07,
+    left + width * 0.66,
+    horizon + height * 0.08,
+  );
+  context.bezierCurveTo(
+    left + width * 0.78,
+    horizon - height * 0.01,
+    left + width * 0.90,
+    horizon + height * 0.04,
+    right,
+    horizon + height * 0.14,
+  );
+  context.lineTo(right, bottom);
+  context.closePath();
+
+  const frontRidge = context.createLinearGradient(0, top, 0, bottom);
+  frontRidge.addColorStop(0, `rgba(98, 124, 166, ${0.012 * alphaScale})`);
+  frontRidge.addColorStop(1, `rgba(98, 124, 166, ${0.065 * alphaScale})`);
+  context.fillStyle = frontRidge;
+  context.fill();
+
+  context.restore();
+}
+
 function TradingChartComponent({
   asset,
   candles,
@@ -1564,6 +1665,14 @@ function TradingChartComponent({
     const indexToX = (index: number) =>
       Math.round(left + (index / Math.max(visibleLength - 1, 1)) * chartWidth) + 0.5;
 
+    drawMountainBackdrop(
+      context,
+      left,
+      right,
+      top,
+      chartBottom,
+      width < 560,
+    );
     drawGrid(context, left, right, top, chartBottom, 8, 6);
 
     context.save();
