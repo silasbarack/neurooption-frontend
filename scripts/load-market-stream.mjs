@@ -18,6 +18,7 @@ const stats = {
   ticks: 0,
   candles: 0,
   reconnects: 0,
+  connectErrors: 0,
   latencies: [],
 };
 
@@ -33,6 +34,13 @@ const sockets = Array.from({ length: users }, (_, index) => {
   });
 
   let hasConnected = false;
+
+  socket.on("connect_error", (error) => {
+    stats.connectErrors += 1;
+    if (stats.connectErrors <= 3) {
+      console.error("connect_error:", error?.message || String(error));
+    }
+  });
 
   socket.on("connect", () => {
     if (hasConnected) stats.reconnects += 1;
@@ -87,6 +95,7 @@ console.log(
       ticks: stats.ticks,
       candles: stats.candles,
       reconnects: stats.reconnects,
+      connectErrors: stats.connectErrors,
       tickRatePerSecond: Number((stats.ticks / (durationMs / 1000)).toFixed(2)),
       latencyMs: {
         samples: stats.latencies.length,
@@ -100,3 +109,9 @@ console.log(
     2,
   ),
 );
+
+
+if (stats.latencies.length === 0 || stats.ticks === 0) {
+  console.error("Load stage failed: no production market ticks were received.");
+  process.exitCode = 1;
+}
