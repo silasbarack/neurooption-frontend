@@ -71,8 +71,11 @@ let socket: Socket | null = null;
 export function getMarketSocket(baseUrl: string) {
   if (!socket) {
     socket = io(`${baseUrl}/market`, {
-      transports: ["websocket"],
-      upgrade: false,
+      // Prefer WebSocket, but allow Engine.IO polling when a mobile
+      // carrier/proxy cannot establish or sustain the WebSocket transport.
+      transports: ["websocket", "polling"],
+      tryAllTransports: true,
+      upgrade: true,
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 250,

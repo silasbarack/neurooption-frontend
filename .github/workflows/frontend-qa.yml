@@ -128,6 +128,11 @@ jobs:
             if (path.endsWith('quotes')) assert.ok(records.every(item => Number.isFinite(Number(item.price))), 'Public quotes must include valid prices');
           }
           NODE
+      - name: Verify live candle movement
+        if: ${{ !cancelled() && steps.deployment.outcome == 'success' }}
+        env:
+          QA_API_URL: https://neurooption-backend.onrender.com
+        run: node scripts/realtime-candle-smoke.mjs 2>&1 | tee artifacts/realtime-candle-smoke.log
       - name: Verify deployed public UI with the real market feed
         if: ${{ !cancelled() && steps.deployment.outcome == 'success' }}
         env:

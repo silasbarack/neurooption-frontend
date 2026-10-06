@@ -749,7 +749,12 @@ export default function TradingPage() {
       );
     };
 
+    let lastRecoveryAt = 0;
+
     const subscribe = () => {
+      // Start stale detection immediately. A connected socket that receives
+      // no first market packet should not leave the chart looking healthy.
+      lastClientTickReceivedAtRef.current = Date.now();
       socket.emit(MARKET_SOCKET_EVENTS.SUBSCRIBE_SYMBOL, { symbol, timeframe });
       syncClock();
       if (lastMarketSequenceRef.current > 0) requestResync();
@@ -846,15 +851,20 @@ export default function TradingPage() {
     }, 5_000);
 
     const staleTimer = window.setInterval(() => {
+      const now = Date.now();
       const lastReceivedAt = lastClientTickReceivedAtRef.current;
-      if (
-        socket.connected &&
-        lastReceivedAt > 0 &&
-        Date.now() - lastReceivedAt > 3_000
-      ) {
+      const staleFor = lastReceivedAt > 0 ? now - lastReceivedAt : 0;
+
+      if (socket.connected && staleFor > 3_000) {
         requestResync();
+
+        if (staleFor > 6_000 && now - lastRecoveryAt > 6_000) {
+          lastRecoveryAt = now;
+          socket.disconnect();
+          socket.connect();
+        }
       }
-    }, 2_000);
+    }, 1_000);
 
     return () => {
       window.clearInterval(clockTimer);
