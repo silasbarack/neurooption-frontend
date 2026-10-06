@@ -63,7 +63,7 @@ export default function MarketsPage() {
             aria-controls="market-results" tabIndex={tab === item.key ? 0 : -1}
             className={tab === item.key ? "is-active" : ""} onClick={() => selectTab(item.key)}
             onKeyDown={(event) => {
-              let next = index;
+              let next: number;
               if (event.key === "ArrowRight") next = (index + 1) % TABS.length;
               else if (event.key === "ArrowLeft") next = (index + TABS.length - 1) % TABS.length;
               else if (event.key === "Home") next = 0;
