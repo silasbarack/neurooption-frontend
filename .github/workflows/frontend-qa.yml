@@ -126,6 +126,11 @@ jobs:
             if (path.endsWith('quotes')) assert.ok(records.every(item => Number.isFinite(Number(item.price))), 'Public quotes must include valid prices');
           }
           NODE
+      - name: Verify deployed public UI with the real market feed
+        if: ${{ !cancelled() && steps.deployment.outcome == 'success' }}
+        env:
+          QA_BASE_URL: https://neurooption-frontend.onrender.com
+        run: node scripts/production-public-smoke.mjs 2>&1 | tee artifacts/production-public-smoke.log
       - name: Check deployed UI using isolated browser fixtures
         if: ${{ !cancelled() && steps.deployment.outcome == 'success' }}
         env:
