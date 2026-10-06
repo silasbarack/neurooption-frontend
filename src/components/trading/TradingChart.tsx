@@ -1603,7 +1603,6 @@ function TradingChartComponent({
 
     context.restore();
 
-    const latest = renderCandles[renderCandles.length - 1];
     const liveLatest = visibleCandlesRaw[visibleCandlesRaw.length - 1];
     const latestY = priceToY(liveLatest.close);
 
@@ -1805,6 +1804,7 @@ function TradingChartComponent({
     selectedIndicators,
     serverOffsetRef,
     marketReceivedAtRef,
+    marketFrameVersionRef,
     timeframe,
   ]);
 
