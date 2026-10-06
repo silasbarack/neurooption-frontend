@@ -1374,6 +1374,13 @@ function TradingChartComponent({
   const drawRef = React.useRef<() => void>(() => {});
   const lastDrawVersionRef = React.useRef(-1);
   const lastTimedDrawRef = React.useRef(0);
+  const indicatorCacheRef = React.useRef<{
+    computedAt: number;
+    visibleLength: number;
+    latestCandleTime: number;
+    bottomPanels: BottomPanel[];
+    overlaySeries: Series[];
+  } | null>(null);
 
   React.useEffect(() => {
     const container = containerRef.current;
@@ -1412,6 +1419,7 @@ function TradingChartComponent({
   }, [marketFrameVersionRef]);
 
   React.useEffect(() => {
+    indicatorCacheRef.current = null;
     drawRef.current = () => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
@@ -1470,32 +1478,55 @@ function TradingChartComponent({
     const renderCandles =
       chartType === "Heiken Ashi" ? heikenAshi(visibleCandlesRaw) : visibleCandlesRaw;
 
-    const allBottomPanels = normalizedIndicators
-      .filter((indicator) => BOTTOM_INDICATORS.has(indicator))
-      .map((indicator) =>
-        buildBottomPanel(
-          indicator,
-          indicatorSettings,
-          indicatorStyles,
-          fullCandles,
-          visibleLength,
-        ),
-      )
-      .filter((panel): panel is BottomPanel => panel !== null);
+    const latestCandleTime = fullCandles[fullCandles.length - 1]?.time ?? 0;
+    const cachedIndicators = indicatorCacheRef.current;
+    const canReuseIndicators =
+      cachedIndicators !== null &&
+      liveNowMs - cachedIndicators.computedAt < 250 &&
+      cachedIndicators.visibleLength === visibleLength &&
+      cachedIndicators.latestCandleTime === latestCandleTime;
 
-    const bottomPanels = allBottomPanels.slice(0, 4);
+    let bottomPanels: BottomPanel[];
+    let overlaySeries: Series[];
 
-    const overlaySeries = normalizedIndicators.flatMap((indicator) =>
-      BOTTOM_INDICATORS.has(indicator)
-        ? []
-        : buildOverlaySeries(
+    if (canReuseIndicators) {
+      bottomPanels = cachedIndicators.bottomPanels;
+      overlaySeries = cachedIndicators.overlaySeries;
+    } else {
+      const allBottomPanels = normalizedIndicators
+        .filter((indicator) => BOTTOM_INDICATORS.has(indicator))
+        .map((indicator) =>
+          buildBottomPanel(
             indicator,
             indicatorSettings,
             indicatorStyles,
             fullCandles,
             visibleLength,
           ),
-    );
+        )
+        .filter((panel): panel is BottomPanel => panel !== null);
+
+      bottomPanels = allBottomPanels.slice(0, 4);
+      overlaySeries = normalizedIndicators.flatMap((indicator) =>
+        BOTTOM_INDICATORS.has(indicator)
+          ? []
+          : buildOverlaySeries(
+              indicator,
+              indicatorSettings,
+              indicatorStyles,
+              fullCandles,
+              visibleLength,
+            ),
+      );
+
+      indicatorCacheRef.current = {
+        computedAt: liveNowMs,
+        visibleLength,
+        latestCandleTime,
+        bottomPanels,
+        overlaySeries,
+      };
+    }
 
     const top = width < 560 ? 18 : 22;
     const footer = 24;
