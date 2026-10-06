@@ -2,8 +2,8 @@
   min-height: 100vh;
   min-height: 100dvh;
   background:
-    radial-gradient(900px 420px at 85% -10%, rgba(47, 107, 255, 0.06), transparent 60%),
-    radial-gradient(800px 420px at 0% 0%, rgba(59, 130, 246, 0.06), transparent 60%),
+    radial-gradient(900px 420px at 85% -10%, rgba(244, 199, 81, 0.06), transparent 60%),
+    radial-gradient(800px 420px at 0% 0%, rgba(244, 199, 81, 0.06), transparent 60%),
     var(--neo-bg);
   color: var(--neo-text);
 }
@@ -107,7 +107,7 @@
   place-items: center;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--neo-accent-2), #1d4ed8);
-  box-shadow: 0 0 0 2px rgba(47, 107, 255, 0.25);
+  box-shadow: 0 0 0 2px rgba(244, 199, 81, 0.25);
   color: var(--neo-accent-ink);
   font-weight: 800;
 }
@@ -213,7 +213,7 @@
 
 .neo-drawer-nav a:hover,
 .neo-drawer-nav a.is-active {
-  background: rgba(47, 107, 255, 0.08);
+  background: rgba(244, 199, 81, 0.08);
 }
 
 .neo-drawer-nav a.is-active,
@@ -355,4 +355,30 @@
   .neo-legacy .np-page-header-text h1 {
     display: none;
   }
+}
+
+/* Responsive and keyboard-accessible application chrome. */
+.neo-skip-link { position:fixed; top:8px; left:16px; z-index:150; padding:12px 16px; background:var(--brand-gold); color:var(--neo-accent-ink); border-radius:8px; transform:translateY(-180%); }
+.neo-skip-link:focus { transform:none; }
+.neo-topbar-inner { padding-top:env(safe-area-inset-top); height:calc(64px + env(safe-area-inset-top)); }
+.neo-topbar-brand { flex-shrink:0; }
+.neo-topbar-brand .neurooption-logo { width:150px; height:auto; object-fit:contain; }
+.neo-topbar-menu { display:inline-grid; }
+.neo-topnav a { font-size:13px; padding-inline:9px; }
+.neo-shell-main { min-width:0; }
+.neo-drawer { visibility:hidden; transition:visibility .3s; }
+.neo-drawer.is-open { visibility:visible; }
+.neo-drawer-panel { padding-top:calc(18px + env(safe-area-inset-top)); overscroll-behavior:contain; }
+.neo-drawer-nav a { min-height:46px; font-weight:500; }
+.neo-drawer-foot small { line-height:1.5; display:block; }
+.balance-info { padding:0; border:0; background:transparent; color:inherit; text-align:left; }
+@media (max-width:1100px) { .neo-topnav a:nth-child(n+4) { display:none; } }
+@media (max-width:900px) {
+ .neo-topbar-inner { height:calc(60px + env(safe-area-inset-top)); padding-inline:16px; }
+ .neo-topbar-menu { width:42px; height:42px; }
+ .neo-topbar-brand .neurooption-logo { width:142px; }
+ .neo-shell.has-title .neo-topbar-title { max-width:calc(100% - 120px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+ .neo-bottomnav a { min-height:48px; color:var(--neo-muted); }
+ .neo-bottomnav a.is-active svg { filter:drop-shadow(0 0 5px rgba(244,199,81,.25)); }
+ .neo-shell-main { padding-top:20px; }
 }

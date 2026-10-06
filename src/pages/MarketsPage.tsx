@@ -1,169 +1,87 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Search, Star } from "lucide-react";
-
+import { useSearchParams } from "react-router-dom";
+import { Search } from "lucide-react";
 import AppShell from "../components/shell/AppShell";
-import AssetIcon from "../components/markets/AssetIcon";
-import { formatChange, formatPrice, useQuotes } from "../components/markets/useQuotes";
+import AssetRow from "../components/markets/AssetRow";
+import { useQuotes } from "../components/markets/useQuotes";
 import "./MarketsPage.css";
-
 const TABS = [
-  { key: "All", label: "All" },
-  { key: "Currencies", label: "Forex" },
-  { key: "Cryptocurrencies", label: "Crypto" },
-  { key: "Stocks", label: "Stocks" },
-  { key: "OTC", label: "OTC" },
-  { key: "Favorites", label: "Favorites" },
-  { key: "Indices", label: "Indices" },
-  { key: "Commodities", label: "Commodities" },
+  { key: "All", label: "All" }, { key: "Currencies", label: "Forex" },
+  { key: "Cryptocurrencies", label: "Crypto" }, { key: "Stocks", label: "Stocks" },
+  { key: "OTC", label: "OTC" }, { key: "Favorites", label: "Favorites" },
+  { key: "Indices", label: "Indices" }, { key: "Commodities", label: "Commodities" },
 ];
-
 const FAVORITES_KEY = "neurooption_favorite_assets";
-
 function readFavorites(): string[] {
   try {
-    const parsed = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+    const parsed: unknown = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
+  } catch { return []; }
 }
-
 export default function MarketsPage() {
-  const navigate = useNavigate();
   const { quotes, live } = useQuotes();
-  const [tab, setTab] = useState("All");
+  const [params, setParams] = useSearchParams();
+  const requested = params.get("category")?.toLowerCase();
+  const tab = TABS.find((item) => item.key.toLowerCase() === requested || item.label.toLowerCase() === requested)?.key ?? "All";
   const [query, setQuery] = useState("");
   const [favorites, setFavorites] = useState<string[]>(readFavorites);
-
+  function selectTab(key: string) {
+    const next = new URLSearchParams(params);
+    if (key === "All") next.delete("category"); else next.set("category", key);
+    setParams(next, { replace: true });
+  }
   function toggleFavorite(symbol: string) {
     setFavorites((current) => {
       const next = current.includes(symbol) ? current.filter((item) => item !== symbol) : [...current, symbol];
-      try {
-        localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
-      } catch {
-        // Favourites just won't persist.
-      }
+      try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(next)); } catch { /* Session-only preference when storage is unavailable. */ }
       return next;
     });
   }
-
   const rows = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return quotes
-      .filter((quote) => {
-        if (tab === "Favorites") return favorites.includes(quote.symbol);
-        if (tab === "OTC") return quote.symbol.endsWith(" OTC");
-        return tab === "All" || quote.category === tab;
-      })
-      .filter(
-        (quote) =>
-          !needle || quote.symbol.toLowerCase().includes(needle) || quote.label.toLowerCase().includes(needle),
-      )
+    return quotes.filter((quote) => {
+      if (tab === "Favorites") return favorites.includes(quote.symbol);
+      if (tab === "OTC") return quote.symbol.endsWith(" OTC");
+      return tab === "All" || quote.category === tab;
+    }).filter((quote) => !needle || quote.symbol.toLowerCase().includes(needle) || quote.label.toLowerCase().includes(needle))
       .sort((a, b) => b.payout - a.payout);
   }, [quotes, tab, query, favorites]);
-
-  function trade(symbol: string) {
-    navigate("/trading", { state: { symbol } });
-  }
-
   return (
     <AppShell wide>
       <div className="mk-head">
-        <div>
-          <h1>Markets</h1>
-          <p>
-            {live ? <span className="mk-live">Live</span> : <span className="mk-live is-off">Connecting</span>}
-            {quotes.length} assets · payouts for a 1-minute trade
-          </p>
-        </div>
-        <label className="mk-search">
-          <Search size={16} aria-hidden="true" />
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search assets..."
-            aria-label="Search assets"
-          />
+        <div><h1>Markets</h1><p role="status">
+          <span className={`mk-live ${live ? "" : "is-off"}`}>{live ? "Live prices" : "Sample prices · connecting"}</span>
+          <span>{quotes.length} assets</span>
+        </p></div>
+        <label className="mk-search"><Search size={17} aria-hidden="true" />
+          <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search assets..." aria-label="Search assets" />
         </label>
       </div>
-
-      <div className="neo-tabs mk-tabs" role="tablist">
-        {TABS.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            role="tab"
-            aria-selected={tab === item.key}
-            className={tab === item.key ? "is-active" : ""}
-            onClick={() => setTab(item.key)}
-          >
-            {item.label}
-          </button>
+      <div className="neo-tabs mk-tabs" role="tablist" aria-label="Market categories">
+        {TABS.map((item, index) => (
+          <button key={item.key} type="button" role="tab" aria-selected={tab === item.key}
+            aria-controls="market-results" tabIndex={tab === item.key ? 0 : -1}
+            className={tab === item.key ? "is-active" : ""} onClick={() => selectTab(item.key)}
+            onKeyDown={(event) => {
+              let next = index;
+              if (event.key === "ArrowRight") next = (index + 1) % TABS.length;
+              else if (event.key === "ArrowLeft") next = (index + TABS.length - 1) % TABS.length;
+              else if (event.key === "Home") next = 0;
+              else if (event.key === "End") next = TABS.length - 1;
+              else return;
+              event.preventDefault(); selectTab(TABS[next].key);
+              (event.currentTarget.parentElement?.children[next] as HTMLElement | undefined)?.focus();
+            }}>{item.label}</button>
         ))}
       </div>
-
-      <div className="mk-table neo-card">
-        <div className="mk-row mk-row-head" aria-hidden="true">
-          <span>Asset</span>
-          <span>Price</span>
-          <span>24h change</span>
-          <span>Payout</span>
-          <span />
-        </div>
-
-        {rows.length === 0 && (
-          <p className="mk-empty">
-            {tab === "Favorites" ? "Tap the star next to an asset to add it to your favourites." : "No assets match your search."}
-          </p>
-        )}
-
-        {rows.map((quote) => {
-          const favorite = favorites.includes(quote.symbol);
-          return (
-            <div
-              key={quote.symbol}
-              className="mk-row"
-              role="button"
-              tabIndex={0}
-              onClick={() => trade(quote.symbol)}
-              onKeyDown={(event) => event.key === "Enter" && trade(quote.symbol)}
-            >
-              <span className="mk-asset">
-                <AssetIcon symbol={quote.symbol} category={quote.category} size={34} />
-                <span>
-                  <b>{quote.symbol}</b>
-                  <small>{quote.label}</small>
-                  <small className="mk-mobile-price">
-                    {formatPrice(quote)}{" "}
-                    <em className={quote.changePercent >= 0 ? "neo-up" : "neo-down"}>{formatChange(quote.changePercent)}</em>
-                  </small>
-                </span>
-              </span>
-              <span className="mk-price">{formatPrice(quote)}</span>
-              <span className={`mk-change ${quote.changePercent >= 0 ? "neo-up" : "neo-down"}`}>
-                {formatChange(quote.changePercent)}
-              </span>
-              <span className="mk-payout">{quote.payout}%</span>
-              <span className="mk-actions">
-                <button
-                  type="button"
-                  className={`mk-star ${favorite ? "is-on" : ""}`}
-                  aria-label={favorite ? `Remove ${quote.symbol} from favourites` : `Add ${quote.symbol} to favourites`}
-                  aria-pressed={favorite}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    toggleFavorite(quote.symbol);
-                  }}
-                >
-                  <Star size={17} fill={favorite ? "currentColor" : "none"} />
-                </button>
-                <span className="neo-btn neo-btn-primary neo-btn-sm mk-trade">Trade</span>
-              </span>
-            </div>
-          );
-        })}
-      </div>
+      <section id="market-results" className="mk-table neo-card" role="tabpanel" aria-label={`${TABS.find((item) => item.key === tab)?.label} assets`}>
+        <div className="mk-row-head" aria-hidden="true"><span>Asset</span><span>Price</span><span>24h change</span><span>Payout</span><span /></div>
+        <ul className="mk-asset-list">
+          {rows.map((quote) => <AssetRow key={quote.symbol} quote={quote} favorite={favorites.includes(quote.symbol)} onToggleFavorite={toggleFavorite} />)}
+        </ul>
+        {rows.length === 0 && <p className="mk-empty">{tab === "Favorites" ? "Tap the star next to an asset to add it to your favourites." : "No assets match your search."}</p>}
+      </section>
+      <p className="mk-feed-note">{live ? "Prices and payouts update from the market feed. Final payout is confirmed in the trading terminal." : "Illustrative quotes are shown while the market feed connects. Open the terminal for executable prices and payouts."}</p>
     </AppShell>
   );
 }

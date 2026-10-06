@@ -3,7 +3,6 @@ import { useSearchParams } from "react-router-dom";
 import {
   ArrowDownLeft,
   ArrowUpRight,
-  ChevronRight,
   CircleAlert,
   CircleCheck,
   LoaderCircle,
@@ -14,8 +13,8 @@ import {
 } from "lucide-react";
 import AppShell from "../components/shell/AppShell";
 import { refreshAccount } from "../components/shell/useAccount";
-import MpesaLogo from "../components/finance/MpesaLogo";
-import PaymentLogo, { type PaymentBrand } from "../components/finance/PaymentLogo";
+import type { PaymentBrand } from "../components/finance/PaymentLogo";
+import PaymentMethodCard from "../components/finance/PaymentMethodCard";
 import MpesaDepositDialog from "../components/finance/MpesaDepositDialog";
 import { financeApi, type FinanceOverview, type FinanceStatus } from "../api";
 import "./FinancePage.css";
@@ -83,6 +82,7 @@ export default function FinancePage() {
   const [loadError, setLoadError] = React.useState("");
   const [loading, setLoading] = React.useState(true);
   const [depositOpen, setDepositOpen] = React.useState(false);
+  const closeDeposit = React.useCallback(() => setDepositOpen(false), []);
 
   const [withdrawPhone, setWithdrawPhone] = React.useState("");
   const [withdrawAmount, setWithdrawAmount] = React.useState("");
@@ -200,41 +200,12 @@ export default function FinancePage() {
                 <h2 className="fin-section-title">Choose Payment Method</h2>
                 <ul className="fin-paylist">
                   <li>
-                    <button
-                      type="button"
-                      className="fin-pay"
-                      onClick={() => setDepositOpen(true)}
-                      disabled={!mpesaReady}
-                    >
-                      <span className="fin-pay-tile">
-                        <MpesaLogo />
-                      </span>
-                      <span className="fin-pay-text">
-                        <b>M-Pesa</b>
-                        <small>Instant deposit</small>
-                        <small>KES</small>
-                      </span>
-                      {mpesaReady ? (
-                        <ChevronRight size={18} className="fin-pay-chev" aria-hidden="true" />
-                      ) : (
-                        <span className="neo-badge neo-badge-muted">{overview ? "Setting up" : "…"}</span>
-                      )}
-                    </button>
+                    <PaymentMethodCard name="M-Pesa" detail="Instant deposit" currencies="KES" brand="mpesa"
+                      available={mpesaReady} status={loading && !loadError ? "Checking…" : "Unavailable"}
+                      onSelect={() => setDepositOpen(true)} />
                   </li>
                   {OTHER_METHODS.map((method) => (
-                    <li key={method.name}>
-                      <button type="button" className="fin-pay" disabled>
-                        <span className="fin-pay-tile">
-                          <PaymentLogo brand={method.brand} label={method.name} />
-                        </span>
-                        <span className="fin-pay-text">
-                          <b>{method.name}</b>
-                          <small>{method.detail}</small>
-                          <small>{method.currencies}</small>
-                        </span>
-                        <span className="neo-badge neo-badge-accent">Coming soon</span>
-                      </button>
-                    </li>
+                    <li key={method.name}><PaymentMethodCard {...method} /></li>
                   ))}
                 </ul>
                 <p className="fin-note">
@@ -365,7 +336,7 @@ export default function FinancePage() {
           <MpesaDepositDialog
             minAmount={overview.mpesa.minAmount}
             maxAmount={overview.mpesa.maxAmount}
-            onClose={() => setDepositOpen(false)}
+            onClose={closeDeposit}
             onFinished={loadOverview}
           />
         )}

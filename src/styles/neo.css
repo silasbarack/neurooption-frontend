@@ -1,4 +1,4 @@
-/* NeuroOption design system: deep navy surfaces, electric-blue accent, Noto Sans.
+/* NeuroOption design system: deep navy surfaces, gold accent, Noto Sans.
    Loaded once from main.tsx; every page builds on these tokens. */
 
 :root {
@@ -12,10 +12,10 @@
   --neo-text: #eef2f8;
   --neo-muted: #8d99b0;
   --neo-faint: #5f6c84;
-  --neo-accent: #2f6bff;
-  --neo-accent-2: #5b8cff;
-  --neo-accent-ink: #ffffff;
-  --neo-accent-soft: rgba(47, 107, 255, 0.14);
+  --neo-accent: #f4c751;
+  --neo-accent-2: #ffdd78;
+  --neo-accent-ink: #17140d;
+  --neo-accent-soft: rgba(244, 199, 81, 0.14);
   --neo-green: #22c55e;
   --neo-green-soft: rgba(34, 197, 94, 0.14);
   --neo-red: #ef4444;
@@ -104,11 +104,11 @@ textarea {
 .neo-btn-primary {
   background: linear-gradient(180deg, var(--neo-accent-2), var(--neo-accent));
   color: var(--neo-accent-ink);
-  box-shadow: 0 8px 22px rgba(47, 107, 255, 0.22);
+  box-shadow: 0 8px 22px rgba(244, 199, 81, 0.22);
 }
 
 .neo-btn-primary:hover {
-  box-shadow: 0 10px 28px rgba(47, 107, 255, 0.34);
+  box-shadow: 0 10px 28px rgba(244, 199, 81, 0.34);
 }
 
 .neo-btn-outline {
@@ -118,8 +118,8 @@ textarea {
 }
 
 .neo-btn-outline:hover {
-  border-color: rgba(47, 107, 255, 0.55);
-  background: rgba(47, 107, 255, 0.06);
+  border-color: rgba(244, 199, 81, 0.55);
+  background: rgba(244, 199, 81, 0.06);
 }
 
 .neo-btn-ghost {
@@ -239,7 +239,7 @@ textarea {
 .neo-tabs button.is-active {
   background: var(--neo-accent-soft);
   color: var(--neo-accent);
-  box-shadow: inset 0 0 0 1px rgba(47, 107, 255, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(244, 199, 81, 0.4);
 }
 
 /* ---------- Inputs ---------- */
@@ -269,7 +269,7 @@ textarea {
 
 .neo-input:focus {
   border-color: var(--neo-accent);
-  box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.16);
+  box-shadow: 0 0 0 3px rgba(244, 199, 81, 0.16);
 }
 
 .neo-badge {

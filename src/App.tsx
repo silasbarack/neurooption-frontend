@@ -1,28 +1,28 @@
-import type { ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import { getToken } from "./utils/storage";
-import LandingPage from "./pages/LandingPage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
-import DeleteAccountPage from "./pages/DeleteAccountPage";
-import ProfilePage from "./pages/ProfilePage";
-import TradingPage from "./pages/TradingPage";
-import FinancePage from "./pages/FinancePage";
-import MarketsPage from "./pages/MarketsPage";
-import AccountPage from "./pages/AccountPage";
+const LandingPage = lazy(() => import("./pages/LandingPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const RegisterPage = lazy(() => import("./pages/RegisterPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
+const DeleteAccountPage = lazy(() => import("./pages/DeleteAccountPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const TradingPage = lazy(() => import("./pages/TradingPage"));
+const FinancePage = lazy(() => import("./pages/FinancePage"));
+const MarketsPage = lazy(() => import("./pages/MarketsPage"));
+const AccountPage = lazy(() => import("./pages/AccountPage"));
 import AppShell from "./components/shell/AppShell";
-import ChatPage from "./pages/ChatPage";
-import HelpPage from "./pages/HelpPage";
-import AchievementsPage from "./pages/AchievementsPage";
-import TournamentsPage from "./pages/TournamentsPage";
-import OpenTradesPage from "./pages/OpenTradesPage";
-import HistoryPage from "./pages/HistoryPage";
-import SignalsPage from "./pages/SignalsPage";
-import SocialTradingPage from "./pages/SocialTradingPage";
-import ExpressTradesPage from "./pages/ExpressTradesPage";
+const ChatPage = lazy(() => import("./pages/ChatPage"));
+const HelpPage = lazy(() => import("./pages/HelpPage"));
+const AchievementsPage = lazy(() => import("./pages/AchievementsPage"));
+const TournamentsPage = lazy(() => import("./pages/TournamentsPage"));
+const OpenTradesPage = lazy(() => import("./pages/OpenTradesPage"));
+const HistoryPage = lazy(() => import("./pages/HistoryPage"));
+const SignalsPage = lazy(() => import("./pages/SignalsPage"));
+const SocialTradingPage = lazy(() => import("./pages/SocialTradingPage"));
+const ExpressTradesPage = lazy(() => import("./pages/ExpressTradesPage"));
 import RouteTransition from "./components/layout/RouteTransition";
 
 /** Older content pages rendered inside the new app frame. */
@@ -50,6 +50,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <RouteTransition>
+        <Suspense fallback={<div className="neo-route-loading" role="status"><span className="neo-skeleton" />Loading NeuroOption…</div>}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
 
@@ -197,6 +198,7 @@ export default function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
       </RouteTransition>
     </BrowserRouter>
   );

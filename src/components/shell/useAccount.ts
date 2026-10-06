@@ -1,61 +1,59 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { accountApi, type AccountSummary } from "../../api";
 import { getToken, getUser } from "../../utils/storage";
 
-// One request per page load, shared by every component that asks.
-let cached: AccountSummary | null = null;
-let inflight: Promise<AccountSummary> | null = null;
-
-function loadAccount() {
-  inflight ??= accountApi
-    .me()
-    .then((account) => {
-      cached = account;
-      return account;
-    })
-    .finally(() => {
-      inflight = null;
-    });
-  return inflight;
+// Scope cached state to its authenticated session and notify all consumers after a refresh.
+let cached: { token: string; account: AccountSummary } | null = null;
+let inflight: { token: string; promise: Promise<AccountSummary> } | null = null;
+const listeners = new Set<() => void>();
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => { listeners.delete(listener); };
 }
-
-/** Forget the cached account (e.g. after a deposit) and fetch it again. */
+function loadAccount(token: string) {
+  if (inflight?.token === token) return inflight.promise;
+  const promise = accountApi.me().then((account) => {
+    if (getToken() === token) {
+      cached = { token, account };
+      listeners.forEach((listener) => listener());
+    }
+    return account;
+  }).finally(() => {
+    if (inflight?.promise === promise) inflight = null;
+  });
+  inflight = { token, promise };
+  return promise;
+}
 export function refreshAccount() {
-  cached = null;
-  return loadAccount();
+  const token = getToken();
+  if (!token) return Promise.reject(new Error("Please sign in to load your account."));
+  return loadAccount(token);
 }
-
 export function initialsOf(name?: string | null) {
   const parts = (name || "").trim().split(/\s+/).filter(Boolean);
   if (!parts.length) return "N";
   return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
 }
-
 export function useAccount() {
-  const [account, setAccount] = useState<AccountSummary | null>(cached);
+  const token = getToken();
+  const account = useSyncExternalStore(subscribe, () => cached?.token === token ? cached.account : null, () => null);
   const [error, setError] = useState("");
-  const signedIn = Boolean(getToken());
   const storedUser = getUser();
-
   useEffect(() => {
-    if (!signedIn) return;
+    if (!token) return;
     let active = true;
-    loadAccount()
-      .then((next) => active && setAccount(next))
-      .catch((err: unknown) => active && setError(err instanceof Error ? err.message : "Could not load your account."));
-    return () => {
-      active = false;
-    };
-  }, [signedIn]);
-
+    loadAccount(token)
+      .then(() => { if (active) setError(""); })
+      .catch((err: unknown) => { if (active) setError(err instanceof Error ? err.message : "Could not load your account."); });
+    return () => { active = false; };
+  }, [token]);
   return {
     account,
     error,
-    signedIn,
+    signedIn: Boolean(token),
     displayName: account?.fullName || storedUser?.fullName || storedUser?.name || "Trader",
-    reload: () =>
-      refreshAccount()
-        .then(setAccount)
-        .catch(() => undefined),
+    reload: () => refreshAccount().then(() => setError("")).catch((err: unknown) => {
+      setError(err instanceof Error ? err.message : "Could not load your account.");
+    }),
   };
 }

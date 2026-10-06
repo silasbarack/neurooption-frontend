@@ -1,4 +1,4 @@
-import { useState, type ReactElement } from "react";
+import type { ReactElement } from "react";
 import "./PaymentLogo.css";
 
 export type PaymentBrand =
@@ -9,14 +9,8 @@ export type PaymentBrand =
   | "mastercard"
   | "visa";
 
-// Drop official artwork in public/payments/<brand>.svg (or .png) and it is used
-// in place of the built-in mark below — no code change needed.
-const OVERRIDE_SOURCES = (brand: PaymentBrand) => [
-  `/payments/${brand}.svg`,
-  `/payments/${brand}.png`,
-  // Legacy filenames kept so existing drop-ins still resolve.
-  ...(brand === "mpesa" ? ["/payments/mpesa-logo.svg", "/payments/mpesa-logo.png"] : []),
-];
+// Add approved local artwork here when supplied; avoid probing nonexistent URLs.
+const OFFICIAL_ASSETS: Partial<Record<PaymentBrand, string>> = {};
 
 const ART: Record<PaymentBrand, ReactElement> = {
   mpesa: (
@@ -145,9 +139,7 @@ type PaymentLogoProps = {
 
 /** A payment brand mark: official artwork when supplied, else a built-in vector. */
 export default function PaymentLogo({ brand, label, className = "" }: PaymentLogoProps) {
-  const sources = OVERRIDE_SOURCES(brand);
-  const [sourceIndex, setSourceIndex] = useState(0);
-  const src = sources[sourceIndex];
+  const src = OFFICIAL_ASSETS[brand];
 
   if (src) {
     return (
@@ -155,7 +147,6 @@ export default function PaymentLogo({ brand, label, className = "" }: PaymentLog
         className={`pay-logo ${className}`}
         src={src}
         alt={label}
-        onError={() => setSourceIndex((index) => index + 1)}
       />
     );
   }

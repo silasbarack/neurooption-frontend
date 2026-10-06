@@ -9,7 +9,8 @@ const ACCOUNT_TYPES: AccountType[] = ["QT Demo", "QT Real"];
 type AccountBalanceSelectorProps = {
   accountType: AccountType;
   currency: Currency;
-  balance: number;
+  balance: number | null;
+  loading?: boolean;
   onAccountTypeChange: (value: AccountType) => void;
   onCurrencyChange: (value: Currency) => void;
   depositPath?: string;
@@ -19,6 +20,7 @@ export default function AccountBalanceSelector({
   accountType,
   currency,
   balance,
+  loading = false,
   onAccountTypeChange,
   onCurrencyChange,
   depositPath = "/finance",
@@ -36,33 +38,32 @@ export default function AccountBalanceSelector({
       }
     }
 
+    function handleEscape(event: KeyboardEvent) { if (event.key === "Escape") setOpen(false); }
+    document.addEventListener("keydown", handleEscape);
     document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, [open]);
 
-  const balanceText = balance.toLocaleString("en-US", {
+  const balanceText = balance === null ? (loading ? "Loading…" : "Unavailable") : balance.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 
   return (
     <div className="account-balance-selector" ref={rootRef}>
-      <div
+      <button
+        type="button"
         className="balance-info"
-        role="button"
-        tabIndex={0}
         aria-expanded={open}
         aria-haspopup="true"
+        aria-label={`Select account and currency. ${accountType}, ${currency}, balance ${balanceText}`}
         onClick={() => setOpen((value) => !value)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            setOpen((value) => !value);
-          }
-        }}
       >
         <div className="balance-top-row">
-          <span>{accountType}</span>
+          <span>{accountType === "QT Demo" ? "Demo" : "Real"}</span>
           <span>{currency}</span>
         </div>
 
@@ -70,7 +71,7 @@ export default function AccountBalanceSelector({
           <span className="balance-amount">{balanceText}</span>
           <ChevronDown size={16} className={`balance-arrow${open ? " is-open" : ""}`} aria-hidden="true" />
         </div>
-      </div>
+      </button>
 
       <button
         type="button"
@@ -97,7 +98,7 @@ export default function AccountBalanceSelector({
                     setOpen(false);
                   }}
                 >
-                  {option}
+                  {option === "QT Demo" ? "Demo" : "Real"}
                 </button>
               ))}
             </div>

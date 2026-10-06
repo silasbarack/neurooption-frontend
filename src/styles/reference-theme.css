@@ -1,176 +1,74 @@
-/* Blue-led application theme from the approved mobile NeuroOption references.
-   Existing business logic is untouched; these are visual token and shell overrides. */
+/* Shared NeuroOption tokens, aligned with the approved gold and navy references. */
 :root {
-  --neo-bg: #04090f;
-  --neo-bg-2: #071019;
-  --neo-panel: #0a131d;
-  --neo-panel-2: #0d1824;
-  --neo-panel-3: #122130;
-  --neo-line: rgba(148, 178, 230, 0.12);
-  --neo-line-strong: rgba(148, 178, 230, 0.22);
-  --neo-text: #f2f1ed;
-  --neo-muted: #929aa4;
-  --neo-faint: #69727c;
-  --neo-accent: #2f6bff;
-  --neo-accent-2: #5b8cff;
-  --neo-accent-ink: #ffffff;
-  --neo-accent-soft: rgba(47, 107, 255, 0.13);
-  --background-primary: var(--neo-bg);
-  --background-secondary: var(--neo-bg-2);
-  --background-elevated: var(--neo-panel-2);
-  --surface: var(--neo-panel);
-  --surface-hover: var(--neo-panel-3);
-  --border: var(--neo-line);
-  --text-primary: var(--neo-text);
-  --text-secondary: var(--neo-muted);
-  --positive: var(--neo-green);
-  --negative: var(--neo-red);
+  --background-primary: #050c14;
+  --background-secondary: #08121d;
+  --background-elevated: #122030;
+  --surface: #0d1926;
+  --surface-hover: #182a3b;
+  --border: rgba(157,180,204,.16);
+  --text-primary: #f4f5f7;
+  --text-secondary: #a5b3c4;
+  --brand-gold: #f4c751;
+  --positive: #2bd286;
+  --negative: #ff5365;
+  --neo-bg: var(--background-primary);
+  --neo-bg-2: var(--background-secondary);
+  --neo-panel: var(--surface);
+  --neo-panel-2: var(--background-elevated);
+  --neo-panel-3: var(--surface-hover);
+  --neo-line: var(--border);
+  --neo-line-strong: rgba(157,180,204,.28);
+  --neo-text: var(--text-primary);
+  --neo-muted: var(--text-secondary);
+  --neo-faint: #8a9bae;
+  --neo-accent: var(--brand-gold);
+  --neo-accent-2: #ffdd78;
+  --neo-accent-ink: #17140d;
+  --neo-accent-soft: rgba(244,199,81,.12);
+  --neo-green: var(--positive);
+  --neo-red: var(--negative);
+  --neo-font: "Noto Sans", Inter, Arial, sans-serif;
+  --neo-radius: 12px;
+  --neo-radius-sm: 8px;
+  --neo-bottom-nav: 68px;
+}
+html { background: var(--background-primary); scroll-padding-top: 80px; }
+body { background: var(--background-primary); color: var(--text-primary); }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--brand-gold);
+  outline-offset: 3px;
+}
+.neo-shell { background: radial-gradient(900px 420px at 84% -12%, rgba(244,199,81,.045), transparent 62%), var(--neo-bg); }
+.neo-topbar { border-bottom-color: var(--border); background: rgba(5,12,20,.96); }
+.neo-drawer-panel { border-left-color: var(--border); background: linear-gradient(180deg,#0c1825,#050c14); }
+.neo-topnav a.is-active, .neo-drawer-nav a.is-active, .neo-drawer-nav a.is-active svg:first-child, .neo-bottomnav a.is-active { color: var(--brand-gold); }
+.neo-topnav a.is-active::after { background: var(--brand-gold); }
+.neo-drawer-nav a:hover, .neo-drawer-nav a.is-active { background: var(--neo-accent-soft); }
+.neo-btn-primary { border-color: var(--brand-gold); background: linear-gradient(180deg,var(--neo-accent-2),var(--brand-gold)); box-shadow: 0 4px 16px rgba(244,199,81,.12); color: var(--neo-accent-ink); }
+.neo-btn-primary:hover { box-shadow: 0 6px 22px rgba(244,199,81,.2); filter: brightness(1.04); }
+.neo-btn-outline:hover { border-color: var(--brand-gold); background: var(--neo-accent-soft); }
+.neo-tabs button.is-active { background: var(--neo-accent-soft); color: var(--brand-gold); box-shadow: inset 0 0 0 1px rgba(244,199,81,.28); }
+.neo-input:focus { border-color: var(--brand-gold); box-shadow: 0 0 0 3px var(--neo-accent-soft); }
+.neo-avatar { background: linear-gradient(135deg,#344858,#182736); box-shadow: 0 0 0 2px rgba(244,199,81,.25); color: var(--brand-gold); }
+.neo-bottomnav { border-top-color: var(--border); background: rgba(5,12,20,.98); }
+.ac-switch button.is-active { border-color: var(--brand-gold); background: var(--neo-accent-soft); color: var(--text-primary); }
+.ac-progress-icon { background: var(--neo-accent-soft); color: var(--brand-gold); }
+.ac-tile:hover { border-color: rgba(244,199,81,.5); }
+.ac-tile:hover svg, .soc-rank, .soc-risk.is-medium { color: var(--brand-gold); }
+.ach-tabs button.is-active, .soc-tabs button.is-active { color: var(--brand-gold); }
+.nt-premium .nt-sidebar button.active, .nt-premium .nt-quick-menu button:hover, .nt-premium .nt-chart-types button.active, .nt-premium .nt-asset-tabs button.active, .nt-premium .nt-asset-list button.active, .nt-premium .nt-floating button.active { color: var(--brand-gold); }
+.nt-premium .nt-sidebar button.active::before { background: var(--brand-gold); }
+.nt-premium .deposit-shortcut-btn { border-color: var(--brand-gold); background: linear-gradient(180deg,var(--neo-accent-2),var(--brand-gold)); color: var(--neo-accent-ink); }
+.fin .neo-tabs button.is-active, .fin-link-btn { color: var(--brand-gold); }
+.fin-pay:focus-visible, .fin-input:focus-visible { outline-color: var(--brand-gold); }
+@media (max-width:900px) {
+  .neo-shell-main { padding-right:16px; padding-left:16px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto; }
+  *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
 }
 
-.neo-shell {
-  background:
-    radial-gradient(900px 420px at 84% -12%, rgba(47, 107, 255, 0.06), transparent 62%),
-    var(--neo-bg);
-}
-
-.neo-topbar {
-  border-bottom-color: rgba(47, 107, 255,.1);
-  background: rgba(4, 9, 15, 0.92);
-}
-
-.neo-topnav a.is-active,
-.neo-drawer-nav a.is-active,
-.neo-drawer-nav a.is-active svg:first-child,
-.neo-bottomnav a.is-active {
-  color: var(--neo-accent);
-}
-
-.neo-topnav a.is-active::after { background: var(--neo-accent); }
-
-.neo-drawer-panel {
-  border-left-color: rgba(47, 107, 255,.13);
-  background: linear-gradient(180deg, #09121b, #04090f);
-}
-
-.neo-drawer-nav a:hover,
-.neo-drawer-nav a.is-active { background: rgba(47, 107, 255,.08); }
-
-.neo-btn-primary {
-  border-color: #5b8cff;
-  background: linear-gradient(180deg, #4a84ff, #2454e6);
-  box-shadow: 0 8px 22px rgba(47, 107, 255, 0.28);
-  color: #ffffff;
-}
-
-.neo-btn-primary:hover { box-shadow: 0 10px 28px rgba(47, 107, 255, 0.3); }
-
-.neo-btn-outline:hover {
-  border-color: rgba(47, 107, 255,.48);
-  background: rgba(47, 107, 255,.05);
-}
-
-.neo-tabs button.is-active {
-  background: rgba(47, 107, 255,.12);
-  color: #7ea7ff;
-  box-shadow: inset 0 0 0 1px rgba(47, 107, 255,.32);
-}
-
-.neo-input:focus {
-  border-color: var(--neo-accent);
-  box-shadow: 0 0 0 3px rgba(47, 107, 255,.12);
-}
-
-.neo-avatar {
-  background: linear-gradient(135deg, #5b8cff, #80610d);
-  box-shadow: 0 0 0 2px rgba(47, 107, 255,.24);
-  color: #fff8df;
-}
-
-.neo-bottomnav {
-  border-top-color: rgba(47, 107, 255,.12);
-  background: rgba(4, 9, 15, 0.97);
-}
-
-.mk-star:hover,
-.mk-star.is-on,
-.mk-payout { color: #7ea7ff; }
-
-.mk-row:not(.mk-row-head):hover { background: rgba(47, 107, 255,.035); }
-.mk-row:focus-visible { outline-color: var(--neo-accent); }
-
-.ac-switch button.is-active {
-  border-color: rgba(47, 107, 255,.48);
-  background: rgba(47, 107, 255,.1);
-  color: #f8f1de;
-}
-
-.ac-progress-icon {
-  background: rgba(47, 107, 255,.14);
-  color: #7ea7ff;
-}
-
-.ac-tile:hover { border-color: rgba(47, 107, 255,.35); }
-.ac-tile:hover svg { color: var(--neo-accent); }
-
-.soc-rank,
-.soc-risk.is-medium { color: #7ea7ff; }
-
-.ach-hero {
-  background:
-    radial-gradient(260px 180px at 50% 20%, rgba(47, 107, 255, 0.2), transparent 70%),
-    linear-gradient(180deg, #101923, #09121b);
-}
-
-.ach-tabs button.is-active,
-.soc-tabs button.is-active { color: #7ea7ff; }
-
-.nt-premium .nt-sidebar button.active,
-.nt-premium .nt-quick-menu button:hover,
-.nt-premium .nt-chart-types button.active,
-.nt-premium .nt-asset-tabs button.active,
-.nt-premium .nt-asset-list button.active,
-.nt-premium .nt-floating button.active { color: #7ea7ff; }
-
-.nt-premium .nt-sidebar button.active::before { background: #7ea7ff; }
-
-.nt-premium .deposit-shortcut-btn {
-  border-color: #7ea7ff;
-  background: linear-gradient(180deg, #5b8cff, #7ea7ff);
-  color: #ffffff;
-}
-
-.fin .neo-tabs button.is-active,
-.fin-link-btn { color: #7ea7ff; }
-
-.fin-pay:focus-visible,
-.fin-input:focus-visible { outline-color: #7ea7ff; }
-
-@media (max-width: 900px) {
-  .neo-shell-main { padding-right: 12px; padding-left: 12px; }
-  .neo-topbar-inner { border-bottom: 1px solid rgba(47, 107, 255,.04); }
-
-  .mk-head { display: grid; gap: 12px; }
-  .mk-head h1 { font-size: 24px; }
-
-  .mk-tabs {
-    border: 0;
-    background: transparent;
-    padding: 0;
-  }
-
-  .mk-tabs button {
-    min-height: 34px;
-    border: 1px solid var(--neo-line);
-    background: #0a131d;
-  }
-
-  .mk-tabs button:nth-child(n + 6) { display: none; }
-  .mk-table { border-radius: 12px; }
-  .mk-row { min-height: 63px; background: #09121b; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .neo-btn,
-  .neo-card,
-  .neo-drawer-panel { transition: none; }
-}
+.neo-route-loading { display:grid; place-content:center; gap:16px; min-height:60dvh; color:var(--neo-muted); text-align:center; font-size:14px; }
+.neo-route-loading .neo-skeleton { display:block; width:200px; height:4px; }

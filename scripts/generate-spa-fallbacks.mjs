@@ -1,4 +1,4 @@
-import { copyFile, mkdir } from "node:fs/promises";
+import { copyFile, mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
 const routes = [
@@ -42,3 +42,8 @@ await Promise.all(
 
 await copyFile(source, join("dist", "404.html"));
 console.log("Generated SPA entry points for " + routes.length + " routes.");
+
+await writeFile(join("dist", "build-info.json"), JSON.stringify({
+  commit: process.env.RENDER_GIT_COMMIT || process.env.GITHUB_SHA || "local",
+  builtAt: new Date().toISOString(),
+}) + "\n");

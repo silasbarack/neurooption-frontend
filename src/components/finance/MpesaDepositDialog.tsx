@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { createPortal } from "react-dom";
 import {
   CircleAlert,
   CircleCheck,
@@ -37,15 +38,40 @@ export default function MpesaDepositDialog({
   const [submitting, setSubmitting] = useState(false);
   const [deposit, setDeposit] = useState<StkDeposit | null>(null);
   const [timedOut, setTimedOut] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<number | null>(null);
   const startedAtRef = useRef(0);
 
   useEffect(() => {
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    const siblings = Array.from(document.body.children).filter(
+      (node): node is HTMLElement => node instanceof HTMLElement && node !== modalRef.current,
+    );
+    const inertStates = siblings.map((node) => node.inert);
+    siblings.forEach((node) => { node.inert = true; });
+    document.body.style.overflow = "hidden";
+    const frame = requestAnimationFrame(() => panelRef.current?.querySelector<HTMLButtonElement>("button")?.focus());
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") { event.preventDefault(); onClose(); return; }
+      if (event.key !== "Tab") return;
+      const items = Array.from(panelRef.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), a[href], [tabindex="0"]',
+      ) ?? []).filter((node) => node.getClientRects().length);
+      const first = items[0], last = items[items.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+      siblings.forEach((node, index) => { node.inert = inertStates[index]; });
+      if (previousFocus?.isConnected) previousFocus.focus();
+    };
   }, [onClose]);
 
   // Poll the deposit until Safaricom confirms, fails or we give up waiting.
@@ -123,9 +149,9 @@ export default function MpesaDepositDialog({
     ? `KES ${deposit.amount.toLocaleString("en-KE")}`
     : `KES ${Number(amount || 0).toLocaleString("en-KE")}`;
 
-  return (
-    <div className="fin-modal" role="dialog" aria-modal="true" aria-label="Deposit with M-Pesa" onClick={onClose}>
-      <div className="fin-modal-panel" onClick={(event) => event.stopPropagation()}>
+  return createPortal(
+    <div ref={modalRef} className="fin fin-modal" role="dialog" aria-modal="true" aria-label="Deposit with M-Pesa" onClick={onClose}>
+      <div ref={panelRef} className="fin-modal-panel" onClick={(event) => event.stopPropagation()}>
         <div className="fin-modal-head">
           <div className="fin-modal-brand">
             <span className="fin-mpesa-badge"><MpesaLogo /></span>
@@ -276,6 +302,7 @@ export default function MpesaDepositDialog({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

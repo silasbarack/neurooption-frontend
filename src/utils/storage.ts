@@ -22,7 +22,7 @@ export function saveUser(user: AuthUser): void {
 }
 
 export function getUser(): AuthUser | null {
-  const raw = localStorage.getItem(USER_KEY);
+  const raw = localStorage.getItem(USER_KEY) || sessionStorage.getItem(USER_KEY);
 
   if (!raw) return null;
 
@@ -30,12 +30,14 @@ export function getUser(): AuthUser | null {
     return JSON.parse(raw) as AuthUser;
   } catch {
     localStorage.removeItem(USER_KEY);
+    sessionStorage.removeItem(USER_KEY);
     return null;
   }
 }
 
 export function clearUser(): void {
   localStorage.removeItem(USER_KEY);
+  sessionStorage.removeItem(USER_KEY);
 }
 
 export function logout(): void {

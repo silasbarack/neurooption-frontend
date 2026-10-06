@@ -39,6 +39,7 @@ export default function AppShell({ children, title, backTo, wide }: AppShellProp
 
   return (
     <div className={`neo-shell ${title ? "has-title" : ""}`}>
+      <a className="neo-skip-link" href="#app-content">Skip to content</a>
       <header className="neo-topbar">
         <div className="neo-topbar-inner">
           {title && (
@@ -51,7 +52,7 @@ export default function AppShell({ children, title, backTo, wide }: AppShellProp
 
           <nav className="neo-topnav" aria-label="Main">
             {TOP_NAV.map(({ label, path }) => (
-              <Link key={path} to={path} className={isActivePath(pathname, path) ? "is-active" : ""}>
+              <Link key={path} to={path} className={isActivePath(pathname, path) ? "is-active" : ""} aria-current={isActivePath(pathname, path) ? "page" : undefined}>
                 {label}
               </Link>
             ))}
@@ -71,14 +72,14 @@ export default function AppShell({ children, title, backTo, wide }: AppShellProp
             <Link to="/profile" className="neo-topbar-avatar" aria-label="Your account">
               <Avatar name={displayName} size={34} />
             </Link>
-            <button type="button" className="neo-icon-btn neo-topbar-menu" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+            <button type="button" className="neo-icon-btn neo-topbar-menu" onClick={() => setMenuOpen(true)} aria-label="Open menu" aria-haspopup="dialog" aria-expanded={menuOpen}>
               <Menu size={19} />
             </button>
           </div>
         </div>
       </header>
 
-      <main className={`neo-shell-main ${wide ? "is-wide" : ""}`}>{children}</main>
+      <main id="app-content" className={`neo-shell-main ${wide ? "is-wide" : ""}`}>{children}</main>
 
       <nav className="neo-bottomnav" aria-label="Main">
         {BOTTOM_NAV.map(({ label, path, icon: Icon }) => (

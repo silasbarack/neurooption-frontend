@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Maximize, Menu, Star } from "lucide-react";
+import { Maximize, Menu } from "lucide-react";
 import type { AccountType, Currency } from "./trading.types";
 import AccountBalanceSelector from "./AccountBalanceSelector";
 import Logo from "../branding/Logo";
@@ -9,7 +9,8 @@ import MenuDrawer from "../shell/MenuDrawer";
 type TradingHeaderProps = {
   accountType: AccountType;
   currency: Currency;
-  balance: number;
+  balance: number | null;
+  balanceLoading?: boolean;
   onAccountChange: (value: AccountType) => void;
   onCurrencyChange: (value: Currency) => void;
   onFullscreen: () => void;
@@ -40,6 +41,7 @@ export default function TradingHeader({
   accountType,
   currency,
   balance,
+  balanceLoading = false,
   onAccountChange,
   onCurrencyChange,
   onFullscreen,
@@ -60,12 +62,9 @@ export default function TradingHeader({
         <Link to="/" className="nt-brand-plate" aria-label="NeuroOption home">
           <Logo className="nt-brand-approved-logo" />
         </Link>
-        <button type="button" className="nt-star" aria-label="Favourites">
-          <Star size={16} aria-hidden="true" />
-        </button>
-        <div className="nt-market-status" aria-label="Market status">
+        <div className="nt-market-status" aria-label="Trading clock">
           <i aria-hidden="true" />
-          <span>Market open</span>
+          <span>Trading workspace</span>
           <time>{clock} UTC</time>
         </div>
       </div>
@@ -75,6 +74,7 @@ export default function TradingHeader({
           accountType={accountType}
           currency={currency}
           balance={balance}
+          loading={balanceLoading}
           onAccountTypeChange={onAccountChange}
           onCurrencyChange={onCurrencyChange}
           depositPath="/finance"
@@ -88,7 +88,7 @@ export default function TradingHeader({
           {initials}
         </Link>
 
-        <button type="button" className="nt-fullscreen nt-menu-btn" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+        <button type="button" className="nt-fullscreen nt-menu-btn" onClick={() => setMenuOpen(true)} aria-label="Open menu" aria-haspopup="dialog" aria-expanded={menuOpen}>
           <Menu size={18} aria-hidden="true" />
         </button>
       </div>

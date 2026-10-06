@@ -156,7 +156,7 @@
 .fin-btn-blue {
   background: linear-gradient(180deg, var(--neo-accent-2), var(--neo-accent));
   color: var(--neo-accent-ink);
-  box-shadow: 0 10px 24px rgba(47, 107, 255, 0.25);
+  box-shadow: 0 10px 24px rgba(244, 199, 81, 0.25);
 }
 
 .fin-btn-green:hover:not(:disabled),
@@ -183,7 +183,7 @@
 .fin-btn:focus-visible,
 .fin-back:focus-visible,
 .fin-input:focus-visible {
-  outline: 3px solid rgba(47, 107, 255, 0.45);
+  outline: 3px solid rgba(244, 199, 81, 0.45);
   outline-offset: 2px;
 }
 
@@ -996,9 +996,9 @@ select.fin-input option {
   display: grid;
   min-width: 220px;
   padding: 14px 18px;
-  border: 1px solid rgba(47, 107, 255, 0.3);
+  border: 1px solid rgba(244, 199, 81, 0.3);
   border-radius: 14px;
-  background: linear-gradient(160deg, rgba(47, 107, 255, 0.1), rgba(13, 22, 40, 0.8));
+  background: linear-gradient(160deg, rgba(244, 199, 81, 0.1), rgba(13, 22, 40, 0.8));
 }
 
 .fin-real small {
@@ -1061,7 +1061,7 @@ select.fin-input option {
 }
 
 .fin-pay:hover:not(:disabled) {
-  border-color: rgba(47, 107, 255, 0.5);
+  border-color: rgba(244, 199, 81, 0.5);
   transform: translateY(-1px);
 }
 
@@ -1141,4 +1141,33 @@ select.fin-input option {
   .fin-grid[data-tab="history"] .fin-main {
     display: none;
   }
+}
+
+/* Payment methods remain disabled until an operational integration is available. */
+.fin-pay { min-height:86px; border-radius:10px; gap:16px; }
+.fin-pay-tile { width:76px; height:52px; padding:0; background:transparent; }
+.fin-pay-tile .pay-logo { width:100%; height:auto; max-height:52px; }
+.fin-pay:disabled { opacity:1; }
+.fin-pay:disabled .fin-pay-text { opacity:.85; }
+.fin-method-status { margin-left:auto; flex-shrink:0; padding:4px 7px; border:1px solid var(--border); border-radius:5px; color:var(--neo-muted); font-size:10px; }
+.fin-pay-mpesa:not(:disabled) { border-color:rgba(43,210,134,.3); }
+.fin-pay:hover:not(:disabled) { border-color:var(--brand-gold); }
+.fin-real { border-color:var(--border); background:var(--surface); }
+.fin-modal { z-index:100; padding-bottom:calc(16px + env(safe-area-inset-bottom)); }
+@media(max-width:900px) {
+ .fin-page-head { margin-bottom:16px; }
+ .fin-page-head > div:first-child { display:none; }
+ .fin-real { grid-template-columns:1fr auto; align-items:center; min-width:0; padding:12px; border-radius:8px; }
+ .fin-real strong { font-size:17px; }
+ .fin-real span { grid-column:1/-1; }
+ .fin-tabs { margin-bottom:20px; }
+ .fin-paylist { gap:8px; }
+ .fin-pay { padding:10px; min-height:83px; gap:11px; }
+ .fin-pay-tile { width:64px; height:46px; }
+ .fin-pay-text b { font-size:13px; }
+ .fin-pay-text small { font-size:11px; }
+ .fin-method-status { max-width:74px; font-size:9px; padding:4px; }
+ .fin-note { font-size:11px; }
+ .fin-card.is-plain { padding:16px; }
+ .fin-tx-main, .fin-tx-side { min-width:0; overflow-wrap:anywhere; }
 }

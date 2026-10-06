@@ -7,8 +7,8 @@ import App from './App.tsx'
 
 // Keep the splash up long enough to read as a deliberate load rather than a
 // flash, but never block the app for long if a font or image is slow.
-const SPLASH_MIN_MS = 1200
-const SPLASH_MAX_WAIT_MS = 4000
+const SPLASH_MIN_MS = 100
+const SPLASH_MAX_WAIT_MS = 1500
 
 function hideSplash() {
   const splash = document.getElementById('app-splash')
