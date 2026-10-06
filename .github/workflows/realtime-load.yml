@@ -1,6 +1,8 @@
 name: Realtime Market Load
 
 on:
+  push:
+    branches: [load/realtime-market-data]
   workflow_dispatch:
     inputs:
       market_ws_url:
@@ -32,9 +34,15 @@ jobs:
           DURATION_MS: ${{ inputs.duration_ms }}
         run: |
           mkdir -p artifacts
+          echo "=== metrics before load ===" | tee -a artifacts/realtime-load.log
+          curl -fsS "${MARKET_WS_URL}/market-data/metrics" | tee -a artifacts/realtime-load.log || true
+          echo | tee -a artifacts/realtime-load.log
           for USERS in 100 500 1000; do
             echo "=== users=${USERS} ===" | tee -a artifacts/realtime-load.log
             USERS="${USERS}" node scripts/load-market-stream.mjs | tee -a artifacts/realtime-load.log
+            echo "=== metrics after users=${USERS} ===" | tee -a artifacts/realtime-load.log
+            curl -fsS "${MARKET_WS_URL}/market-data/metrics" | tee -a artifacts/realtime-load.log || true
+            echo | tee -a artifacts/realtime-load.log
             sleep 5
           done
       - name: Upload load report
