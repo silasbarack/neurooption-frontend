@@ -313,6 +313,7 @@ export default function TradingPage() {
   const marketFrameVersionRef = React.useRef(0);
   const lastMarketSequenceRef = React.useRef(0);
   const lastClientTickAgeRef = React.useRef(0);
+  const lastClientTickReceivedAtRef = React.useRef(0);
   const lastServerBroadcastRef = React.useRef(0);
   const lastRenderDelayRef = React.useRef(0);
   const seenSettledTradeIdsRef = React.useRef<Set<string> | null>(null);
@@ -754,6 +755,14 @@ export default function TradingPage() {
       if (lastMarketSequenceRef.current > 0) requestResync();
     };
 
+    const handleReconnect = () => {
+      socket.emit(MARKET_SOCKET_EVENTS.CLIENT_METRICS, {
+        reconnect: true,
+        tickAgeMs: lastClientTickAgeRef.current,
+        renderDelayMs: lastRenderDelayRef.current,
+      });
+    };
+
     const handlePriceUpdate = (data: MarketPriceUpdate) => {
       if (data.symbol !== symbol || !Number.isFinite(data.sequence)) return;
 
@@ -764,7 +773,9 @@ export default function TradingPage() {
       if (data.sequence <= previousSequence) return;
 
       lastMarketSequenceRef.current = data.sequence;
-      const estimatedServerNow = Date.now() + serverOffsetRef.current;
+      const clientReceiveTimestamp = Date.now();
+      lastClientTickReceivedAtRef.current = clientReceiveTimestamp;
+      const estimatedServerNow = clientReceiveTimestamp + serverOffsetRef.current;
       lastClientTickAgeRef.current = Math.max(
         0,
         estimatedServerNow - data.timestamp,
@@ -820,6 +831,7 @@ export default function TradingPage() {
     };
 
     socket.on("connect", subscribe);
+    socket.io.on("reconnect", handleReconnect);
     socket.on(MARKET_SOCKET_EVENTS.PRICE_UPDATE, handlePriceUpdate);
     socket.on(MARKET_SOCKET_EVENTS.CANDLE_UPDATE, handleCandleUpdate);
 
@@ -833,11 +845,24 @@ export default function TradingPage() {
       });
     }, 5_000);
 
+    const staleTimer = window.setInterval(() => {
+      const lastReceivedAt = lastClientTickReceivedAtRef.current;
+      if (
+        socket.connected &&
+        lastReceivedAt > 0 &&
+        Date.now() - lastReceivedAt > 3_000
+      ) {
+        requestResync();
+      }
+    }, 2_000);
+
     return () => {
       window.clearInterval(clockTimer);
       window.clearInterval(metricsTimer);
+      window.clearInterval(staleTimer);
       socket.emit(MARKET_SOCKET_EVENTS.UNSUBSCRIBE_SYMBOL, { symbol, timeframe });
       socket.off("connect", subscribe);
+      socket.io.off("reconnect", handleReconnect);
       socket.off(MARKET_SOCKET_EVENTS.PRICE_UPDATE, handlePriceUpdate);
       socket.off(MARKET_SOCKET_EVENTS.CANDLE_UPDATE, handleCandleUpdate);
     };
