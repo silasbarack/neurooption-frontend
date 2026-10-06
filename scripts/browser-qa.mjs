@@ -244,6 +244,8 @@ try {
         await goldTheme(page);
         if (route.path === '/') {
           await page.locator('.hp-hero').waitFor({state:'visible'});
+          const primaryInk=await page.locator('.hp-hero-cta .hp-btn-primary').evaluate(element=>getComputedStyle(element).color.match(/\\d+/g).slice(0,3).map(Number));
+          assert.ok(primaryInk.every(channel=>channel<90),'Gold CTA needs dark text for accessible contrast');
           assert.ok(await page.locator('.hp-hero-cta a').count()>=2,'Hero must provide account and demo actions');
           assert.ok(await page.locator('.hp-stage,.hp-laptop,.hp-hero-phone,.hp-hero-art,.hp-hero-visual,.hp-hero-devices,.hp-hero-laptop,.hd').count()>0,'Hero must include the trading/device preview');
           assert.ok(await page.locator('.hp-ticker,.hp-ticker-strip,.hp-ticker-track,.hp-quotes,.hd-tickers,[data-qa="ticker"]').count()>0,'Homepage must retain a quote ticker');
