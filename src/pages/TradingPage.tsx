@@ -115,7 +115,7 @@ const VALID_CATEGORIES: AssetCategory[] = [
 ];
 
 // RSI starts visible; the existing toolbar can toggle or configure indicators.
-const DEFAULT_SELECTED_INDICATORS: string[] = ["RSI"];
+const DEFAULT_SELECTED_INDICATORS: string[] = [];
 
 function timeframeToSeconds(timeframe: string) {
   const normalized = timeframe.trim().toUpperCase();

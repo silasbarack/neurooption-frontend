@@ -28,6 +28,8 @@ try{
   assert.equal(new URL(page.url()).pathname,'/trading','QA session must remain on trading route');
   const canvas=page.locator('.nt-chart-canvas').first();
   await canvas.waitFor({state:'visible',timeout:45000});
+  const chartLabel=await canvas.getAttribute('aria-label');
+  assert.ok(chartLabel && !/RSI/i.test(chartLabel),'RSI must not be enabled by default on the trading screen');
   const wrapper=page.locator('.nt-chart-canvas-wrap').first();
   const style=await wrapper.evaluate(el=>getComputedStyle(el).backgroundImage);
   const photoRefs=style.split('hero-mountains.jpg').length-1;
