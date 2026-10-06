@@ -313,6 +313,7 @@ export default function TradingPage() {
   const marketFrameVersionRef = React.useRef(0);
   const lastMarketSequenceRef = React.useRef(0);
   const lastClientTickAgeRef = React.useRef(0);
+  const lastServerBroadcastRef = React.useRef(0);
   const lastRenderDelayRef = React.useRef(0);
   const seenSettledTradeIdsRef = React.useRef<Set<string> | null>(null);
   const resultMarkerTimersRef = React.useRef<Map<string, number>>(new Map());
@@ -407,6 +408,17 @@ export default function TradingPage() {
   const filteredAssets = availableAssets.filter(
     (asset) => asset.category === activeCategory
   );
+
+  const handleChartFrameRendered = React.useCallback(() => {
+    const serverBroadcastTimestamp = lastServerBroadcastRef.current;
+    if (!serverBroadcastTimestamp) return;
+
+    const estimatedServerNow = Date.now() + serverOffsetRef.current;
+    lastRenderDelayRef.current = Math.max(
+      0,
+      estimatedServerNow - serverBroadcastTimestamp,
+    );
+  }, []);
 
   const clearResultMarkers = React.useCallback(() => {
     resultMarkerTimersRef.current.forEach((timerId) => {
@@ -752,12 +764,12 @@ export default function TradingPage() {
       if (data.sequence <= previousSequence) return;
 
       lastMarketSequenceRef.current = data.sequence;
-      const now = Date.now();
-      lastClientTickAgeRef.current = Math.max(0, now - data.timestamp);
-      lastRenderDelayRef.current = Math.max(
+      const estimatedServerNow = Date.now() + serverOffsetRef.current;
+      lastClientTickAgeRef.current = Math.max(
         0,
-        now - data.serverBroadcastTimestamp,
+        estimatedServerNow - data.timestamp,
       );
+      lastServerBroadcastRef.current = data.serverBroadcastTimestamp;
     };
 
     const handleCandleUpdate = (data: MarketCandleUpdate) => {
@@ -1135,6 +1147,7 @@ export default function TradingPage() {
             candlesRef={candlesRef}
             marketFrameVersionRef={marketFrameVersionRef}
             serverOffsetRef={serverOffsetRef}
+            onFrameRendered={handleChartFrameRendered}
             chartType={chartType}
             timeframe={timeframe}
             expirySeconds={expirySeconds}
