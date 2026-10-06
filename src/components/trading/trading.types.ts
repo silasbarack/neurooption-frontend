@@ -47,6 +47,7 @@ export type TradeMarker = {
   id: string;
   side: TradeSide;
   entryPrice: number;
+  expiryTime?: number;
   label: string;
 };
 
