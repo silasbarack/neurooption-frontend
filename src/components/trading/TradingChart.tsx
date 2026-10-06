@@ -1583,7 +1583,9 @@ function TradingChartComponent({
 
     const remaining = Math.max(
       0,
-      Math.round((liveNowMs + expirySeconds * 1000 - Date.now()) / 1000),
+      Math.ceil(
+        (newestCandleStart + candleIntervalMs - liveNowMs) / 1000,
+      ),
     );
 
     const expiryX = right - 8;
@@ -1621,7 +1623,16 @@ function TradingChartComponent({
       context.stroke();
       context.setLineDash([]);
 
-      drawTextPill(context, trade.label, left + 8, y, color);
+      const tradeRemaining =
+        Number.isFinite(trade.expiryTime) && trade.expiryTime
+          ? Math.max(0, Math.ceil((trade.expiryTime - liveNowMs) / 1000))
+          : null;
+      const tradeLabel =
+        tradeRemaining === null
+          ? trade.label
+          : `${trade.label} · ${formatDuration(tradeRemaining)}`;
+
+      drawTextPill(context, tradeLabel, left + 8, y, color);
     });
 
     resultMarkers.forEach((marker) => {
