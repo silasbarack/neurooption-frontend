@@ -158,7 +158,7 @@ export default function FinancePage() {
       <div className="fin">
         <div className="fin-page-head">
           <div>
-            <h1>Finance</h1>
+            <h1>{title}</h1>
             <p>Deposit with M-Pesa, request withdrawals and track every transaction.</p>
           </div>
           <div className="fin-real">

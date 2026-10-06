@@ -1,5 +1,5 @@
 import React from "react";
-import { Activity, Clock3, Ellipsis, PenLine, X } from "lucide-react";
+import { Activity, ChartCandlestick, Clock3, PenLine, X } from "lucide-react";
 import type { ChartType } from "./trading.types";
 import { DRAWING_TOOLS, INDICATORS, TIMEFRAMES } from "./trading.constants";
 import {
@@ -114,6 +114,13 @@ export default function TradingToolbar({
     Record<string, string | number | boolean>
   >({});
 
+  const editorDialogRef = React.useRef<HTMLDialogElement>(null);
+  const editorOpen = editingIndicator !== null;
+  React.useEffect(() => {
+    const dialog = editorDialogRef.current;
+    if (editorOpen && dialog && !dialog.open) dialog.showModal();
+  }, [editorOpen]);
+
   const editingCanonical = editingIndicator
     ? normalizeIndicatorName(editingIndicator)
     : null;
@@ -171,7 +178,7 @@ export default function TradingToolbar({
     <>
       <div className="nt-toolbar-left">
         <div className="nt-tool-wrap">
-          <button type="button" className="nt-tool-btn" onClick={onTimeframeToggle}>
+          <button type="button" className="nt-tool-btn" onClick={onTimeframeToggle} aria-expanded={timeframeOpen} aria-label="Select chart timeframe">
             <Clock3 size={15} aria-hidden="true" /> {timeframe}
           </button>
 
@@ -200,22 +207,22 @@ export default function TradingToolbar({
           )}
         </div>
 
-        <button type="button" className="nt-tool-btn" onClick={onIndicatorsToggle}>
+        <button type="button" className={`nt-tool-btn${selectedIndicators.length ? " active" : ""}`} onClick={onIndicatorsToggle} aria-expanded={indicatorsOpen}>
           <Activity size={15} aria-hidden="true" /> Indicators
         </button>
 
-        <button type="button" className="nt-tool-btn" onClick={onDrawingToggle}>
-          <PenLine size={15} aria-hidden="true" /> {selectedTool}
+        <button type="button" className="nt-tool-btn" onClick={onDrawingToggle} aria-expanded={drawingOpen} title={`Selected tool: ${selectedTool}`}>
+          <PenLine size={15} aria-hidden="true" /> Drawing
         </button>
 
         <button
           type="button"
           className={`nt-tool-btn compact${moreOpen ? " active" : ""}`}
-          aria-label="More tools"
+          aria-label="Select chart style"
           aria-expanded={moreOpen}
           onClick={() => setMoreOpen((current) => !current)}
         >
-          <Ellipsis size={17} aria-hidden="true" />
+          <ChartCandlestick size={17} aria-hidden="true" /> Chart
         </button>
       </div>
 
@@ -319,12 +326,14 @@ export default function TradingToolbar({
           </button>
 
           <h3>Drawing tools</h3>
+          <p className="nt-tools-note">Drawing overlays are coming soon. Chart navigation remains available.</p>
           <div>
             {DRAWING_TOOLS.map((tool) => (
               <button
                 key={tool}
                 type="button"
                 className={selectedTool === tool ? "active" : ""}
+                disabled={tool !== "Cursor"}
                 onClick={() => onToolChange(tool)}
               >
                 {tool}
@@ -335,6 +344,16 @@ export default function TradingToolbar({
       )}
 
       {editingIndicator && editingCanonical && (
+        <dialog
+          ref={editorDialogRef}
+          aria-label="Indicator settings"
+          onCancel={closeEditor}
+          style={{
+            width: "100vw", height: "100dvh", maxWidth: "none", maxHeight: "none",
+            border: 0, margin: 0, padding: 15, color: "var(--nt-text)",
+            background: "rgba(9,14,24,0.7)",
+          }}
+        >
         <div
           style={{
             position: "fixed",
@@ -351,7 +370,9 @@ export default function TradingToolbar({
               width: "min(430px, calc(100vw - 30px))",
               borderRadius: 16,
               padding: 22,
-              background: "linear-gradient(180deg, #5f86b1, #486c96)",
+              background: "var(--nt-surface)",
+              maxHeight: "calc(100dvh - 32px)",
+              overflowY: "auto",
               color: "#ffffff",
               boxShadow: "0 25px 80px rgba(15, 23, 42, 0.35)",
               border: "1px solid rgba(255,255,255,0.24)",
@@ -372,6 +393,7 @@ export default function TradingToolbar({
               <button
                 type="button"
                 onClick={closeEditor}
+                aria-label="Close indicator settings"
                 style={{
                   border: "none",
                   background: "transparent",
@@ -395,7 +417,7 @@ export default function TradingToolbar({
                   minWidth: 110,
                   borderRadius: 12,
                   border: "1px solid rgba(255,255,255,0.45)",
-                  background: activeEditorTab === "inputs" ? "#7dd3fc" : "transparent",
+                  background: activeEditorTab === "inputs" ? "var(--nt-accent-soft)" : "transparent",
                   color: "#ffffff",
                   fontWeight: 900,
                   cursor: "pointer",
@@ -412,7 +434,7 @@ export default function TradingToolbar({
                   minWidth: 110,
                   borderRadius: 12,
                   border: "1px solid rgba(255,255,255,0.45)",
-                  background: activeEditorTab === "styles" ? "#7dd3fc" : "transparent",
+                  background: activeEditorTab === "styles" ? "var(--nt-accent-soft)" : "transparent",
                   color: "#ffffff",
                   fontWeight: 900,
                   cursor: "pointer",
@@ -461,7 +483,7 @@ export default function TradingToolbar({
                           height: 42,
                           borderRadius: 8,
                           border: "1px solid rgba(255,255,255,0.5)",
-                          background: "#2f669c",
+                          background: "var(--nt-surface-alt)",
                           color: "#ffffff",
                           padding: "0 12px",
                           fontSize: 16,
@@ -543,7 +565,7 @@ export default function TradingToolbar({
                               height: 42,
                               border: "1px solid rgba(255,255,255,0.45)",
                               borderRadius: 8,
-                              background: "#2f669c",
+                              background: "var(--nt-surface-alt)",
                               padding: 4,
                             }}
                           />
@@ -581,7 +603,7 @@ export default function TradingToolbar({
                             height: 42,
                             borderRadius: 8,
                             border: "1px solid rgba(255,255,255,0.5)",
-                            background: "#2f669c",
+                            background: "var(--nt-surface-alt)",
                             color: "#ffffff",
                             padding: "0 12px",
                             fontSize: 16,
@@ -631,7 +653,7 @@ export default function TradingToolbar({
                   minWidth: 95,
                   border: "none",
                   borderRadius: 8,
-                  background: "#b86b87",
+                  background: "var(--nt-surface-alt)",
                   color: "#ffffff",
                   fontWeight: 900,
                   cursor: "pointer",
@@ -648,8 +670,8 @@ export default function TradingToolbar({
                   minWidth: 95,
                   border: "none",
                   borderRadius: 8,
-                  background: "#1796a6",
-                  color: "#ffffff",
+                  background: "var(--nt-accent)",
+                  color: "#111827",
                   fontWeight: 900,
                   cursor: "pointer",
                 }}
@@ -659,6 +681,7 @@ export default function TradingToolbar({
             </div>
           </div>
         </div>
+        </dialog>
       )}
     </>
   );

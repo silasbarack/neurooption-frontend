@@ -384,3 +384,12 @@
 }
 
 .neo-drawer { overflow:clip; }
+
+/* Keep the complete official wordmark on titled phone screens. */
+@media(max-width:900px){
+ .neo-topbar-inner{gap:10px}
+ .neo-shell.has-title .neo-topbar-brand{display:flex}
+ .neo-shell.has-title .neo-topbar-brand .neurooption-logo{width:124px;height:auto}
+ .neo-shell.has-title .neo-topbar-title{display:none}
+ .neo-topbar-right{gap:8px}
+}

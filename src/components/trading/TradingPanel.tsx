@@ -7,7 +7,6 @@ import {
   Coins,
   Minus,
   Plus,
-  Sparkles,
 } from "lucide-react";
 import type { Currency, TradeSide } from "./trading.types";
 import type { BackendTrade } from "./tradesApi";
@@ -27,10 +26,11 @@ type TradingPanelProps = {
   expiryParts: ExpiryParts;
   amount: string;
   currency: Currency;
-  payout: number;
+  payout: number | null;
   expectedProfitText: string;
   expectedReturnText: string;
   canTrade: boolean;
+  tradeDisabledReason?: string;
   sentiment: number;
   openTrades: BackendTrade[];
   onAdjustExpiry: (unit: "hours" | "minutes" | "seconds", delta: number) => void;
@@ -50,6 +50,7 @@ export default function TradingPanel({
   expectedProfitText,
   expectedReturnText,
   canTrade,
+  tradeDisabledReason,
   sentiment,
   openTrades,
   onAdjustExpiry,
@@ -57,7 +58,10 @@ export default function TradingPanel({
   onTrade,
 }: TradingPanelProps) {
   const numericAmount = Number(amount || 0);
+  const currencySymbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : currency;
   const sellSentiment = 100 - sentiment;
+  const totalSeconds = expiryParts.hours * 3600 + expiryParts.minutes * 60 + expiryParts.seconds;
+  const durationLabel = totalSeconds % 60 === 0 ? `${totalSeconds / 60} min` : `${totalSeconds} sec`;
 
   return (
     <aside className="nt-trade-panel nt-white-panel">
@@ -75,10 +79,10 @@ export default function TradingPanel({
       )}
 
       <section className="nt-white-field nt-field-time">
-        <h3><Clock size={14} aria-hidden="true" /> Expiration</h3>
+        <h3><Clock size={14} aria-hidden="true" /> Time</h3>
 
         <div className="nt-white-input">
-          <strong>{expiryText}</strong>
+          <strong>{durationLabel}</strong>
           <div>
             <button type="button" onClick={() => onAdjustExpiry("seconds", -1)} aria-label="Decrease expiration">
               <Minus size={14} />
@@ -89,7 +93,7 @@ export default function TradingPanel({
           </div>
         </div>
 
-        <div className="nt-white-expiry">
+        <div className="nt-white-expiry" aria-label={`Expiration ${expiryText}`}>
           <span>{String(expiryParts.hours).padStart(2, "0")}h</span>
           <span>{String(expiryParts.minutes).padStart(2, "0")}m</span>
           <span>{String(expiryParts.seconds).padStart(2, "0")}s</span>
@@ -100,9 +104,12 @@ export default function TradingPanel({
         <h3><Coins size={14} aria-hidden="true" /> Amount</h3>
 
         <label className="nt-white-input">
+          <span className="nt-amount-currency" aria-hidden="true">{currencySymbol}</span>
           <input
             type="number"
             min="1"
+            inputMode="decimal"
+            aria-label={`Trade amount in ${currency}`}
             value={amount}
             onChange={(event) => onAmountChange(event.target.value)}
           />
@@ -123,10 +130,9 @@ export default function TradingPanel({
         <small>{currency}</small>
       </section>
 
-      <section className="nt-white-payout">
-        <span>Payout</span>
-        <strong>+{payout}%</strong>
-        <small>{expectedProfitText}</small>
+      <section className="nt-white-payout" aria-label="Trade payout and potential profit">
+        <div><span>Payout</span><strong>{payout === null ? "Unavailable" : `+${payout}%`}</strong></div>
+        <div><span>Profit</span><small>{expectedProfitText}</small></div>
       </section>
 
       <button
@@ -136,13 +142,7 @@ export default function TradingPanel({
         onClick={() => onTrade("BUY")}
       >
         <span>Buy</span>
-        <em className="nt-btn-payout">{payout}%</em>
         <ArrowUpRight size={20} aria-hidden="true" />
-      </button>
-
-      <button type="button" className="nt-ai">
-        <Sparkles size={16} aria-hidden="true" />
-        AI trading
       </button>
 
       <button
@@ -152,10 +152,10 @@ export default function TradingPanel({
         onClick={() => onTrade("SELL")}
       >
         <span>Sell</span>
-        <em className="nt-btn-payout">{payout}%</em>
         <ArrowDownRight size={20} aria-hidden="true" />
       </button>
 
+      {tradeDisabledReason && <p className="nt-trade-status" role="status">{tradeDisabledReason}</p>}
       <section className="nt-white-sentiment">
         <div>
           <span>Sentiment</span>
@@ -165,7 +165,7 @@ export default function TradingPanel({
         <div
           className="bar"
           style={{
-            background: `linear-gradient(90deg, #1fdb8e 0 ${sentiment}%, #ff5b72 ${sentiment}% 100%)`,
+            background: `linear-gradient(90deg, var(--positive) 0 ${sentiment}%, var(--negative) ${sentiment}% 100%)`,
           }}
         >
           <i style={{ left: `${sentiment}%` }} />

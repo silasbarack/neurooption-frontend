@@ -240,7 +240,7 @@ try {
         if (route.path === '/') {
           await page.locator('.hp-hero').waitFor({state:'visible'});
           assert.ok(await page.locator('.hp-hero-cta a').count()>=2,'Hero must provide account and demo actions');
-          assert.ok(await page.locator('.hp-hero-art,.hp-hero-visual,.hp-hero-devices,.hp-hero-laptop,.hd').count()>0,'Hero must include the trading/device preview');
+          assert.ok(await page.locator('.hp-stage,.hp-laptop,.hp-hero-phone,.hp-hero-art,.hp-hero-visual,.hp-hero-devices,.hp-hero-laptop,.hd').count()>0,'Hero must include the trading/device preview');
           assert.ok(await page.locator('.hp-ticker,.hp-ticker-strip,.hp-ticker-track,.hp-quotes,.hd-tickers,[data-qa="ticker"]').count()>0,'Homepage must retain a quote ticker');
           assert.ok(await page.locator('#devices,.hp-devices').count()>0,'Homepage must retain its device section');
           const text=await page.locator('main').innerText();
@@ -271,7 +271,7 @@ try {
   for (const pathname of protectedPaths) {
     await scenario('guest-redirect-'+pathname.slice(1),{path:pathname,width:390,auth:false},async page => {
       await page.waitForURL(url => url.pathname === '/login');
-      assert.ok(await page.locator('input[type="password"]').count()>0,'Protected route must show the real sign-in form');
+      await page.locator('input[type="password"]').waitFor({state:'visible'});
     });
   }
 
@@ -309,7 +309,7 @@ try {
       const dialog=page.getByRole('dialog',{name:'Menu',exact:true});
       await dialog.waitFor({state:'visible'});
       assert.equal(await dialog.getAttribute('aria-modal'),'true');
-      assert.ok(await dialog.evaluate(element => element.contains(document.activeElement)),'Opening drawer must move focus inside');
+      await page.waitForFunction(() => document.querySelector('[role="dialog"][aria-label="Menu"]')?.contains(document.activeElement));
       assert.ok(await page.evaluate(() => Boolean(document.getElementById('root')?.inert)),'Background must be inert while drawer is open');
       await trapFocus(page,dialog);
       await page.keyboard.press('Escape');
@@ -337,6 +337,7 @@ try {
       await page.getByRole('button',{name:'Remove EUR/USD OTC from favourites',exact:true}).waitFor({state:'visible'});
     });
     await scenario('market-search-and-filter-'+width,{path:'/markets',width,auth:false},async page => {
+      await page.getByRole('tab',{name:'All',exact:true}).waitFor({state:'visible'});
       for (const name of ['All','Forex','Crypto','Stocks','OTC','Favorites','Indices','Commodities']) assert.ok(await page.getByRole('tab',{name,exact:true}).isVisible(),'Market category must remain accessible: '+name);
       await page.getByRole('tab',{name:'Crypto',exact:true}).click();
       await page.getByRole('searchbox',{name:'Search assets',exact:true}).fill('Bitcoin');

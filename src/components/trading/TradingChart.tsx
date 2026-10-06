@@ -606,6 +606,8 @@ function drawTextPill(
 ) {
   context.font = "800 11px 'Noto Sans', sans-serif";
   const pillWidth = context.measureText(text).width + 14;
+  const canvasWidth = context.canvas.width / Math.max(context.getTransform().a, 1);
+  x = clamp(x, 4, Math.max(4, canvasWidth - pillWidth - 4));
 
   context.fillStyle = background;
   context.beginPath();
@@ -1249,6 +1251,7 @@ function drawBottomPanel(
   top: number,
   bottom: number,
   candleGap: number,
+  scrollOffset: number,
 ) {
   context.fillStyle = panelIndex % 2 === 0 ? "#141925" : "#10141d";
   context.fillRect(left, top, right - left, bottom - top);
@@ -1284,7 +1287,7 @@ function drawBottomPanel(
     bottom - ((value - min) / (max - min)) * (bottom - top - 18) - 9;
 
   const indexToX = (index: number) =>
-    left + (index / Math.max(visibleLength - 1, 1)) * (right - left);
+    left + (index / Math.max(visibleLength - 1, 1)) * (right - left) - scrollOffset;
 
   context.strokeStyle = "rgba(255, 255, 255, 0.05)";
   context.lineWidth = 1;
@@ -1308,6 +1311,8 @@ function drawBottomPanel(
       context.moveTo(left, y);
       context.lineTo(right, y);
       context.stroke();
+      context.fillStyle = "#9aa4b8";
+      context.fillText(String(level), right + 10, y - 5);
     });
 
     context.setLineDash([]);
@@ -1315,6 +1320,10 @@ function drawBottomPanel(
 
   const zeroY = clamp(valueToY(0), top + 6, bottom - 6);
 
+  context.save();
+  context.beginPath();
+  context.rect(left, top + 18, right - left, Math.max(0, bottom - top - 18));
+  context.clip();
   panel.series
     .filter((series) => series.visible !== false)
     .forEach((series) => {
@@ -1337,6 +1346,7 @@ function drawBottomPanel(
         series.width ?? 1.35,
       );
     });
+  context.restore();
 }
 
 function TradingChartComponent({
@@ -1416,8 +1426,7 @@ function TradingChartComponent({
     const height = rect.height;
 
     context.clearRect(0, 0, width, height);
-    // Translucent, so the chart wallpaper set in CSS shows faintly behind.
-    context.fillStyle = "rgba(9, 16, 30, 0.84)";
+    context.fillStyle = "#101725";
     context.fillRect(0, 0, width, height);
 
     if (candles.length < 2) {
@@ -1425,16 +1434,18 @@ function TradingChartComponent({
       context.font = "800 14px 'Noto Sans', sans-serif";
       context.textAlign = "center";
       context.textBaseline = "middle";
-      context.fillText("Loading backend OTC candles...", width / 2, height / 2);
+      context.fillText("Waiting for market data…", width / 2, height / 2);
       return;
     }
 
     const normalizedIndicators = uniqueCanonicalIndicators(selectedIndicators);
     const fullCandles = candles.slice(-MAX_HISTORY_CANDLES);
 
-    const left = 18;
-    const rightSpace = 84;
-    const right = width - rightSpace;
+    context.font = "800 11px 'Noto Sans', sans-serif";
+    const left = width < 560 ? 8 : 14;
+    const latestPriceText = fullCandles[fullCandles.length - 1].close.toFixed(asset.precision);
+    const rightSpace = clamp(context.measureText(latestPriceText).width + 22, 70, 120);
+    const right = Math.max(left + 1, width - rightSpace);
     const chartWidth = right - left;
 
     const visibleLength = Math.min(
@@ -1472,20 +1483,14 @@ function TradingChartComponent({
           ),
     );
 
-    // Desktop overlays the toolbar on the chart; phones place it above.
-    const top = width < 560 ? 26 : 64;
-    const footer = 26;
-    const availableHeight = Math.max(height - top - footer, 160);
-    const singlePanelHeight = clamp(availableHeight * 0.125, 84, 108);
-    const desiredBottomArea = bottomPanels.length * singlePanelHeight;
-    const bottomAreaHeight =
-      bottomPanels.length > 0
-        ? Math.min(desiredBottomArea, availableHeight * 0.36)
-        : 0;
-    const panelHeight =
-      bottomPanels.length > 0 ? bottomAreaHeight / bottomPanels.length : 0;
+    const top = width < 560 ? 18 : 22;
+    const footer = 24;
+    const availableHeight = Math.max(0, height - top - footer);
+    const desiredBottomArea = bottomPanels.length * 72;
+    const bottomAreaHeight = bottomPanels.length > 0 ? Math.min(desiredBottomArea, Math.max(0, availableHeight - 90)) : 0;
+    const panelHeight = bottomPanels.length > 0 ? bottomAreaHeight / bottomPanels.length : 0;
     const chartBottom = height - footer - bottomAreaHeight;
-    const chartHeight = Math.max(chartBottom - top, 120);
+    const chartHeight = Math.max(1, chartBottom - top);
     const candleGap = chartWidth / Math.max(visibleLength - 1, 1);
     const candleWidth = clamp(Math.floor(candleGap * 0.66), 3, 10);
 
@@ -1571,7 +1576,7 @@ function TradingChartComponent({
 
     const expiryX = right - 8;
 
-    context.strokeStyle = "#1677ff";
+    context.strokeStyle = "#d7ad48";
     context.lineWidth = 1.5;
     context.setLineDash([6, 5]);
     context.beginPath();
@@ -1580,7 +1585,7 @@ function TradingChartComponent({
     context.stroke();
     context.setLineDash([]);
 
-    drawTextPill(context, formatDuration(remaining), expiryX - 92, top + 16, "#1677ff");
+    drawTextPill(context, formatDuration(remaining), expiryX - 92, top + 16, "#d7ad48", "#111827");
 
     context.fillStyle = "#9aa4b8";
     context.font = "900 13px 'Noto Sans', sans-serif";
@@ -1621,12 +1626,18 @@ function TradingChartComponent({
       drawTextPill(context, marker.label, right - 112, y, color);
     });
 
-    overlaySeries.slice(0, 6).forEach((series, index) => {
-      context.fillStyle = series.color;
+    let legendX = left;
+    let legendRow = 0;
+    overlaySeries.slice(0, 6).forEach((series) => {
       context.font = "800 11px 'Noto Sans', sans-serif";
+      const labelWidth = context.measureText(series.name).width + 14;
+      if (legendX + labelWidth > right) { legendX = left; legendRow += 1; }
+      if (legendRow > 1) return;
+      context.fillStyle = series.color;
       context.textAlign = "left";
       context.textBaseline = "top";
-      context.fillText(series.name, left + index * 96, top + 8);
+      context.fillText(series.name, legendX, top + 8 + legendRow * 14, Math.max(1, right - legendX));
+      legendX += labelWidth;
     });
 
     context.fillStyle = "#9aa4b8";
@@ -1660,8 +1671,23 @@ function TradingChartComponent({
         panelTop,
         panelBottom,
         candleGap,
+        scrollOffset,
       );
     });
+    context.font = "500 10px 'Noto Sans', sans-serif";
+    context.fillStyle = "#8290a6";
+    context.textBaseline = "middle";
+    const tickCount = width < 560 ? 3 : 5;
+    for (let tick = 0; tick < tickCount; tick += 1) {
+      const index = Math.round((visibleLength - 1) * tick / (tickCount - 1));
+      const date = new Date(visibleCandlesRaw[index].time);
+      if (!Number.isFinite(date.getTime())) continue;
+      context.textAlign = tick === 0 ? "left" : tick === tickCount - 1 ? "right" : "center";
+      const label = date.toISOString().slice(11, timeframeToSeconds(timeframe) < 60 ? 19 : 16);
+      context.fillText(label, clamp(indexToX(index) - scrollOffset, left, right), height - 10);
+    }
+    context.textAlign = "right";
+    context.fillText("UTC", width - 10, height - 10);
     };
   }, [
     activeTrades,
@@ -1679,7 +1705,7 @@ function TradingChartComponent({
 
   return (
     <div ref={containerRef} className="nt-chart-canvas-wrap">
-      <canvas ref={canvasRef} className="nt-chart-canvas" />
+      <canvas ref={canvasRef} className="nt-chart-canvas" role="img" aria-label={`${asset.symbol} ${chartType} chart with ${selectedIndicators.join(", ") || "price"} indicators`} />
     </div>
   );
 }

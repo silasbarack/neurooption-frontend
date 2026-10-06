@@ -35,6 +35,7 @@ export function formatChange(value: number) {
 export function useQuotes() {
   const [quotes, setQuotes] = useState<MarketQuote[]>(FALLBACK_QUOTES);
   const [live, setLive] = useState(false);
+  const [updatedAt, setUpdatedAt] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -44,12 +45,18 @@ export function useQuotes() {
       if (!document.hidden) {
         try {
           const data = await marketQuotesApi.quotes();
-          if (active && data.quotes?.length) {
-            setQuotes(data.quotes);
-            setLive(true);
+          const validQuotes = Array.isArray(data.quotes) ? data.quotes.filter((quote) =>
+            typeof quote.symbol === "string" && typeof quote.label === "string" && typeof quote.category === "string" &&
+            Number.isFinite(quote.price) && quote.price > 0 && Number.isInteger(quote.precision) && quote.precision >= 0 && quote.precision <= 8 &&
+            Number.isFinite(quote.changePercent) && Number.isFinite(quote.payout) && quote.payout >= 0 && quote.payout <= 100
+          ) : [];
+          if (active) {
+            if (validQuotes.length) { setQuotes(validQuotes); setUpdatedAt(Date.now()); setLive(true); }
+            else setLive(false);
           }
         } catch {
-          // Keep the last good list.
+          // Retain the last list for browsing, but never mark an unavailable feed live.
+          if (active) setLive(false);
         }
       }
       if (active) timer = window.setTimeout(load, POLL_MS);
@@ -62,5 +69,5 @@ export function useQuotes() {
     };
   }, []);
 
-  return { quotes, live };
+  return { quotes, live, updatedAt };
 }

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Check, Flame, Lock, Target, TrendingUp, Trophy } from "lucide-react";
 import AppShell from "../components/shell/AppShell";
-import { fetchTradeHistory, type BackendTrade } from "../components/trading";
+import { fetchTradeHistory, type BackendTrade } from "../components/trading/tradesApi";
 import "./CommunityPages.css";
 
 const XP_PER_LEVEL = 300;

@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { ArrowLeft, ChevronDown, ChevronUp, X } from "lucide-react";
+import { ChevronDown, Star, X } from "lucide-react";
 import "./TradingPage.css";
 
 import {
@@ -46,7 +46,6 @@ import {
   updateIndicatorSetting,
   updateIndicatorStyle,
 } from "../components/trading/indicator-settings";
-import { buildTimeframeCandles } from "../components/trading/timeframeEngine";
 import {
   getMarketSocket,
   MARKET_SOCKET_EVENTS,
@@ -54,6 +53,7 @@ import {
   type MarketPriceUpdate,
 } from "../components/trading/marketSocket";
 import "./TradingPremium.css";
+import { useQuotes } from "../components/markets/useQuotes";
 
 type BackendAsset = {
   symbol: string;
@@ -103,12 +103,7 @@ const DEFAULT_ASSET =
   ASSETS.find((asset) => asset.symbol === "EUR/USD OTC") ?? ASSETS[0];
 
 const INITIAL_NOW_MS = Date.now();
-const INITIAL_CANDLES = buildTimeframeCandles(
-  DEFAULT_ASSET,
-  "M1",
-  [],
-  INITIAL_NOW_MS
-);
+const INITIAL_CANDLES: Candle[] = [];
 
 const VALID_CATEGORIES: AssetCategory[] = [
   "Currencies",
@@ -118,8 +113,8 @@ const VALID_CATEGORIES: AssetCategory[] = [
   "Commodities",
 ];
 
-// A new trader starts on a clean chart; indicators are opt-in from the toolbar.
-const DEFAULT_SELECTED_INDICATORS: string[] = [];
+// RSI starts visible; the existing toolbar can toggle or configure indicators.
+const DEFAULT_SELECTED_INDICATORS: string[] = ["RSI"];
 
 function timeframeToSeconds(timeframe: string) {
   const normalized = timeframe.trim().toUpperCase();
@@ -302,13 +297,6 @@ function tradeToResultPopupItem(trade: BackendTrade): TradeResultPopupItem {
   };
 }
 
-/** Keep the last good value when the backend sends something unparseable,
-    so a malformed response never shows the user "NaN" in place of money. */
-function toFiniteNumber(value: unknown, fallback: number): number {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
-
 function toWalletBalance(value: unknown, fallback: number | null): number | null {
   if ((typeof value !== "number" && typeof value !== "string") || (typeof value === "string" && !value.trim())) return fallback;
   const parsed = Number(value);
@@ -317,7 +305,7 @@ function toWalletBalance(value: unknown, fallback: number | null): number | null
 export default function TradingPage() {
   const location = useLocation();
   const candlesRef = React.useRef<Candle[]>(INITIAL_CANDLES);
-  const expirySecondsRef = React.useRef(45);
+  const expirySecondsRef = React.useRef(60);
   const fetchingTradingStateRef = React.useRef(false);
   const serverOffsetRef = React.useRef(0);
   const seenSettledTradeIdsRef = React.useRef<Set<string> | null>(null);
@@ -325,6 +313,8 @@ export default function TradingPage() {
 
   const [accountType, setAccountType] = React.useState<AccountType>("QT Demo");
   const [currency, setCurrency] = React.useState<Currency>("USD");
+  const walletScopeRef = React.useRef(accountType+"|"+currency);
+  const walletVersionRef = React.useRef(0);
 
   const [walletBalance, setWalletBalance] = React.useState<number | null>(null);
   const [walletLoading, setWalletLoading] = React.useState(true);
@@ -335,6 +325,8 @@ export default function TradingPage() {
   const requestedSymbol = (location.state as { symbol?: string } | null)?.symbol;
   const initialAsset =
     ASSETS.find((asset) => asset.symbol === requestedSymbol) ?? DEFAULT_ASSET;
+  const marketSelectionRef = React.useRef(initialAsset.symbol+"|M1");
+  const marketVersionRef = React.useRef(0);
 
   const [availableAssets, setAvailableAssets] = React.useState<Asset[]>(ASSETS);
   const [selectedAsset, setSelectedAsset] = React.useState<Asset>(initialAsset);
@@ -361,11 +353,24 @@ export default function TradingPage() {
   const [drawingOpen, setDrawingOpen] = React.useState(false);
   const [selectedTool, setSelectedTool] = React.useState("Cursor");
 
-  const [expirySeconds, setExpirySeconds] = React.useState(45);
+  const [expirySeconds, setExpirySeconds] = React.useState(60);
   const [amount, setAmount] = React.useState("100");
-  const [payout, setPayout] = React.useState(91);
+  const { quotes, live, updatedAt } = useQuotes();
+  const payoutQuote = live && Date.now() - updatedAt <= 20000 ? quotes.find((quote) => quote.symbol === selectedAsset.symbol) : undefined;
+  const payout = payoutQuote && typeof payoutQuote.payout === "number" && Number.isFinite(payoutQuote.payout) && payoutQuote.payout > 0 && payoutQuote.payout <= 100 ? payoutQuote.payout : null;
+  const [favorites, setFavorites] = React.useState<string[]>(() => {
+    try { const value: unknown = JSON.parse(localStorage.getItem("neurooption_favorite_assets") || "[]"); return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []; } catch { return []; }
+  });
+  function toggleFavorite() {
+    setFavorites((current) => {
+      const next = current.includes(selectedAsset.symbol) ? current.filter((symbol) => symbol !== selectedAsset.symbol) : [...current, selectedAsset.symbol];
+      try { localStorage.setItem("neurooption_favorite_assets", JSON.stringify(next)); } catch { /* Session-only when storage is unavailable. */ }
+      return next;
+    });
+  }
 
   const [candles, setCandles] = React.useState<Candle[]>(INITIAL_CANDLES);
+  const [marketReady, setMarketReady] = React.useState(false);
   const [activeTrades, setActiveTrades] = React.useState<TradeMarker[]>([]);
   const [openTrades, setOpenTrades] = React.useState<BackendTrade[]>([]);
   const [resultMarkers, setResultMarkers] = React.useState<ResultMarker[]>([]);
@@ -379,11 +384,11 @@ export default function TradingPage() {
     ? Math.max(0, stakeAmount)
     : 0;
 
-  const expectedProfit = safeStakeAmount * (payout / 100);
-  const expectedReturn = safeStakeAmount + expectedProfit;
+  const expectedProfit = payout === null ? null : safeStakeAmount * (payout / 100);
+  const expectedReturn = expectedProfit === null ? null : safeStakeAmount + expectedProfit;
 
   const canTrade =
-    walletBalance !== null && safeStakeAmount > 0 &&
+    marketReady && payout !== null && walletBalance !== null && safeStakeAmount > 0 &&
     safeStakeAmount <= walletBalance &&
     !tradeSubmitting &&
     !walletLoading;
@@ -440,19 +445,15 @@ export default function TradingPage() {
     []
   );
 
-  const showSyntheticMarket = React.useCallback(
+  const resetMarket = React.useCallback(
     (asset: Asset, nextTimeframe: string, atMs = Date.now()) => {
-      const nextCandles = buildTimeframeCandles(
-        asset,
-        nextTimeframe,
-        [],
-        atMs
-      );
-
-      candlesRef.current = nextCandles;
+      marketSelectionRef.current = asset.symbol+"|"+nextTimeframe;
+      marketVersionRef.current += 1;
+      candlesRef.current = [];
       serverOffsetRef.current = atMs - Date.now();
-      setCandles(nextCandles);
-      setSentiment(calculateSentiment(nextCandles));
+      setCandles([]);
+      setMarketReady(false);
+      setSentiment(50);
       setNowMs(atMs);
       setActiveTrades([]);
       clearResultMarkers();
@@ -464,13 +465,14 @@ export default function TradingPage() {
   // (settlement-accurate) candle history once it arrives.
   const loadHistoricalCandles = React.useCallback(
     async (asset: Asset, nextTimeframe: string, signal?: AbortSignal) => {
+      const requestVersion = marketVersionRef.current;
       const encodedAsset = encodeURIComponent(asset.symbol);
       const data = await fetchJson<BackendCandlesResponse>(
         `${API_BASE_URL}/market-data/candles?asset=${encodedAsset}&timeframe=${nextTimeframe}`,
         signal
       );
 
-      if (data.candles.length === 0) return;
+      if (signal?.aborted || requestVersion !== marketVersionRef.current || marketSelectionRef.current !== asset.symbol+"|"+nextTimeframe || !Array.isArray(data.candles) || data.candles.length === 0) return;
 
       const nextCandles: Candle[] = data.candles.map((candle) => ({
         time: candle.time,
@@ -480,15 +482,25 @@ export default function TradingPage() {
         close: Number(candle.close),
       }));
 
-      candlesRef.current = nextCandles;
-      setCandles(nextCandles);
-      setSentiment(calculateSentiment(nextCandles));
+      const validCandles = nextCandles.filter((candle) =>
+        [candle.time,candle.open,candle.high,candle.low,candle.close].every(Number.isFinite) && candle.time > 0 &&
+        [candle.open,candle.high,candle.low,candle.close].every(value => value > 0) &&
+        candle.high >= Math.max(candle.open,candle.close) && candle.low <= Math.min(candle.open,candle.close)
+      );
+      if (!validCandles.length) return;
+      candlesRef.current = validCandles;
+      setCandles(validCandles);
+      setSentiment(calculateSentiment(validCandles));
+      setMarketReady(validCandles.length >= 2);
     },
     []
   );
 
   const loadWallet = React.useCallback(
     async (signal?: AbortSignal) => {
+      const requestScope=accountType+"|"+currency;
+      const requestVersion=walletVersionRef.current;
+      if (signal?.aborted || walletScopeRef.current!==requestScope) return;
       setWalletLoading(true);
 
       try {
@@ -501,9 +513,10 @@ export default function TradingPage() {
           signal
         );
 
+        if (signal?.aborted || walletScopeRef.current!==requestScope || requestVersion!==walletVersionRef.current) return;
         setWalletBalance((previous) => toWalletBalance(data.balance, previous));
       } finally {
-        setWalletLoading(false);
+        if (!signal?.aborted && walletScopeRef.current===requestScope && requestVersion===walletVersionRef.current) setWalletLoading(false);
       }
     },
     [accountType, currency]
@@ -511,6 +524,8 @@ export default function TradingPage() {
 
   const loadTradingState = React.useCallback(
     async (signal?: AbortSignal) => {
+      const requestScope=accountType+"|"+currency;
+      const requestVersion=walletVersionRef.current;
       if (fetchingTradingStateRef.current || document.hidden) return;
 
       fetchingTradingStateRef.current = true;
@@ -539,7 +554,7 @@ export default function TradingPage() {
           ),
         ]);
 
-        setWalletBalance((previous) => toWalletBalance(wallet.balance, previous));
+        if (!signal?.aborted && walletScopeRef.current===requestScope && requestVersion===walletVersionRef.current) setWalletBalance((previous) => toWalletBalance(wallet.balance, previous));
         setActiveTrades(open.map(tradeToMarker));
         setOpenTrades(open);
 
@@ -628,7 +643,7 @@ export default function TradingPage() {
             nextAssets.find((asset) => asset.symbol === "EUR/USD OTC") ??
             nextAssets[0];
 
-          showSyntheticMarket(preferred, timeframe);
+          resetMarket(preferred, timeframe);
           setSelectedAsset(preferred);
           setActiveCategory(preferred.category);
           loadHistoricalCandles(preferred, timeframe).catch(() => undefined);
@@ -645,7 +660,7 @@ export default function TradingPage() {
     return () => {
       cancelled = true;
     };
-  }, [showSyntheticMarket, loadHistoricalCandles, timeframe, requestedSymbol]);
+  }, [resetMarket, loadHistoricalCandles, timeframe, requestedSymbol]);
 
   // Live price/candle feed: subscribe to this asset+timeframe room on the
   // backend's market WebSocket, which ticks continuously regardless of
@@ -661,7 +676,7 @@ export default function TradingPage() {
     };
 
     const handleCandleUpdate = (data: MarketCandleUpdate) => {
-      if (data.symbol !== symbol || data.timeframe !== timeframe) return;
+      if (data.symbol !== symbol || data.timeframe !== timeframe || marketSelectionRef.current !== symbol+"|"+timeframe) return;
 
       const nextCandle: Candle = {
         time: data.candle.time,
@@ -671,6 +686,7 @@ export default function TradingPage() {
         close: data.candle.close,
       };
 
+      if (![nextCandle.time,nextCandle.open,nextCandle.high,nextCandle.low,nextCandle.close].every(Number.isFinite) || nextCandle.time <= 0 || ![nextCandle.open,nextCandle.high,nextCandle.low,nextCandle.close].every(value => value > 0) || nextCandle.high < Math.max(nextCandle.open,nextCandle.close) || nextCandle.low > Math.min(nextCandle.open,nextCandle.close)) return;
       const current = candlesRef.current;
       const lastIndex = current.length - 1;
 
@@ -681,6 +697,7 @@ export default function TradingPage() {
 
       candlesRef.current = nextCandles;
       setCandles(nextCandles);
+      setMarketReady(nextCandles.length >= 2);
       setSentiment(calculateSentiment(nextCandles));
     };
 
@@ -741,18 +758,6 @@ export default function TradingPage() {
     };
   }, [timeframe, loadTradingState]);
 
-  React.useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      const pulse = Math.floor(Math.random() * 5);
-      const nextPayout = clamp(84 + selectedAsset.payoutBoost + pulse, 20, 92);
-
-      setPayout(nextPayout);
-    }, 8000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [selectedAsset]);
 
   function handleFullscreen() {
     if (document.fullscreenElement) {
@@ -764,7 +769,7 @@ export default function TradingPage() {
   }
 
   function handleAssetChange(asset: Asset) {
-    showSyntheticMarket(asset, timeframe);
+    resetMarket(asset, timeframe);
     setSelectedAsset(asset);
     setActiveCategory(asset.category);
     setAssetMenuOpen(false);
@@ -772,7 +777,7 @@ export default function TradingPage() {
   }
 
   function handleTimeframeChange(nextTimeframe: string) {
-    showSyntheticMarket(selectedAsset, nextTimeframe);
+    resetMarket(selectedAsset, nextTimeframe);
     setTimeframe(nextTimeframe);
     setTimeframeOpen(false);
     loadHistoricalCandles(selectedAsset, nextTimeframe).catch(() => undefined);
@@ -834,6 +839,8 @@ export default function TradingPage() {
 
   async function handleTrade(side: TradeSide) {
     if (!canTrade) return;
+    const requestScope=accountType+"|"+currency;
+    const requestVersion=walletVersionRef.current;
 
     setTradeSubmitting(true);
     setTradeError(null);
@@ -862,8 +869,7 @@ export default function TradingPage() {
         expirySeconds: expirySecondsRef.current,
       });
 
-      setPayout((previous) => toFiniteNumber(response.trade.payoutPercent, previous));
-      setWalletBalance((previous) => toWalletBalance(response.wallet.balance, previous));
+      if (walletScopeRef.current===requestScope && requestVersion===walletVersionRef.current) setWalletBalance((previous) => toWalletBalance(response.wallet.balance, previous));
 
       setActiveTrades((current) => [tradeToMarker(response.trade), ...current]);
 
@@ -899,7 +905,7 @@ export default function TradingPage() {
       : 0;
 
   const chartLayoutStyle = {
-    "--nt-indicator-space": `${bottomIndicatorCount * 100}px`,
+    "--nt-indicator-space": `${bottomIndicatorCount * 72}px`,
   } as React.CSSProperties;
 
   return (
@@ -909,8 +915,8 @@ export default function TradingPage() {
         currency={currency}
         balance={walletBalance}
         balanceLoading={walletLoading}
-        onAccountChange={(next) => { if (next !== accountType) { setWalletBalance(null); setWalletLoading(true); setAccountType(next); } }}
-        onCurrencyChange={(next) => { if (next !== currency) { setWalletBalance(null); setWalletLoading(true); setCurrency(next); } }}
+        onAccountChange={(next) => { if (next !== accountType) { walletScopeRef.current=next+"|"+currency; walletVersionRef.current+=1; setWalletBalance(null); setWalletLoading(true); setAccountType(next); } }}
+        onCurrencyChange={(next) => { if (next !== currency) { walletScopeRef.current=accountType+"|"+next; walletVersionRef.current+=1; setWalletBalance(null); setWalletLoading(true); setCurrency(next); } }}
         onFullscreen={handleFullscreen}
       />
 
@@ -923,6 +929,8 @@ export default function TradingPage() {
               <button
                 type="button"
                 className="nt-asset-trigger"
+                aria-expanded={assetMenuOpen}
+                aria-label="Select trading asset"
                 onClick={() => setAssetMenuOpen((current) => !current)}
               >
                 <span>{selectedAsset.symbol}</span>
@@ -965,7 +973,7 @@ export default function TradingPage() {
                       >
                         <strong>{asset.symbol}</strong>
                         <span>
-                          {asset.label} • Payout boost {asset.payoutBoost}
+                          {asset.label}
                         </span>
                       </button>
                     ))}
@@ -973,9 +981,13 @@ export default function TradingPage() {
                 </div>
               )}
             </div>
-
+            <button type="button" className={favorites.includes(selectedAsset.symbol) ? "nt-asset-favorite is-active" : "nt-asset-favorite"} onClick={toggleFavorite} aria-pressed={favorites.includes(selectedAsset.symbol)} aria-label={`${favorites.includes(selectedAsset.symbol) ? "Remove" : "Add"} ${selectedAsset.symbol} ${favorites.includes(selectedAsset.symbol) ? "from" : "to"} favorites`}>
+              <Star size={16} aria-hidden="true" fill={favorites.includes(selectedAsset.symbol) ? "currentColor" : "none"} />
+            </button>
+            <div className="nt-asset-live-quote" aria-label="Current market price"><strong>{lastPrice !== undefined ? lastPrice.toFixed(selectedAsset.precision) : "—"}</strong>{marketReady && <small className={changePercent >= 0 ? "is-up" : "is-down"}>{changePercent >= 0 ? "+" : ""}{changePercent.toFixed(2)}%</small>}</div>
           </div>
 
+          <div className="nt-chart-toolbar" aria-label="Chart tools">
           <TradingToolbar
             timeframe={timeframe}
             chartType={chartType}
@@ -996,6 +1008,7 @@ export default function TradingPage() {
             onIndicatorSettingChange={handleIndicatorSettingChange}
             onIndicatorStyleChange={handleIndicatorStyleChange}
           />
+          </div>
 
           <TradingChart
             asset={selectedAsset}
@@ -1011,10 +1024,7 @@ export default function TradingPage() {
             resultMarkers={resultMarkers}
           />
 
-          <div className="nt-chart-footer">
-            <button type="button" aria-label="Scroll back"><ArrowLeft size={14} /></button>
-            <button type="button">{timeframe} <ChevronUp size={14} aria-hidden="true" /></button>
-          </div>
+
         </section>
 
         <TradingPanel
@@ -1026,9 +1036,10 @@ export default function TradingPage() {
           amount={amount}
           currency={currency}
           payout={payout}
-          expectedProfitText={formatMoney(expectedProfit, currency)}
-          expectedReturnText={formatMoney(expectedReturn, currency)}
+          expectedProfitText={expectedProfit === null ? "—" : formatMoney(expectedProfit, currency)}
+          expectedReturnText={expectedReturn === null ? "—" : formatMoney(expectedReturn, currency)}
           canTrade={canTrade}
+          tradeDisabledReason={!marketReady ? "Waiting for market prices…" : payout === null ? "Waiting for current payout…" : walletBalance === null ? walletLoading ? "Loading account balance…" : "Account balance unavailable" : tradeSubmitting ? "Submitting trade…" : safeStakeAmount <= 0 ? "Enter an amount greater than zero" : safeStakeAmount > walletBalance ? "Amount exceeds available balance" : walletLoading ? "Updating account balance…" : undefined}
           sentiment={sentiment}
           openTrades={openTrades}
           onAdjustExpiry={handleAdjustExpiry}

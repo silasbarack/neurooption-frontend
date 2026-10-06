@@ -2,3 +2,5 @@
 @media(max-width:900px){.ac{grid-template-columns:1fr;gap:20px;max-width:520px}.ac-heading{display:none}.ac-col{gap:15px}.ac-user{padding:20px}.ac-section-heading{margin:1px 0 -3px}.ac-section-heading>span{display:none}.ac-balance strong{font-size:33px}.ac-tile{padding:18px 6px 16px;gap:11px}.ac-tiles{gap:10px}.ac-progress{padding:18px}.ac-details{order:4}.ac-security-note{padding-bottom:2px}}
 @media(max-width:380px){.ac-user{gap:13px;padding:18px}.ac-user-text b{font-size:17px}.ac-balance{padding:20px}.ac-balance strong{font-size:30px}.ac-balance small span{display:none}.ac-tiles{gap:8px}.ac-tile{font-size:11px}.ac-progress{padding:16px;gap:13px 10px}.ac-progress-text b{font-size:13px}}
 @media(prefers-reduced-motion:reduce){.ac-tile,.ac-switch button,.ac-progress-bar i{transition:none}.ac-tile:hover{transform:none}}
+
+@media(max-width:900px){.ac-heading{display:block}.ac-heading .ac-eyebrow,.ac-heading p{display:none}.ac-title{font-size:22px;margin:0}}

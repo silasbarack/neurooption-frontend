@@ -1,14 +1,14 @@
 /* Home page: dark hero, then alternating light and dark bands. */
 .hp {
-  --hp-blue: #2f6bff;
-  --hp-blue-2: #4d84ff;
+  --hp-blue: #e4b94f;
+  --hp-blue-2: #f2cf76;
   --hp-dark: #050a18;
   --hp-dark-2: #081127;
-  --hp-light: #eef3fb;
+  --hp-light: #f7f2e8;
   --hp-ink: #0b1630;
   --hp-ink-muted: #51607a;
   --hp-line-dark: rgba(148, 170, 220, 0.14);
-  --hp-line-light: #d6e0f0;
+  --hp-line-light: #e0d8c9;
 
   /* The app shell fixes the viewport height; each page scrolls itself. */
   height: 100%;
@@ -71,13 +71,13 @@
 }
 
 .hp-btn-primary {
-  background: linear-gradient(180deg, #3d78ff, #2259f0);
+  background: linear-gradient(180deg, #f3d17b, #d9ae45);
   color: #fff;
-  box-shadow: 0 10px 26px rgba(47, 107, 255, 0.35);
+  box-shadow: 0 10px 26px rgba(244,199,81, 0.35);
 }
 
 .hp-btn-primary:hover {
-  background: linear-gradient(180deg, #4d84ff, #2f6bff);
+  background: linear-gradient(180deg, #f2cf76, #e4b94f);
 }
 
 .hp-btn-ghost {
@@ -92,26 +92,26 @@
 }
 
 .hp-btn-outline {
-  border-color: rgba(47, 107, 255, 0.55);
+  border-color: rgba(244,199,81, 0.55);
   background: #fff;
   color: var(--hp-blue);
 }
 
 .hp-btn-outline:hover {
-  background: #f2f6ff;
+  background: #fff8eb;
 }
 
 .hp-btn:focus-visible,
 .hp-nav-item button:focus-visible,
 .hp-exp-card:focus-visible,
 .hp-market-card:focus-visible {
-  outline: 3px solid rgba(77, 132, 255, 0.6);
+  outline: 3px solid rgba(232, 191, 96, 0.6);
   outline-offset: 2px;
 }
 
 .hp-eyebrow {
   margin: 0 0 10px;
-  color: #6ea0ff;
+  color: #e8bf60;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -212,7 +212,7 @@
 
 .hp-nav-menu a:hover,
 .hp-nav-menu a:focus-visible {
-  background: rgba(47, 107, 255, 0.14);
+  background: rgba(244,199,81, 0.14);
   color: #fff;
   outline: none;
 }
@@ -251,8 +251,8 @@
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(700px 420px at 78% 40%, rgba(47, 107, 255, 0.26), transparent 65%),
-    radial-gradient(500px 300px at 10% 0%, rgba(124, 58, 237, 0.14), transparent 70%),
+    radial-gradient(700px 420px at 78% 40%, rgba(244,199,81, 0.26), transparent 65%),
+    radial-gradient(500px 300px at 10% 0%, rgba(174, 132, 49, 0.14), transparent 70%),
     /* The photo sits under a heavy wash so it reads as a faint backdrop. */
     linear-gradient(180deg, rgba(5, 10, 24, 0.84) 0%, rgba(6, 13, 32, 0.9) 55%, rgba(7, 16, 41, 0.97) 100%),
     url("/landing/hero-mountains.jpg") center 62% / cover no-repeat,
@@ -291,7 +291,7 @@
 
 .hp-hero h1 span {
   display: block;
-  background: linear-gradient(90deg, #a78bfa 0%, #8b9cff 45%, #7dd3fc 100%);
+  background: linear-gradient(90deg, #e4b94f 0%, #f2cf76 45%, #f5dfb1 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -330,7 +330,7 @@
 }
 
 .hp-hero-points svg {
-  color: #6ea0ff;
+  color: #e8bf60;
 }
 
 /* Hero artwork: a laptop running the trading workspace */
@@ -345,7 +345,7 @@
   position: absolute;
   inset: 8% 2% 10%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.35), transparent 68%);
+  background: radial-gradient(circle, rgba(192, 153, 65, 0.35), transparent 68%);
   filter: blur(34px);
 }
 
@@ -442,7 +442,7 @@
 }
 
 .hp-app-tabs i.is-on {
-  color: #6ea0ff;
+  color: #e8bf60;
 }
 
 .hp-app-balance {
@@ -454,7 +454,7 @@
 }
 
 .hp-app-balance small {
-  color: #6ea0ff;
+  color: #e8bf60;
   font-size: 6px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -463,7 +463,7 @@
 .hp-app-deposit {
   padding: 3px 6px;
   border-radius: 3px;
-  background: #2f6bff;
+  background: #e4b94f;
   color: #fff;
   font-weight: 800;
 }
@@ -486,7 +486,7 @@
 }
 
 .hp-app-rail .is-on {
-  color: #6ea0ff;
+  color: #e8bf60;
 }
 
 .hp-app-chart {
@@ -494,7 +494,7 @@
   flex: 1;
   min-width: 0;
   padding: 5px 26px 22px 3px;
-  background: radial-gradient(90% 70% at 60% 40%, rgba(47, 107, 255, 0.07), transparent 70%), #070e1e;
+  background: radial-gradient(90% 70% at 60% 40%, rgba(244,199,81, 0.07), transparent 70%), #070e1e;
 }
 
 .hp-candles {
@@ -517,7 +517,7 @@
 }
 
 .hp-candle-last {
-  stroke: #6ea0ff;
+  stroke: #e8bf60;
   stroke-width: 0.7;
   stroke-dasharray: 3 3;
 }
@@ -540,7 +540,7 @@
   right: 26px;
   padding: 2px 5px;
   border-radius: 3px;
-  background: #2f6bff;
+  background: #e4b94f;
   color: #fff;
   font-size: 6px;
   font-weight: 800;
@@ -657,11 +657,11 @@
   font-weight: 700;
 }
 
-.is-up {
+.hp .is-up {
   color: #22c55e;
 }
 
-.is-down {
+.hp .is-down {
   color: #ef4444;
 }
 
@@ -676,7 +676,7 @@
 }
 
 .hp-light {
-  background: linear-gradient(180deg, #f3f7fd, #e9f0fa);
+  background: linear-gradient(180deg, #f8f4eb, #f0e8db);
   color: var(--hp-ink);
 }
 
@@ -721,14 +721,14 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #6ea0ff !important;
+  color: #e8bf60 !important;
   font-size: 13px;
   font-weight: 700;
   text-decoration: none;
 }
 
 .hp-text-link:hover {
-  color: #9dbdff !important;
+  color: #f4d38b !important;
 }
 
 /* Experience cards */
@@ -747,7 +747,7 @@
   overflow: hidden;
   border: 1px solid var(--hp-line-light);
   border-radius: 16px;
-  background: linear-gradient(160deg, #ffffff, #e6eefb);
+  background: linear-gradient(160deg, #ffffff, #efe5d2);
   color: var(--hp-ink) !important;
   text-decoration: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -759,9 +759,9 @@
 }
 
 .hp-exp-card.is-dark {
-  border-color: rgba(96, 165, 250, 0.25);
+  border-color: rgba(232, 191, 96, 0.25);
   background:
-    radial-gradient(120% 90% at 100% 100%, rgba(47, 107, 255, 0.45), transparent 60%),
+    radial-gradient(120% 90% at 100% 100%, rgba(244,199,81, 0.45), transparent 60%),
     linear-gradient(160deg, #0b1838, #050a18);
   color: #fff !important;
 }
@@ -772,7 +772,7 @@
 }
 
 .hp-exp-card.is-dark .hp-exp-icon {
-  color: #6ea0ff;
+  color: #e8bf60;
 }
 
 .hp-exp-card b {
@@ -834,7 +834,7 @@
 }
 
 .hp-market-card:hover {
-  border-color: rgba(96, 165, 250, 0.5);
+  border-color: rgba(232, 191, 96, 0.5);
   transform: translateY(-2px);
 }
 
@@ -888,7 +888,7 @@
   width: 54px;
   height: 54px;
   border-radius: 14px;
-  background: linear-gradient(160deg, #ffffff, #dde8fb);
+  background: linear-gradient(160deg, #ffffff, #e9dcc3);
   box-shadow: 0 8px 20px rgba(30, 64, 175, 0.1);
   color: var(--hp-blue);
 }
@@ -909,7 +909,7 @@
 .hp-community {
   overflow: hidden;
   background:
-    radial-gradient(600px 300px at 20% 50%, rgba(47, 107, 255, 0.25), transparent 70%),
+    radial-gradient(600px 300px at 20% 50%, rgba(244,199,81, 0.25), transparent 70%),
     linear-gradient(180deg, #050a18, #07102a);
 }
 
@@ -966,9 +966,9 @@
   place-items: center;
   width: 32px;
   height: 32px;
-  border: 1px solid rgba(110, 160, 255, 0.5);
+  border: 1px solid rgba(232, 191, 96, 0.5);
   border-radius: 50%;
-  color: #6ea0ff;
+  color: #e8bf60;
 }
 
 /* Devices */
@@ -1046,7 +1046,7 @@
   width: 136%;
   height: 78%;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(59, 130, 246, 0.5), rgba(147, 197, 253, 0.18) 60%, transparent);
+  background: radial-gradient(closest-side, rgba(192, 153, 65, 0.5), rgba(241, 214, 147, 0.18) 60%, transparent);
   filter: blur(10px);
 }
 
@@ -1183,9 +1183,9 @@
 }
 
 .hp-phone-chips i.is-on {
-  background: rgba(47, 107, 255, 0.2);
-  color: #6ea0ff;
-  box-shadow: inset 0 0 0 1px rgba(47, 107, 255, 0.45);
+  background: rgba(244,199,81, 0.2);
+  color: #e8bf60;
+  box-shadow: inset 0 0 0 1px rgba(244,199,81, 0.45);
 }
 
 .hp-phone-list {
@@ -1240,7 +1240,7 @@
 .hp-phone-timer {
   padding: 2px 6px;
   border-radius: 4px;
-  background: #2f6bff;
+  background: #e4b94f;
   color: #fff;
   font-size: 8px;
   font-weight: 800;
@@ -1324,7 +1324,7 @@
 }
 
 .hp-tabbar span.is-on {
-  color: #6ea0ff;
+  color: #e8bf60;
 }
 
 .hp-tabbar small {
@@ -1430,7 +1430,7 @@
 }
 
 .hp-footer-news small {
-  color: #6ea0ff;
+  color: #e8bf60;
 }
 
 .hp-footer-bottom {
@@ -1450,7 +1450,7 @@
 }
 
 .hp-footer-bottom a {
-  color: #6ea0ff !important;
+  color: #e8bf60 !important;
   text-decoration: none;
 }
 

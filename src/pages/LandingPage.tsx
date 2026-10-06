@@ -48,10 +48,10 @@ const NAV: NavGroup[] = [
     label: "Markets",
     links: [
       { label: "All markets", to: "/markets" },
-      { label: "Forex", to: "/markets" },
-      { label: "Crypto", to: "/markets" },
-      { label: "Stocks", to: "/markets" },
-      { label: "OTC markets", to: "/markets" },
+      { label: "Forex", to: "/markets?category=Currencies" },
+      { label: "Crypto", to: "/markets?category=Cryptocurrencies" },
+      { label: "Stocks", to: "/markets?category=Stocks" },
+      { label: "OTC markets", to: "/markets?category=OTC" },
     ],
   },
   {
@@ -100,11 +100,11 @@ const EXPERIENCE = [
 
 // Symbols as the backend names them; quotes fall back to built-in samples offline.
 const POPULAR = [
-  { symbol: "EUR/USD OTC", name: "EUR/USD", color: "#3b82f6" },
+  { symbol: "EUR/USD OTC", name: "EUR/USD", color: "#e4b94f" },
   { symbol: "BTC/USD OTC", name: "BTC/USD", color: "#f59e0b" },
   { symbol: "Gold OTC", name: "Gold", color: "#eab308" },
   { symbol: "Tesla OTC", name: "Tesla", color: "#ef4444" },
-  { symbol: "US 500 OTC", name: "US 500", color: "#3b82f6" },
+  { symbol: "US 500 OTC", name: "US 500", color: "#e4b94f" },
   { symbol: "WTI Oil OTC", name: "Oil", color: "#ef4444" },
 ];
 
@@ -134,10 +134,10 @@ const FOOTER = [
   {
     title: "Markets",
     links: [
-      ["Forex", "/markets"],
-      ["Commodities", "/markets"],
-      ["Indices", "/markets"],
-      ["Shares", "/markets"],
+      ["Forex", "/markets?category=Currencies"],
+      ["Commodities", "/markets?category=Commodities"],
+      ["Indices", "/markets?category=Indices"],
+      ["Shares", "/markets?category=Stocks"],
       ["Cryptocurrencies", "/markets"],
     ],
   },
@@ -341,6 +341,7 @@ function HeroArt({ quotes }: { quotes: MarketQuote[] }) {
                     <i key={i} style={{ height: `${18 + ((i * 41) % 72)}%` }} className={i % 3 === 1 ? "is-down" : ""} />
                   ))}
                 </div>
+                <div className="hp-app-chart-times"><span>11:00</span><span>11:15</span><span>11:30</span><span>11:45</span><span>12:00</span></div>
               </div>
 
               <div className="hp-app-panel">
@@ -366,7 +367,7 @@ function HeroArt({ quotes }: { quotes: MarketQuote[] }) {
         <div className="hp-laptop-base" />
       </div>
       <div className="hp-hero-phone">
-        <div className="hp-hero-phone-notch" />
+        <div className="hp-hero-phone-notch" /><div className="hp-hero-phone-status"><span>9:41</span><span>Demo preview</span></div>
         <div className="hp-hero-phone-head">
           <span className="hp-hero-phone-mark">
             <img src="/neurooption-logo.png" alt="" />
@@ -386,9 +387,9 @@ function HeroArt({ quotes }: { quotes: MarketQuote[] }) {
           <span><small>Payout</small><b>+{payout}%</b></span>
           <span><small>Profit</small><b>{"$"}{(100 + payout).toFixed(2)}</b></span>
         </div>
-        <div className="hp-hero-phone-actions"><span>BUY</span><span>SELL</span></div>
+        <div className="hp-hero-phone-actions"><span>BUY</span><span>SELL</span></div><span className="hp-hero-phone-home" />
       </div>
-      <span className="hp-float is-price">
+      <small className="hp-preview-label">Illustrative demo workspace · sample chart</small><span className="hp-float is-price">
         <b>{price.toFixed(5)}</b>
         <em className={change >= 0 ? "is-up" : "is-down"}>{formatChange(change)}</em>
       </span>
@@ -404,7 +405,7 @@ function CardArt({ kind }: { kind: (typeof EXPERIENCE)[number]["art"] }) {
           <path
             key={i}
             d={`M0 ${120 - i * 3} C 60 ${60 + i * 4}, 120 ${140 - i * 6}, 220 ${30 + i * 5}`}
-            stroke="#60a5fa"
+            stroke="#e8bf60"
             strokeOpacity={0.15 + i * 0.06}
             fill="none"
           />
@@ -417,11 +418,11 @@ function CardArt({ kind }: { kind: (typeof EXPERIENCE)[number]["art"] }) {
       <svg className="hp-card-art" viewBox="0 0 220 140" aria-hidden="true">
         <defs>
           <linearGradient id="hp-shield" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#93c5fd" />
-            <stop offset="1" stopColor="#1d4ed8" />
+            <stop offset="0" stopColor="#f1d693" />
+            <stop offset="1" stopColor="#987328" />
           </linearGradient>
         </defs>
-        <ellipse cx="150" cy="128" rx="54" ry="8" fill="#3b82f6" opacity="0.35" />
+        <ellipse cx="150" cy="128" rx="54" ry="8" fill="#e4b94f" opacity="0.35" />
         <path d="M150 20 l44 16 v34 c0 30 -20 48 -44 58 c-24 -10 -44 -28 -44 -58 v-34 z" fill="url(#hp-shield)" opacity="0.9" />
         <path d="M150 32 l32 12 v26 c0 22 -14 36 -32 44 c-18 -8 -32 -22 -32 -44 v-26 z" fill="#0b1630" opacity="0.35" />
       </svg>
@@ -431,10 +432,10 @@ function CardArt({ kind }: { kind: (typeof EXPERIENCE)[number]["art"] }) {
     return (
       <svg className="hp-card-art" viewBox="0 0 220 140" aria-hidden="true">
         {[0, 1, 2].map((i) => (
-          <rect key={i} x={110 + i * 4} y={112 - i * 14} width="90" height="12" rx="3" fill="#bfdbfe" opacity={0.55 + i * 0.15} />
+          <rect key={i} x={110 + i * 4} y={112 - i * 14} width="90" height="12" rx="3" fill="#e4d3ad" opacity={0.55 + i * 0.15} />
         ))}
         {[0, 1, 2].map((i) => (
-          <rect key={`p${i}`} x={130 + i * 18} y={20 + i * 6} width="14" height={52 - i * 6} rx="2" fill="#dbeafe" stroke="#93c5fd" opacity="0.8" />
+          <rect key={`p${i}`} x={130 + i * 18} y={20 + i * 6} width="14" height={52 - i * 6} rx="2" fill="#f3e6ca" stroke="#f1d693" opacity="0.8" />
         ))}
       </svg>
     );
@@ -449,8 +450,8 @@ function CardArt({ kind }: { kind: (typeof EXPERIENCE)[number]["art"] }) {
           width="62"
           height="92"
           rx="8"
-          fill="#dbeafe"
-          stroke="#93c5fd"
+          fill="#f3e6ca"
+          stroke="#f1d693"
           opacity={0.45 + i * 0.18}
           transform={`skewY(-12) translate(0 ${30 + i * 4})`}
         />
@@ -474,24 +475,24 @@ function Globe3D() {
           <stop offset="1" stopColor="#050a18" />
         </radialGradient>
         <radialGradient id="hp-globe-halo" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0.75" stopColor="#3b82f6" stopOpacity="0" />
-          <stop offset="0.9" stopColor="#3b82f6" stopOpacity="0.45" />
-          <stop offset="1" stopColor="#3b82f6" stopOpacity="0" />
+          <stop offset="0.75" stopColor="#e4b94f" stopOpacity="0" />
+          <stop offset="0.9" stopColor="#e4b94f" stopOpacity="0.45" />
+          <stop offset="1" stopColor="#e4b94f" stopOpacity="0" />
         </radialGradient>
       </defs>
       <circle cx="150" cy="150" r="140" fill="url(#hp-globe-halo)" />
-      <circle cx="150" cy="150" r="118" fill="url(#hp-globe-fill)" stroke="#60a5fa" strokeOpacity="0.5" />
+      <circle cx="150" cy="150" r="118" fill="url(#hp-globe-fill)" stroke="#e8bf60" strokeOpacity="0.5" />
       {[-60, -30, 0, 30, 60].map((lat) => (
-        <ellipse key={lat} cx="150" cy={150 + lat * 1.3} rx={118 * Math.cos((lat * Math.PI) / 180)} ry="10" fill="none" stroke="#60a5fa" strokeOpacity="0.16" />
+        <ellipse key={lat} cx="150" cy={150 + lat * 1.3} rx={118 * Math.cos((lat * Math.PI) / 180)} ry="10" fill="none" stroke="#e8bf60" strokeOpacity="0.16" />
       ))}
       {[20, 50, 80].map((rx) => (
-        <ellipse key={rx} cx="150" cy="150" rx={rx} ry="118" fill="none" stroke="#60a5fa" strokeOpacity="0.14" />
+        <ellipse key={rx} cx="150" cy="150" rx={rx} ry="118" fill="none" stroke="#e8bf60" strokeOpacity="0.14" />
       ))}
       {lights.map((p, i) => (
         <circle key={i} cx={p.x} cy={p.y} r={i % 5 === 0 ? 1.8 : 1.1} fill="#fde68a" opacity={p.o} />
       ))}
-      <ellipse cx="150" cy="150" rx="146" ry="44" fill="none" stroke="#93c5fd" strokeOpacity="0.35" transform="rotate(-18 150 150)" />
-      <ellipse cx="150" cy="150" rx="140" ry="64" fill="none" stroke="#a78bfa" strokeOpacity="0.25" transform="rotate(22 150 150)" />
+      <ellipse cx="150" cy="150" rx="146" ry="44" fill="none" stroke="#f1d693" strokeOpacity="0.35" transform="rotate(-18 150 150)" />
+      <ellipse cx="150" cy="150" rx="140" ry="64" fill="none" stroke="#cfa754" strokeOpacity="0.25" transform="rotate(22 150 150)" />
     </svg>
   );
 }
@@ -673,7 +674,7 @@ function StoreBadges() {
 }
 
 export default function LandingPage() {
-  const { quotes } = useQuotes();
+  const { quotes, live } = useQuotes();
   const [menuOpen, setMenuOpen] = useState(false);
   const [newsletterNote, setNewsletterNote] = useState("");
   const closeMenu = useCallback(() => setMenuOpen(false), []);
@@ -740,7 +741,7 @@ export default function LandingPage() {
               <p className="hp-eyebrow">Turn insight into opportunity</p>
               <h1>
                 Trade Smarter
-                <span>with NeuroOption</span>
+                <span><i className="hp-hero-with">with </i>NeuroOption</span>
               </h1>
               <p className="hp-lead">
                 Access global markets with a modern trading platform, real market conditions and powerful tools —
@@ -771,12 +772,17 @@ export default function LandingPage() {
                   <Globe size={17} aria-hidden="true" /> Global Access
                 </li>
               </ul>
+              <div className="hp-mobile-highlights" aria-label="Platform highlights">
+                <div><ShieldCheck aria-hidden="true"/><b>100+</b><small>Trading Assets</small></div>
+                <div><Zap aria-hidden="true"/><b>92%</b><small>Max Payout</small></div>
+                <div><BarChart3 aria-hidden="true"/><b>24/7</b><small>Global Markets</small></div>
+              </div>
             </div>
             <HeroArt quotes={quotes} />
           </div>
         </section>
 
-        <MarketTicker quotes={quotes} />
+        <MarketTicker quotes={quotes} live={live} />
         <PlatformStats />
         <GlobalMarketsSection />
 
@@ -810,7 +816,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="markets" className="hp-section hp-dark">
+        <section id="popular-markets" className="hp-section hp-dark">
           <div className="hp-wrap">
             <div className="hp-section-head">
               <div>
@@ -821,6 +827,7 @@ export default function LandingPage() {
                 View all markets <ArrowRight size={14} aria-hidden="true" />
               </Link>
             </div>
+            <p className="hp-market-feed">{live ? "Market feed connected. Chart lines are illustrative." : "Sample prices shown while the market feed connects. Chart lines are illustrative."}</p>
             <div className="hp-market-grid">
               {POPULAR.map((asset, index) => {
                 const quote = quoteFor(quotes, asset.symbol);
@@ -830,7 +837,7 @@ export default function LandingPage() {
                     <div className="hp-market-head">
                       <AssetIcon symbol={asset.symbol} category={quote?.category} size={30} />
                       <span>
-                        <b>{asset.name}</b>
+                        <b>{asset.name}</b>{(!live || !quotes.some((item) => item.symbol === asset.symbol)) && <small>Sample</small>}
                         <em className={change >= 0 ? "is-up" : "is-down"}>{formatChange(change)}</em>
                       </span>
                     </div>
@@ -919,7 +926,7 @@ export default function LandingPage() {
               <StoreBadges />
               <small className="hp-stores-note">Native apps are coming soon. The web platform works on any phone today.</small>
             </div>
-            <PhoneMockups quotes={quotes} />
+            <div><p className="hp-devices-preview-note">Demo platform preview · charts are illustrative</p><PhoneMockups quotes={quotes} /></div>
           </div>
         </section>
       </main>

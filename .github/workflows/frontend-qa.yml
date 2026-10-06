@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: frontend-qa-${{ github.ref }}
   cancel-in-progress: true
@@ -32,6 +36,8 @@ jobs:
         run: npx tsc -b 2>&1 | tee artifacts/typescript.log
       - name: Build production assets
         run: npm run build 2>&1 | tee artifacts/build.log
+      - name: Verify real public market and account contracts
+        run: node scripts/backend-smoke.mjs
       - name: Install isolated browser tooling
         run: npm install --no-save --package-lock=false playwright@1.58.2
       - name: Install Chromium

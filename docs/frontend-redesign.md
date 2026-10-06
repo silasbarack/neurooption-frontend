@@ -1,38 +1,38 @@
 # NeuroOption responsive redesign
 
-The user's supplied desktop and mobile references are the approved design brief.
-The implementation enhances existing React/TypeScript components and routes.
-Gold controls and deep navy surfaces preserve green/red trade states.
-The production logo is public/neurooption-logo.png; its bytes and proportions are unchanged.
+The supplied desktop and mobile references guide the existing React/TypeScript UI.
+Gold controls and deep navy surfaces preserve green/red trading states. The official
+production logo, public/neurooption-logo.png, retains its original bytes and proportions.
 
 ## Preserved services
-- Authentication: shared API/Bearer token and existing login/register/reset forms.
-- Account: /account/me, with session-scoped cache and synchronized refresh.
-- Markets: /market-data/quotes, historical candles and existing Socket.IO feed.
-- Trading: existing engine wallet/open/history/trade endpoints, validations, chart,
-  timeframe aggregation, drawing tools and indicators.
-- Finance: /finance/me, M-Pesa STK submission/status polling, withdrawals.
+- Authentication: shared Bearer token and existing login/register/reset forms.
+- Account: /account/me with session-scoped cache, versioned requests and forced post-payment refresh.
+- Markets: /market-data/quotes, historical candles and the existing Socket.IO feed.
+- Trading: existing engine wallet/open/history/trade endpoints, validations, chart types and indicators.
+- Finance: /finance/me, actual M-Pesa STK submission/status polling and withdrawals.
+- Profile: existing users/profile save endpoint; actual account KYC status.
 - Achievements: calculations from actual trade history.
 
-Social trading has no operational backend integration. Its illustrative profiles
-and local following controls are explicitly labeled; no copy orders are submitted.
-Unavailable payment methods remain disabled. No payment, withdrawal or trade success
-is fabricated. Existing fallback quote data is labeled when displayed.
+Trade controls require genuine candles, a valid wallet and a current authoritative payout.
+No synthetic chart or random payout is used for execution. Browsing fallback quotes are labelled.
+Existing unimplemented drawing overlays are explicitly marked coming soon.
+Social profiles are labelled examples; local following and preview Copy controls submit no orders.
+Unavailable payment methods stay disabled. No payment, withdrawal, KYC or trade success is fabricated.
 
 ## Components and routes
-Reusable AssetRow and PaymentMethodCard join existing logo, shell, drawer, chart,
-trading controls and public homepage components. Existing routes and aliases remain.
-Market category links use the category query parameter, preserving asset selection.
-Page modules load on demand so the canvas/chart bundle does not delay the homepage.
+Reusable AssetRow, PaymentMethodCard, PaymentLogo, MarketCategoryArt, MarketTicker,
+PlatformStats and GlobalMarketsSection join the existing logo, shell, drawer,
+homepage device preview, canvas chart and trading controls. Existing routes and
+aliases remain. Market categories use query parameters. Page modules load on demand.
 
 ## Verification and deployment
-The managed execution environment failed to start. The isolated GitHub branch is
-codex/neurooption-responsive-redesign. The frontend QA workflow installs dependencies,
-runs TypeScript/build/ESLint, then browser checks at 1920, 1440, 1366, 1280, 1024,
-768, 430, 412, 390, 375 and 360 pixels. Browser fixtures are isolated in the test
-script and do not replace production APIs. Financial POSTs are blocked during QA.
+The managed execution environment failed to start. GitHub Actions provides isolated
+npm ci, ESLint, TypeScript/build, interaction regressions and browser checks.
+Coverage spans 1920, 1440, 1366, 1280, 1024, 768, 430, 412, 390, 375 and 360 pixels.
+Browser fixtures are test-only and block financial mutations. Separate real public
+backend checks validate quote/asset contracts and unauthenticated account rejection.
+Production checks wait for the exact commit through build-info.json, then check the deployed UI.
+Workflow shell pipefail makes every failed check block the release.
 
-The existing Render static site serves dist and automatically deploys main:
-https://neurooption-frontend.onrender.com
-Only verified source changes are published to main. No environment values, secrets,
-backend schema or Render service settings are modified.
+Render automatically deploys main to https://neurooption-frontend.onrender.com.
+No secrets, backend schemas, environment values or Render service settings are changed.
