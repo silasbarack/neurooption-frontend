@@ -19,6 +19,7 @@ type TradingChartProps = {
   candlesRef?: React.MutableRefObject<Candle[]>;
   marketFrameVersionRef?: React.MutableRefObject<number>;
   serverOffsetRef?: React.MutableRefObject<number>;
+  onFrameRendered?: () => void;
   chartType: ChartType;
   timeframe: string;
   expirySeconds: number;
@@ -1357,6 +1358,7 @@ function TradingChartComponent({
   candlesRef,
   marketFrameVersionRef,
   serverOffsetRef,
+  onFrameRendered,
   chartType,
   timeframe,
   expirySeconds,
@@ -1711,6 +1713,7 @@ function TradingChartComponent({
     }
     context.textAlign = "right";
     context.fillText("UTC", width - 10, height - 10);
+    onFrameRendered?.();
     };
   }, [
     activeTrades,
@@ -1721,6 +1724,7 @@ function TradingChartComponent({
     expirySeconds,
     indicatorSettings,
     indicatorStyles,
+    onFrameRendered,
     resultMarkers,
     resizeVersion,
     selectedIndicators,
@@ -1745,6 +1749,7 @@ const TradingChart = React.memo(TradingChartComponent, (previous, next) => {
     previous.candlesRef === next.candlesRef &&
     previous.marketFrameVersionRef === next.marketFrameVersionRef &&
     previous.serverOffsetRef === next.serverOffsetRef &&
+    previous.onFrameRendered === next.onFrameRendered &&
     previous.selectedIndicators === next.selectedIndicators &&
     previous.indicatorSettings === next.indicatorSettings &&
     previous.indicatorStyles === next.indicatorStyles &&
