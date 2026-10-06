@@ -138,6 +138,12 @@ jobs:
         env:
           QA_BASE_URL: https://neurooption-frontend.onrender.com
         run: node scripts/production-public-smoke.mjs 2>&1 | tee artifacts/production-public-smoke.log
+      - name: Verify production trading chart visually
+        if: ${{ !cancelled() && steps.deployment.outcome == 'success' }}
+        env:
+          QA_BASE_URL: https://neurooption-frontend.onrender.com
+          QA_ARTIFACT_DIR: artifacts/production-trading
+        run: node scripts/production-trading-visual.mjs 2>&1 | tee artifacts/production-trading-visual.log
       - name: Check deployed UI using isolated browser fixtures
         if: ${{ !cancelled() && steps.deployment.outcome == 'success' }}
         env:

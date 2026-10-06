@@ -314,6 +314,8 @@ export default function TradingPage() {
   const lastMarketSequenceRef = React.useRef(0);
   const lastClientTickAgeRef = React.useRef(0);
   const lastClientTickReceivedAtRef = React.useRef(0);
+  const lastClientMarketReceivedAtRef = React.useRef(0);
+  const lastRenderedMarketReceivedAtRef = React.useRef(0);
   const lastServerBroadcastRef = React.useRef(0);
   const lastRenderDelayRef = React.useRef(0);
   const seenSettledTradeIdsRef = React.useRef<Set<string> | null>(null);
@@ -411,14 +413,14 @@ export default function TradingPage() {
   );
 
   const handleChartFrameRendered = React.useCallback(() => {
-    const serverBroadcastTimestamp = lastServerBroadcastRef.current;
-    if (!serverBroadcastTimestamp) return;
+    const receivedAt = lastClientMarketReceivedAtRef.current;
+    if (
+      !receivedAt ||
+      receivedAt === lastRenderedMarketReceivedAtRef.current
+    ) return;
 
-    const estimatedServerNow = Date.now() + serverOffsetRef.current;
-    lastRenderDelayRef.current = Math.max(
-      0,
-      estimatedServerNow - serverBroadcastTimestamp,
-    );
+    lastRenderDelayRef.current = Math.max(0, Date.now() - receivedAt);
+    lastRenderedMarketReceivedAtRef.current = receivedAt;
   }, []);
 
   const clearResultMarkers = React.useCallback(() => {
@@ -780,6 +782,7 @@ export default function TradingPage() {
       lastMarketSequenceRef.current = data.sequence;
       const clientReceiveTimestamp = Date.now();
       lastClientTickReceivedAtRef.current = clientReceiveTimestamp;
+      lastClientMarketReceivedAtRef.current = clientReceiveTimestamp;
       const estimatedServerNow = clientReceiveTimestamp + serverOffsetRef.current;
       lastClientTickAgeRef.current = Math.max(
         0,
@@ -799,6 +802,9 @@ export default function TradingPage() {
         lastMarketSequenceRef.current > 0 &&
         data.sequence < lastMarketSequenceRef.current - 1
       ) return;
+
+      lastClientMarketReceivedAtRef.current = Date.now();
+      lastServerBroadcastRef.current = data.serverBroadcastTimestamp;
 
       const nextCandle: Candle = {
         time: data.candle.time,
