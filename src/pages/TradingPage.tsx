@@ -1188,6 +1188,7 @@ export default function TradingPage() {
             candlesRef={candlesRef}
             marketFrameVersionRef={marketFrameVersionRef}
             serverOffsetRef={serverOffsetRef}
+            marketReceivedAtRef={lastClientMarketReceivedAtRef}
             onFrameRendered={handleChartFrameRendered}
             chartType={chartType}
             timeframe={timeframe}

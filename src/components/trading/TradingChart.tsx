@@ -19,6 +19,7 @@ type TradingChartProps = {
   candlesRef?: React.MutableRefObject<Candle[]>;
   marketFrameVersionRef?: React.MutableRefObject<number>;
   serverOffsetRef?: React.MutableRefObject<number>;
+  marketReceivedAtRef?: React.MutableRefObject<number>;
   onFrameRendered?: () => void;
   chartType: ChartType;
   timeframe: string;
@@ -1359,6 +1360,7 @@ function TradingChartComponent({
   candlesRef,
   marketFrameVersionRef,
   serverOffsetRef,
+  marketReceivedAtRef,
   onFrameRendered,
   chartType,
   timeframe,
@@ -1602,9 +1604,10 @@ function TradingChartComponent({
     context.restore();
 
     const latest = renderCandles[renderCandles.length - 1];
-    const latestY = priceToY(latest.close);
+    const liveLatest = visibleCandlesRaw[visibleCandlesRaw.length - 1];
+    const latestY = priceToY(liveLatest.close);
 
-    context.strokeStyle = latest.close >= latest.open ? "#22c55e" : "#ef4444";
+    context.strokeStyle = liveLatest.close >= liveLatest.open ? "#22c55e" : "#ef4444";
     context.lineWidth = 1.2;
     context.setLineDash([5, 5]);
     context.beginPath();
@@ -1615,10 +1618,10 @@ function TradingChartComponent({
 
     drawTextPill(
       context,
-      latest.close.toFixed(asset.precision),
+      liveLatest.close.toFixed(asset.precision),
       right + 8,
       latestY,
-      latest.close >= latest.open ? "#16a34a" : "#dc2626",
+      liveLatest.close >= liveLatest.open ? "#16a34a" : "#dc2626",
     );
 
     const remaining = Math.max(
@@ -1751,6 +1754,40 @@ function TradingChartComponent({
     }
     context.textAlign = "right";
     context.fillText("UTC", width - 10, height - 10);
+
+    // Lightweight production diagnostics for browser QA. This stays off
+    // React state and does not affect pricing or rendering decisions.
+    const renderedAt = Date.now();
+    const marketReceivedAt = marketReceivedAtRef?.current ?? 0;
+    (
+      canvas as HTMLCanvasElement & {
+        __neuroLive?: {
+          symbol: string;
+          timeframe: string;
+          candleTime: number;
+          open: number;
+          high: number;
+          low: number;
+          close: number;
+          renderedAt: number;
+          receiveToRenderMs: number | null;
+          marketVersion: number;
+        };
+      }
+    ).__neuroLive = {
+      symbol: asset.symbol,
+      timeframe,
+      candleTime: liveLatest.time,
+      open: liveLatest.open,
+      high: liveLatest.high,
+      low: liveLatest.low,
+      close: liveLatest.close,
+      renderedAt,
+      receiveToRenderMs:
+        marketReceivedAt > 0 ? Math.max(0, renderedAt - marketReceivedAt) : null,
+      marketVersion: marketFrameVersionRef?.current ?? 0,
+    };
+
     onFrameRendered?.();
     };
   }, [
@@ -1767,6 +1804,7 @@ function TradingChartComponent({
     resizeVersion,
     selectedIndicators,
     serverOffsetRef,
+    marketReceivedAtRef,
     timeframe,
   ]);
 
@@ -1787,6 +1825,7 @@ const TradingChart = React.memo(TradingChartComponent, (previous, next) => {
     previous.candlesRef === next.candlesRef &&
     previous.marketFrameVersionRef === next.marketFrameVersionRef &&
     previous.serverOffsetRef === next.serverOffsetRef &&
+    previous.marketReceivedAtRef === next.marketReceivedAtRef &&
     previous.onFrameRendered === next.onFrameRendered &&
     previous.selectedIndicators === next.selectedIndicators &&
     previous.indicatorSettings === next.indicatorSettings &&
