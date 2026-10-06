@@ -1,3 +1,4 @@
+import type React from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowDownRight,
@@ -33,6 +34,9 @@ type TradingPanelProps = {
   tradeDisabledReason?: string;
   sentiment: number;
   openTrades: BackendTrade[];
+  /** Live price and change, kept in step with the chart between renders. */
+  livePrice?: React.ReactNode;
+  liveChange?: React.ReactNode;
   onAdjustExpiry: (unit: "hours" | "minutes" | "seconds", delta: number) => void;
   onAmountChange: (amount: string) => void;
   onTrade: (side: TradeSide) => void;
@@ -53,6 +57,8 @@ export default function TradingPanel({
   tradeDisabledReason,
   sentiment,
   openTrades,
+  livePrice,
+  liveChange,
   onAdjustExpiry,
   onAmountChange,
   onTrade,
@@ -67,14 +73,26 @@ export default function TradingPanel({
     <aside className="nt-trade-panel nt-white-panel">
       {assetSymbol && priceText && (
         <section className="nt-panel-ticker" aria-label="Selected asset">
-          <div>
-            <small>{assetSymbol}</small>
-            <strong>{priceText}</strong>
-          </div>
-          <span className={changePercent >= 0 ? "is-up" : "is-down"}>
-            {changePercent >= 0 ? "+" : ""}
-            {changePercent.toFixed(2)}%
-          </span>
+          {livePrice ? (
+            <>
+              <div>
+                <small>{assetSymbol}</small>
+                {livePrice}
+              </div>
+              {liveChange}
+            </>
+          ) : (
+            <>
+              <div>
+                <small>{assetSymbol}</small>
+                <strong>{priceText}</strong>
+              </div>
+              <span className={changePercent >= 0 ? "is-up" : "is-down"}>
+                {changePercent >= 0 ? "+" : ""}
+                {changePercent.toFixed(2)}%
+              </span>
+            </>
+          )}
         </section>
       )}
 

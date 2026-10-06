@@ -15,6 +15,7 @@ import {
   TradingSidebar,
   TradingToolbar,
 } from "../components/trading";
+import LiveQuote from "../components/trading/LiveQuote";
 
 import type {
   AccountType,
@@ -1156,7 +1157,7 @@ export default function TradingPage() {
             <button type="button" className={favorites.includes(selectedAsset.symbol) ? "nt-asset-favorite is-active" : "nt-asset-favorite"} onClick={toggleFavorite} aria-pressed={favorites.includes(selectedAsset.symbol)} aria-label={`${favorites.includes(selectedAsset.symbol) ? "Remove" : "Add"} ${selectedAsset.symbol} ${favorites.includes(selectedAsset.symbol) ? "from" : "to"} favorites`}>
               <Star size={16} aria-hidden="true" fill={favorites.includes(selectedAsset.symbol) ? "currentColor" : "none"} />
             </button>
-            <div className="nt-asset-live-quote" aria-label="Current market price"><strong>{lastPrice !== undefined ? lastPrice.toFixed(selectedAsset.precision) : "—"}</strong>{marketReady && <small className={changePercent >= 0 ? "is-up" : "is-down"}>{changePercent >= 0 ? "+" : ""}{changePercent.toFixed(2)}%</small>}</div>
+            <div className="nt-asset-live-quote" aria-label="Current market price"><LiveQuote candlesRef={candlesRef} marketFrameVersionRef={marketFrameVersionRef} precision={selectedAsset.precision} showChange={marketReady} /></div>
           </div>
 
           <div className="nt-chart-toolbar" aria-label="Chart tools">
@@ -1207,6 +1208,8 @@ export default function TradingPage() {
           assetSymbol={selectedAsset.symbol}
           priceText={lastPrice !== undefined ? lastPrice.toFixed(selectedAsset.precision) : undefined}
           changePercent={changePercent}
+          livePrice={<LiveQuote candlesRef={candlesRef} marketFrameVersionRef={marketFrameVersionRef} precision={selectedAsset.precision} part="price" />}
+          liveChange={<LiveQuote candlesRef={candlesRef} marketFrameVersionRef={marketFrameVersionRef} precision={selectedAsset.precision} part="change" changeTag="span" />}
           expiryText={formatExpiry(expirySeconds)}
           expiryParts={expiryParts}
           amount={amount}

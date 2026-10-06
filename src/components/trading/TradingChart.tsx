@@ -1216,6 +1216,33 @@ function priceRangeFromCandles(candles: Candle[], extras: number[]) {
   return { min: min - padding, max: max + padding };
 }
 
+type AxisRange = { min: number; max: number; key: string };
+
+/**
+ * Keeps the price axis still while price stays inside it. Recomputing the
+ * range every frame rescales the whole chart on each new high or low, so every
+ * candle shifts on every tick. Instead, re-frame only when price leaves the
+ * view or the data has shrunk to a small part of it, and leave headroom so the
+ * next few ticks fit. This moves the axis, never a price.
+ */
+function stabilizeAxisRange(
+  previous: AxisRange | null,
+  target: { min: number; max: number },
+  key: string,
+): AxisRange {
+  const span = Math.max(target.max - target.min, Number.EPSILON);
+
+  if (previous && previous.key === key) {
+    const fits = target.min >= previous.min && target.max <= previous.max;
+    const viewSpan = previous.max - previous.min;
+    const stillTight = span >= viewSpan * 0.62;
+    if (fits && stillTight) return previous;
+  }
+
+  const headroom = span * 0.12;
+  return { min: target.min - headroom, max: target.max + headroom, key };
+}
+
 function drawGrid(
   context: CanvasRenderingContext2D,
   left: number,
@@ -1377,6 +1404,7 @@ function TradingChartComponent({
   const drawRef = React.useRef<() => void>(() => {});
   const lastDrawVersionRef = React.useRef(-1);
   const lastTimedDrawRef = React.useRef(0);
+  const axisRangeRef = React.useRef<AxisRange | null>(null);
   const indicatorCacheRef = React.useRef<{
     computedAt: number;
     visibleLength: number;
@@ -1558,7 +1586,13 @@ function TradingChartComponent({
       ...overlayValues,
     ].filter(isFiniteNumber);
 
-    const { min, max } = priceRangeFromCandles(renderCandles, markerValues);
+    const axisRange = stabilizeAxisRange(
+      axisRangeRef.current,
+      priceRangeFromCandles(renderCandles, markerValues),
+      `${asset.symbol}|${timeframe}|${chartType}|${visibleLength}`,
+    );
+    axisRangeRef.current = axisRange;
+    const { min, max } = axisRange;
 
     const priceToY = (price: number) =>
   Math.round(top + ((max - price) / (max - min)) * chartHeight) + 0.5;
@@ -1773,6 +1807,8 @@ function TradingChartComponent({
           renderedAt: number;
           receiveToRenderMs: number | null;
           marketVersion: number;
+          axisMin: number;
+          axisMax: number;
         };
       }
     ).__neuroLive = {
@@ -1787,6 +1823,8 @@ function TradingChartComponent({
       receiveToRenderMs:
         marketReceivedAt > 0 ? Math.max(0, renderedAt - marketReceivedAt) : null,
       marketVersion: marketFrameVersionRef?.current ?? 0,
+      axisMin: min,
+      axisMax: max,
     };
 
     onFrameRendered?.();
