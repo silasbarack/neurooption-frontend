@@ -393,3 +393,6 @@
  .neo-shell.has-title .neo-topbar-title{display:none}
  .neo-topbar-right{gap:8px}
 }
+
+/* Opening must expose controls before initial keyboard focus is assigned. */
+.neo-drawer.is-open{visibility:visible;transition:none}
