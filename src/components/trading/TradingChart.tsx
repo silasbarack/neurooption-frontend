@@ -1547,7 +1547,10 @@ function TradingChartComponent({
     const height = rect.height;
 
     context.clearRect(0, 0, width, height);
-    context.fillStyle = "#101725";
+    // Keep the Canvas slightly translucent so the real mountain photograph
+    // configured on the chart wrapper remains subtly visible behind the grid
+    // and candles without affecting hit-testing or the realtime render path.
+    context.fillStyle = "rgba(16, 23, 37, 0.74)";
     context.fillRect(0, 0, width, height);
 
     const sourceCandles = candlesRef?.current ?? candles;

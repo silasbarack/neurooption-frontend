@@ -1197,8 +1197,11 @@
 .nt-premium .nt-tool-btn.active{background:var(--nt-accent-soft);border-color:var(--nt-accent);color:var(--nt-accent)}
 .nt-premium .nt-chart-types{position:absolute;top:44px;right:12px;width:max-content;max-width:calc(100% - 24px);display:none;flex-wrap:wrap;z-index:40}
 .nt-premium .nt-chart-types.is-open{display:flex}
-.nt-premium .nt-chart-canvas-wrap{position:relative;inset:auto;grid-column:1;grid-row:3;min-height:calc(132px + var(--nt-indicator-space,0px));height:100%;width:100%;background:#101725}
+.nt-premium .nt-chart-canvas-wrap{position:relative;inset:auto;grid-column:1;grid-row:3;min-height:calc(132px + var(--nt-indicator-space,0px));height:100%;width:100%;background:linear-gradient(180deg,rgba(6,12,24,.54),rgba(6,12,24,.72)),url("/landing/hero-mountains.jpg") center 58%/cover no-repeat,var(--nt-chart-bg)}
 .nt-premium .nt-chart-canvas{display:block;width:100%;height:100%}
+@media (max-width:640px){
+ .nt-premium .nt-chart-canvas-wrap{background:linear-gradient(180deg,rgba(6,12,24,.62),rgba(6,12,24,.78)),url("/landing/hero-mountains.jpg") center 60%/cover no-repeat,var(--nt-chart-bg)}
+}
 .nt-premium .nt-asset-menu,.nt-premium .nt-floating{max-width:min(380px,calc(100vw - 32px));max-height:min(480px,calc(100dvh - 220px));overflow:auto;padding:14px;z-index:60}
 .nt-premium .nt-timeframes{width:260px;padding-top:38px}
 .nt-premium .nt-indicators,.nt-premium .nt-drawings{top:48px;left:12px}
