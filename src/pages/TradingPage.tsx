@@ -51,6 +51,8 @@ import {
   MARKET_SOCKET_EVENTS,
   type MarketCandleUpdate,
   type MarketPriceUpdate,
+  type MarketResyncResponse,
+  type ServerTimeResponse,
 } from "../components/trading/marketSocket";
 import "./TradingPremium.css";
 import { useQuotes } from "../components/markets/useQuotes";
@@ -102,7 +104,6 @@ const TRADE_RESULT_DISPLAY_MS = 10000;
 const DEFAULT_ASSET =
   ASSETS.find((asset) => asset.symbol === "EUR/USD OTC") ?? ASSETS[0];
 
-const INITIAL_NOW_MS = Date.now();
 const INITIAL_CANDLES: Candle[] = [];
 
 const VALID_CATEGORIES: AssetCategory[] = [
@@ -247,6 +248,7 @@ function tradeToMarker(trade: BackendTrade): TradeMarker {
     id: trade.id,
     side: trade.side,
     entryPrice: Number(trade.entryPrice),
+    expiryTime: Number(trade.expiryTime),
     label: `${trade.side} ${formatMoney(
       Number(trade.stakeAmount),
       trade.currency
@@ -308,6 +310,12 @@ export default function TradingPage() {
   const expirySecondsRef = React.useRef(60);
   const fetchingTradingStateRef = React.useRef(false);
   const serverOffsetRef = React.useRef(0);
+  const marketFrameVersionRef = React.useRef(0);
+  const lastMarketSequenceRef = React.useRef(0);
+  const lastClientTickAgeRef = React.useRef(0);
+  const lastClientTickReceivedAtRef = React.useRef(0);
+  const lastServerBroadcastRef = React.useRef(0);
+  const lastRenderDelayRef = React.useRef(0);
   const seenSettledTradeIdsRef = React.useRef<Set<string> | null>(null);
   const resultMarkerTimersRef = React.useRef<Map<string, number>>(new Map());
 
@@ -354,10 +362,9 @@ export default function TradingPage() {
   const [selectedTool, setSelectedTool] = React.useState("Cursor");
 
   const [expirySeconds, setExpirySeconds] = React.useState(60);
-  const [clientNowMs, setClientNowMs] = React.useState(INITIAL_NOW_MS);
   const [amount, setAmount] = React.useState("100");
   const { quotes, live, updatedAt } = useQuotes();
-  const payoutQuote = live && clientNowMs - updatedAt <= 20000 ? quotes.find((quote) => quote.symbol === selectedAsset.symbol) : undefined;
+  const payoutQuote = live && updatedAt > 0 ? quotes.find((quote) => quote.symbol === selectedAsset.symbol) : undefined;
   const payout = payoutQuote && typeof payoutQuote.payout === "number" && Number.isFinite(payoutQuote.payout) && payoutQuote.payout > 0 && payoutQuote.payout <= 100 ? payoutQuote.payout : null;
   const [favorites, setFavorites] = React.useState<string[]>(() => {
     try { const value: unknown = JSON.parse(localStorage.getItem("neurooption_favorite_assets") || "[]"); return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []; } catch { return []; }
@@ -377,7 +384,6 @@ export default function TradingPage() {
   const [resultMarkers, setResultMarkers] = React.useState<ResultMarker[]>([]);
   const [resultPopups, setResultPopups] = React.useState<TradeResultPopupItem[]>([]);
 
-  const [nowMs, setNowMs] = React.useState(INITIAL_NOW_MS);
   const [sentiment, setSentiment] = React.useState(50);
 
   const stakeAmount = Number(amount);
@@ -403,6 +409,17 @@ export default function TradingPage() {
   const filteredAssets = availableAssets.filter(
     (asset) => asset.category === activeCategory
   );
+
+  const handleChartFrameRendered = React.useCallback(() => {
+    const serverBroadcastTimestamp = lastServerBroadcastRef.current;
+    if (!serverBroadcastTimestamp) return;
+
+    const estimatedServerNow = Date.now() + serverOffsetRef.current;
+    lastRenderDelayRef.current = Math.max(
+      0,
+      estimatedServerNow - serverBroadcastTimestamp,
+    );
+  }, []);
 
   const clearResultMarkers = React.useCallback(() => {
     resultMarkerTimersRef.current.forEach((timerId) => {
@@ -455,7 +472,8 @@ export default function TradingPage() {
       setCandles([]);
       setMarketReady(false);
       setSentiment(50);
-      setNowMs(atMs);
+      lastMarketSequenceRef.current = 0;
+      marketFrameVersionRef.current += 1;
       setActiveTrades([]);
       clearResultMarkers();
     },
@@ -609,19 +627,6 @@ export default function TradingPage() {
     expirySecondsRef.current = expirySeconds;
   }, [expirySeconds]);
 
-  // Candle data now arrives authoritatively from the backend over the market
-  // WebSocket; this just keeps the on-screen clock (and expiry countdown)
-  // ticking in between pushes.
-  React.useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      const clientTime = Date.now();
-      setClientNowMs(clientTime);
-      setNowMs(clientTime + serverOffsetRef.current);
-    }, 250);
-
-    return () => window.clearInterval(intervalId);
-  }, []);
-
   React.useEffect(() => {
     let cancelled = false;
 
@@ -665,21 +670,130 @@ export default function TradingPage() {
     };
   }, [resetMarket, loadHistoricalCandles, timeframe, requestedSymbol]);
 
-  // Live price/candle feed: subscribe to this asset+timeframe room on the
-  // backend's market WebSocket, which ticks continuously regardless of
-  // whether anyone is watching, and is the same price feed trade settlement
-  // uses — so the chart can never drift from what actually decides trades.
+  // Market ticks stay off React state. The Canvas reads candlesRef directly,
+  // while React state is updated only when a new candle bucket is created or
+  // when history must be reconciled after a reconnect/sequence gap.
   React.useEffect(() => {
     const socket = getMarketSocket(API_BASE_URL);
     const symbol = selectedAsset.symbol;
+    const requestResync = () => {
+      const current = candlesRef.current;
+      const since = current[Math.max(0, current.length - 3)]?.time ?? 0;
+
+      socket.emit(
+        MARKET_SOCKET_EVENTS.RESYNC_REQUEST,
+        {
+          symbol,
+          timeframe,
+          since,
+          limit: 320,
+          lastSequence: lastMarketSequenceRef.current,
+        },
+        (response: MarketResyncResponse) => {
+          if (
+            response?.symbol !== symbol ||
+            response?.timeframe !== timeframe ||
+            marketSelectionRef.current !== symbol+"|"+timeframe ||
+            !Array.isArray(response?.candles)
+          ) return;
+
+          const byTime = new Map<number, Candle>();
+          for (const candle of candlesRef.current) byTime.set(candle.time, candle);
+          for (const candle of response.candles) {
+            if (
+              [candle.time, candle.open, candle.high, candle.low, candle.close].every(Number.isFinite) &&
+              candle.time > 0 &&
+              candle.high >= Math.max(candle.open, candle.close) &&
+              candle.low <= Math.min(candle.open, candle.close)
+            ) {
+              byTime.set(candle.time, {
+                time: candle.time,
+                open: candle.open,
+                high: candle.high,
+                low: candle.low,
+                close: candle.close,
+              });
+            }
+          }
+
+          const reconciled = Array.from(byTime.values())
+            .sort((a, b) => a.time - b.time)
+            .slice(-420);
+
+          if (reconciled.length > 0) {
+            candlesRef.current = reconciled;
+            marketFrameVersionRef.current += 1;
+            lastMarketSequenceRef.current = Math.max(
+              lastMarketSequenceRef.current,
+              Number(response.lastSequence || 0),
+            );
+            setCandles(reconciled);
+            setMarketReady(reconciled.length >= 2);
+            setSentiment(calculateSentiment(reconciled));
+          }
+        },
+      );
+    };
+
+    const syncClock = () => {
+      const clientSentAt = Date.now();
+      socket.emit(
+        MARKET_SOCKET_EVENTS.SERVER_TIME,
+        { clientSentAt },
+        (response: ServerTimeResponse) => {
+          if (!response || !Number.isFinite(response.serverTimestamp)) return;
+          const clientReceivedAt = Date.now();
+          const midpoint = clientSentAt + (clientReceivedAt - clientSentAt) / 2;
+          serverOffsetRef.current = response.serverTimestamp - midpoint;
+        },
+      );
+    };
+
+    const subscribe = () => {
+      socket.emit(MARKET_SOCKET_EVENTS.SUBSCRIBE_SYMBOL, { symbol, timeframe });
+      syncClock();
+      if (lastMarketSequenceRef.current > 0) requestResync();
+    };
+
+    const handleReconnect = () => {
+      socket.emit(MARKET_SOCKET_EVENTS.CLIENT_METRICS, {
+        reconnect: true,
+        tickAgeMs: lastClientTickAgeRef.current,
+        renderDelayMs: lastRenderDelayRef.current,
+      });
+    };
 
     const handlePriceUpdate = (data: MarketPriceUpdate) => {
-      if (data.symbol !== symbol) return;
-      serverOffsetRef.current = new Date(data.serverTime).getTime() - Date.now();
+      if (data.symbol !== symbol || !Number.isFinite(data.sequence)) return;
+
+      const previousSequence = lastMarketSequenceRef.current;
+      if (previousSequence > 0 && data.sequence > previousSequence + 1) {
+        requestResync();
+      }
+      if (data.sequence <= previousSequence) return;
+
+      lastMarketSequenceRef.current = data.sequence;
+      const clientReceiveTimestamp = Date.now();
+      lastClientTickReceivedAtRef.current = clientReceiveTimestamp;
+      const estimatedServerNow = clientReceiveTimestamp + serverOffsetRef.current;
+      lastClientTickAgeRef.current = Math.max(
+        0,
+        estimatedServerNow - data.timestamp,
+      );
+      lastServerBroadcastRef.current = data.serverBroadcastTimestamp;
     };
 
     const handleCandleUpdate = (data: MarketCandleUpdate) => {
-      if (data.symbol !== symbol || data.timeframe !== timeframe || marketSelectionRef.current !== symbol+"|"+timeframe) return;
+      if (
+        data.symbol !== symbol ||
+        data.timeframe !== timeframe ||
+        marketSelectionRef.current !== symbol+"|"+timeframe
+      ) return;
+
+      if (
+        lastMarketSequenceRef.current > 0 &&
+        data.sequence < lastMarketSequenceRef.current - 1
+      ) return;
 
       const nextCandle: Candle = {
         time: data.candle.time,
@@ -689,27 +803,66 @@ export default function TradingPage() {
         close: data.candle.close,
       };
 
-      if (![nextCandle.time,nextCandle.open,nextCandle.high,nextCandle.low,nextCandle.close].every(Number.isFinite) || nextCandle.time <= 0 || ![nextCandle.open,nextCandle.high,nextCandle.low,nextCandle.close].every(value => value > 0) || nextCandle.high < Math.max(nextCandle.open,nextCandle.close) || nextCandle.low > Math.min(nextCandle.open,nextCandle.close)) return;
+      if (
+        ![nextCandle.time,nextCandle.open,nextCandle.high,nextCandle.low,nextCandle.close].every(Number.isFinite) ||
+        nextCandle.time <= 0 ||
+        ![nextCandle.open,nextCandle.high,nextCandle.low,nextCandle.close].every(value => value > 0) ||
+        nextCandle.high < Math.max(nextCandle.open,nextCandle.close) ||
+        nextCandle.low > Math.min(nextCandle.open,nextCandle.close)
+      ) return;
+
       const current = candlesRef.current;
       const lastIndex = current.length - 1;
+      const isSameBucket =
+        lastIndex >= 0 && current[lastIndex].time === nextCandle.time;
 
-      const nextCandles =
-        lastIndex >= 0 && current[lastIndex].time === nextCandle.time
-          ? [...current.slice(0, lastIndex), nextCandle]
-          : [...current.slice(-419), nextCandle];
+      if (isSameBucket) {
+        current[lastIndex] = nextCandle;
+        marketFrameVersionRef.current += 1;
+        return;
+      }
 
+      const nextCandles = [...current.slice(-419), nextCandle];
       candlesRef.current = nextCandles;
+      marketFrameVersionRef.current += 1;
       setCandles(nextCandles);
       setMarketReady(nextCandles.length >= 2);
       setSentiment(calculateSentiment(nextCandles));
     };
 
+    socket.on("connect", subscribe);
+    socket.io.on("reconnect", handleReconnect);
     socket.on(MARKET_SOCKET_EVENTS.PRICE_UPDATE, handlePriceUpdate);
     socket.on(MARKET_SOCKET_EVENTS.CANDLE_UPDATE, handleCandleUpdate);
-    socket.emit(MARKET_SOCKET_EVENTS.SUBSCRIBE_SYMBOL, { symbol, timeframe });
+
+    if (socket.connected) subscribe();
+
+    const clockTimer = window.setInterval(syncClock, 30_000);
+    const metricsTimer = window.setInterval(() => {
+      socket.emit(MARKET_SOCKET_EVENTS.CLIENT_METRICS, {
+        tickAgeMs: lastClientTickAgeRef.current,
+        renderDelayMs: lastRenderDelayRef.current,
+      });
+    }, 5_000);
+
+    const staleTimer = window.setInterval(() => {
+      const lastReceivedAt = lastClientTickReceivedAtRef.current;
+      if (
+        socket.connected &&
+        lastReceivedAt > 0 &&
+        Date.now() - lastReceivedAt > 3_000
+      ) {
+        requestResync();
+      }
+    }, 2_000);
 
     return () => {
+      window.clearInterval(clockTimer);
+      window.clearInterval(metricsTimer);
+      window.clearInterval(staleTimer);
       socket.emit(MARKET_SOCKET_EVENTS.UNSUBSCRIBE_SYMBOL, { symbol, timeframe });
+      socket.off("connect", subscribe);
+      socket.io.off("reconnect", handleReconnect);
       socket.off(MARKET_SOCKET_EVENTS.PRICE_UPDATE, handlePriceUpdate);
       socket.off(MARKET_SOCKET_EVENTS.CANDLE_UPDATE, handleCandleUpdate);
     };
@@ -1016,10 +1169,13 @@ export default function TradingPage() {
           <TradingChart
             asset={selectedAsset}
             candles={candles}
+            candlesRef={candlesRef}
+            marketFrameVersionRef={marketFrameVersionRef}
+            serverOffsetRef={serverOffsetRef}
+            onFrameRendered={handleChartFrameRendered}
             chartType={chartType}
             timeframe={timeframe}
             expirySeconds={expirySeconds}
-            nowMs={nowMs}
             selectedIndicators={selectedIndicators}
             indicatorSettings={indicatorSettings}
             indicatorStyles={indicatorStyles}

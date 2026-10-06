@@ -16,10 +16,13 @@ import {
 type TradingChartProps = {
   asset: Asset;
   candles: Candle[];
+  candlesRef?: React.MutableRefObject<Candle[]>;
+  marketFrameVersionRef?: React.MutableRefObject<number>;
+  serverOffsetRef?: React.MutableRefObject<number>;
+  onFrameRendered?: () => void;
   chartType: ChartType;
   timeframe: string;
   expirySeconds: number;
-  nowMs: number;
   selectedIndicators: string[];
   indicatorSettings?: IndicatorSettingsMap;
   indicatorStyles?: IndicatorStylesMap;
@@ -1352,10 +1355,13 @@ function drawBottomPanel(
 function TradingChartComponent({
   asset,
   candles,
+  candlesRef,
+  marketFrameVersionRef,
+  serverOffsetRef,
+  onFrameRendered,
   chartType,
   timeframe,
   expirySeconds,
-  nowMs,
   selectedIndicators,
   indicatorSettings = DEFAULT_INDICATOR_SETTINGS,
   indicatorStyles = DEFAULT_INDICATOR_STYLES,
@@ -1366,11 +1372,15 @@ function TradingChartComponent({
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const [resizeVersion, setResizeVersion] = React.useState(0);
   const drawRef = React.useRef<() => void>(() => {});
-  const serverSkewRef = React.useRef(0);
-
-  React.useEffect(() => {
-    serverSkewRef.current = nowMs - Date.now();
-  }, [nowMs]);
+  const lastDrawVersionRef = React.useRef(-1);
+  const lastTimedDrawRef = React.useRef(0);
+  const indicatorCacheRef = React.useRef<{
+    computedAt: number;
+    visibleLength: number;
+    latestCandleTime: number;
+    bottomPanels: BottomPanel[];
+    overlaySeries: Series[];
+  } | null>(null);
 
   React.useEffect(() => {
     const container = containerRef.current;
@@ -1389,24 +1399,34 @@ function TradingChartComponent({
   React.useEffect(() => {
     let frame = 0;
 
-    const loop = () => {
-      drawRef.current();
+    const loop = (timestamp: number) => {
+      const marketVersion = marketFrameVersionRef?.current ?? 0;
+      const marketChanged = marketVersion !== lastDrawVersionRef.current;
+      const timedRefresh = timestamp - lastTimedDrawRef.current >= 80;
+
+      if (marketChanged || timedRefresh) {
+        drawRef.current();
+        lastDrawVersionRef.current = marketVersion;
+        lastTimedDrawRef.current = timestamp;
+      }
+
       frame = window.requestAnimationFrame(loop);
     };
 
     frame = window.requestAnimationFrame(loop);
 
     return () => window.cancelAnimationFrame(frame);
-  }, []);
+  }, [marketFrameVersionRef]);
 
   React.useEffect(() => {
+    indicatorCacheRef.current = null;
     drawRef.current = () => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
 
     if (!canvas || !context) return;
 
-    const liveNowMs = Date.now() + serverSkewRef.current;
+    const liveNowMs = Date.now() + (serverOffsetRef?.current ?? 0);
 
     const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
@@ -1429,7 +1449,9 @@ function TradingChartComponent({
     context.fillStyle = "#101725";
     context.fillRect(0, 0, width, height);
 
-    if (candles.length < 2) {
+    const sourceCandles = candlesRef?.current ?? candles;
+
+    if (sourceCandles.length < 2) {
       context.fillStyle = "#7d8aa0";
       context.font = "800 14px 'Noto Sans', sans-serif";
       context.textAlign = "center";
@@ -1439,7 +1461,7 @@ function TradingChartComponent({
     }
 
     const normalizedIndicators = uniqueCanonicalIndicators(selectedIndicators);
-    const fullCandles = candles.slice(-MAX_HISTORY_CANDLES);
+    const fullCandles = sourceCandles.slice(-MAX_HISTORY_CANDLES);
 
     context.font = "800 11px 'Noto Sans', sans-serif";
     const left = width < 560 ? 8 : 14;
@@ -1456,32 +1478,55 @@ function TradingChartComponent({
     const renderCandles =
       chartType === "Heiken Ashi" ? heikenAshi(visibleCandlesRaw) : visibleCandlesRaw;
 
-    const allBottomPanels = normalizedIndicators
-      .filter((indicator) => BOTTOM_INDICATORS.has(indicator))
-      .map((indicator) =>
-        buildBottomPanel(
-          indicator,
-          indicatorSettings,
-          indicatorStyles,
-          fullCandles,
-          visibleLength,
-        ),
-      )
-      .filter((panel): panel is BottomPanel => panel !== null);
+    const latestCandleTime = fullCandles[fullCandles.length - 1]?.time ?? 0;
+    const cachedIndicators = indicatorCacheRef.current;
+    const canReuseIndicators =
+      cachedIndicators !== null &&
+      liveNowMs - cachedIndicators.computedAt < 250 &&
+      cachedIndicators.visibleLength === visibleLength &&
+      cachedIndicators.latestCandleTime === latestCandleTime;
 
-    const bottomPanels = allBottomPanels.slice(0, 4);
+    let bottomPanels: BottomPanel[];
+    let overlaySeries: Series[];
 
-    const overlaySeries = normalizedIndicators.flatMap((indicator) =>
-      BOTTOM_INDICATORS.has(indicator)
-        ? []
-        : buildOverlaySeries(
+    if (canReuseIndicators) {
+      bottomPanels = cachedIndicators.bottomPanels;
+      overlaySeries = cachedIndicators.overlaySeries;
+    } else {
+      const allBottomPanels = normalizedIndicators
+        .filter((indicator) => BOTTOM_INDICATORS.has(indicator))
+        .map((indicator) =>
+          buildBottomPanel(
             indicator,
             indicatorSettings,
             indicatorStyles,
             fullCandles,
             visibleLength,
           ),
-    );
+        )
+        .filter((panel): panel is BottomPanel => panel !== null);
+
+      bottomPanels = allBottomPanels.slice(0, 4);
+      overlaySeries = normalizedIndicators.flatMap((indicator) =>
+        BOTTOM_INDICATORS.has(indicator)
+          ? []
+          : buildOverlaySeries(
+              indicator,
+              indicatorSettings,
+              indicatorStyles,
+              fullCandles,
+              visibleLength,
+            ),
+      );
+
+      indicatorCacheRef.current = {
+        computedAt: liveNowMs,
+        visibleLength,
+        latestCandleTime,
+        bottomPanels,
+        overlaySeries,
+      };
+    }
 
     const top = width < 560 ? 18 : 22;
     const footer = 24;
@@ -1571,7 +1616,9 @@ function TradingChartComponent({
 
     const remaining = Math.max(
       0,
-      Math.round((liveNowMs + expirySeconds * 1000 - Date.now()) / 1000),
+      Math.ceil(
+        (newestCandleStart + candleIntervalMs - liveNowMs) / 1000,
+      ),
     );
 
     const expiryX = right - 8;
@@ -1609,7 +1656,16 @@ function TradingChartComponent({
       context.stroke();
       context.setLineDash([]);
 
-      drawTextPill(context, trade.label, left + 8, y, color);
+      const tradeRemaining =
+        Number.isFinite(trade.expiryTime) && trade.expiryTime
+          ? Math.max(0, Math.ceil((trade.expiryTime - liveNowMs) / 1000))
+          : null;
+      const tradeLabel =
+        tradeRemaining === null
+          ? trade.label
+          : `${trade.label} · ${formatDuration(tradeRemaining)}`;
+
+      drawTextPill(context, tradeLabel, left + 8, y, color);
     });
 
     resultMarkers.forEach((marker) => {
@@ -1688,18 +1744,22 @@ function TradingChartComponent({
     }
     context.textAlign = "right";
     context.fillText("UTC", width - 10, height - 10);
+    onFrameRendered?.();
     };
   }, [
     activeTrades,
     asset,
     candles,
+    candlesRef,
     chartType,
     expirySeconds,
     indicatorSettings,
     indicatorStyles,
+    onFrameRendered,
     resultMarkers,
     resizeVersion,
     selectedIndicators,
+    serverOffsetRef,
     timeframe,
   ]);
 
@@ -1716,8 +1776,11 @@ const TradingChart = React.memo(TradingChartComponent, (previous, next) => {
     previous.chartType === next.chartType &&
     previous.timeframe === next.timeframe &&
     previous.expirySeconds === next.expirySeconds &&
-    previous.nowMs === next.nowMs &&
     previous.candles === next.candles &&
+    previous.candlesRef === next.candlesRef &&
+    previous.marketFrameVersionRef === next.marketFrameVersionRef &&
+    previous.serverOffsetRef === next.serverOffsetRef &&
+    previous.onFrameRendered === next.onFrameRendered &&
     previous.selectedIndicators === next.selectedIndicators &&
     previous.indicatorSettings === next.indicatorSettings &&
     previous.indicatorStyles === next.indicatorStyles &&
