@@ -98,7 +98,11 @@ async function makeContext(options) {
       telemetry.fixtureHits.push(endpoint);
       if (endpoint === '/account/me') return fulfill(account);
       if (endpoint === '/finance/me') return fulfill({wallet:account.real,mpesa:{configured:Boolean(options.mpesaConfigured),environment:'sandbox',minAmount:1,maxAmount:100000},transactions:[]});
-      if (endpoint === '/market-data/quotes') return fulfill({serverTime:new Date().toISOString(),quotes});
+      if (endpoint === '/market-data/quotes') {
+        if (options.payout === 'unavailable') return fulfill({message:'Quote feed unavailable in this QA scenario'},503);
+        const data = options.payout === 'invalid' ? quotes.map(quote=>({...quote,payout:999})) : quotes;
+        return fulfill({serverTime:new Date().toISOString(),quotes:data});
+      }
       if (endpoint === '/market-data/assets' || endpoint === '/market/assets') return fulfill({assets});
       if (endpoint === '/market-data/candles') {
         if (options.candles === 'unavailable') return fulfill({message:'Market unavailable in this QA scenario'},503);
@@ -375,6 +379,42 @@ try {
       assert.match(await page.locator('body').innerText(),/connecting|loading|unavailable|waiting/i,'Unavailable market must show its connection state');
     });
   }
+
+  for (const payout of ['unavailable','invalid']) {
+    await scenario('payout-'+payout,{path:'/trading',width:390,auth:true,payout},async(page,telemetry)=>{
+      await chartDimensions(page);
+      await page.waitForFunction(()=>document.body.innerText.includes('1,234.56'));
+      assert.ok(telemetry.fixtureHits.includes('/market-data/quotes'));
+      assert.equal(await page.locator('.nt-buy').isDisabled(),true,'Unavailable payout must block Buy');
+      assert.equal(await page.locator('.nt-sell').isDisabled(),true,'Unavailable payout must block Sell');
+      assert.match(await page.locator('.nt-white-payout').innerText(),/Unavailable/);
+      assert.match(await page.locator('.nt-trade-status').innerText(),/payout/i);
+    });
+  }
+  await scenario('terminal-controls-and-indicator-dialog',{path:'/trading',width:390,auth:true},async page=>{
+    await chartDimensions(page);
+    await page.waitForFunction(()=>document.querySelector('.nt-buy')?.disabled===false);
+    assert.match(await page.locator('.nt-white-payout').innerText(),/92%/,'Backend payout must drive the preview');
+    await page.getByRole('button',{name:'Select chart style',exact:true}).click();
+    await page.locator('.nt-chart-types').getByRole('button',{name:'Line',exact:true}).click();
+    assert.ok((await page.locator('.nt-chart-types').getByRole('button',{name:'Line',exact:true}).getAttribute('class')).includes('active'));
+    await page.getByRole('button',{name:'Indicators',exact:true}).click();
+    const editorTrigger=page.getByTitle('Edit indicator settings',{exact:true}).first();
+    await editorTrigger.click();
+    const dialog=page.getByRole('dialog',{name:'Indicator settings',exact:true});
+    await dialog.waitFor({state:'visible'});
+    assert.ok(await dialog.evaluate(element=>element.contains(document.activeElement)),'Indicator editor must own focus');
+    const period=dialog.locator('input[type="number"]').first();
+    await period.fill('18');
+    assert.ok(await period.evaluate(element=>element===document.activeElement),'Editing must retain input focus');
+    await page.keyboard.press('Escape');
+    await dialog.waitFor({state:'hidden'});
+    await editorTrigger.click();
+    await dialog.waitFor({state:'visible'});
+    await dialog.getByRole('button',{name:'Cancel',exact:true}).click();
+    await dialog.waitFor({state:'hidden'});
+    await noOverflow(page);
+  });
 
   await scenario('deposit-dialog-keyboard',{path:'/finance',width:390,auth:true,mpesaConfigured:true},async page => {
     const trigger=page.locator('button.fin-pay').filter({hasText:'M-Pesa'}).first();

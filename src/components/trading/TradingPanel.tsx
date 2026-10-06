@@ -58,7 +58,7 @@ export default function TradingPanel({
   onTrade,
 }: TradingPanelProps) {
   const numericAmount = Number(amount || 0);
-  const currencySymbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : currency;
+  const currencySymbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency;
   const sellSentiment = 100 - sentiment;
   const totalSeconds = expiryParts.hours * 3600 + expiryParts.minutes * 60 + expiryParts.seconds;
   const durationLabel = totalSeconds % 60 === 0 ? `${totalSeconds / 60} min` : `${totalSeconds} sec`;
