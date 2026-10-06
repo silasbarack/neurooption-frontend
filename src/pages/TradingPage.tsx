@@ -248,6 +248,7 @@ function tradeToMarker(trade: BackendTrade): TradeMarker {
     id: trade.id,
     side: trade.side,
     entryPrice: Number(trade.entryPrice),
+    expiryTime: Number(trade.expiryTime),
     label: `${trade.side} ${formatMoney(
       Number(trade.stakeAmount),
       trade.currency
