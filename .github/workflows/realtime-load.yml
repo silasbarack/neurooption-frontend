@@ -1,0 +1,47 @@
+name: Realtime Market Load
+
+on:
+  workflow_dispatch:
+    inputs:
+      market_ws_url:
+        description: Market backend base URL
+        required: true
+        default: https://neurooption-backend.onrender.com
+      duration_ms:
+        description: Duration per load stage in milliseconds
+        required: true
+        default: "15000"
+
+permissions:
+  contents: read
+
+jobs:
+  websocket-load:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Run 100 / 500 / 1000 client stages
+        env:
+          MARKET_WS_URL: ${{ inputs.market_ws_url }}
+          DURATION_MS: ${{ inputs.duration_ms }}
+        run: |
+          mkdir -p artifacts
+          for USERS in 100 500 1000; do
+            echo "=== users=${USERS} ===" | tee -a artifacts/realtime-load.log
+            USERS="${USERS}" node scripts/load-market-stream.mjs | tee -a artifacts/realtime-load.log
+            sleep 5
+          done
+      - name: Upload load report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: realtime-market-load-${{ github.sha }}
+          path: artifacts/realtime-load.log
+          if-no-files-found: error
+          retention-days: 14
