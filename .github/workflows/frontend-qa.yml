@@ -20,10 +20,13 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Existing ESLint baseline
-        continue-on-error: true
-        run: npm run lint
-      - name: TypeScript
-        run: npx tsc -b
-      - name: Production build
-        run: npm run build
+      - run: npm run lint
+      - run: npx tsc -b
+      - run: npm run build
+      - run: npm install --no-save --package-lock=false playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - name: Browser regressions
+        run: |
+          npm run preview -- --host 127.0.0.1 > /tmp/neurooption-preview.log 2>&1 &
+          node -e "const t=setInterval(async()=>{try{const r=await fetch('http://127.0.0.1:4173');if(r.ok){clearInterval(t);process.exit(0)}}catch{}},250);setTimeout(()=>process.exit(1),30000)"
+          node scripts/interaction-regression.mjs
