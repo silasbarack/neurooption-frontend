@@ -441,7 +441,20 @@ button {
 .nt-asset-list button {
   text-align: left;
   display: grid;
-  gap: 3px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 3px;
+}
+
+.nt-asset-list button > .asset-icon {
+  grid-row: span 2;
+}
+
+.nt-asset-trigger > span:not(.asset-icon) {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
 }
 
 .nt-asset-list span {
@@ -788,7 +801,14 @@ button {
 }
 
 .nt-open-trade-asset {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
   font-weight: 700;
+}
+
+.nt-open-trade-asset > span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

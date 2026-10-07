@@ -1,4 +1,5 @@
 import React from "react";
+import AssetIcon from "../components/markets/AssetIcon";
 import { PageHeader, StatusBadge, DataTable, EmptyState } from "../components/common";
 import type { DataTableColumn } from "../components/common";
 import { fetchOpenTrades, formatMoney, type BackendTrade } from "../components/trading/tradesApi";
@@ -39,7 +40,7 @@ export default function OpenTradesPage() {
   const totalAtRisk = trades.reduce((sum, t) => sum + Number(t.stakeAmount), 0);
 
   const columns: Array<DataTableColumn<BackendTrade>> = [
-    { key: "asset", header: "Asset", render: (t) => <strong>{t.asset}</strong> },
+    { key: "asset", header: "Asset", render: (t) => <span className="np-asset-cell"><AssetIcon symbol={t.asset} size={22} /><strong>{t.asset}</strong></span> },
     {
       key: "side",
       header: "Direction",

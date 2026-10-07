@@ -1,4 +1,5 @@
 import type React from "react";
+import AssetIcon from "../markets/AssetIcon";
 import { Link } from "react-router-dom";
 import {
   ArrowDownRight,
@@ -206,7 +207,10 @@ export default function TradingPanel({
           <ul className="nt-open-trades-list">
             {openTrades.slice(0, 4).map((trade) => (
               <li key={trade.id} className={trade.side === "BUY" ? "buy" : "sell"}>
-                <span className="nt-open-trade-asset">{trade.asset}</span>
+                <span className="nt-open-trade-asset">
+                  <AssetIcon symbol={trade.asset} size={16} />
+                  <span>{trade.asset}</span>
+                </span>
                 <span className="nt-open-trade-side">{trade.side}</span>
                 <span className="nt-open-trade-amount">{formatMoney(trade.stakeAmount, trade.currency)}</span>
               </li>

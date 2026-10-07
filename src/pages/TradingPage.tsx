@@ -2,6 +2,7 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 import { ChevronDown, Star, X } from "lucide-react";
 import "./TradingPage.css";
+import AssetIcon from "../components/markets/AssetIcon";
 
 import {
   ASSETS,
@@ -1106,6 +1107,7 @@ export default function TradingPage() {
                 aria-label="Select trading asset"
                 onClick={() => setAssetMenuOpen((current) => !current)}
               >
+                <AssetIcon symbol={selectedAsset.symbol} size={22} />
                 <span>{selectedAsset.symbol}</span>
                 <ChevronDown size={16} aria-hidden="true" />
               </button>
@@ -1144,6 +1146,7 @@ export default function TradingPage() {
                         }
                         onClick={() => handleAssetChange(asset)}
                       >
+                        <AssetIcon symbol={asset.symbol} size={30} />
                         <strong>{asset.symbol}</strong>
                         <span>
                           {asset.label}

@@ -1,4 +1,5 @@
 import React from "react";
+import AssetIcon from "../components/markets/AssetIcon";
 import { PageHeader, StatusBadge, EmptyState } from "../components/common";
 import type { BadgeTone } from "../components/common";
 import { ASSETS } from "../components/trading";
@@ -85,7 +86,10 @@ export default function ExpressTradesPage() {
                     background: isSelected ? "var(--np-accent-soft)" : undefined,
                   }}
                 >
-                  <div style={{ fontWeight: 800, fontSize: 13.5 }}>{asset.symbol}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 800, fontSize: 13.5 }}>
+                    <AssetIcon symbol={asset.symbol} size={22} />
+                    <span>{asset.symbol}</span>
+                  </div>
                   <div className="np-text-muted" style={{ fontSize: 11.5 }}>
                     +{85 + asset.payoutBoost}%
                   </div>

@@ -6,15 +6,24 @@
   border-radius: 50%;
 }
 
+.asset-icon-single {
+  display: block;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
 .asset-icon-glyph {
+  background: #334155;
+  color: #fff;
   font-weight: 800;
   line-height: 1;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
-.asset-icon-pair svg {
+.asset-icon-pair img {
   position: absolute;
   border-radius: 50%;
+  object-fit: cover;
   box-shadow: 0 0 0 1.5px var(--neo-panel, #0d1628);
 }
 

@@ -694,3 +694,11 @@
     max-height: 50vh;
   }
 }
+
+/* Asset name with its logo, used in trade tables. */
+.np-asset-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
