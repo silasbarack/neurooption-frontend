@@ -1284,3 +1284,10 @@
 }
 
 .nt-premium .nt-field-amount .nt-white-input{grid-template-columns:auto minmax(0,1fr) 72px}.nt-premium .nt-amount-currency{display:flex;align-items:center;padding-left:10px;color:var(--nt-text);font-size:14px}.nt-premium .nt-field-amount .nt-white-input input{padding-left:4px}
+
+/* Trading screen text is regular weight throughout. Scoped to the trading
+   page root; !important beats the component rules and inline weights. */
+.nt-page.nt-premium,
+.nt-page.nt-premium * {
+  font-weight: 400 !important;
+}

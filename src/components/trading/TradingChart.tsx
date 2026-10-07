@@ -608,7 +608,7 @@ function drawTextPill(
   background: string,
   foreground = "#ffffff",
 ) {
-  context.font = "800 11px 'Noto Sans', sans-serif";
+  context.font = "400 11px 'Noto Sans', Arial, sans-serif";
   const pillWidth = context.measureText(text).width + 14;
   const canvasWidth = context.canvas.width / (context.getTransform().a || 1);
   x = clamp(x, 4, Math.max(4, canvasWidth - pillWidth - 4));
@@ -1295,7 +1295,7 @@ function drawBottomPanel(
   context.stroke();
 
   context.fillStyle = "#9aa4b8";
-  context.font = "800 11px 'Noto Sans', sans-serif";
+  context.font = "400 11px 'Noto Sans', Arial, sans-serif";
   context.textAlign = "left";
   context.textBaseline = "top";
   context.fillText(panel.title, left + 8, top + 5);
@@ -1492,7 +1492,7 @@ function TradingChartComponent({
 
     if (sourceCandles.length < 2) {
       context.fillStyle = "#7d8aa0";
-      context.font = "800 14px 'Noto Sans', sans-serif";
+      context.font = "400 14px 'Noto Sans', Arial, sans-serif";
       context.textAlign = "center";
       context.textBaseline = "middle";
       context.fillText("Waiting for market data…", width / 2, height / 2);
@@ -1502,7 +1502,7 @@ function TradingChartComponent({
     const normalizedIndicators = uniqueCanonicalIndicators(selectedIndicators);
     const fullCandles = sourceCandles.slice(-MAX_HISTORY_CANDLES);
 
-    context.font = "800 11px 'Noto Sans', sans-serif";
+    context.font = "400 11px 'Noto Sans', Arial, sans-serif";
     const left = width < 560 ? 8 : 14;
     const latestPriceText = fullCandles[fullCandles.length - 1].close.toFixed(asset.precision);
     const rightSpace = clamp(context.measureText(latestPriceText).width + 22, 70, 120);
@@ -1680,12 +1680,12 @@ function TradingChartComponent({
     drawTextPill(context, formatDuration(remaining), expiryX - 92, top + 16, "#d7ad48", "#111827");
 
     context.fillStyle = "#9aa4b8";
-    context.font = "900 13px 'Noto Sans', sans-serif";
+    context.font = "400 13px 'Noto Sans', Arial, sans-serif";
     context.textAlign = "center";
     context.textBaseline = "middle";
     context.fillText(timeframe, expiryX - 28, chartBottom - 44);
 
-    context.font = "800 12px 'Noto Sans', sans-serif";
+    context.font = "400 12px 'Noto Sans', Arial, sans-serif";
     context.fillText(formatDuration(remaining).slice(3), expiryX - 28, chartBottom - 25);
 
     activeTrades.forEach((trade) => {
@@ -1730,7 +1730,7 @@ function TradingChartComponent({
     let legendX = left;
     let legendRow = 0;
     overlaySeries.slice(0, 6).forEach((series) => {
-      context.font = "800 11px 'Noto Sans', sans-serif";
+      context.font = "400 11px 'Noto Sans', Arial, sans-serif";
       const labelWidth = context.measureText(series.name).width + 14;
       if (legendX + labelWidth > right) { legendX = left; legendRow += 1; }
       if (legendRow > 1) return;
@@ -1742,7 +1742,7 @@ function TradingChartComponent({
     });
 
     context.fillStyle = "#9aa4b8";
-    context.font = "800 11px 'Noto Sans', sans-serif";
+    context.font = "400 11px 'Noto Sans', Arial, sans-serif";
     context.textAlign = "right";
     context.textBaseline = "middle";
 
@@ -1775,7 +1775,7 @@ function TradingChartComponent({
         scrollOffset,
       );
     });
-    context.font = "500 10px 'Noto Sans', sans-serif";
+    context.font = "400 10px 'Noto Sans', Arial, sans-serif";
     context.fillStyle = "#8290a6";
     context.textBaseline = "middle";
     const tickCount = width < 560 ? 3 : 5;
