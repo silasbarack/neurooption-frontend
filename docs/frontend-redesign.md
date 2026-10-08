@@ -36,3 +36,20 @@ Workflow shell pipefail makes every failed check block the release.
 
 Render automatically deploys main to https://neurooption-frontend.onrender.com.
 No secrets, backend schemas, environment values or Render service settings are changed.
+
+## Live payouts and Kenya time
+- Payouts come from the backend payout engine: `/market-data/payouts` on load,
+  then the market socket (`asset:payout-snapshot` on every connection,
+  `asset:payout-updated` per change, applied in version order). See
+  `src/components/trading/payoutStore.ts`. Each badge subscribes to one asset,
+  so a payout change never re-renders the chart.
+- Orders send the payout shown (`quotedPayoutPercent`, `payoutVersion`). If it
+  changed, the backend refuses with 409 `PAYOUT_CHANGED`; the screen shows the
+  new payout and no trade is placed.
+- All times are UTC instants shown in Africa/Nairobi (EAT, UTC+3):
+  `src/utils/kenyaTime.ts`. The clock under the chart and every countdown use
+  the server clock (`serverClock.ts`): sampled over the socket, advanced with
+  a monotonic timer, re-synced on reconnect, wake-up and clock jumps.
+- The chart axis labels real candle opening times on round EAT boundaries and
+  shows the date at Kenya midnight. `node scripts/kenya-time.test.mjs` checks
+  the conversions.

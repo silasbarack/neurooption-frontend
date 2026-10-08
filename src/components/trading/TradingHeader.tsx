@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { Maximize, Menu } from "lucide-react";
 import type { AccountType, Currency } from "./trading.types";
 import AccountBalanceSelector from "./AccountBalanceSelector";
 import Logo from "../branding/Logo";
 import MenuDrawer from "../shell/MenuDrawer";
+import KenyaClock from "./KenyaClock";
 
 type TradingHeaderProps = {
   accountType: AccountType;
@@ -34,10 +35,6 @@ function readUserInitials(): string {
   return "NO";
 }
 
-function formatUtc(date: Date): string {
-  return date.toISOString().slice(11, 19);
-}
-
 export default function TradingHeader({
   accountType,
   currency,
@@ -49,14 +46,8 @@ export default function TradingHeader({
   onAddDemoFunds,
 }: TradingHeaderProps) {
   const [initials] = useState(readUserInitials);
-  const [clock, setClock] = useState(() => formatUtc(new Date()));
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
-
-  useEffect(() => {
-    const id = window.setInterval(() => setClock(formatUtc(new Date())), 1000);
-    return () => window.clearInterval(id);
-  }, []);
 
   return (
     <header className="nt-header">
@@ -67,7 +58,7 @@ export default function TradingHeader({
         <div className="nt-market-status" aria-label="Trading clock">
           <i aria-hidden="true" />
           <span>Trading workspace</span>
-          <time>{clock} UTC</time>
+          <KenyaClock className="nt-header-clock" compact />
         </div>
       </div>
 

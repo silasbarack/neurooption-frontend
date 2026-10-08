@@ -1,4 +1,5 @@
 import React from "react";
+import { formatKenyaDateTime } from "../utils/kenyaTime";
 import AssetIcon from "../components/markets/AssetIcon";
 import { PageHeader, StatCard, StatusBadge, DataTable, EmptyState } from "../components/common";
 import type { DataTableColumn } from "../components/common";
@@ -80,7 +81,7 @@ export default function HistoryPage() {
     {
       key: "closedAt",
       header: "Closed",
-      render: (t) => (t.settledAt ? new Date(t.settledAt).toLocaleString() : "—"),
+      render: (t) => (t.settledAt ? formatKenyaDateTime(t.settledAt) : "—"),
     },
   ];
 

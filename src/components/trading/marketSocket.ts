@@ -32,7 +32,7 @@ export type MarketCandleUpdate = {
 };
 
 export type MarketResyncResponse = {
-  event: "resync_response";
+  type?: "resync_response";
   symbol: string;
   timeframe: string;
   requestedSince: number;
@@ -49,7 +49,7 @@ export type MarketResyncResponse = {
 };
 
 export type ServerTimeResponse = {
-  event: "server_time";
+  type?: "server_time";
   clientSentAt: number;
   serverTimestamp: number;
   serverTime: string;

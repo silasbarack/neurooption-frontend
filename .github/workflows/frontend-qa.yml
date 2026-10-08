@@ -36,6 +36,8 @@ jobs:
           npm run lint 2>&1 | tee artifacts/lint.log
       - name: Check TypeScript
         run: npx tsc -b 2>&1 | tee artifacts/typescript.log
+      - name: Check Kenya time conversions
+        run: node scripts/kenya-time.test.mjs 2>&1 | tee artifacts/kenya-time.log
       - name: Build production assets
         run: npm run build 2>&1 | tee artifacts/build.log
       - name: Verify real public market and account contracts
