@@ -3,6 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import type { AccountType, Currency } from "./trading.types";
 import { CURRENCIES } from "./trading.constants";
+import AnimatedBalance from "./AnimatedBalance";
 
 const ACCOUNT_TYPES: AccountType[] = ["QT Demo", "QT Real"];
 
@@ -71,7 +72,11 @@ export default function AccountBalanceSelector({
         </div>
 
         <div className="balance-main-row">
-          <span className="balance-amount">{balanceText}</span>
+          {balance === null ? (
+            <span className="balance-amount">{balanceText}</span>
+          ) : (
+            <AnimatedBalance className="balance-amount" value={balance} scopeKey={`${accountType}|${currency}`} />
+          )}
           <ChevronDown size={16} className={`balance-arrow${open ? " is-open" : ""}`} aria-hidden="true" />
         </div>
       </button>
