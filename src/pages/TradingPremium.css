@@ -301,10 +301,64 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* Clean, solid dark-navy chart surface so candles read clearly. */
+/* Chart surface: black or white (chosen in the Chart menu), with the faint
+   mountain photo showing through. The canvas on top is transparent. */
 .nt-premium .nt-chart-canvas-wrap,
 .nt-premium .nt-chart-wrap {
-  background: var(--nt-chart-bg);
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.84)),
+    url("/landing/hero-mountains.jpg") center 60% / cover no-repeat,
+    #000;
+}
+
+.nt-premium .nt-chart-canvas-wrap[data-chart-bg="white"] {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.92)),
+    url("/landing/hero-mountains.jpg") center 60% / cover no-repeat,
+    var(--background-primary);
+}
+
+/* Background switch inside the Chart menu. */
+.nt-premium .nt-chart-types {
+  flex-wrap: wrap;
+}
+
+.nt-premium .nt-chart-bg {
+  display: flex;
+  flex: 1 0 100%;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  padding: 6px 2px 0;
+  border-top: 1px solid var(--nt-border);
+}
+
+.nt-premium .nt-chart-bg > span {
+  margin-right: auto;
+  padding: 0 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.nt-premium .nt-chart-types .nt-chart-bg button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nt-chart-bg-swatch {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+}
+
+.nt-chart-bg-swatch.is-black {
+  background: #000;
+}
+
+.nt-chart-bg-swatch.is-white {
+  background: #fff;
 }
 
 .nt-premium .nt-asset-trigger,
@@ -954,7 +1008,7 @@
     right: 8px;
     display: none;
     width: auto;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     padding: 4px;
     box-shadow: var(--shadow-lg);
   }

@@ -1,6 +1,7 @@
 import React from "react";
 import { Activity, ChartCandlestick, Clock3, PenLine, X } from "lucide-react";
 import type { ChartType } from "./trading.types";
+import type { ChartBackground } from "./TradingChart";
 import { DRAWING_TOOLS, INDICATORS, TIMEFRAMES } from "./trading.constants";
 import {
   DEFAULT_INDICATOR_SETTINGS,
@@ -26,6 +27,8 @@ type TradingToolbarProps = {
   onDrawingToggle: () => void;
   onTimeframeChange: (timeframe: string) => void;
   onChartTypeChange: (chartType: ChartType) => void;
+  chartBackground: ChartBackground;
+  onChartBackgroundChange: (background: ChartBackground) => void;
   onToolChange: (tool: string) => void;
   onIndicatorToggle: (indicator: string) => void;
   onIndicatorSettingChange?: (
@@ -100,6 +103,8 @@ export default function TradingToolbar({
   onDrawingToggle,
   onTimeframeChange,
   onChartTypeChange,
+  chartBackground,
+  onChartBackgroundChange,
   onToolChange,
   onIndicatorToggle,
   onIndicatorSettingChange,
@@ -242,6 +247,21 @@ export default function TradingToolbar({
             </button>
           ),
         )}
+        <div className="nt-chart-bg" role="group" aria-label="Chart background">
+          <span>Background</span>
+          {(["black", "white"] as ChartBackground[]).map((item) => (
+            <button
+              key={item}
+              type="button"
+              className={item === chartBackground ? "active" : ""}
+              aria-pressed={item === chartBackground}
+              onClick={() => onChartBackgroundChange(item)}
+            >
+              <i className={`nt-chart-bg-swatch is-${item}`} aria-hidden="true" />
+              {item === "black" ? "Black" : "White"}
+            </button>
+          ))}
+        </div>
       </div>
 
       {indicatorsOpen && (

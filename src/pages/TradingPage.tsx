@@ -18,6 +18,7 @@ import {
   TradingToolbar,
 } from "../components/trading";
 import LiveQuote from "../components/trading/LiveQuote";
+import type { ChartBackground } from "../components/trading/TradingChart";
 
 import type {
   AccountType,
@@ -351,6 +352,13 @@ export default function TradingPage() {
   const [assetMenuOpen, setAssetMenuOpen] = React.useState(false);
 
   const [chartType, setChartType] = React.useState<ChartType>("Candlesticks");
+  const [chartBackground, setChartBackground] = React.useState<ChartBackground>(() => {
+    try { return localStorage.getItem("neurooption_chart_background") === "white" ? "white" : "black"; } catch { return "black"; }
+  });
+  const changeChartBackground = React.useCallback((next: ChartBackground) => {
+    setChartBackground(next);
+    try { localStorage.setItem("neurooption_chart_background", next); } catch { /* Session-only when storage is unavailable. */ }
+  }, []);
   const [timeframe, setTimeframe] = React.useState("M1");
   const [timeframeOpen, setTimeframeOpen] = React.useState(false);
 
@@ -1224,6 +1232,8 @@ export default function TradingPage() {
             onDrawingToggle={() => setDrawingOpen((current) => !current)}
             onTimeframeChange={handleTimeframeChange}
             onChartTypeChange={setChartType}
+            chartBackground={chartBackground}
+            onChartBackgroundChange={changeChartBackground}
             onToolChange={handleToolChange}
             onIndicatorToggle={handleIndicatorToggle}
             onIndicatorSettingChange={handleIndicatorSettingChange}
@@ -1247,6 +1257,7 @@ export default function TradingPage() {
             indicatorStyles={indicatorStyles}
             activeTrades={activeTrades}
             resultMarkers={resultMarkers}
+            background={chartBackground}
           />
 
 

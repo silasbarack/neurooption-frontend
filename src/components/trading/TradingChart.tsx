@@ -29,6 +29,7 @@ type TradingChartProps = {
   indicatorStyles?: IndicatorStylesMap;
   activeTrades: TradeMarker[];
   resultMarkers: ResultMarker[];
+  background?: ChartBackground;
 };
 
 type Value = number | null;
@@ -57,19 +58,61 @@ type BottomPanel = {
 
 const MAX_HISTORY_CANDLES = 520;
 
-// Canvas chrome colours. Canvas cannot read CSS variables per frame without
-// extra work, so these mirror the brand tokens in src/styles/brand.css:
-// --chart-bg, --chart-panel, --chart-text, --chart-line hue, --brand-accent
-// (expiry line) and --brand-primary (text on the turquoise pill).
-const CHART_BG = "#0B1A2C";
-const CHART_PANEL = "#10233A";
-const CHART_TEXT = "#C9D6E3";
-const CHART_TEXT_MUTED = "#8FA3B8";
-const CHART_GRID = "rgba(173, 199, 222, 0.07)";
-const CHART_GRID_SOFT = "rgba(173, 199, 222, 0.06)";
-const CHART_DIVIDER = "rgba(173, 199, 222, 0.16)";
-const CHART_EXPIRY = "#17ADB4";
-const CHART_EXPIRY_TEXT = "#0D315E";
+export type ChartBackground = "black" | "white";
+
+// Canvas chrome colours for each chart background. Canvas cannot read CSS
+// variables per frame without extra work, so these mirror the brand tokens in
+// src/styles/brand.css. The chart surface itself is painted by CSS (solid
+// black or white with the faint mountain photo), so the canvas stays clear.
+const CHART_PALETTES = {
+  black: {
+    panel: "rgba(0, 0, 0, 0.55)",
+    panelAlt: "rgba(0, 0, 0, 0.35)",
+    text: "#C9D6E3",
+    textMuted: "#8FA3B8",
+    grid: "rgba(173, 199, 222, 0.07)",
+    gridSoft: "rgba(173, 199, 222, 0.06)",
+    divider: "rgba(173, 199, 222, 0.16)",
+    expiry: "#17ADB4", // --brand-accent
+    expiryText: "#0D315E", // --brand-primary
+  },
+  white: {
+    panel: "rgba(255, 255, 255, 0.7)",
+    panelAlt: "rgba(246, 249, 252, 0.6)", // --background-secondary
+    text: "#182B43", // --text-primary
+    textMuted: "#526579", // --text-secondary
+    grid: "rgba(13, 49, 94, 0.08)",
+    gridSoft: "rgba(13, 49, 94, 0.06)",
+    divider: "rgba(13, 49, 94, 0.16)",
+    expiry: "#0879AD", // --brand-secondary
+    expiryText: "#FFFFFF",
+  },
+} as const;
+
+// The palette in use; set at the start of every draw from the chart's
+// background prop, so the module-level drawing helpers can read it.
+let CHART_PANEL: string = CHART_PALETTES.black.panel;
+let CHART_PANEL_ALT: string = CHART_PALETTES.black.panelAlt;
+let CHART_TEXT: string = CHART_PALETTES.black.text;
+let CHART_TEXT_MUTED: string = CHART_PALETTES.black.textMuted;
+let CHART_GRID: string = CHART_PALETTES.black.grid;
+let CHART_GRID_SOFT: string = CHART_PALETTES.black.gridSoft;
+let CHART_DIVIDER: string = CHART_PALETTES.black.divider;
+let CHART_EXPIRY: string = CHART_PALETTES.black.expiry;
+let CHART_EXPIRY_TEXT: string = CHART_PALETTES.black.expiryText;
+
+function applyChartPalette(background: ChartBackground) {
+  const palette = CHART_PALETTES[background];
+  CHART_PANEL = palette.panel;
+  CHART_PANEL_ALT = palette.panelAlt;
+  CHART_TEXT = palette.text;
+  CHART_TEXT_MUTED = palette.textMuted;
+  CHART_GRID = palette.grid;
+  CHART_GRID_SOFT = palette.gridSoft;
+  CHART_DIVIDER = palette.divider;
+  CHART_EXPIRY = palette.expiry;
+  CHART_EXPIRY_TEXT = palette.expiryText;
+}
 
 const BOTTOM_INDICATORS = new Set([
   "AWESOME_OSCILLATOR",
@@ -1298,7 +1341,7 @@ function drawBottomPanel(
   candleGap: number,
   scrollOffset: number,
 ) {
-  context.fillStyle = panelIndex % 2 === 0 ? CHART_PANEL : CHART_BG;
+  context.fillStyle = panelIndex % 2 === 0 ? CHART_PANEL : CHART_PANEL_ALT;
   context.fillRect(left, top, right - left, bottom - top);
 
   context.strokeStyle = CHART_DIVIDER;
@@ -1411,6 +1454,7 @@ function TradingChartComponent({
   indicatorStyles = DEFAULT_INDICATOR_STYLES,
   activeTrades,
   resultMarkers,
+  background = "black",
 }: TradingChartProps) {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -1495,10 +1539,10 @@ function TradingChartComponent({
     const width = rect.width;
     const height = rect.height;
 
+    // Leave the canvas clear: the black or white surface and the faint
+    // mountain photo behind it come from CSS.
     context.clearRect(0, 0, width, height);
-    // Solid dark-navy chart surface (--chart-bg) so candles read clearly.
-    context.fillStyle = CHART_BG;
-    context.fillRect(0, 0, width, height);
+    applyChartPalette(background);
 
     const sourceCandles = candlesRef?.current ?? candles;
 
@@ -1858,10 +1902,11 @@ function TradingChartComponent({
     marketReceivedAtRef,
     marketFrameVersionRef,
     timeframe,
+    background,
   ]);
 
   return (
-    <div ref={containerRef} className="nt-chart-canvas-wrap">
+    <div ref={containerRef} className="nt-chart-canvas-wrap" data-chart-bg={background}>
       <canvas ref={canvasRef} className="nt-chart-canvas" role="img" aria-label={`${asset.symbol} ${chartType} chart with ${selectedIndicators.join(", ") || "price"} indicators`} />
     </div>
   );
@@ -1883,7 +1928,8 @@ const TradingChart = React.memo(TradingChartComponent, (previous, next) => {
     previous.indicatorSettings === next.indicatorSettings &&
     previous.indicatorStyles === next.indicatorStyles &&
     previous.activeTrades === next.activeTrades &&
-    previous.resultMarkers === next.resultMarkers
+    previous.resultMarkers === next.resultMarkers &&
+    previous.background === next.background
   );
 });
 
