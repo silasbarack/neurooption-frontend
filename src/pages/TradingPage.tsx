@@ -776,16 +776,17 @@ export default function TradingPage() {
         reconnect: true,
         tickAgeMs: lastClientTickAgeRef.current,
         renderDelayMs: lastRenderDelayRef.current,
+        transport: socket.io.engine?.transport?.name,
       });
     };
 
     const handlePriceUpdate = (data: MarketPriceUpdate) => {
       if (data.symbol !== symbol || !Number.isFinite(data.sequence)) return;
 
+      // Price updates are sent volatile: the server may drop one when a slow
+      // connection is backed up, so a gap is expected and not worth a full
+      // resync. Candles arrive reliably; the stale timer covers real outages.
       const previousSequence = lastMarketSequenceRef.current;
-      if (previousSequence > 0 && data.sequence > previousSequence + 1) {
-        requestResync();
-      }
       if (data.sequence <= previousSequence) return;
 
       lastMarketSequenceRef.current = data.sequence;
@@ -862,6 +863,7 @@ export default function TradingPage() {
       socket.emit(MARKET_SOCKET_EVENTS.CLIENT_METRICS, {
         tickAgeMs: lastClientTickAgeRef.current,
         renderDelayMs: lastRenderDelayRef.current,
+        transport: socket.io.engine?.transport?.name,
       });
     }, 5_000);
 
