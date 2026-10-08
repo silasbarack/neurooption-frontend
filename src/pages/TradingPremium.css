@@ -1291,3 +1291,10 @@
 .nt-page.nt-premium * {
   font-weight: 400 !important;
 }
+
+/* The header's backdrop-filter makes it its own stacking context; lift it
+   above the page body so the balance dropdown is not hidden under the chart. */
+.nt-premium .nt-header {
+  position: relative;
+  z-index: 40;
+}
