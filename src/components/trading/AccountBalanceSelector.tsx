@@ -14,6 +14,8 @@ type AccountBalanceSelectorProps = {
   onAccountTypeChange: (value: AccountType) => void;
   onCurrencyChange: (value: Currency) => void;
   depositPath?: string;
+  /** Opens the add-demo-funds dialog; the "+" uses it on the demo account. */
+  onAddDemoFunds?: () => void;
 };
 
 export default function AccountBalanceSelector({
@@ -24,6 +26,7 @@ export default function AccountBalanceSelector({
   onAccountTypeChange,
   onCurrencyChange,
   depositPath = "/finance",
+  onAddDemoFunds,
 }: AccountBalanceSelectorProps) {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
@@ -73,15 +76,28 @@ export default function AccountBalanceSelector({
         </div>
       </button>
 
-      <button
-        type="button"
-        className="deposit-shortcut-btn"
-        aria-label="Deposit funds"
-        onClick={() => navigate(depositPath)}
-      >
-        <Plus size={18} aria-hidden="true" />
-        <span>Deposit</span>
-      </button>
+      {accountType === "QT Demo" && onAddDemoFunds ? (
+        <button
+          type="button"
+          className="deposit-shortcut-btn"
+          aria-label="Add demo funds"
+          aria-haspopup="dialog"
+          onClick={onAddDemoFunds}
+        >
+          <Plus size={18} aria-hidden="true" />
+          <span>Add funds</span>
+        </button>
+      ) : (
+        <button
+          type="button"
+          className="deposit-shortcut-btn"
+          aria-label="Deposit funds"
+          onClick={() => navigate(depositPath)}
+        >
+          <Plus size={18} aria-hidden="true" />
+          <span>Deposit</span>
+        </button>
+      )}
 
       {open && (
         <div className="balance-dropdown">

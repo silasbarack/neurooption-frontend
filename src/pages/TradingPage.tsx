@@ -2,6 +2,7 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 import { ChevronDown, Star, X } from "lucide-react";
 import "./TradingPage.css";
+import DemoFundsDialog from "../components/trading/DemoFundsDialog";
 import AssetIcon from "../components/markets/AssetIcon";
 
 import {
@@ -329,6 +330,8 @@ export default function TradingPage() {
   const walletVersionRef = React.useRef(0);
 
   const [walletBalance, setWalletBalance] = React.useState<number | null>(null);
+  const [walletBalanceUsd, setWalletBalanceUsd] = React.useState<number | null>(null);
+  const [demoFundsOpen, setDemoFundsOpen] = React.useState(false);
   const [walletLoading, setWalletLoading] = React.useState(true);
   const [tradeSubmitting, setTradeSubmitting] = React.useState(false);
   const [tradeError, setTradeError] = React.useState<string | null>(null);
@@ -538,6 +541,7 @@ export default function TradingPage() {
 
         if (signal?.aborted || walletScopeRef.current!==requestScope || requestVersion!==walletVersionRef.current) return;
         setWalletBalance((previous) => toWalletBalance(data.balance, previous));
+        setWalletBalanceUsd((previous) => toWalletBalance(data.balanceUsd, previous));
       } finally {
         if (!signal?.aborted && walletScopeRef.current===requestScope && requestVersion===walletVersionRef.current) setWalletLoading(false);
       }
@@ -577,7 +581,10 @@ export default function TradingPage() {
           ),
         ]);
 
-        if (!signal?.aborted && walletScopeRef.current===requestScope && requestVersion===walletVersionRef.current) setWalletBalance((previous) => toWalletBalance(wallet.balance, previous));
+        if (!signal?.aborted && walletScopeRef.current===requestScope && requestVersion===walletVersionRef.current) {
+          setWalletBalance((previous) => toWalletBalance(wallet.balance, previous));
+          setWalletBalanceUsd((previous) => toWalletBalance(wallet.balanceUsd, previous));
+        }
         setActiveTrades(open.map(tradeToMarker));
         setOpenTrades(open);
 
@@ -1043,7 +1050,10 @@ export default function TradingPage() {
         expirySeconds: expirySecondsRef.current,
       });
 
-      if (walletScopeRef.current===requestScope && requestVersion===walletVersionRef.current) setWalletBalance((previous) => toWalletBalance(response.wallet.balance, previous));
+      if (walletScopeRef.current===requestScope && requestVersion===walletVersionRef.current) {
+        setWalletBalance((previous) => toWalletBalance(response.wallet.balance, previous));
+        setWalletBalanceUsd((previous) => toWalletBalance(response.wallet.balanceUsd, previous));
+      }
 
       setActiveTrades((current) => [tradeToMarker(response.trade), ...current]);
 
@@ -1078,6 +1088,29 @@ export default function TradingPage() {
       ? ((lastCandle.close - firstCandle.open) / firstCandle.open) * 100
       : 0;
 
+  const openDemoFunds = React.useCallback(() => {
+    setDemoFundsOpen(true);
+    void loadWallet();
+  }, [loadWallet]);
+  const closeDemoFunds = React.useCallback(() => setDemoFundsOpen(false), []);
+
+  const addDemoFunds = React.useCallback(
+    async (amountUsd: number) => {
+      const requestScope = accountType + "|" + currency;
+      const response = await postJson<
+        { wallet: BackendWalletResponse },
+        { amount: number; currency: Currency }
+      >(`${API_BASE_URL}/trading-engine/demo/top-up`, { amount: amountUsd, currency });
+
+      if (walletScopeRef.current === requestScope) {
+        walletVersionRef.current += 1;
+        setWalletBalance((previous) => toWalletBalance(response.wallet.balance, previous));
+        setWalletBalanceUsd((previous) => toWalletBalance(response.wallet.balanceUsd, previous));
+      }
+    },
+    [accountType, currency]
+  );
+
   const chartLayoutStyle = {
     "--nt-indicator-space": `${bottomIndicatorCount * 72}px`,
   } as React.CSSProperties;
@@ -1089,10 +1122,20 @@ export default function TradingPage() {
         currency={currency}
         balance={walletBalance}
         balanceLoading={walletLoading}
-        onAccountChange={(next) => { if (next !== accountType) { walletScopeRef.current=next+"|"+currency; walletVersionRef.current+=1; setWalletBalance(null); setWalletLoading(true); setAccountType(next); } }}
-        onCurrencyChange={(next) => { if (next !== currency) { walletScopeRef.current=accountType+"|"+next; walletVersionRef.current+=1; setWalletBalance(null); setWalletLoading(true); setCurrency(next); } }}
+        onAccountChange={(next) => { if (next !== accountType) { walletScopeRef.current=next+"|"+currency; walletVersionRef.current+=1; setWalletBalance(null); setWalletBalanceUsd(null); setWalletLoading(true); setAccountType(next); } }}
+        onCurrencyChange={(next) => { if (next !== currency) { walletScopeRef.current=accountType+"|"+next; walletVersionRef.current+=1; setWalletBalance(null); setWalletBalanceUsd(null); setWalletLoading(true); setCurrency(next); } }}
         onFullscreen={handleFullscreen}
+        onAddDemoFunds={openDemoFunds}
       />
+
+      {demoFundsOpen && (
+        <DemoFundsDialog
+          currency={currency}
+          balanceUsd={accountType === "QT Demo" ? walletBalanceUsd : null}
+          onClose={closeDemoFunds}
+          onAddFunds={addDemoFunds}
+        />
+      )}
 
       <section className="nt-page-body">
         <TradingSidebar />

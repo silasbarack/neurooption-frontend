@@ -14,6 +14,7 @@ type TradingHeaderProps = {
   onAccountChange: (value: AccountType) => void;
   onCurrencyChange: (value: Currency) => void;
   onFullscreen: () => void;
+  onAddDemoFunds?: () => void;
 };
 
 // Sign-in keeps the user in localStorage ("remember me") or sessionStorage.
@@ -45,6 +46,7 @@ export default function TradingHeader({
   onAccountChange,
   onCurrencyChange,
   onFullscreen,
+  onAddDemoFunds,
 }: TradingHeaderProps) {
   const [initials] = useState(readUserInitials);
   const [clock, setClock] = useState(() => formatUtc(new Date()));
@@ -78,6 +80,7 @@ export default function TradingHeader({
           onAccountTypeChange={onAccountChange}
           onCurrencyChange={onCurrencyChange}
           depositPath="/finance"
+          onAddDemoFunds={onAddDemoFunds}
         />
 
         <button type="button" className="nt-fullscreen" onClick={onFullscreen} aria-label="Full screen">
