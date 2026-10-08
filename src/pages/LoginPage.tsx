@@ -21,15 +21,6 @@ import {
 
 // Decorative candles for the market preview: [open, close, high, low] in px
 // from the bottom of a 120px chart.
-const PREVIEW_CANDLES: Array<[number, number, number, number]> = [
-  [21, 51, 68, 8], [46, 29, 61, 21], [25, 51, 63, 17], [46, 36, 55, 25],
-  [31, 53, 61, 19], [49, 68, 85, 38], [63, 38, 76, 29], [34, 46, 57, 21],
-  [42, 66, 76, 27], [61, 46, 74, 31], [42, 70, 85, 31], [66, 53, 76, 40],
-  [49, 68, 85, 38], [63, 81, 95, 55], [76, 55, 85, 42], [51, 76, 89, 42],
-  [72, 63, 89, 55], [59, 81, 89, 46], [76, 91, 104, 61], [87, 68, 104, 57],
-  [63, 87, 98, 49],
-];
-
 export default function LoginPage() {
   const navigate = useNavigate();
 
@@ -80,6 +71,23 @@ export default function LoginPage() {
       privacyLabel={tt("privacy")}
       contactsLabel={tt("contacts")}
     >
+      <figure className="au-showcase" id="markets">
+        <picture>
+          <source
+            type="image/webp"
+            srcSet="/landing/trading-preview-800.webp 800w, /landing/trading-preview-1600.webp 1600w"
+            sizes="(max-width: 900px) 100vw, 680px"
+          />
+          <img
+            src="/landing/trading-preview-1600.jpg"
+            alt="NeuroOption trading screen: EUR/USD OTC candlestick chart with the Buy and Sell panel"
+            width={1600}
+            height={959}
+            decoding="async"
+            fetchPriority="high"
+          />
+        </picture>
+      </figure>
       <div className="au-hero" id="platform">
         <span className="au-eyebrow">
           <i aria-hidden="true" />
@@ -93,37 +101,6 @@ export default function LoginPage() {
           NeuroOption brings OTC assets, responsive candlestick charts and
           streamlined account controls into one focused trading workspace.
         </p>
-
-        <div className="au-market" id="markets" aria-label="Market preview">
-          <div className="au-market-head">
-            <div>
-              <span className="au-market-pair">EUR/USD OTC</span>
-              <strong className="au-market-price">1.08742</strong>
-            </div>
-            <span className="au-market-change">+0.08%</span>
-          </div>
-          <div className="au-market-chart" aria-hidden="true">
-            {PREVIEW_CANDLES.map(([open, close, high, low], index) => (
-              <span key={index} className={close >= open ? "up" : "down"}>
-                <b style={{ bottom: `${low}px`, height: `${high - low}px` }} />
-                <i
-                  style={{
-                    bottom: `${Math.min(open, close)}px`,
-                    height: `${Math.max(3, Math.abs(close - open))}px`,
-                  }}
-                />
-              </span>
-            ))}
-          </div>
-          <div className="au-market-actions">
-            <div className="au-market-payout">
-              <span>Payout</span>
-              <strong>85%</strong>
-            </div>
-            <span className="au-market-buy">Buy</span>
-            <span className="au-market-sell">Sell</span>
-          </div>
-        </div>
 
         <ul className="au-features" id="security">
           <li>

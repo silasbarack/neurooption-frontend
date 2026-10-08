@@ -1234,3 +1234,121 @@
     height: 40px;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Real trading-screen preview, shown first, and a black theme matching the
+   logo's black.
+   ------------------------------------------------------------------------ */
+
+.au-main,
+.au-main.is-stacked {
+  align-content: start;
+  align-items: start;
+}
+
+/* Sign-in page: preview above the headline on the left, form on the right. */
+.au-main.is-stacked:has(.au-showcase) {
+  max-width: 1280px;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  grid-template-areas:
+    "show card"
+    "hero card";
+  row-gap: 32px;
+  padding-top: 28px;
+}
+
+.au-main.is-stacked:has(.au-showcase) .au-showcase { grid-area: show; }
+.au-main.is-stacked:has(.au-showcase) .au-hero { grid-area: hero; }
+.au-main.is-stacked:has(.au-showcase) .au-card { grid-area: card; align-self: start; }
+
+.au-showcase {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  background: #0a0a0a;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(212, 175, 55, 0.08);
+}
+
+.au-showcase img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+  /* Medium screens: the preview runs across the top at full width. */
+  .au-main.is-stacked:has(.au-showcase) {
+    grid-template-areas:
+      "show show"
+      "hero card";
+  }
+}
+
+@media (max-width: 900px) {
+  /* Phone: preview first, then the form, then the headline. */
+  .au-main.is-stacked:has(.au-showcase) {
+    max-width: 640px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "show"
+      "card"
+      "hero";
+    row-gap: 22px;
+    padding-top: 12px;
+  }
+
+  .au-showcase {
+    border-radius: 14px;
+  }
+}
+
+/* Black theme */
+.au {
+  --au-line: rgba(255, 255, 255, 0.1);
+  --au-field: #0b0b0c;
+  background:
+    radial-gradient(900px 420px at 15% -8%, rgba(212, 175, 55, 0.07), transparent 70%),
+    #000;
+}
+
+.au-header {
+  background: #000;
+}
+
+.au-card {
+  background: linear-gradient(180deg, #121214, #0a0a0b);
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.04) inset,
+    0 40px 90px rgba(0, 0, 0, 0.8);
+}
+
+.au-card::before {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04) 45%, rgba(212, 175, 55, 0.2));
+}
+
+.au-card::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+}
+
+.au-language,
+.au-trust,
+.au-features li,
+.au-benefits li {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.au-language option {
+  background: #111;
+}
+
+.au-input input:focus,
+.au-code:focus {
+  background: #101012;
+}
+
+.au-input input:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
