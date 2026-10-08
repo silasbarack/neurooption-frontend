@@ -12,6 +12,13 @@ import {
   type IndicatorSettingsMap,
   type IndicatorStylesMap,
 } from "./indicator-settings";
+import {
+  formatKenyaDate,
+  formatKenyaTime,
+  kenyaDayKey,
+  kenyaOffsetMs,
+  KENYA_ZONE_LABEL,
+} from "../../utils/kenyaTime";
 
 type TradingChartProps = {
   asset: Asset;
@@ -1438,6 +1445,80 @@ function drawBottomPanel(
 }
 
 
+// Label spacings the time axis may use; each must be a whole number of
+// candles so every label sits on a real candle's opening time.
+const AXIS_STEPS_MS = [
+  5_000, 10_000, 15_000, 30_000,
+  60_000, 2 * 60_000, 5 * 60_000, 10 * 60_000, 15 * 60_000, 30 * 60_000,
+  3_600_000, 2 * 3_600_000, 3 * 3_600_000, 4 * 3_600_000, 6 * 3_600_000, 12 * 3_600_000,
+  86_400_000, 2 * 86_400_000, 7 * 86_400_000,
+];
+
+/**
+ * Time axis in East Africa Time. Candle times are UTC bucket starts; labels
+ * go on candles that start on a round Kenya-local boundary (e.g. every
+ * 15 minutes), and a label that falls on Kenya midnight shows the date.
+ */
+function drawKenyaTimeAxis(
+  context: CanvasRenderingContext2D,
+  candles: Candle[],
+  candleIntervalMs: number,
+  candleGap: number,
+  xForIndex: (index: number) => number,
+  left: number,
+  right: number,
+  width: number,
+  height: number,
+) {
+  context.font = "400 10px 'Noto Sans', Arial, sans-serif";
+  context.fillStyle = CHART_TEXT_MUTED;
+  context.textBaseline = "middle";
+
+  const minSpacing = width < 560 ? 64 : 88;
+  const step =
+    AXIS_STEPS_MS.find(
+      (candidate) =>
+        candidate >= candleIntervalMs &&
+        candidate % candleIntervalMs === 0 &&
+        (candidate / candleIntervalMs) * candleGap >= minSpacing,
+    ) ?? AXIS_STEPS_MS[AXIS_STEPS_MS.length - 1];
+  const withSeconds = step < 60_000;
+  const y = height - 10;
+  const zoneWidth = context.measureText(KENYA_ZONE_LABEL).width + 16;
+  let lastX = -Infinity;
+  let lastDay = 0;
+
+  // Candles of 4 hours or a day open on UTC boundaries (03:00, 07:00 … in
+  // Kenya), so for those the labels follow the UTC grid instead.
+  const firstTime = candles[0]?.time ?? 0;
+  const alignToKenya = kenyaOffsetMs(firstTime) % candleIntervalMs === 0;
+
+  context.textAlign = "center";
+  for (let index = 0; index < candles.length; index += 1) {
+    const time = candles[index].time;
+    if (!Number.isFinite(time)) continue;
+    const local = time + kenyaOffsetMs(time);
+    if ((alignToKenya ? local : time) % step !== 0) continue;
+
+    const x = xForIndex(index);
+    if (x < left + 14 || x > right - zoneWidth / 2 || x - lastX < minSpacing * 0.8) continue;
+
+    // The date replaces the time where the Kenya calendar day changes.
+    const day = kenyaDayKey(time);
+    const newDay = lastDay !== 0 && day !== lastDay;
+    const label =
+      step >= 86_400_000 || newDay || (alignToKenya && local % 86_400_000 === 0)
+        ? formatKenyaDate(time)
+        : formatKenyaTime(time, withSeconds);
+    context.fillText(label, x, y);
+    lastX = x;
+    lastDay = day;
+  }
+
+  context.textAlign = "right";
+  context.fillText(KENYA_ZONE_LABEL, width - 10, y);
+}
+
 function TradingChartComponent({
   asset,
   candles,
@@ -1831,20 +1912,17 @@ function TradingChartComponent({
         scrollOffset,
       );
     });
-    context.font = "400 10px 'Noto Sans', Arial, sans-serif";
-    context.fillStyle = CHART_TEXT_MUTED;
-    context.textBaseline = "middle";
-    const tickCount = width < 560 ? 3 : 5;
-    for (let tick = 0; tick < tickCount; tick += 1) {
-      const index = Math.round((visibleLength - 1) * tick / (tickCount - 1));
-      const date = new Date(visibleCandlesRaw[index].time);
-      if (!Number.isFinite(date.getTime())) continue;
-      context.textAlign = tick === 0 ? "left" : tick === tickCount - 1 ? "right" : "center";
-      const label = date.toISOString().slice(11, timeframeToSeconds(timeframe) < 60 ? 19 : 16);
-      context.fillText(label, clamp(indexToX(index) - scrollOffset, left, right), height - 10);
-    }
-    context.textAlign = "right";
-    context.fillText("UTC", width - 10, height - 10);
+    drawKenyaTimeAxis(
+      context,
+      visibleCandlesRaw,
+      candleIntervalMs,
+      candleGap,
+      (index) => indexToX(index) - scrollOffset,
+      left,
+      right,
+      width,
+      height,
+    );
 
     // Lightweight production diagnostics for browser QA. This stays off
     // React state and does not affect pricing or rendering decisions.

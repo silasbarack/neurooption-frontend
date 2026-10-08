@@ -56,10 +56,23 @@ import {
   type MarketCandleUpdate,
   type MarketPriceUpdate,
   type MarketResyncResponse,
-  type ServerTimeResponse,
 } from "../components/trading/marketSocket";
 import "./TradingPremium.css";
-import { useQuotes } from "../components/markets/useQuotes";
+import KenyaClock from "../components/trading/KenyaClock";
+import AssetPayoutBadge from "../components/trading/AssetPayoutBadge";
+import {
+  applyPayout,
+  payoutsAreFresh,
+  quotePayout,
+  useAssetPayout,
+  type PayoutQuote,
+} from "../components/trading/payoutStore";
+import {
+  ensureServerClock,
+  requestServerTimeSync,
+  serverOffsetMs,
+  subscribeServerClock,
+} from "../components/trading/serverClock";
 
 type BackendAsset = {
   symbol: string;
@@ -217,6 +230,29 @@ function calculateSentiment(candles: Candle[]) {
   return Math.round(clamp(40 + bullishRatio * 18 + trendPressure, 20, 60));
 }
 
+/** A refused request, with the server's response body. */
+class RequestError extends Error {
+  readonly status: number;
+  readonly body: unknown;
+
+  constructor(message: string, status: number, body: unknown) {
+    super(message);
+    this.status = status;
+    this.body = body;
+  }
+}
+
+type PayoutChangedBody = {
+  code: "PAYOUT_CHANGED";
+  message: string;
+  quote: PayoutQuote & { updatedAt?: string };
+};
+
+function isPayoutChanged(body: unknown): body is PayoutChangedBody {
+  const value = body as Partial<PayoutChangedBody> | null;
+  return !!value && value.code === "PAYOUT_CHANGED" && !!value.quote && typeof value.quote.symbol === "string";
+}
+
 async function postJson<TResponse, TBody>(
   url: string,
   body: TBody,
@@ -241,7 +277,7 @@ async function postJson<TResponse, TBody>(
         ? data.message
         : `Request failed: ${response.status}`;
 
-    throw new Error(message);
+    throw new RequestError(message, response.status, data);
   }
 
   return data as TResponse;
@@ -378,9 +414,11 @@ export default function TradingPage() {
 
   const [expirySeconds, setExpirySeconds] = React.useState(60);
   const [amount, setAmount] = React.useState("100");
-  const { quotes, live, updatedAt } = useQuotes();
-  const payoutQuote = live && updatedAt > 0 ? quotes.find((quote) => quote.symbol === selectedAsset.symbol) : undefined;
-  const payout = payoutQuote && typeof payoutQuote.payout === "number" && Number.isFinite(payoutQuote.payout) && payoutQuote.payout > 0 && payoutQuote.payout <= 100 ? payoutQuote.payout : null;
+  // The backend's published payout for this asset, adjusted for the chosen
+  // expiry exactly as the backend will when the order arrives.
+  const assetPayout = useAssetPayout(selectedAsset.symbol);
+  const payoutQuote = assetPayout ? quotePayout(selectedAsset.symbol, expirySeconds) : null;
+  const payout = payoutQuote ? payoutQuote.payoutPercent : null;
   const [favorites, setFavorites] = React.useState<string[]>(() => {
     try { const value: unknown = JSON.parse(localStorage.getItem("neurooption_favorite_assets") || "[]"); return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []; } catch { return []; }
   });
@@ -479,11 +517,10 @@ export default function TradingPage() {
   );
 
   const resetMarket = React.useCallback(
-    (asset: Asset, nextTimeframe: string, atMs = Date.now()) => {
+    (asset: Asset, nextTimeframe: string) => {
       marketSelectionRef.current = asset.symbol+"|"+nextTimeframe;
       marketVersionRef.current += 1;
       candlesRef.current = [];
-      serverOffsetRef.current = atMs - Date.now();
       setCandles([]);
       setMarketReady(false);
       setSentiment(50);
@@ -631,6 +668,15 @@ export default function TradingPage() {
     [accountType, currency, showTemporaryResultMarkers]
   );
 
+  // The chart and tick-age metrics read the server clock through this offset.
+  React.useEffect(() => {
+    ensureServerClock();
+    serverOffsetRef.current = serverOffsetMs();
+    return subscribeServerClock(() => {
+      serverOffsetRef.current = serverOffsetMs();
+    });
+  }, []);
+
   React.useEffect(() => {
     const resultMarkerTimers = resultMarkerTimersRef.current;
 
@@ -754,19 +800,8 @@ export default function TradingPage() {
       );
     };
 
-    const syncClock = () => {
-      const clientSentAt = Date.now();
-      socket.emit(
-        MARKET_SOCKET_EVENTS.SERVER_TIME,
-        { clientSentAt },
-        (response: ServerTimeResponse) => {
-          if (!response || !Number.isFinite(response.serverTimestamp)) return;
-          const clientReceivedAt = Date.now();
-          const midpoint = clientSentAt + (clientReceivedAt - clientSentAt) / 2;
-          serverOffsetRef.current = response.serverTimestamp - midpoint;
-        },
-      );
-    };
+    // The shared server clock (serverClock.ts) does the sampling.
+    const syncClock = requestServerTimeSync;
 
     let lastRecoveryAt = 0;
 
@@ -866,7 +901,6 @@ export default function TradingPage() {
 
     if (socket.connected) subscribe();
 
-    const clockTimer = window.setInterval(syncClock, 30_000);
     const metricsTimer = window.setInterval(() => {
       socket.emit(MARKET_SOCKET_EVENTS.CLIENT_METRICS, {
         tickAgeMs: lastClientTickAgeRef.current,
@@ -892,7 +926,6 @@ export default function TradingPage() {
     }, 1_000);
 
     return () => {
-      window.clearInterval(clockTimer);
       window.clearInterval(metricsTimer);
       window.clearInterval(staleTimer);
       socket.emit(MARKET_SOCKET_EVENTS.UNSUBSCRIBE_SYMBOL, { symbol, timeframe });
@@ -1029,7 +1062,13 @@ export default function TradingPage() {
   }
 
   async function handleTrade(side: TradeSide) {
-    if (!canTrade || Date.now() - updatedAt > 20000) return;
+    if (!canTrade || !payoutQuote) return;
+    if (!payoutsAreFresh()) {
+      setTradeError("Payouts are reconnecting. Please try again in a moment.");
+      return;
+    }
+    // The payout on screen; the backend accepts the order only at this payout.
+    const shownQuote = payoutQuote;
     const requestScope=accountType+"|"+currency;
     const requestVersion=walletVersionRef.current;
 
@@ -1048,6 +1087,8 @@ export default function TradingPage() {
           currency: Currency;
           amount: number;
           expirySeconds: number;
+          quotedPayoutPercent: number;
+          payoutVersion: number;
         }
       >(`${API_BASE_URL}/trading-engine/trades`, {
         userId: USER_ID,
@@ -1058,6 +1099,8 @@ export default function TradingPage() {
         currency,
         amount: safeStakeAmount,
         expirySeconds: expirySecondsRef.current,
+        quotedPayoutPercent: shownQuote.payoutPercent,
+        payoutVersion: shownQuote.version,
       });
 
       if (walletScopeRef.current===requestScope && requestVersion===walletVersionRef.current) {
@@ -1069,6 +1112,26 @@ export default function TradingPage() {
 
       await loadTradingState();
     } catch (error) {
+      if (error instanceof RequestError && error.status === 409 && isPayoutChanged(error.body)) {
+        // Never trade at a payout the trader has not seen: show the new one
+        // and let them decide again.
+        const quote = error.body.quote;
+        applyPayout(
+          {
+            symbol: quote.symbol,
+            payoutPercent: quote.assetPayoutPercent,
+            version: quote.version,
+            marketType: quote.marketType,
+            updatedAt: new Date().toISOString(),
+          },
+          true,
+        );
+        setTradeError(
+          `Payout changed from ${shownQuote.payoutPercent}% to ${quote.payoutPercent}%. No trade was placed — review the new payout and try again.`,
+        );
+        return;
+      }
+
       const message =
         error instanceof Error ? error.message : "Could not place trade.";
 
@@ -1162,6 +1225,7 @@ export default function TradingPage() {
               >
                 <AssetIcon symbol={selectedAsset.symbol} size={22} />
                 <span>{selectedAsset.symbol}</span>
+                <AssetPayoutBadge symbol={selectedAsset.symbol} className="nt-asset-trigger-payout" />
                 <ChevronDown size={16} aria-hidden="true" />
               </button>
 
@@ -1204,6 +1268,7 @@ export default function TradingPage() {
                         <span>
                           {asset.label}
                         </span>
+                        <AssetPayoutBadge symbol={asset.symbol} className="nt-asset-menu-payout" />
                       </button>
                     ))}
                   </div>
@@ -1260,6 +1325,8 @@ export default function TradingPage() {
             background={chartBackground}
           />
 
+          <KenyaClock />
+
 
         </section>
 
@@ -1274,6 +1341,8 @@ export default function TradingPage() {
           amount={amount}
           currency={currency}
           payout={payout}
+          payoutVersion={payoutQuote?.version ?? null}
+          payoutAssetPercent={payoutQuote?.assetPayoutPercent ?? null}
           expectedProfitText={expectedProfit === null ? "—" : formatMoney(expectedProfit, currency)}
           expectedReturnText={expectedReturn === null ? "—" : formatMoney(expectedReturn, currency)}
           canTrade={canTrade}

@@ -3,24 +3,7 @@ import AssetIcon from "../components/markets/AssetIcon";
 import { PageHeader, StatusBadge, DataTable, EmptyState } from "../components/common";
 import type { DataTableColumn } from "../components/common";
 import { fetchOpenTrades, formatMoney, type BackendTrade } from "../components/trading/tradesApi";
-
-// Live "time left until expiry" — ticks every second from the trade's
-// real expiryTime, no fake price data involved.
-function Countdown({ expiryTime }: { expiryTime: number }) {
-  const [now, setNow] = React.useState(() => Date.now());
-
-  React.useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, []);
-
-  const remainingMs = Math.max(0, expiryTime - now);
-  const seconds = Math.floor(remainingMs / 1000);
-  const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
-  const ss = String(seconds % 60).padStart(2, "0");
-
-  return <span className={remainingMs === 0 ? "np-text-muted" : ""}>{mm}:{ss}</span>;
-}
+import TradeCountdown from "../components/trading/TradeCountdown";
 
 export default function OpenTradesPage() {
   const [trades, setTrades] = React.useState<BackendTrade[]>([]);
@@ -48,7 +31,7 @@ export default function OpenTradesPage() {
     },
     { key: "investment", header: "Investment", align: "right", render: (t) => formatMoney(t.stakeAmount, t.currency) },
     { key: "entry", header: "Entry Price", align: "right", render: (t) => t.entryPrice },
-    { key: "expiry", header: "Time Left", align: "right", render: (t) => <Countdown expiryTime={t.expiryTime} /> },
+    { key: "expiry", header: "Time Left", align: "right", render: (t) => <TradeCountdown expiryTime={t.expiryTime} showExpiry /> },
     { key: "payout", header: "Payout", align: "right", render: (t) => `+${t.payoutPercent}%` },
     {
       key: "profit",

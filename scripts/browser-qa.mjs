@@ -103,6 +103,11 @@ async function makeContext(options) {
         const data = options.payout === 'invalid' ? quotes.map(quote=>({...quote,payout:999})) : quotes;
         return fulfill({serverTime:new Date().toISOString(),quotes:data});
       }
+      if (endpoint === '/market-data/payouts') {
+        if (options.payout === 'unavailable') return fulfill({message:'Payout feed unavailable in this QA scenario'},503);
+        const payouts = quotes.map(quote=>({symbol:quote.symbol,assetId:quote.symbol,payoutPercent:options.payout === 'invalid' ? 999 : quote.payout,version:1,marketType:'OTC',category:quote.category,updatedAt:new Date().toISOString()}));
+        return fulfill({serverTime:new Date().toISOString(),expiryAdjustments:[{maxSeconds:15,adjustPercent:-3},{maxSeconds:30,adjustPercent:-2},{minSeconds:300,adjustPercent:1}],bounds:{minPercent:20,maxPercent:92},payouts});
+      }
       if (endpoint === '/market-data/assets' || endpoint === '/market/assets') return fulfill({assets});
       if (endpoint === '/market-data/candles') {
         if (options.candles === 'unavailable') return fulfill({message:'Market unavailable in this QA scenario'},503);
@@ -405,7 +410,7 @@ try {
     await scenario('payout-'+payout,{path:'/trading',width:390,auth:true,payout},async(page,telemetry)=>{
       await chartDimensions(page);
       await page.waitForFunction(()=>document.body.innerText.includes('1,234.56'));
-      assert.ok(telemetry.fixtureHits.includes('/market-data/quotes'));
+      assert.ok(telemetry.fixtureHits.includes('/market-data/payouts'));
       assert.equal(await page.locator('.nt-buy').isDisabled(),true,'Unavailable payout must block Buy');
       assert.equal(await page.locator('.nt-sell').isDisabled(),true,'Unavailable payout must block Sell');
       assert.match(await page.locator('.nt-white-payout').innerText(),/Unavailable/);

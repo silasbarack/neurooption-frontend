@@ -13,6 +13,7 @@ import {
 import type { Currency, TradeSide } from "./trading.types";
 import type { BackendTrade } from "./tradesApi";
 import { formatMoney } from "./tradesApi";
+import TradeCountdown from "./TradeCountdown";
 
 type ExpiryParts = {
   hours: number;
@@ -29,6 +30,10 @@ type TradingPanelProps = {
   amount: string;
   currency: Currency;
   payout: number | null;
+  /** Version of the asset payout being shown; changes flash the payout. */
+  payoutVersion?: number | null;
+  /** Asset payout before the expiry adjustment. */
+  payoutAssetPercent?: number | null;
   expectedProfitText: string;
   expectedReturnText: string;
   canTrade: boolean;
@@ -52,6 +57,8 @@ export default function TradingPanel({
   amount,
   currency,
   payout,
+  payoutVersion = null,
+  payoutAssetPercent = null,
   expectedProfitText,
   expectedReturnText,
   canTrade,
@@ -150,7 +157,20 @@ export default function TradingPanel({
       </section>
 
       <section className="nt-white-payout" aria-label="Trade payout and potential profit">
-        <div><span>Payout</span><strong>{payout === null ? "Unavailable" : `+${payout}%`}</strong></div>
+        <div>
+          <span>Payout</span>
+          <strong
+            key={payoutVersion ?? "none"}
+            className={payoutVersion !== null ? "nt-payout-value" : undefined}
+            title={
+              payout !== null && payoutAssetPercent !== null && payoutAssetPercent !== payout
+                ? `Asset payout ${payoutAssetPercent}%, adjusted ${payout - payoutAssetPercent > 0 ? "+" : ""}${payout - payoutAssetPercent} for this trade length`
+                : undefined
+            }
+          >
+            {payout === null ? "Unavailable" : `+${payout}%`}
+          </strong>
+        </div>
         <div><span>Profit</span><small>{expectedProfitText}</small></div>
       </section>
 
@@ -161,6 +181,7 @@ export default function TradingPanel({
         onClick={() => onTrade("BUY")}
       >
         <span>Buy</span>
+        {payout !== null && <small className="nt-trade-button-payout">{payout}%</small>}
         <ArrowUpRight size={20} aria-hidden="true" />
       </button>
 
@@ -171,6 +192,7 @@ export default function TradingPanel({
         onClick={() => onTrade("SELL")}
       >
         <span>Sell</span>
+        {payout !== null && <small className="nt-trade-button-payout">{payout}%</small>}
         <ArrowDownRight size={20} aria-hidden="true" />
       </button>
 
@@ -213,6 +235,11 @@ export default function TradingPanel({
                 </span>
                 <span className="nt-open-trade-side">{trade.side}</span>
                 <span className="nt-open-trade-amount">{formatMoney(trade.stakeAmount, trade.currency)}</span>
+                <span className="nt-open-trade-meta">
+                  <span title="Payout locked when the trade was accepted">{trade.payoutPercent}%</span>
+                  {" · "}
+                  <TradeCountdown expiryTime={trade.expiryTime} />
+                </span>
               </li>
             ))}
           </ul>
