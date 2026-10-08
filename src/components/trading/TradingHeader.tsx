@@ -62,7 +62,7 @@ export default function TradingHeader({
     <header className="nt-header">
       <div className="nt-brand">
         <Link to="/" className="nt-brand-plate" aria-label="NeuroOption home">
-          <Logo className="nt-brand-approved-logo" />
+          <Logo className="nt-brand-approved-logo" variant="clear" />
         </Link>
         <div className="nt-market-status" aria-label="Trading clock">
           <i aria-hidden="true" />

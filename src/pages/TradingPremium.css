@@ -1298,3 +1298,19 @@
   position: relative;
   z-index: 40;
 }
+
+/* The header logo is the transparent artwork, sitting directly on the
+   header colour; no dark plate behind it. */
+.nt-premium .nt-brand-plate,
+.nt-premium .nt-brand-plate:hover {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.nt-premium .nt-brand-plate picture {
+  display: block;
+  line-height: 0;
+}
