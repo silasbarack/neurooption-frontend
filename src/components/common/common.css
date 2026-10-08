@@ -1,26 +1,25 @@
-/* Shared "dashboard" theme for all non-trading content pages.
-   Self-contained (does not depend on TradingPage.css's :root vars)
-   so any page works correctly even when it's the first page loaded. */
+/* Shared light theme for all non-trading content pages. Every --np-* token
+   points at the brand tokens in src/styles/brand.css. */
 
 .np-page {
-  --np-bg: var(--neo-bg, #060b16);
-  --np-surface: var(--neo-panel, #0d1628);
-  --np-surface-alt: var(--neo-panel-2, #111c31);
-  --np-surface-raised: var(--neo-panel-3, #16233c);
-  --np-border: var(--neo-line, rgba(148, 170, 205, 0.13));
-  --np-text: #ffffff;
-  --np-text-muted: var(--neo-muted, #8d99b0);
-  --np-text-faint: #5f6b85;
-  --np-accent: var(--neo-accent, #2f6bff);
-  --np-accent-soft: rgba(47, 107, 255, 0.14);
-  --np-success: #16c784;
-  --np-success-soft: rgba(22, 199, 132, 0.14);
-  --np-danger: #f6465d;
-  --np-danger-soft: rgba(246, 70, 93, 0.14);
-  --np-warning: #f5a623;
-  --np-warning-soft: rgba(245, 166, 35, 0.14);
+  --np-bg: var(--background-primary);
+  --np-surface: var(--surface-primary);
+  --np-surface-alt: var(--surface-secondary);
+  --np-surface-raised: var(--background-tertiary);
+  --np-border: var(--border-primary);
+  --np-text: var(--text-primary);
+  --np-text-muted: var(--text-secondary);
+  --np-text-faint: var(--text-muted);
+  --np-accent: var(--brand-secondary);
+  --np-accent-soft: var(--brand-soft);
+  --np-success: var(--positive);
+  --np-success-soft: var(--positive-soft);
+  --np-danger: var(--negative);
+  --np-danger-soft: var(--negative-soft);
+  --np-warning: var(--warning);
+  --np-warning-soft: var(--warning-soft);
   --np-radius: 14px;
-  --np-shadow: 0 18px 44px rgba(0, 0, 0, 0.35);
+  --np-shadow: var(--shadow-sm);
 
   min-height: 100vh;
   background: var(--np-bg);
@@ -50,7 +49,7 @@
 
 .np-page-header-text h1 {
   margin: 0 0 4px;
-  color: var(--np-text);
+  color: var(--brand-primary);
   font-size: 26px;
   font-weight: 800;
 }
@@ -98,11 +97,19 @@
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
-  transition: filter 0.15s ease, transform 0.08s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.08s ease;
 }
 
 .np-btn:hover {
-  filter: brightness(1.15);
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+}
+
+.np-btn:focus-visible,
+.np-tab:focus-visible,
+.np-chat-convo:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .np-btn:active {
@@ -111,21 +118,34 @@
 
 .np-btn-primary {
   border: 0;
-  background: linear-gradient(180deg, #5b8cff, #2f6bff);
-  box-shadow: 0 8px 20px rgba(47, 107, 255, 0.25);
-  color: #ffffff;
+  background: var(--cta-gradient);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-on-brand);
+}
+
+.np-btn-primary:hover {
+  background: var(--cta-solid-hover);
+  color: var(--text-on-brand);
 }
 
 .np-btn-success {
   border: 0;
-  background: linear-gradient(135deg, #1fdb8e, #0fae71);
-  box-shadow: 0 8px 20px rgba(22, 199, 132, 0.28);
+  background: var(--positive);
+  color: var(--text-on-brand);
+}
+
+.np-btn-success:hover {
+  background: var(--positive-strong);
 }
 
 .np-btn-danger {
   border: 0;
-  background: linear-gradient(135deg, #ff5b72, #e0293f);
-  box-shadow: 0 8px 20px rgba(246, 70, 93, 0.28);
+  background: var(--negative);
+  color: var(--text-on-brand);
+}
+
+.np-btn-danger:hover {
+  background: var(--negative-strong);
 }
 
 .np-btn-ghost {
@@ -139,10 +159,13 @@
   border-radius: 8px;
 }
 
-.np-btn:disabled {
-  opacity: 0.5;
+.np-btn:disabled,
+.np-btn:disabled:hover {
+  border: 1px solid var(--border-primary);
+  background: var(--surface-secondary);
+  box-shadow: none;
+  color: var(--text-muted);
   cursor: not-allowed;
-  filter: none;
 }
 
 /* Cards */
@@ -199,6 +222,7 @@
 
 .np-section-head h2 {
   margin: 0;
+  color: var(--brand-primary);
   font-size: 18px;
   font-weight: 800;
 }
@@ -277,22 +301,22 @@
 }
 
 .np-badge-success {
-  color: #5be8a8;
+  color: var(--positive-strong);
   background: var(--np-success-soft);
 }
 
 .np-badge-danger {
-  color: #ff8b9a;
+  color: var(--negative-strong);
   background: var(--np-danger-soft);
 }
 
 .np-badge-warning {
-  color: #ffc873;
+  color: var(--warning);
   background: var(--np-warning-soft);
 }
 
 .np-badge-info {
-  color: #7cc4ff;
+  color: var(--brand-secondary);
   background: var(--np-accent-soft);
 }
 
@@ -343,16 +367,16 @@
 }
 
 .np-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--surface-hover);
 }
 
 .np-text-success {
-  color: #5be8a8;
+  color: var(--positive-strong);
   font-weight: 800;
 }
 
 .np-text-danger {
-  color: #ff8b9a;
+  color: var(--negative-strong);
   font-weight: 800;
 }
 
@@ -407,6 +431,11 @@
   cursor: pointer;
 }
 
+.np-tab:hover {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
 .np-tab.active {
   border-color: var(--np-accent);
   background: var(--np-accent-soft);
@@ -428,19 +457,22 @@
 
 .np-input,
 .np-select {
+  box-sizing: border-box;
+  max-width: 100%;
   height: 42px;
   padding: 0 14px;
-  border: 1px solid var(--np-border);
+  border: 1px solid var(--border-strong);
   border-radius: 10px;
-  background: var(--np-surface-alt);
+  background: var(--surface-primary);
   color: var(--np-text);
   font-size: 14px;
 }
 
 .np-input:focus,
 .np-select:focus {
-  outline: 2px solid var(--np-accent);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 1px;
+  border-color: var(--focus-ring);
 }
 
 .np-search {
@@ -449,6 +481,7 @@
 }
 
 .np-search input {
+  box-sizing: border-box;
   width: 100%;
   height: 44px;
   padding: 0 16px 0 40px;
@@ -460,8 +493,9 @@
 }
 
 .np-search input:focus {
-  outline: 2px solid var(--np-accent);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 1px;
+  border-color: var(--focus-ring);
 }
 
 .np-search-icon {
@@ -484,7 +518,7 @@
 .np-progress-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #00b4ff, #0a6fd6);
+  background: var(--brand-gradient);
 }
 
 /* Avatar */
@@ -492,8 +526,8 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, #2a3550, #16c784);
-  color: #ffffff;
+  background: var(--brand-gradient);
+  color: var(--text-on-brand);
   font-weight: 900;
   flex: 0 0 auto;
 }
@@ -588,7 +622,7 @@
   padding: 0 5px;
   border-radius: 999px;
   background: var(--np-accent);
-  color: #ffffff;
+  color: var(--text-on-brand);
   font-size: 11px;
   font-weight: 800;
   display: grid;
@@ -642,8 +676,8 @@
 }
 
 .np-chat-bubble.user {
-  background: linear-gradient(180deg, #5b8cff, #2f6bff);
-  color: #ffffff;
+  background: var(--brand-secondary);
+  color: var(--text-on-brand);
   border-bottom-right-radius: 4px;
 }
 
@@ -673,8 +707,9 @@
 }
 
 .np-chat-input-row input:focus {
-  outline: 2px solid var(--np-accent);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 1px;
+  border-color: var(--focus-ring);
 }
 
 @media (max-width: 720px) {

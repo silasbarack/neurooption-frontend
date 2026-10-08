@@ -2,11 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="preload" as="image" href="/neurooption-logo.jpg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/brand/favicon-64.png" />
+    <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preload" as="image" type="image/webp" href="/brand/neurooption-logo-480.webp" />
+    <meta name="description" content="NeuroOption: OTC trading on forex, crypto, stocks, indices and commodities, with live candlestick charts and a demo account." />
+    <meta property="og:title" content="NeuroOption" />
+    <meta property="og:description" content="Trade with clarity. React in real time." />
+    <meta property="og:image" content="/brand/icon-512.png" />
+    <meta property="og:type" content="website" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#050a18" />
+    <meta name="theme-color" content="#ffffff" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -22,9 +29,7 @@
         justify-content: center;
         gap: 26px;
         padding: 24px;
-        background:
-          radial-gradient(circle at 50% 40%, rgba(244, 199, 81, 0.10), transparent 46%),
-          #050a18;
+        background: #ffffff;
         font-family: "Noto Sans", Arial, sans-serif;
         transition: opacity 0.18s ease, visibility 0.18s ease;
       }
@@ -34,10 +39,8 @@
         pointer-events: none;
       }
       .app-splash-logo {
-        width: min(300px, 70vw);
+        width: min(260px, 64vw);
         height: auto;
-        border-radius: 18px;
-        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
         animation: app-splash-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both,
           app-splash-breathe 2.4s ease-in-out 0.7s infinite;
       }
@@ -45,14 +48,14 @@
         width: min(220px, 56vw);
         height: 4px;
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.1);
+        background: #eaf2f7;
         overflow: hidden;
       }
       .app-splash-bar {
         width: 100%;
         height: 100%;
         border-radius: inherit;
-        background: linear-gradient(90deg, #f8d66c, #d7ad48);
+        background: linear-gradient(90deg, #0d315e, #0879ad, #17adb4);
         transform-origin: left center;
         transform: scaleX(0.04);
         animation: app-splash-progress 2.6s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
@@ -64,7 +67,7 @@
       }
       .app-splash-text {
         margin: 0;
-        color: #8d99b0;
+        color: #526579;
         font-size: 13px;
         letter-spacing: 0.08em;
         text-transform: uppercase;
@@ -91,7 +94,7 @@
   </head>
   <body>
     <div id="app-splash" role="status" aria-live="polite" aria-label="Loading NeuroOption">
-      <img class="app-splash-logo" src="/neurooption-logo.jpg" alt="NeuroOption" />
+      <img class="app-splash-logo" src="/brand/neurooption-logo-480.webp" width="1019" height="760" alt="NeuroOption" />
       <div class="app-splash-track"><div class="app-splash-bar"></div></div>
       <p class="app-splash-text">Preparing your trading workspace</p>
     </div>

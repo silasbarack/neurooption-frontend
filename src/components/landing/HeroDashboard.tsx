@@ -17,6 +17,7 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
+import "./HeroDashboard.css";
 
 // Deterministic market data so the showcase looks the same on every load.
 function seededRandom(seed: number) {
@@ -70,6 +71,8 @@ const y = (price: number) => CHART.padTop + (1 - (price - MIN) / (MAX - MIN)) * 
 const LAST = CANDLES[CANDLES.length - 1].close;
 const EXPIRY_X = step * (CANDLES.length - 6);
 const AXIS = Array.from({ length: 6 }, (_, i) => MIN + ((MAX - MIN) * (i + 0.5)) / 6);
+const pctX = (x: number) => `${(x / CHART.width) * 100}%`;
+const pctY = (value: number) => `${(value / CHART.height) * 100}%`;
 const TIMES = ["11:00", "11:15", "11:30", "11:45", "12:00", "12:15", "12:30"];
 
 const TICKERS = [
@@ -96,7 +99,7 @@ export default function HeroDashboard() {
     <div className="hd" aria-label="NeuroOption trading workspace preview" role="img">
       <div className="hd-top">
         <div className="hd-brand">
-          <img src="/apple-touch-icon.png" alt="" width="26" height="26" />
+          <img src="/brand/neurooption-emblem-transparent-128.webp" alt="" width="32" height="26" />
           <span>Trading workspace</span>
         </div>
         <div className="hd-top-right">
@@ -137,24 +140,14 @@ export default function HeroDashboard() {
               <span>5m</span>
             </div>
 
+            {/* The plot stretches to fill the panel; its labels live in an HTML
+                layer on top so text is never squashed by the stretch. */}
             <svg viewBox={`0 0 ${CHART.width} ${CHART.height}`} preserveAspectRatio="none">
               {AXIS.map((price) => (
-                <g key={price}>
-                  <line x1="0" x2={plotW} y1={y(price)} y2={y(price)} className="hd-grid" />
-                  {Math.abs(y(price) - y(LAST)) > 14 && (
-                    <text x={plotW + 8} y={y(price) + 4} className="hd-axis">{price.toFixed(5)}</text>
-                  )}
-                </g>
-              ))}
-              {TIMES.map((time, i) => (
-                <text key={time} x={(plotW / (TIMES.length - 1)) * i} y={CHART.height - 6} className="hd-axis" textAnchor={i === 0 ? "start" : "middle"}>
-                  {time}
-                </text>
+                <line key={price} x1="0" x2={plotW} y1={y(price)} y2={y(price)} className="hd-grid" />
               ))}
 
               <line x1={EXPIRY_X} x2={EXPIRY_X} y1={CHART.padTop - 8} y2={CHART.height - CHART.padBottom} className="hd-expiry" />
-              <text x={EXPIRY_X - 6} y={CHART.padTop - 2} textAnchor="end" className="hd-expiry-caption">Expiration</text>
-              <text x={EXPIRY_X - 6} y={CHART.padTop + 11} textAnchor="end" className="hd-expiry-text">00:00:43</text>
 
               {CANDLES.map((c, i) => {
                 const x = i * step + step / 2;
@@ -170,9 +163,31 @@ export default function HeroDashboard() {
               })}
 
               <line x1="0" x2={plotW} y1={y(LAST)} y2={y(LAST)} className="hd-last" />
-              <rect x={plotW + 2} y={y(LAST) - 9} width={CHART.padRight - 4} height="18" rx="3" className="hd-last-tag" />
-              <text x={plotW + 8} y={y(LAST) + 4} className="hd-last-text">{LAST.toFixed(5)}</text>
             </svg>
+
+            <div className="hd-labels">
+              {AXIS.filter((price) => Math.abs(y(price) - y(LAST)) > 14).map((price) => (
+                <span key={price} className="hd-axis hd-axis-y" style={{ top: pctY(y(price)) }}>
+                  {price.toFixed(5)}
+                </span>
+              ))}
+              {TIMES.map((time, i) => (
+                <span
+                  key={time}
+                  className={`hd-axis hd-axis-x${i === 0 ? " is-start" : ""}`}
+                  style={{ left: pctX((plotW / (TIMES.length - 1)) * i) }}
+                >
+                  {time}
+                </span>
+              ))}
+              <span className="hd-expiry-label" style={{ left: pctX(EXPIRY_X - 6), top: pctY(CHART.padTop - 10) }}>
+                <small className="hd-expiry-caption">Expiration</small>
+                <b className="hd-expiry-text">00:00:43</b>
+              </span>
+              <span className="hd-last-tag" style={{ top: pctY(y(LAST)) }}>
+                <b className="hd-last-text">{LAST.toFixed(5)}</b>
+              </span>
+            </div>
 
             <div className="hd-quote">
               <small>EUR/USD OTC</small>

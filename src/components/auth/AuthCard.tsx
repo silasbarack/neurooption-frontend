@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Logo from "../branding/Logo";
 import "./AuthForms.css";
 
 type AuthCardProps = {
@@ -12,7 +13,7 @@ export default function AuthCard({ title, subtitle, children }: AuthCardProps) {
     <main className="auth-page">
       <section className="auth-card">
         <div className="auth-logo-row">
-          <img className="auth-logo-image" src="/neurooption-logo.jpg" alt="NeuroOption" />
+          <Logo className="auth-logo-image" />
         </div>
 
         <h2>{title}</h2>

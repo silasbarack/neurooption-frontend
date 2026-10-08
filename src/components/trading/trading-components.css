@@ -41,9 +41,9 @@ button {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  color: #ffffff;
-  background: linear-gradient(135deg, #00b4ff, #0a6fd6);
-  box-shadow: 0 4px 14px rgba(0, 154, 249, 0.4);
+  color: var(--text-on-brand);
+  background: var(--cta-gradient);
+  box-shadow: var(--shadow-sm);
   font-size: 19px;
   font-weight: 900;
 }
@@ -65,8 +65,8 @@ button {
 }
 
 .nt-star:hover {
-  color: #9fbeff;
-  background: rgba(159, 190, 255, 0.12);
+  color: var(--brand-primary);
+  background: var(--surface-hover);
 }
 
 .nt-account-bar {
@@ -79,12 +79,12 @@ button {
 .account-balance-selector {
   position: relative;
   font-family: "Noto Sans", Arial, sans-serif;
-  background: #151a2d;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-primary);
   border-radius: 14px;
   padding: 10px 14px;
   min-width: 240px;
-  color: #ffffff;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -101,7 +101,7 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #9ca3af;
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 700;
   margin-bottom: 4px;
@@ -118,7 +118,7 @@ button {
   font-size: 28px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  color: #ffffff;
+  color: var(--brand-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -126,7 +126,7 @@ button {
 
 .balance-arrow {
   flex: 0 0 auto;
-  color: #ffffff;
+  color: var(--text-secondary);
   font-size: 18px;
 }
 
@@ -136,8 +136,8 @@ button {
   height: 54px;
   border: none;
   border-radius: 14px;
-  background: #22c55e;
-  color: #ffffff;
+  background: var(--cta-gradient);
+  color: var(--text-on-brand);
   font-size: 26px;
   font-weight: 900;
   cursor: pointer;
@@ -145,7 +145,12 @@ button {
 }
 
 .deposit-shortcut-btn:hover {
-  filter: brightness(1.1);
+  background: var(--cta-solid-hover);
+}
+
+.deposit-shortcut-btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .deposit-shortcut-btn:active {
@@ -157,11 +162,11 @@ button {
   top: calc(100% + 8px);
   left: 0;
   min-width: 280px;
-  background: #151a2d;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-primary);
   border-radius: 14px;
   padding: 14px;
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow-lg);
   z-index: 95;
   display: flex;
   flex-direction: column;
@@ -171,7 +176,7 @@ button {
 .balance-dropdown-label {
   display: block;
   margin-bottom: 8px;
-  color: #9ca3af;
+  color: var(--text-secondary);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -192,10 +197,10 @@ button {
 .balance-dropdown-option {
   height: 34px;
   padding: 0 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-primary);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
-  color: #ffffff;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
   font-size: 12.5px;
   font-weight: 700;
 }
@@ -206,8 +211,8 @@ button {
 
 .balance-dropdown-option.active {
   border-color: var(--nt-accent);
-  background: rgba(0, 154, 249, 0.18);
-  color: var(--nt-accent);
+  background: var(--brand-soft-strong);
+  color: var(--brand-primary);
 }
 
 .nt-fullscreen {
@@ -230,8 +235,8 @@ button {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, #2a3550, #16c784);
-  color: #ffffff;
+  background: var(--cta-gradient);
+  color: var(--text-on-brand);
   font-weight: 900;
 }
 
@@ -357,7 +362,7 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 .nt-asset-trigger span {
@@ -398,7 +403,7 @@ button {
 }
 
 .nt-floating-close:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--surface-hover);
   color: var(--nt-text);
 }
 
@@ -429,7 +434,7 @@ button {
 .nt-asset-tabs button.active,
 .nt-asset-list button.active,
 .nt-floating button.active {
-  color: #ffffff;
+  color: var(--text-on-brand);
   background: var(--nt-accent);
 }
 
@@ -463,7 +468,7 @@ button {
 }
 
 .nt-asset-list button.active span {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-secondary);
 }
 
 .nt-toolbar-left {
@@ -640,8 +645,8 @@ button {
 .nt-white-payout {
   padding: 10px;
   border-radius: 9px;
-  background: linear-gradient(135deg, rgba(22, 199, 132, 0.14), rgba(22, 199, 132, 0.04));
-  border: 1px dashed rgba(22, 199, 132, 0.4);
+  background: var(--positive-soft);
+  border: 1px dashed var(--positive);
   display: grid;
   gap: 3px;
   text-align: center;
@@ -668,39 +673,39 @@ button {
   height: 46px;
   border: 0;
   border-radius: 10px;
-  color: #ffffff;
+  color: var(--text-on-brand);
   font-size: 15px;
   font-weight: 900;
   letter-spacing: 0.02em;
 }
 
 .nt-buy {
-  background: linear-gradient(135deg, #1fdb8e, #0fae71);
-  box-shadow: 0 10px 24px rgba(22, 199, 132, 0.32);
+  background: var(--positive-strong);
+  box-shadow: var(--shadow-sm);
 }
 
 .nt-buy:hover:not(:disabled) {
-  box-shadow: 0 12px 28px rgba(22, 199, 132, 0.48);
+  box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
 .nt-sell {
-  background: linear-gradient(135deg, #ff5b72, #e0293f);
-  box-shadow: 0 10px 24px rgba(246, 70, 93, 0.32);
+  background: var(--negative-strong);
+  box-shadow: var(--shadow-sm);
 }
 
 .nt-sell:hover:not(:disabled) {
-  box-shadow: 0 12px 28px rgba(246, 70, 93, 0.48);
+  box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
 .nt-ai {
-  background: linear-gradient(135deg, #00b4ff, #009cff);
-  box-shadow: 0 10px 24px var(--nt-ai-glow-half, rgba(0, 156, 255, 0.5));
+  background: var(--cta-gradient);
+  box-shadow: var(--shadow-sm);
 }
 
 .nt-ai:hover {
-  box-shadow: 0 12px 28px var(--nt-ai-glow, rgba(0, 156, 255, 1));
+  box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
@@ -729,7 +734,7 @@ button {
 .nt-white-sentiment .bar {
   height: 6px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #1fdb8e 0 62%, #ff5b72 62% 100%);
+  background: linear-gradient(90deg, var(--positive) 0 62%, var(--negative) 62% 100%);
 }
 
 .nt-white-sentiment small {
@@ -820,11 +825,11 @@ button {
 }
 
 .nt-open-trades-list li.buy .nt-open-trade-side {
-  color: var(--nt-buy, #1fdb8e);
+  color: var(--positive-strong);
 }
 
 .nt-open-trades-list li.sell .nt-open-trade-side {
-  color: var(--nt-sell, #ff5b72);
+  color: var(--negative-strong);
 }
 
 .nt-open-trade-amount {
@@ -1214,10 +1219,10 @@ button {
   max-width: 210px;
   padding: 4px 7px;
   border-radius: 8px;
-  color: var(--nt-text);
-  background: rgba(17, 21, 31, 0.9);
-  border: 1px solid var(--nt-border);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+  color: var(--chart-text);
+  background: var(--chart-panel);
+  border: 1px solid var(--chart-line);
+  box-shadow: var(--shadow-sm);
   font-size: 10px;
   font-weight: 700;
   overflow: hidden;
@@ -1236,8 +1241,8 @@ button {
   bottom: -4px;
   width: 4px;
   border-radius: 999px;
-  background: #ffffff;
-  opacity: 0.6;
+  background: var(--brand-primary);
+  opacity: 0.7;
 }
 
 @media (max-width: 980px) {

@@ -101,7 +101,7 @@ export default function AchievementsPage() {
         <section className="ach-hero neo-card" aria-labelledby="ach-level-title" aria-busy={loading}>
           <div className="ach-level" aria-hidden="true">
             <svg viewBox="0 0 120 120">
-              <defs><linearGradient id="ach-gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ffe08a" /><stop offset="1" stopColor="#c98a0c" /></linearGradient></defs>
+              <defs><linearGradient id="ach-gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style={{ stopColor: "var(--brand-accent-light)" }} /><stop offset="1" style={{ stopColor: "var(--brand-secondary)" }} /></linearGradient></defs>
               {Array.from({ length: 9 }, (_, i) => {
                 const a = (-200 + i * 25) * (Math.PI / 180);
                 const b = (-160 - i * 25) * (Math.PI / 180);
@@ -110,7 +110,7 @@ export default function AchievementsPage() {
                   <ellipse cx={60 + Math.cos(b) * 46} cy={64 + Math.sin(b) * 46} rx="4" ry="9" fill="url(#ach-gold)" transform={"rotate(" + ((b * 180) / Math.PI + 90) + " " + (60 + Math.cos(b) * 46) + " " + (64 + Math.sin(b) * 46) + ")"} />
                 </g>;
               })}
-              <circle cx="60" cy="62" r="36" fill="url(#ach-gold)" /><circle cx="60" cy="62" r="29" fill="#171d2c" />
+              <circle cx="60" cy="62" r="36" fill="url(#ach-gold)" /><circle cx="60" cy="62" r="29" style={{ fill: "var(--brand-primary)" }} />
             </svg>
             <b>{level ?? "–"}</b>
           </div>

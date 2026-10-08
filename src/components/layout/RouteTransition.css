@@ -5,8 +5,8 @@
   z-index: 9998;
   width: 100%;
   height: 3px;
-  background: linear-gradient(90deg, #13b9b2, #1167ca);
-  box-shadow: 0 0 10px rgba(17, 103, 202, 0.45);
+  background: var(--brand-gradient);
+  box-shadow: 0 0 8px var(--focus-ring-soft);
   transform-origin: left center;
   pointer-events: none;
   animation: route-progress 0.75s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;

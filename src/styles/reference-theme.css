@@ -1,67 +1,43 @@
-/* Shared NeuroOption tokens, aligned with the approved gold and navy references. */
+/* Shared aliases and global behaviour. Colours come from brand.css. */
 :root {
-  --background-primary: #050c14;
-  --background-secondary: #08121d;
-  --background-elevated: #122030;
-  --surface: #0d1926;
-  --surface-hover: #182a3b;
-  --border: rgba(157,180,204,.16);
-  --text-primary: #f4f5f7;
-  --text-secondary: #a5b3c4;
-  --brand-gold: #f4c751;
-  --positive: #2bd286;
-  --negative: #ff5365;
-  --neo-bg: var(--background-primary);
-  --neo-bg-2: var(--background-secondary);
-  --neo-panel: var(--surface);
-  --neo-panel-2: var(--background-elevated);
-  --neo-panel-3: var(--surface-hover);
-  --neo-line: var(--border);
-  --neo-line-strong: rgba(157,180,204,.28);
-  --neo-text: var(--text-primary);
-  --neo-muted: var(--text-secondary);
-  --neo-faint: #8a9bae;
-  --neo-accent: var(--brand-gold);
-  --neo-accent-2: #ffdd78;
-  --neo-accent-ink: #17140d;
-  --neo-accent-soft: rgba(244,199,81,.12);
-  --neo-green: var(--positive);
-  --neo-red: var(--negative);
-  --neo-font: "Noto Sans", Inter, Arial, sans-serif;
+  --background-elevated: var(--surface-primary);
+  --surface: var(--surface-primary);
+  --border: var(--border-primary);
+  /* Legacy name kept for older rules; it now resolves to the brand ocean. */
+  --brand-gold: var(--brand-secondary);
   --neo-radius: 12px;
   --neo-radius-sm: 8px;
   --neo-bottom-nav: 68px;
+  --neo-font: "Noto Sans", Inter, Arial, sans-serif;
 }
 html { background: var(--background-primary); scroll-padding-top: 80px; }
 body { background: var(--background-primary); color: var(--text-primary); }
 button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--brand-gold);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
 }
-.neo-shell { background: radial-gradient(900px 420px at 84% -12%, rgba(244,199,81,.045), transparent 62%), var(--neo-bg); }
-.neo-topbar { border-bottom-color: var(--border); background: rgba(5,12,20,.96); }
-.neo-drawer-panel { border-left-color: var(--border); background: linear-gradient(180deg,#0c1825,#050c14); }
-.neo-topnav a.is-active, .neo-drawer-nav a.is-active, .neo-drawer-nav a.is-active svg:first-child, .neo-bottomnav a.is-active { color: var(--brand-gold); }
-.neo-topnav a.is-active::after { background: var(--brand-gold); }
-.neo-drawer-nav a:hover, .neo-drawer-nav a.is-active { background: var(--neo-accent-soft); }
-.neo-btn-primary { border-color: var(--brand-gold); background: linear-gradient(180deg,var(--neo-accent-2),var(--brand-gold)); box-shadow: 0 4px 16px rgba(244,199,81,.12); color: var(--neo-accent-ink); }
-.neo-btn-primary:hover { box-shadow: 0 6px 22px rgba(244,199,81,.2); filter: brightness(1.04); }
-.neo-btn-outline:hover { border-color: var(--brand-gold); background: var(--neo-accent-soft); }
-.neo-tabs button.is-active { background: var(--neo-accent-soft); color: var(--brand-gold); box-shadow: inset 0 0 0 1px rgba(244,199,81,.28); }
-.neo-input:focus { border-color: var(--brand-gold); box-shadow: 0 0 0 3px var(--neo-accent-soft); }
-.neo-avatar { background: linear-gradient(135deg,#344858,#182736); box-shadow: 0 0 0 2px rgba(244,199,81,.25); color: var(--brand-gold); }
-.neo-bottomnav { border-top-color: var(--border); background: rgba(5,12,20,.98); }
-.ac-switch button.is-active { border-color: var(--brand-gold); background: var(--neo-accent-soft); color: var(--text-primary); }
-.ac-progress-icon { background: var(--neo-accent-soft); color: var(--brand-gold); }
-.ac-tile:hover { border-color: rgba(244,199,81,.5); }
-.ac-tile:hover svg, .soc-rank, .soc-risk.is-medium { color: var(--brand-gold); }
-.ach-tabs button.is-active, .soc-tabs button.is-active { color: var(--brand-gold); }
-.nt-premium .nt-sidebar button.active, .nt-premium .nt-quick-menu button:hover, .nt-premium .nt-chart-types button.active, .nt-premium .nt-asset-tabs button.active, .nt-premium .nt-asset-list button.active, .nt-premium .nt-floating button.active { color: var(--brand-gold); }
-.nt-premium .nt-sidebar button.active::before { background: var(--brand-gold); }
-.nt-premium .deposit-shortcut-btn { border-color: var(--brand-gold); background: linear-gradient(180deg,var(--neo-accent-2),var(--brand-gold)); color: var(--neo-accent-ink); }
-.fin .neo-tabs button.is-active, .fin-link-btn { color: var(--brand-gold); }
-.fin-pay:focus-visible, .fin-input:focus-visible { outline-color: var(--brand-gold); }
+::selection { background: rgba(23, 173, 180, 0.25); color: var(--text-primary); }
+.neo-shell { background: var(--background-secondary); }
+.neo-topbar { border-bottom-color: var(--border-primary); background: rgba(255, 255, 255, 0.96); }
+.neo-drawer-panel { border-left-color: var(--border-primary); background: var(--surface-primary); }
+.neo-topnav a.is-active, .neo-drawer-nav a.is-active, .neo-drawer-nav a.is-active svg:first-child, .neo-bottomnav a.is-active { color: var(--brand-secondary); }
+.neo-topnav a.is-active::after { background: var(--brand-gradient); }
+.neo-drawer-nav a:hover, .neo-drawer-nav a.is-active { background: var(--brand-soft); }
+.neo-btn-primary { border-color: transparent; }
+.neo-btn-primary:hover { filter: brightness(1.06); }
+.neo-btn-outline:hover { border-color: var(--brand-secondary); background: var(--brand-soft); }
+.neo-tabs button.is-active { background: var(--surface-primary); color: var(--brand-secondary); box-shadow: inset 0 0 0 1px rgba(8, 121, 173, 0.3), var(--shadow-sm); }
+.neo-input:focus { border-color: var(--brand-secondary); box-shadow: 0 0 0 3px var(--focus-ring-soft); }
+.neo-avatar { background: var(--brand-gradient); box-shadow: 0 0 0 2px var(--surface-primary), 0 0 0 3px var(--border-primary); color: var(--text-on-brand); }
+.neo-bottomnav { border-top-color: var(--border-primary); background: rgba(255, 255, 255, 0.98); }
+.ac-switch button.is-active { border-color: var(--brand-secondary); background: var(--brand-soft); color: var(--text-primary); }
+.ac-progress-icon { background: var(--brand-soft); color: var(--brand-secondary); }
+.ac-tile:hover { border-color: rgba(8, 121, 173, 0.45); }
+.ac-tile:hover svg, .soc-rank, .soc-risk.is-medium { color: var(--brand-secondary); }
+.ach-tabs button.is-active, .soc-tabs button.is-active { color: var(--brand-secondary); }
+.fin .neo-tabs button.is-active, .fin-link-btn { color: var(--brand-secondary); }
+.fin-pay:focus-visible, .fin-input:focus-visible { outline-color: var(--focus-ring); }
 @media (max-width:900px) {
   .neo-shell-main { padding-right:16px; padding-left:16px; }
 }

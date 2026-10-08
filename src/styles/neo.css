@@ -1,39 +1,40 @@
-/* NeuroOption design system: deep navy surfaces, gold accent, Noto Sans.
+/* NeuroOption design system: white surfaces, navy and turquoise accents, Noto Sans.
    Loaded once from main.tsx; every page builds on these tokens. */
 
 :root {
-  --neo-bg: #050a18;
-  --neo-bg-2: #08101f;
-  --neo-panel: #0d1628;
-  --neo-panel-2: #111c31;
-  --neo-panel-3: #16233c;
-  --neo-line: rgba(148, 170, 205, 0.13);
-  --neo-line-strong: rgba(148, 170, 205, 0.24);
-  --neo-text: #eef2f8;
-  --neo-muted: #8d99b0;
-  --neo-faint: #5f6c84;
-  --neo-accent: #f4c751;
-  --neo-accent-2: #ffdd78;
-  --neo-accent-ink: #17140d;
-  --neo-accent-soft: rgba(244, 199, 81, 0.14);
-  --neo-green: #22c55e;
-  --neo-green-soft: rgba(34, 197, 94, 0.14);
-  --neo-red: #ef4444;
-  --neo-red-soft: rgba(239, 68, 68, 0.14);
-  --neo-blue: #3b82f6;
-  --neo-violet: #a78bfa;
-  --neo-cyan: #7dd3fc;
-  --neo-light: #eef3fb;
-  --neo-light-2: #e3ebf8;
-  --neo-ink: #0b1630;
-  --neo-ink-muted: #51607a;
+  /* Mapped onto the brand tokens in brand.css. */
+  --neo-bg: var(--background-primary);
+  --neo-bg-2: var(--background-secondary);
+  --neo-panel: var(--surface-primary);
+  --neo-panel-2: var(--surface-primary);
+  --neo-panel-3: var(--background-tertiary);
+  --neo-line: var(--border-primary);
+  --neo-line-strong: var(--border-strong);
+  --neo-text: var(--text-primary);
+  --neo-muted: var(--text-secondary);
+  --neo-faint: var(--text-muted);
+  --neo-accent: var(--brand-secondary);
+  --neo-accent-2: var(--brand-accent);
+  --neo-accent-ink: var(--text-on-brand);
+  --neo-accent-soft: var(--brand-soft);
+  --neo-green: var(--positive);
+  --neo-green-soft: var(--positive-soft);
+  --neo-red: var(--negative);
+  --neo-red-soft: var(--negative-soft);
+  --neo-blue: var(--brand-secondary);
+  --neo-violet: #6D5BD0;
+  --neo-cyan: var(--brand-accent);
+  --neo-light: var(--background-secondary);
+  --neo-light-2: var(--background-tertiary);
+  --neo-ink: var(--brand-primary);
+  --neo-ink-muted: var(--text-secondary);
   --neo-radius: 14px;
   --neo-radius-sm: 10px;
-  --neo-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  --neo-shadow: var(--shadow-lg);
   --neo-font: "Noto Sans", Arial, sans-serif;
   --neo-bottom-nav: 64px;
 
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html,
@@ -102,24 +103,25 @@ textarea {
 }
 
 .neo-btn-primary {
-  background: linear-gradient(180deg, var(--neo-accent-2), var(--neo-accent));
-  color: var(--neo-accent-ink);
-  box-shadow: 0 8px 22px rgba(244, 199, 81, 0.22);
+  background: var(--cta-solid);
+  background: var(--cta-gradient);
+  color: var(--text-on-brand);
+  box-shadow: 0 6px 18px rgba(8, 121, 173, 0.22);
 }
 
 .neo-btn-primary:hover {
-  box-shadow: 0 10px 28px rgba(244, 199, 81, 0.34);
+  box-shadow: 0 8px 24px rgba(8, 121, 173, 0.32);
 }
 
 .neo-btn-outline {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--surface-primary);
   border-color: var(--neo-line-strong);
   color: var(--neo-text);
 }
 
 .neo-btn-outline:hover {
-  border-color: rgba(244, 199, 81, 0.55);
-  background: rgba(244, 199, 81, 0.06);
+  border-color: var(--brand-secondary);
+  background: var(--brand-soft);
 }
 
 .neo-btn-ghost {
@@ -129,16 +131,16 @@ textarea {
 
 .neo-btn-ghost:hover {
   color: var(--neo-text);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface-hover);
 }
 
 .neo-btn-green {
-  background: linear-gradient(180deg, #2bd46a, #17a34a);
+  background: var(--positive);
   color: #fff;
 }
 
 .neo-btn-red {
-  background: linear-gradient(180deg, #f25757, #d92d2d);
+  background: var(--negative);
   color: #fff;
 }
 
@@ -177,9 +179,10 @@ textarea {
 
 /* ---------- Surfaces ---------- */
 .neo-card {
-  background: linear-gradient(180deg, var(--neo-panel-2), var(--neo-panel));
+  background: var(--surface-primary);
   border: 1px solid var(--neo-line);
   border-radius: var(--neo-radius);
+  box-shadow: var(--shadow-sm);
 }
 
 .neo-eyebrow {
@@ -239,7 +242,7 @@ textarea {
 .neo-tabs button.is-active {
   background: var(--neo-accent-soft);
   color: var(--neo-accent);
-  box-shadow: inset 0 0 0 1px rgba(244, 199, 81, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(8, 121, 173, 0.3);
 }
 
 /* ---------- Inputs ---------- */
@@ -261,7 +264,7 @@ textarea {
   box-sizing: border-box;
   border: 1px solid var(--neo-line-strong);
   border-radius: var(--neo-radius-sm);
-  background: var(--neo-bg-2);
+  background: var(--surface-primary);
   color: var(--neo-text);
   font-size: 15px;
   outline: none;
@@ -269,7 +272,7 @@ textarea {
 
 .neo-input:focus {
   border-color: var(--neo-accent);
-  box-shadow: 0 0 0 3px rgba(244, 199, 81, 0.16);
+  box-shadow: 0 0 0 3px var(--focus-ring-soft);
 }
 
 .neo-badge {
@@ -294,7 +297,7 @@ textarea {
 }
 
 .neo-badge-muted {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--background-tertiary);
   color: var(--neo-muted);
 }
 
@@ -305,7 +308,7 @@ textarea {
 
 .neo-skeleton {
   border-radius: 8px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04));
+  background: linear-gradient(90deg, var(--background-secondary), var(--background-tertiary), var(--background-secondary));
   background-size: 200% 100%;
   animation: neo-shimmer 1.3s linear infinite;
 }
@@ -316,14 +319,21 @@ textarea {
   }
 }
 
-/* The logo artwork is gold on near-black, so it sits on a dark plate. */
+/* The official logo sits directly on white; it is sized by height and keeps
+   its own aspect ratio. */
+.neurooption-logo-picture {
+  display: contents;
+}
+
+.neurooption-logo {
+  max-width: 100%;
+  object-fit: contain;
+}
+
 .neo-brand {
   display: inline-flex;
   align-items: center;
   padding: 0;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #000;
   text-decoration: none;
   line-height: 0;
 }
@@ -335,7 +345,7 @@ textarea {
 }
 
 .neo-brand-sm {
-  padding: 5px 9px;
+  padding: 0;
 }
 
 .neo-brand-sm .neurooption-logo {

@@ -1,17 +1,17 @@
 /* Finance page (inside AppShell): deposit methods, withdrawals and history. */
 
 .fin {
-  --fin-bg: var(--neo-bg);
-  --fin-card: var(--neo-panel);
-  --fin-card-2: var(--neo-panel-2);
-  --fin-line: var(--neo-line);
-  --fin-text: var(--neo-text);
-  --fin-muted: var(--neo-muted);
-  --fin-faint: var(--neo-faint);
-  --fin-blue: var(--neo-accent);
-  --fin-green: var(--neo-green);
-  --fin-red: var(--neo-red);
-  --fin-amber: var(--neo-accent);
+  --fin-bg: var(--background-primary);
+  --fin-card: var(--surface-primary);
+  --fin-card-2: var(--surface-secondary);
+  --fin-line: var(--border-primary);
+  --fin-text: var(--text-primary);
+  --fin-muted: var(--text-secondary);
+  --fin-faint: var(--text-muted);
+  --fin-blue: var(--brand-secondary);
+  --fin-green: var(--positive-strong);
+  --fin-red: var(--negative-strong);
+  --fin-amber: var(--warning);
 
   text-align: start;
   color: var(--fin-text);
@@ -36,8 +36,7 @@
   top: 0;
   z-index: 10;
   border-bottom: 1px solid var(--fin-line);
-  background: rgba(10, 14, 22, 0.86);
-  backdrop-filter: blur(14px);
+  background: var(--surface-primary);
 }
 
 .fin-header-inner {
@@ -52,16 +51,12 @@
 
 .fin-brand {
   display: inline-flex;
-  padding: 6px 12px;
-  border-radius: 12px;
-  background: #fff; /* the approved logo has navy lettering */
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
 .fin-logo {
   display: block;
-  width: 150px;
-  height: auto;
+  width: auto;
+  height: 44px;
 }
 
 .fin-back {
@@ -72,16 +67,16 @@
   padding: 0 14px;
   border: 1px solid var(--fin-line);
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.03);
-  color: #d6dee9;
+  background: var(--surface-primary);
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
 }
 
 .fin-back:hover {
-  border-color: rgba(255, 255, 255, 0.18);
-  color: #fff;
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
 }
 
 .fin-container {
@@ -100,7 +95,7 @@
 }
 
 .fin-kicker {
-  color: #6ea8ff;
+  color: var(--brand-secondary);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -109,7 +104,7 @@
 
 .fin-titlebar h1 {
   margin: 6px 0 6px;
-  color: #fff;
+  color: var(--brand-primary);
   font-size: 34px;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -148,31 +143,36 @@
 }
 
 .fin-btn-green {
-  background: linear-gradient(180deg, #2bd46a, #16a34a);
-  color: #fff;
-  box-shadow: 0 10px 24px rgba(22, 163, 74, 0.3);
+  background: var(--positive);
+  color: var(--text-on-brand);
+  box-shadow: var(--shadow-sm);
 }
 
 .fin-btn-blue {
-  background: linear-gradient(180deg, var(--neo-accent-2), var(--neo-accent));
-  color: var(--neo-accent-ink);
-  box-shadow: 0 10px 24px rgba(244, 199, 81, 0.25);
+  background: var(--cta-gradient);
+  color: var(--text-on-brand);
+  box-shadow: var(--shadow-sm);
 }
 
 .fin-btn-green:hover:not(:disabled),
 .fin-btn-blue:hover:not(:disabled) {
   transform: translateY(-1px);
-  filter: brightness(1.06);
+  box-shadow: var(--shadow-md);
+}
+
+.fin-btn-green:hover:not(:disabled) {
+  background: var(--positive-strong);
 }
 
 .fin-btn-ghost {
-  border-color: var(--fin-line);
-  background: rgba(255, 255, 255, 0.04);
-  color: #e8eef6;
+  border-color: var(--border-strong);
+  background: var(--surface-primary);
+  color: var(--text-primary);
 }
 
 .fin-btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.09);
+  border-color: var(--brand-secondary);
+  background: var(--brand-soft);
 }
 
 .fin-btn-block {
@@ -182,8 +182,13 @@
 
 .fin-btn:focus-visible,
 .fin-back:focus-visible,
-.fin-input:focus-visible {
-  outline: 3px solid rgba(244, 199, 81, 0.45);
+.fin-input:focus-visible,
+.fin-pay:focus-visible,
+.fin-link-btn:focus-visible,
+.fin-banner button:focus-visible,
+.fin-icon-btn:focus-visible,
+.fin-quick button:focus-visible {
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -201,15 +206,16 @@
   padding: 24px;
   border: 1px solid var(--fin-line);
   border-radius: 20px;
-  background: linear-gradient(180deg, rgba(20, 26, 38, 0.95), rgba(14, 19, 28, 0.95));
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .fin-balance.is-real {
-  border-color: rgba(47, 134, 255, 0.35);
+  border-color: var(--border-strong);
   background:
-    radial-gradient(120% 120% at 100% 0%, rgba(47, 134, 255, 0.35), rgba(47, 134, 255, 0) 60%),
-    linear-gradient(160deg, #13203a 0%, #0f1626 100%);
-  box-shadow: 0 24px 60px rgba(31, 111, 255, 0.18);
+    radial-gradient(120% 120% at 100% 0%, var(--brand-soft-strong), transparent 60%),
+    var(--surface-primary);
+  box-shadow: var(--shadow-md);
 }
 
 .fin-balance-head {
@@ -225,21 +231,21 @@
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.07);
-  color: #fff;
+  background: var(--brand-soft);
+  color: var(--brand-secondary);
 }
 
 .fin-badge {
   padding: 5px 10px;
   border-radius: 999px;
-  background: rgba(34, 197, 94, 0.14);
+  background: var(--positive-soft);
   color: var(--fin-green);
   font-size: 12px;
   font-weight: 700;
 }
 
 .fin-badge.is-demo {
-  background: rgba(245, 185, 66, 0.14);
+  background: var(--warning-soft);
   color: var(--fin-amber);
 }
 
@@ -252,7 +258,7 @@
 .fin-balance strong {
   display: block;
   margin: 4px 0 6px;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 36px;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -292,10 +298,10 @@
   border-radius: 12px;
 }
 
-.fin-stat-icon.is-green { background: rgba(34, 197, 94, 0.14); color: var(--fin-green); }
-.fin-stat-icon.is-blue { background: rgba(47, 134, 255, 0.14); color: #6ea8ff; }
-.fin-stat-icon.is-amber { background: rgba(245, 185, 66, 0.14); color: var(--fin-amber); }
-.fin-stat-icon.is-muted { background: rgba(255, 255, 255, 0.06); color: var(--fin-muted); }
+.fin-stat-icon.is-green { background: var(--positive-soft); color: var(--fin-green); }
+.fin-stat-icon.is-blue { background: var(--brand-soft); color: var(--brand-secondary); }
+.fin-stat-icon.is-amber { background: var(--warning-soft); color: var(--fin-amber); }
+.fin-stat-icon.is-muted { background: var(--surface-secondary); color: var(--fin-muted); }
 
 .fin-stat small {
   display: block;
@@ -305,7 +311,7 @@
 }
 
 .fin-stat strong {
-  color: #fff;
+  color: var(--text-primary);
   font-size: 20px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -328,7 +334,8 @@
   padding: 22px;
   border: 1px solid var(--fin-line);
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(20, 26, 38, 0.95), rgba(14, 19, 28, 0.95));
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .fin-card-head {
@@ -341,7 +348,7 @@
 
 .fin-card-head h2 {
   margin: 0;
-  color: #fff;
+  color: var(--brand-primary);
   font-size: 17px;
   font-weight: 700;
 }
@@ -387,8 +394,8 @@
   border-radius: 11px;
 }
 
-.fin-tx-icon.is-in { background: rgba(34, 197, 94, 0.13); color: var(--fin-green); }
-.fin-tx-icon.is-out { background: rgba(47, 134, 255, 0.13); color: #6ea8ff; }
+.fin-tx-icon.is-in { background: var(--positive-soft); color: var(--fin-green); }
+.fin-tx-icon.is-out { background: var(--brand-soft); color: var(--brand-secondary); }
 
 .fin-tx-main {
   flex: 1;
@@ -397,7 +404,7 @@
 
 .fin-tx-main strong {
   display: block;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 700;
 }
@@ -421,7 +428,7 @@
 }
 
 .fin-tx-side strong.is-in { color: var(--fin-green); }
-.fin-tx-side strong.is-out { color: #e8eef6; }
+.fin-tx-side strong.is-out { color: var(--text-primary); }
 
 .fin-status {
   padding: 3px 9px;
@@ -430,9 +437,9 @@
   font-weight: 700;
 }
 
-.fin-status.is-success { background: rgba(34, 197, 94, 0.13); color: var(--fin-green); }
-.fin-status.is-warning { background: rgba(245, 185, 66, 0.14); color: var(--fin-amber); }
-.fin-status.is-danger { background: rgba(239, 68, 68, 0.14); color: #f87171; }
+.fin-status.is-success { background: var(--positive-soft); color: var(--fin-green); }
+.fin-status.is-warning { background: var(--warning-soft); color: var(--fin-amber); }
+.fin-status.is-danger { background: var(--negative-soft); color: var(--fin-red); }
 
 .fin-empty {
   display: grid;
@@ -444,7 +451,7 @@
 }
 
 .fin-empty strong {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 /* Withdrawal form */
@@ -466,10 +473,10 @@
   width: 100%;
   height: 48px;
   padding: 0 14px;
-  border: 1px solid var(--fin-line);
+  border: 1px solid var(--border-strong);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.035);
-  color: #fff;
+  background: var(--surface-primary);
+  color: var(--text-primary);
   font-size: 15px;
   font-weight: 600;
   outline: none;
@@ -477,13 +484,13 @@
 }
 
 .fin-input:focus {
-  border-color: rgba(47, 134, 255, 0.6);
-  box-shadow: 0 0 0 3px rgba(47, 134, 255, 0.15);
+  border-color: var(--focus-ring);
+  box-shadow: 0 0 0 3px var(--focus-ring-soft);
 }
 
 select.fin-input option {
-  background: #121926;
-  color: #fff;
+  background: var(--surface-primary);
+  color: var(--text-primary);
 }
 
 .fin-amount {
@@ -559,7 +566,7 @@ select.fin-input option {
   padding: 12px;
   border: 1px solid var(--fin-line);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--surface-secondary);
 }
 
 .fin-method-icon {
@@ -569,13 +576,13 @@ select.fin-input option {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: rgba(47, 134, 255, 0.13);
-  color: #6ea8ff;
+  background: var(--brand-soft);
+  color: var(--brand-secondary);
 }
 
 .fin-methods strong {
   display: block;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
@@ -596,9 +603,9 @@ select.fin-input option {
 }
 
 .fin-banner.is-error {
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  background: rgba(239, 68, 68, 0.1);
-  color: #fecaca;
+  border: 1px solid var(--negative);
+  background: var(--negative-soft);
+  color: var(--negative-strong);
 }
 
 .fin-banner span {
@@ -613,8 +620,8 @@ select.fin-input option {
   padding: 6px 10px;
   border: 1px solid var(--fin-line);
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.04);
-  color: #d6dee9;
+  background: var(--surface-primary);
+  color: var(--text-primary);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -622,12 +629,13 @@ select.fin-input option {
 
 .fin-link-btn:hover,
 .fin-banner button:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--brand-secondary);
+  color: var(--brand-secondary);
+  background: var(--brand-soft);
 }
 
 .fin-status.is-muted {
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--surface-secondary);
   color: var(--fin-muted);
 }
 
@@ -636,7 +644,7 @@ select.fin-input option {
   align-items: flex-start;
   gap: 8px;
   margin: 4px 0 0;
-  color: #fca5a5;
+  color: var(--negative-strong);
   font-size: 13px;
   font-weight: 600;
   line-height: 1.45;
@@ -663,14 +671,14 @@ select.fin-input option {
   height: 36px;
   border: 0;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #c9d4e2;
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
   cursor: pointer;
 }
 
 .fin-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  background: var(--surface-hover);
+  color: var(--text-primary);
 }
 
 /* M-Pesa branding: the official artwork is designed for a white background */
@@ -681,9 +689,9 @@ select.fin-input option {
   width: 64px;
   height: 40px;
   padding: 5px 8px;
+  border: 1px solid var(--border-primary);
   border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  background: var(--surface-primary);
 }
 
 .fin-mpesa-badge.is-large {
@@ -701,7 +709,7 @@ select.fin-input option {
 }
 
 .mpesa-wordmark {
-  color: #3fa535;
+  color: #3fa535; /* M-Pesa's own brand green (third-party mark) */
   font-size: 13px;
   font-weight: 900;
   letter-spacing: 0.02em;
@@ -713,10 +721,10 @@ select.fin-input option {
 }
 
 .fin-mpesa-card {
-  border-color: rgba(63, 165, 53, 0.35);
+  border-color: var(--border-strong);
   background:
-    radial-gradient(120% 100% at 100% 0%, rgba(63, 165, 53, 0.18), rgba(63, 165, 53, 0) 60%),
-    linear-gradient(180deg, rgba(20, 26, 38, 0.95), rgba(14, 19, 28, 0.95));
+    radial-gradient(120% 100% at 100% 0%, var(--positive-soft), transparent 60%),
+    var(--surface-primary);
 }
 
 .fin-mpesa-top {
@@ -728,7 +736,7 @@ select.fin-input option {
 
 .fin-mpesa-card h2 {
   margin: 0 0 8px;
-  color: #fff;
+  color: var(--brand-primary);
   font-size: 18px;
 }
 
@@ -740,8 +748,8 @@ select.fin-input option {
   margin-inline-start: auto;
   padding: 3px 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--fin-faint);
+  background: var(--surface-secondary);
+  color: var(--fin-muted);
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
@@ -759,8 +767,8 @@ select.fin-input option {
   display: grid;
   place-items: center;
   padding: 16px;
-  background: rgba(3, 6, 12, 0.7);
-  backdrop-filter: blur(4px);
+  background: var(--overlay);
+  backdrop-filter: blur(3px);
   animation: fin-fade 0.18s ease;
 }
 
@@ -772,8 +780,9 @@ select.fin-input option {
   padding: 22px;
   border: 1px solid var(--fin-line);
   border-radius: 20px;
-  background: #121926;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
   animation: fin-rise 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -793,7 +802,7 @@ select.fin-input option {
 
 .fin-modal-brand strong {
   display: block;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 16px;
 }
 
@@ -812,8 +821,8 @@ select.fin-input option {
   height: 36px;
   border: 1px solid var(--fin-line);
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.03);
-  color: #d6dee9;
+  background: var(--surface-primary);
+  color: var(--text-primary);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -821,9 +830,9 @@ select.fin-input option {
 
 .fin-quick button:hover,
 .fin-quick button.is-active {
-  border-color: rgba(63, 165, 53, 0.6);
-  background: rgba(63, 165, 53, 0.14);
-  color: #fff;
+  border-color: var(--brand-secondary);
+  background: var(--brand-soft);
+  color: var(--brand-secondary);
 }
 
 .fin-stk-state {
@@ -836,7 +845,7 @@ select.fin-input option {
 
 .fin-stk-state h3 {
   margin: 4px 0 0;
-  color: #fff;
+  color: var(--brand-primary);
   font-size: 20px;
 }
 
@@ -848,7 +857,7 @@ select.fin-input option {
 }
 
 .fin-stk-state p strong {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .fin-stk-icon {
@@ -860,13 +869,13 @@ select.fin-input option {
 }
 
 .fin-stk-icon.is-waiting {
-  background: rgba(63, 165, 53, 0.15);
-  color: #4ade80;
+  background: var(--positive-soft);
+  color: var(--positive-strong);
   animation: fin-pulse 1.6s ease-out infinite;
 }
 
-.fin-stk-icon.is-success { background: rgba(34, 197, 94, 0.15); color: var(--fin-green); }
-.fin-stk-icon.is-failed { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+.fin-stk-icon.is-success { background: var(--positive-soft); color: var(--fin-green); }
+.fin-stk-icon.is-failed { background: var(--negative-soft); color: var(--fin-red); }
 
 .fin-stk-progress {
   display: flex;
@@ -876,8 +885,8 @@ select.fin-input option {
   margin-bottom: 6px;
   padding: 12px 14px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  color: #c9d4e2;
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
   font-size: 13px;
   line-height: 1.5;
   text-align: start;
@@ -891,8 +900,8 @@ select.fin-input option {
 @keyframes fin-fade { from { opacity: 0; } }
 @keyframes fin-rise { from { transform: translateY(16px); opacity: 0.6; } }
 @keyframes fin-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(63, 165, 53, 0.45); }
-  100% { box-shadow: 0 0 0 18px rgba(63, 165, 53, 0); }
+  0% { box-shadow: 0 0 0 0 var(--positive-soft); }
+  100% { box-shadow: 0 0 0 18px transparent; }
 }
 
 /* Responsive */
@@ -909,11 +918,7 @@ select.fin-input option {
   }
 
   .fin-logo {
-    width: 116px;
-  }
-
-  .fin-brand {
-    padding: 5px 9px;
+    height: 36px;
   }
 
   .fin-back {
@@ -981,6 +986,7 @@ select.fin-input option {
 }
 
 .fin-page-head h1 {
+  color: var(--brand-primary);
   margin: 0 0 4px;
   font-size: 28px;
   font-weight: 800;
@@ -996,9 +1002,9 @@ select.fin-input option {
   display: grid;
   min-width: 220px;
   padding: 14px 18px;
-  border: 1px solid rgba(244, 199, 81, 0.3);
+  border: 1px solid var(--border-primary);
   border-radius: 14px;
-  background: linear-gradient(160deg, rgba(244, 199, 81, 0.1), rgba(13, 22, 40, 0.8));
+  background: linear-gradient(160deg, var(--brand-soft), transparent 70%), var(--surface-primary);
 }
 
 .fin-real small {
@@ -1053,15 +1059,16 @@ select.fin-input option {
   padding: 10px 14px 10px 10px;
   border: 1px solid var(--fin-line);
   border-radius: 14px;
-  background: linear-gradient(180deg, var(--neo-panel-2), var(--neo-panel));
+  background: var(--surface-primary);
   color: var(--fin-text);
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.18s ease, transform 0.18s ease;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .fin-pay:hover:not(:disabled) {
-  border-color: rgba(244, 199, 81, 0.5);
+  border-color: var(--brand-secondary);
+  box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
@@ -1112,7 +1119,7 @@ select.fin-input option {
 }
 
 .fin-pay-tile {
-  background: #fff;
+  background: var(--surface-primary);
 }
 
 .fin-card.is-plain {
@@ -1149,10 +1156,10 @@ select.fin-input option {
 .fin-pay-tile .pay-logo { width:100%; height:auto; max-height:52px; }
 .fin-pay:disabled { opacity:1; }
 .fin-pay:disabled .fin-pay-text { opacity:.85; }
-.fin-method-status { margin-left:auto; flex-shrink:0; padding:4px 7px; border:1px solid var(--border); border-radius:5px; color:var(--neo-muted); font-size:10px; }
-.fin-pay-mpesa:not(:disabled) { border-color:rgba(43,210,134,.3); }
-.fin-pay:hover:not(:disabled) { border-color:var(--brand-gold); }
-.fin-real { border-color:var(--border); background:var(--surface); }
+.fin-method-status { margin-left:auto; flex-shrink:0; padding:4px 7px; border:1px solid var(--border-primary); border-radius:5px; background:var(--surface-secondary); color:var(--text-secondary); font-size:10px; }
+.fin-pay-mpesa:not(:disabled) { border-color:var(--border-strong); }
+.fin-pay:hover:not(:disabled) { border-color:var(--brand-secondary); }
+.fin-real { border-color:var(--border-primary); background:var(--surface-primary); box-shadow:var(--shadow-sm); }
 .fin-modal { z-index:100; padding-bottom:calc(16px + env(safe-area-inset-bottom)); }
 @media(max-width:900px) {
  .fin-page-head { margin-bottom:16px; }

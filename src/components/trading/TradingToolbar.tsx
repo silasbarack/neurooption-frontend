@@ -351,7 +351,7 @@ export default function TradingToolbar({
           style={{
             width: "100vw", height: "100dvh", maxWidth: "none", maxHeight: "none",
             border: 0, margin: 0, padding: 15, color: "var(--nt-text)",
-            background: "rgba(9,14,24,0.7)",
+            background: "var(--overlay)",
           }}
         >
         <div
@@ -361,7 +361,7 @@ export default function TradingToolbar({
             zIndex: 9999,
             display: "grid",
             placeItems: "center",
-            background: "rgba(15, 23, 42, 0.22)",
+            background: "transparent",
             backdropFilter: "blur(2px)",
           }}
         >
@@ -373,9 +373,9 @@ export default function TradingToolbar({
               background: "var(--nt-surface)",
               maxHeight: "calc(100dvh - 32px)",
               overflowY: "auto",
-              color: "#ffffff",
-              boxShadow: "0 25px 80px rgba(15, 23, 42, 0.35)",
-              border: "1px solid rgba(255,255,255,0.24)",
+              color: "var(--text-primary)",
+              boxShadow: "var(--shadow-lg)",
+              border: "1px solid var(--border-primary)",
             }}
           >
             <div
@@ -397,7 +397,7 @@ export default function TradingToolbar({
                 style={{
                   border: "none",
                   background: "transparent",
-                  color: "#ffffff",
+                  color: "var(--text-secondary)",
                   fontSize: 34,
                   lineHeight: 1,
                   cursor: "pointer",
@@ -416,9 +416,9 @@ export default function TradingToolbar({
                   height: 42,
                   minWidth: 110,
                   borderRadius: 12,
-                  border: "1px solid rgba(255,255,255,0.45)",
-                  background: activeEditorTab === "inputs" ? "var(--nt-accent-soft)" : "transparent",
-                  color: "#ffffff",
+                  border: activeEditorTab === "inputs" ? "1px solid var(--brand-secondary)" : "1px solid var(--border-primary)",
+                  background: activeEditorTab === "inputs" ? "var(--brand-soft-strong)" : "transparent",
+                  color: activeEditorTab === "inputs" ? "var(--brand-primary)" : "var(--text-secondary)",
                   fontWeight: 900,
                   cursor: "pointer",
                 }}
@@ -433,9 +433,9 @@ export default function TradingToolbar({
                   height: 42,
                   minWidth: 110,
                   borderRadius: 12,
-                  border: "1px solid rgba(255,255,255,0.45)",
-                  background: activeEditorTab === "styles" ? "var(--nt-accent-soft)" : "transparent",
-                  color: "#ffffff",
+                  border: activeEditorTab === "styles" ? "1px solid var(--brand-secondary)" : "1px solid var(--border-primary)",
+                  background: activeEditorTab === "styles" ? "var(--brand-soft-strong)" : "transparent",
+                  color: activeEditorTab === "styles" ? "var(--brand-primary)" : "var(--text-secondary)",
                   fontWeight: 900,
                   cursor: "pointer",
                 }}
@@ -482,9 +482,9 @@ export default function TradingToolbar({
                         style={{
                           height: 42,
                           borderRadius: 8,
-                          border: "1px solid rgba(255,255,255,0.5)",
-                          background: "var(--nt-surface-alt)",
-                          color: "#ffffff",
+                          border: "1px solid var(--border-strong)",
+                          background: "var(--surface-primary)",
+                          color: "var(--text-primary)",
                           padding: "0 12px",
                           fontSize: 16,
                           fontWeight: 900,
@@ -563,9 +563,9 @@ export default function TradingToolbar({
                             style={{
                               width: 72,
                               height: 42,
-                              border: "1px solid rgba(255,255,255,0.45)",
+                              border: "1px solid var(--border-strong)",
                               borderRadius: 8,
-                              background: "var(--nt-surface-alt)",
+                              background: "var(--surface-primary)",
                               padding: 4,
                             }}
                           />
@@ -602,9 +602,9 @@ export default function TradingToolbar({
                           style={{
                             height: 42,
                             borderRadius: 8,
-                            border: "1px solid rgba(255,255,255,0.5)",
-                            background: "var(--nt-surface-alt)",
-                            color: "#ffffff",
+                            border: "1px solid var(--border-strong)",
+                            background: "var(--surface-primary)",
+                            color: "var(--text-primary)",
                             padding: "0 12px",
                             fontSize: 16,
                             fontWeight: 900,
@@ -637,8 +637,8 @@ export default function TradingToolbar({
                   minWidth: 80,
                   border: "none",
                   borderRadius: 8,
-                  background: "rgba(30, 41, 59, 0.28)",
-                  color: "#ffffff",
+                  background: "var(--negative-soft)",
+                  color: "var(--negative-strong)",
                   fontWeight: 900,
                   cursor: "pointer",
                 }}
@@ -654,8 +654,8 @@ export default function TradingToolbar({
                   minWidth: 80,
                   border: "none",
                   borderRadius: 8,
-                  background: "var(--nt-surface-alt)",
-                  color: "#ffffff",
+                  background: "var(--surface-secondary)",
+                  color: "var(--text-primary)",
                   fontWeight: 900,
                   cursor: "pointer",
                 }}
@@ -671,8 +671,8 @@ export default function TradingToolbar({
                   minWidth: 80,
                   border: "none",
                   borderRadius: 8,
-                  background: "var(--nt-accent)",
-                  color: "#111827",
+                  background: "var(--cta-solid)",
+                  color: "var(--text-on-brand)",
                   fontWeight: 900,
                   cursor: "pointer",
                 }}

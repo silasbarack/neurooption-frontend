@@ -57,6 +57,20 @@ type BottomPanel = {
 
 const MAX_HISTORY_CANDLES = 520;
 
+// Canvas chrome colours. Canvas cannot read CSS variables per frame without
+// extra work, so these mirror the brand tokens in src/styles/brand.css:
+// --chart-bg, --chart-panel, --chart-text, --chart-line hue, --brand-accent
+// (expiry line) and --brand-primary (text on the turquoise pill).
+const CHART_BG = "#0B1A2C";
+const CHART_PANEL = "#10233A";
+const CHART_TEXT = "#C9D6E3";
+const CHART_TEXT_MUTED = "#8FA3B8";
+const CHART_GRID = "rgba(173, 199, 222, 0.07)";
+const CHART_GRID_SOFT = "rgba(173, 199, 222, 0.06)";
+const CHART_DIVIDER = "rgba(173, 199, 222, 0.16)";
+const CHART_EXPIRY = "#17ADB4";
+const CHART_EXPIRY_TEXT = "#0D315E";
+
 const BOTTOM_INDICATORS = new Set([
   "AWESOME_OSCILLATOR",
   "RSI",
@@ -1252,7 +1266,7 @@ function drawGrid(
   columns: number,
   rows: number,
 ) {
-  context.strokeStyle = "rgba(255, 255, 255, 0.045)";
+  context.strokeStyle = CHART_GRID;
   context.lineWidth = 1;
 
   for (let i = 0; i <= columns; i += 1) {
@@ -1284,17 +1298,17 @@ function drawBottomPanel(
   candleGap: number,
   scrollOffset: number,
 ) {
-  context.fillStyle = panelIndex % 2 === 0 ? "#141925" : "#10141d";
+  context.fillStyle = panelIndex % 2 === 0 ? CHART_PANEL : CHART_BG;
   context.fillRect(left, top, right - left, bottom - top);
 
-  context.strokeStyle = "rgba(255, 255, 255, 0.08)";
+  context.strokeStyle = CHART_DIVIDER;
   context.lineWidth = 1;
   context.beginPath();
   context.moveTo(left, top);
   context.lineTo(right, top);
   context.stroke();
 
-  context.fillStyle = "#9aa4b8";
+  context.fillStyle = CHART_TEXT;
   context.font = "400 11px 'Noto Sans', Arial, sans-serif";
   context.textAlign = "left";
   context.textBaseline = "top";
@@ -1320,7 +1334,7 @@ function drawBottomPanel(
   const indexToX = (index: number) =>
     left + (index / Math.max(visibleLength - 1, 1)) * (right - left) - scrollOffset;
 
-  context.strokeStyle = "rgba(255, 255, 255, 0.05)";
+  context.strokeStyle = CHART_GRID_SOFT;
   context.lineWidth = 1;
 
   for (let i = 1; i < 3; i += 1) {
@@ -1342,7 +1356,7 @@ function drawBottomPanel(
       context.moveTo(left, y);
       context.lineTo(right, y);
       context.stroke();
-      context.fillStyle = "#9aa4b8";
+      context.fillStyle = CHART_TEXT;
       context.fillText(String(level), right + 10, y - 5);
     });
 
@@ -1482,16 +1496,14 @@ function TradingChartComponent({
     const height = rect.height;
 
     context.clearRect(0, 0, width, height);
-    // Keep the Canvas slightly translucent so the real mountain photograph
-    // configured on the chart wrapper remains subtly visible behind the grid
-    // and candles without affecting hit-testing or the realtime render path.
-    context.fillStyle = "rgba(10, 16, 29, 0.64)";
+    // Solid dark-navy chart surface (--chart-bg) so candles read clearly.
+    context.fillStyle = CHART_BG;
     context.fillRect(0, 0, width, height);
 
     const sourceCandles = candlesRef?.current ?? candles;
 
     if (sourceCandles.length < 2) {
-      context.fillStyle = "#7d8aa0";
+      context.fillStyle = CHART_TEXT_MUTED;
       context.font = "400 14px 'Noto Sans', Arial, sans-serif";
       context.textAlign = "center";
       context.textBaseline = "middle";
@@ -1668,7 +1680,7 @@ function TradingChartComponent({
 
     const expiryX = right - 8;
 
-    context.strokeStyle = "#d7ad48";
+    context.strokeStyle = CHART_EXPIRY;
     context.lineWidth = 1.5;
     context.setLineDash([6, 5]);
     context.beginPath();
@@ -1677,9 +1689,9 @@ function TradingChartComponent({
     context.stroke();
     context.setLineDash([]);
 
-    drawTextPill(context, formatDuration(remaining), expiryX - 92, top + 16, "#d7ad48", "#111827");
+    drawTextPill(context, formatDuration(remaining), expiryX - 92, top + 16, CHART_EXPIRY, CHART_EXPIRY_TEXT);
 
-    context.fillStyle = "#9aa4b8";
+    context.fillStyle = CHART_TEXT;
     context.font = "400 13px 'Noto Sans', Arial, sans-serif";
     context.textAlign = "center";
     context.textBaseline = "middle";
@@ -1741,7 +1753,7 @@ function TradingChartComponent({
       legendX += labelWidth;
     });
 
-    context.fillStyle = "#9aa4b8";
+    context.fillStyle = CHART_TEXT;
     context.font = "400 11px 'Noto Sans', Arial, sans-serif";
     context.textAlign = "right";
     context.textBaseline = "middle";
@@ -1776,7 +1788,7 @@ function TradingChartComponent({
       );
     });
     context.font = "400 10px 'Noto Sans', Arial, sans-serif";
-    context.fillStyle = "#8290a6";
+    context.fillStyle = CHART_TEXT_MUTED;
     context.textBaseline = "middle";
     const tickCount = width < 560 ? 3 : 5;
     for (let tick = 0; tick < tickCount; tick += 1) {

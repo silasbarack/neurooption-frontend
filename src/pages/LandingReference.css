@@ -1,452 +1,95 @@
-/* Approved NeuroOption desktop/mobile reference treatment.
-   Layers over LandingPage.css so existing chart/device logic remains intact. */
+/* Homepage responsive layout and motion. Layers over LandingPage.css.
+   Colours come only from brand tokens (src/styles/brand.css). */
 
-.hp {
-  --hp-blue: #e4b94f;
-  --hp-blue-2: #f2cf76;
-  --hp-dark: #070c17;
-  --hp-dark-2: #07101a;
-  --hp-light: #f6f0e4;
-  --hp-ink: #10151d;
-  --hp-ink-muted: #626b76;
-  --hp-line-dark: rgba(255, 222, 143, 0.16);
-  --hp-line-light: #ded6c5;
-  background: #070c17;
-}
-
-.hp-header {
-  border-bottom-color: rgba(255, 218, 130, 0.13);
-  background: rgba(3, 7, 13, 0.9);
-}
-.hp-header-inner { height: 62px; }
-.hp-nav { margin-left: 28px; }
-.hp-nav-item button { color: #c8c3b8; font-size: 12px; }
-.hp-nav-item:hover button,
-.hp-nav-item:focus-within button {
-  color: #fff7e6;
-  background: rgba(244,199,81, 0.08);
-}
-.hp-nav-menu {
-  border-color: rgba(244,199,81, 0.2);
-  background: #0a1119;
-}
-.hp-nav-menu a:hover,
-.hp-nav-menu a:focus-visible {
-  background: rgba(244,199,81, 0.1);
-  color: #f2cf76;
-}
-.hp-lang { color: #c8c3b8; }
-
-.hp-btn-primary {
-  border-color: #f2cf76;
-  background: linear-gradient(180deg, #f3d17b, #d9ae45);
-  box-shadow: 0 10px 28px rgba(244,199,81, 0.3);
-  color: #ffffff;
-}
-.hp-btn-primary:hover {
-  background: linear-gradient(180deg, #ffdc83, #e4b94f);
-  box-shadow: 0 12px 34px rgba(244,199,81, 0.4);
-}
-.hp-btn-ghost {
-  border-color: rgba(255, 255, 255, 0.22);
-  background: rgba(3, 8, 14, 0.44);
-}
-.hp-btn-outline {
-  border-color: rgba(244,199,81, 0.46);
-  background: #fffdf8;
-  color: #7d5700;
-}
-.hp-btn:focus-visible,
-.hp-nav-item button:focus-visible,
-.hp-exp-card:focus-visible,
-.hp-market-card:focus-visible,
-.hp-category-card:focus-visible,
-.hp-ticker-item:focus-visible {
-  outline-color: rgba(244,199,81, 0.7);
+/* ---------- Light entrance motion ---------- */
+@keyframes hp-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-.hp-eyebrow,
-.hp-light .hp-eyebrow { color: #e8bf60; }
+@keyframes hp-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -8px; }
+}
 
-.hp-hero {
-  background:
-    radial-gradient(760px 430px at 77% 42%, rgba(244,199,81, 0.14), transparent 68%),
-    linear-gradient(90deg, rgba(3, 7, 13, 0.98) 0%, rgba(4, 9, 15, 0.89) 43%, rgba(4, 9, 15, 0.58) 70%, rgba(4, 9, 15, 0.83) 100%),
-    linear-gradient(180deg, rgba(4, 8, 14, 0.35), rgba(4, 8, 14, 0.82)),
-    url("/landing/hero-mountains.jpg") center 58% / cover no-repeat,
-    #070c17;
+@keyframes hp-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
 }
-.hp-hero::before { opacity: 0.05; }
-.hp-hero-inner {
-  min-height: 560px;
-  gap: 34px;
-  padding-top: 44px;
-  padding-bottom: 42px;
-}
-.hp-hero h1 {
-  max-width: 540px;
-  font-size: clamp(46px, 5.3vw, 68px);
-  line-height: 0.98;
-}
-.hp-hero h1 span {
-  margin-top: 6px;
-  background: none;
-  color: #e8bf60;
-  -webkit-text-fill-color: currentColor;
-}
-.hp-lead { max-width: 515px; color: #c4c6c8; }
-.hp-hero-points { gap: 12px 24px; color: #ddd9cf; }
-.hp-hero-points svg { color: #e8bf60; }
-.hp-glow { background: radial-gradient(circle, rgba(244,199,81, 0.18), transparent 66%); }
 
-.hp-lid {
-  border-color: rgba(244, 214, 145, 0.36);
-  background: linear-gradient(170deg, #30333a, #10151b);
+.hp-hero-copy > * {
+  animation: hp-rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
-.hp-screen,
-.hp-phone-screen,
-.hp-hero-phone { background: #0a1322; }
-.hp-app-top,
-.hp-app-panel,
-.hp-tabbar { background: #111b2c; }
-.hp-app-pair,
-.hp-app-field { background: #1a263a; }
-.hp-app-tabs i.is-on,
-.hp-app-balance small,
-.hp-app-rail .is-on { color: #e8bf60; }
-.hp-app-deposit,
-.hp-app-timer,
-.hp-phone-timer {
-  background: #e8bf60;
-  color: #151006;
-}
-.hp-candle-last { stroke: #e8bf60; }
-.hp-float {
-  border-color: rgba(244, 214, 145, 0.36);
-  background: linear-gradient(150deg, rgba(244,199,81, 0.17), rgba(10, 18, 26, 0.75));
+
+.hp-hero-copy > :nth-child(2) { animation-delay: 0.06s; }
+.hp-hero-copy > :nth-child(3) { animation-delay: 0.12s; }
+.hp-hero-copy > :nth-child(4) { animation-delay: 0.18s; }
+.hp-hero-copy > :nth-child(5),
+.hp-hero-copy > :nth-child(6) { animation-delay: 0.24s; }
+
+.hp-stage {
+  animation: hp-rise 0.8s 0.15s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .hp-hero-phone {
-  position: absolute;
-  right: -10px;
-  bottom: 18px;
-  z-index: 4;
-  width: 142px;
-  height: 292px;
-  padding: 15px 7px 9px;
-  overflow: hidden;
-  border: 5px solid #20242a;
-  border-radius: 25px;
-  box-shadow: 0 28px 54px rgba(0, 0, 0, 0.52);
-  color: #f7f3ea;
-  transform: rotate(5deg);
+  animation: hp-bob 7s 1s ease-in-out infinite;
 }
-.hp-hero-phone-notch {
-  position: absolute;
-  top: 5px;
-  left: 50%;
-  width: 46px;
-  height: 10px;
-  border-radius: 999px;
-  background: #000;
-  transform: translateX(-50%);
-}
-.hp-hero-phone-head {
-  display: grid;
-  grid-template-columns: 30px minmax(0, 1fr);
-  gap: 1px 5px;
-  align-items: center;
-  margin-top: 7px;
-  font-size: 6px;
-}
-/* The emblem is gold on near-black, so the plate is dark. */
-.hp-hero-phone-mark {
-  display: inline-flex;
-  grid-row: span 2;
-  overflow: hidden;
-  border-radius: 3px;
-  background: #000;
-  line-height: 0;
-}
-.hp-hero-phone-mark img { width: 100%; height: auto; }
-.hp-hero-phone-head span { color: #a9b1bb; }
-.hp-hero-phone-head b { font-size: 7px; }
-.hp-hero-phone-chart {
-  position: relative;
-  height: 118px;
-  margin-top: 8px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(5, 10, 16, 0.62), rgba(5, 10, 16, 0.88)),
-    url("/landing/hero-mountains.jpg") center / cover;
-}
-.hp-hero-phone-chart .hp-candles { width: 100%; height: 100%; }
+
+.hp-app-timer,
 .hp-hero-phone-expiry {
-  position: absolute;
-  top: 38%;
-  right: 4px;
-  padding: 2px 4px;
-  border-radius: 4px;
-  background: #e8bf60;
-  color: #151006;
-  font-size: 6px;
-  font-weight: 800;
-}
-.hp-hero-phone-fields,
-.hp-hero-phone-profit,
-.hp-hero-phone-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 5px;
-  margin-top: 6px;
-}
-.hp-hero-phone-fields span {
-  display: grid;
-  padding: 4px 5px;
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: 5px;
-  background: #101923;
-}
-.hp-hero-phone-fields small,
-.hp-hero-phone-profit small { color: #808b98; font-size: 5px; }
-.hp-hero-phone-fields b,
-.hp-hero-phone-profit b { font-size: 7px; }
-.hp-hero-phone-profit span { display: grid; justify-items: center; }
-.hp-hero-phone-profit span:first-child b { color: #20c969; }
-.hp-hero-phone-profit span:last-child b { color: #e8bf60; }
-.hp-hero-phone-actions span {
-  padding: 7px 0;
-  border-radius: 6px;
-  font-size: 7px;
-  font-weight: 900;
-  text-align: center;
-}
-.hp-hero-phone-actions span:first-child { background: #18b957; }
-.hp-hero-phone-actions span:last-child { background: #e44848; }
-
-.hp-ticker {
-  border-top: 1px solid rgba(255,255,255,.06);
-  border-bottom: 1px solid rgba(244,199,81,.15);
-  background: #060c13;
-}
-.hp-ticker-track {
-  display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  padding-top: 0;
-  padding-bottom: 0;
-}
-.hp-ticker-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  padding: 10px 9px;
-  border-right: 1px solid rgba(255,255,255,.06);
-  color: #f5f2eb;
-  text-decoration: none;
-}
-.hp-ticker-item:first-child { border-left: 1px solid rgba(255,255,255,.06); }
-.hp-ticker-item span { display: grid; min-width: 0; }
-.hp-ticker-item b {
-  overflow: hidden;
-  font-size: 10px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.hp-ticker-item small {
-  color: #929aa4;
-  font-size: 9px;
-  font-variant-numeric: tabular-nums;
-}
-.hp-ticker-item em {
-  margin-left: auto;
-  font-size: 9px;
-  font-style: normal;
-  font-weight: 800;
+  animation: hp-pulse 2.4s ease-in-out infinite;
 }
 
-.hp-stats-strip {
-  background: #f3ecdf;
-  color: #14171b;
+/* ---------- Large tablets / small laptops ---------- */
+@media (min-width: 1101px) and (max-width: 1240px) {
+  .hp-header-inner { gap: 10px; }
+  .hp-nav { margin-left: 0; }
+  .hp-nav-item button {
+    padding-inline: 7px;
+    font-size: 12px;
+  }
+  .hp-header .hp-btn-sm {
+    padding-inline: 12px;
+    font-size: 12px;
+  }
+  .hp-lang { margin-right: 0; }
+  .hp-header .neo-brand .neurooption-logo { height: 48px; }
 }
-.hp-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  padding-top: 15px;
-  padding-bottom: 15px;
-}
-.hp-stats-grid > div {
-  display: grid;
-  justify-items: center;
-  gap: 1px;
-  padding: 2px 10px;
-  border-right: 1px solid #d8cfbd;
-  text-align: center;
-}
-.hp-stats-grid > div:last-child { border-right: 0; }
-.hp-stats-grid strong { font-size: 18px; line-height: 1.15; }
-.hp-stats-grid span { color: #62666c; font-size: 10px; }
 
-.hp-global-markets {
-  border-top: 1px solid rgba(244,199,81,.13);
-  background:
-    radial-gradient(650px 260px at 25% 20%, rgba(244,199,81,.08), transparent 68%),
-    #090f1b;
-}
-.hp-global-head {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 30px;
-  margin-bottom: 24px;
-}
-.hp-global-head h2 { color: #fff; }
-.hp-global-head > p {
-  max-width: 520px;
-  margin: 0;
-  color: #9da6b0;
-  font-size: 13px;
-  line-height: 1.6;
-}
-.hp-category-grid {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 12px;
-}
-.hp-category-card {
-  --cat-accent: #e4b94f;
-  --cat-glow: rgba(244,199,81,.35);
-  position: relative;
-  display: grid;
-  align-content: end;
-  min-height: 178px;
-  padding: 16px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,.09);
-  border-radius: 12px;
-  color: #fff !important;
-  text-decoration: none;
-  isolation: isolate;
-  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
-}
-.hp-category-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  background:
-    radial-gradient(circle at 72% 22%, var(--cat-glow), transparent 31%),
-    linear-gradient(155deg, #111b25, #0d1625 70%);
-}
-.hp-category-card::after {
-  content: "";
-  position: absolute;
-  inset: auto -20% -30% 15%;
-  z-index: -1;
-  height: 95px;
-  border: 1px solid var(--cat-accent);
-  border-radius: 50%;
-  opacity: .32;
-  transform: rotate(-16deg);
-}
-.hp-category-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--cat-accent);
-  box-shadow: 0 18px 42px rgba(0,0,0,.3);
-}
-.hp-category-card.is-forex { --cat-accent: #4fa2ff; --cat-glow: rgba(38,120,255,.35); }
-.hp-category-card.is-crypto { --cat-accent: #f2cf76; --cat-glow: rgba(242, 207, 118,.35); }
-.hp-category-card.is-commodities { --cat-accent: #e8bf60; --cat-glow: rgba(232, 191, 96,.34); }
-.hp-category-card.is-stocks { --cat-accent: #e7e9ee; --cat-glow: rgba(182,191,212,.23); }
-.hp-category-card.is-indices { --cat-accent: #9b83ff; --cat-glow: rgba(126,90,255,.3); }
-.hp-category-card.is-otc { --cat-accent: #43d6e6; --cat-glow: rgba(67,214,230,.3); }
-.hp-category-icon {
-  position: absolute;
-  top: 18px;
-  right: 16px;
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 14px;
-  background: rgba(255,255,255,.05);
-  color: var(--cat-accent);
-  backdrop-filter: blur(8px);
-}
-.hp-category-copy { display: grid; gap: 4px; }
-.hp-category-copy b { font-size: 14px; }
-.hp-category-copy small { color: #9aa3ad; font-size: 10px; }
-.hp-category-arrow {
-  position: absolute;
-  right: 14px;
-  bottom: 13px;
-  color: var(--cat-accent);
-  font-size: 18px;
-}
-.hp-markets-note {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 15px;
-  color: #7f8994;
-  font-size: 11px;
-}
-.hp-markets-note svg { color: #f2cf76; }
+@media (max-width: 1100px) {
+  .hp-nav { display: none; }
+  .hp-menu-btn { display: grid; }
 
-.hp-light { background: linear-gradient(180deg, #f7f2e8, #efe7d8); }
-.hp-dark { background: linear-gradient(180deg, #090f1b, #07111a); }
-.hp-exp-card {
-  border-color: #d9d0be;
-  background: linear-gradient(155deg, #fffdf8, #eee4d2);
-}
-.hp-exp-card.is-dark {
-  border-color: rgba(244,199,81,.22);
-  background:
-    radial-gradient(120% 90% at 100% 100%, rgba(244,199,81,.22), transparent 60%),
-    linear-gradient(160deg, #111922, #0a1322);
-}
-.hp-exp-icon,
-.hp-exp-card.is-dark .hp-exp-icon,
-.hp-why-icon { color: #e4b94f; }
-.hp-market-card {
-  border-color: rgba(244,199,81,.12);
-  background: linear-gradient(180deg, #101923, #080f16);
-}
-.hp-market-card:hover { border-color: rgba(244,199,81,.46); }
-.hp-community {
-  background:
-    radial-gradient(600px 300px at 20% 50%, rgba(244,199,81,.14), transparent 70%),
-    linear-gradient(180deg, #070c17, #0d1625);
-}
-.hp-community li span {
-  border-color: rgba(244,199,81,.48);
-  color: #e8bf60;
-}
-.hp-phone-chips i.is-on {
-  background: rgba(244,199,81,.16);
-  color: #e8bf60;
-  box-shadow: inset 0 0 0 1px rgba(244,199,81,.42);
-}
-.hp-tabbar span.is-on { color: #e8bf60; }
-.hp-swoosh {
-  background: radial-gradient(closest-side, rgba(244,199,81,.28), rgba(244,199,81,.08) 60%, transparent);
-}
-.hp-footer {
-  border-top-color: rgba(244,199,81,.12);
-  background: #070c17;
-}
-.hp-news-field button {
-  background: #e8bf60;
-  color: #ffffff;
-}
-.hp-footer-bottom a,
-.hp-footer-news small,
-.hp-text-link { color: #f2cf76 !important; }
+  .hp-market-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
-@media (max-width: 900px) {
+  .hp-exp-grid,
+  .hp-why-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .hp-footer-grid { grid-template-columns: 1fr 1fr 1fr; }
+
+  .hp-footer-brand,
+  .hp-footer-news { grid-column: span 3; }
+
+  .hp-footer-news { max-width: 460px; }
+}
+
+@media (max-width: 1000px) {
+  .hp-category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hp-category-card { min-height: 214px; }
+  .hp-category-art { height: 158px; }
+  .hp-hero-inner { gap: 26px; }
+  .hp-hero h1 { font-size: 44px; }
+  .hp-hero-points { gap: 12px 16px; }
+}
+
+@media (max-width: 1180px) {
+  .hp-stats-grid strong { font-size: 19px; }
   .hp-ticker-track {
     display: flex;
     overflow-x: auto;
@@ -457,157 +100,357 @@
   }
   .hp-ticker-track::-webkit-scrollbar { display: none; }
   .hp-ticker-item {
-    flex: 0 0 150px;
+    flex: 0 0 156px;
     scroll-snap-align: start;
-  }
-  .hp-stats-grid {
-    overflow-x: auto;
-    grid-template-columns: repeat(6, minmax(145px, 1fr));
-    scrollbar-width: none;
-  }
-  .hp-category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .hp-global-head {
-    align-items: flex-start;
-    flex-direction: column;
   }
 }
 
-@media (max-width: 640px) {
-  .hp-header .hp-btn,
-  .hp-lang { display: none; }
-  .hp-header-inner { height: 58px; }
-  .hp-hero {
-    min-height: calc(100dvh - 58px);
-    background:
-      linear-gradient(180deg, rgba(3,7,13,.62) 0%, rgba(3,7,13,.9) 76%, #070c17 100%),
-      url("/landing/hero-mountains.jpg") center 24% / cover no-repeat,
-      #070c17;
+@media (max-width: 900px) {
+  .hp-global-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
   }
+}
+
+@media (min-width: 861px) and (max-width: 1000px) {
+  .hp-app-tabs { display: none; }
+  .hp-stage { padding-right: 24px; }
+}
+
+@media (max-width: 860px) {
+  .hp-hero-inner,
+  .hp-community-inner,
+  .hp-devices-inner { grid-template-columns: 1fr; }
+
+  .hp-hero-inner {
+    min-height: 0;
+    padding-top: 44px;
+    padding-bottom: 36px;
+  }
+
+  .hp-hero-copy { max-width: 620px; }
+
+  .hp-stage {
+    width: 100%;
+    max-width: 640px;
+    min-height: 0;
+    margin: 0 auto;
+  }
+
+  .hp-section-aside {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .hp-stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px 0;
+  }
+  .hp-stats-grid > div:nth-child(3) { border-right: 0; }
+
+  .hp-devices-copy { padding-bottom: 0; }
+  .hp-community-inner { gap: 16px; }
+  .hp-globe { max-width: 280px; }
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 640px) {
+  .hp-wrap {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .hp-header-inner { height: 64px; }
+  .hp-header .neo-brand .neurooption-logo { height: 40px; }
+
+  .hp-lang,
+  .hp-header .hp-btn { display: none; }
+
   .hp-hero-inner {
     display: block;
-    padding-top: 52px;
-    padding-bottom: 38px;
+    padding-top: 36px;
+    padding-bottom: 28px;
   }
-  .hp-hero-copy {
-    position: relative;
-    z-index: 3;
+
+  .hp-eyebrow {
+    margin-bottom: 12px;
+    font-size: 10px;
   }
+
   .hp-hero h1 {
-    max-width: 330px;
-    font-size: clamp(40px, 12vw, 50px);
+    max-width: 480px;
+    font-size: clamp(36px, 10.5vw, 50px);
+    line-height: 1.08;
   }
+
+  .hp-hero-with { display: block; }
+
   .hp-lead {
-    max-width: 340px;
-    margin-top: 18px;
-    font-size: 14px;
+    margin: 18px 0 24px;
+    font-size: 15px;
+    line-height: 1.65;
   }
-  .hp-hero-points {
+
+  .hp-hero-cta {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 9px;
-    margin-top: 28px;
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
-  .hp-hero-points li {
+
+  .hp-hero-cta .hp-btn {
+    width: 100%;
+    min-height: 50px;
+    font-size: 15px;
+  }
+
+  .hp-cta-desktop { display: none; }
+  .hp-cta-mobile { display: inline; }
+
+  .hp-hero-points { display: none; }
+
+  .hp-mobile-highlights {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 24px;
+    border: 1px solid var(--border-primary);
+    border-radius: 12px;
+    background: var(--surface-primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .hp-mobile-highlights > div {
     display: grid;
     justify-items: center;
     gap: 5px;
-    padding: 11px 6px;
-    border: 1px solid rgba(244,199,81,.16);
-    border-radius: 10px;
-    background: rgba(6,12,19,.52);
-    font-size: 9px;
+    padding: 14px 4px;
+    border-right: 1px solid var(--border-primary);
+    font-variant-numeric: tabular-nums;
     text-align: center;
   }
-  .hp-hero-points li:nth-child(4) { display: none; }
-  .hp-stage {
-    height: 355px;
-    margin: 20px 0 -12px;
+
+  .hp-mobile-highlights > div:last-child { border-right: 0; }
+
+  .hp-mobile-highlights svg {
+    width: 22px;
+    height: 22px;
+    color: var(--brand-secondary);
   }
-  .hp-laptop,
-  .hp-float { display: none; }
+
+  .hp-mobile-highlights b {
+    color: var(--brand-primary);
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .hp-mobile-highlights small {
+    color: var(--text-secondary);
+    font-size: 11px;
+  }
+
+  /* On phones the hero shows the phone mockup only. */
+  .hp-stage {
+    height: 372px;
+    min-height: 372px;
+    margin: 26px 0 0;
+    padding: 0 0 20px;
+  }
+
+  .hp-laptop { display: none; }
+
   .hp-hero-phone {
     position: relative;
     right: auto;
     bottom: auto;
-    width: 205px;
-    height: 410px;
-    padding: 19px 10px 12px;
+    width: 198px;
+    height: 338px;
+    padding: 20px 10px 10px;
     border-width: 6px;
-    border-radius: 34px;
+    border-radius: 31px;
     transform: rotate(-2deg);
   }
-  .hp-hero-phone-notch {
-    top: 7px;
-    width: 64px;
-    height: 13px;
-  }
+
+  .hp-hero-phone-status { font-size: 7px; }
+
   .hp-hero-phone-head {
-    grid-template-columns: 22px minmax(0, 1fr);
+    grid-template-columns: 40px 1fr;
+    gap: 2px 8px;
     margin-top: 10px;
     font-size: 8px;
   }
-  .hp-hero-phone-head img { width: 22px; }
-  .hp-hero-phone-head b { font-size: 10px; }
-  .hp-hero-phone-chart {
-    height: 180px;
-    margin-top: 12px;
-  }
+
+  .hp-hero-phone-head b { font-size: 11px; }
+  .hp-hero-phone-chart { height: 138px; margin-top: 11px; }
+
   .hp-hero-phone-fields small,
-  .hp-hero-phone-profit small { font-size: 7px; }
+  .hp-hero-phone-profit small { font-size: 6px; }
+
   .hp-hero-phone-fields b,
-  .hp-hero-phone-profit b { font-size: 10px; }
+  .hp-hero-phone-profit b { font-size: 9px; }
+
   .hp-hero-phone-actions span {
-    padding: 10px 0;
+    padding-block: 8px;
+    font-size: 9px;
+  }
+
+  .hp-preview-label {
+    bottom: 0;
     font-size: 10px;
   }
-  .hp-stats-grid {
-    grid-template-columns: repeat(3, 1fr);
-    overflow: visible;
-    padding: 14px 6px;
+
+  .hp-ticker-item { padding: 12px 10px; }
+
+  .hp-stats-grid { padding: 20px 4px; }
+  .hp-stats-grid > div { padding-inline: 4px; }
+  .hp-stats-grid strong { font-size: 17px; }
+  .hp-stats-grid span { font-size: 10px; }
+
+  .hp-section { padding: 48px 0; }
+  .hp-section.hp-global-markets { padding: 44px 0 40px; }
+  .hp-section-head { margin-bottom: 24px; }
+  .hp-global-head { margin-bottom: 20px; }
+
+  .hp-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
-  .hp-stats-grid > div:nth-child(n + 4) { display: none; }
-  .hp-stats-grid strong { font-size: 18px; }
-  .hp-category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
   .hp-category-card {
-    min-height: 154px;
+    min-height: 192px;
     padding: 13px;
   }
-  .hp-category-icon {
-    top: 13px;
-    right: 13px;
-    width: 47px;
-    height: 47px;
+
+  .hp-category-art { height: 140px; }
+  .hp-category-copy b { font-size: 13px; }
+  .hp-category-copy small { font-size: 11px; }
+  .hp-category-arrow { right: 12px; bottom: 14px; }
+
+  .hp-markets-note {
+    align-items: flex-start;
+    line-height: 1.5;
   }
-  .hp-global-head > p { font-size: 12px; }
+
+  .hp-exp-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .hp-exp-card {
+    min-height: 220px;
+    padding: 18px 14px 14px;
+  }
+
+  .hp-exp-card b {
+    margin-top: 20px;
+    font-size: 14px;
+  }
+
+  .hp-exp-card p { font-size: 12px; }
+
+  .hp-card-art {
+    width: 86%;
+    opacity: 0.7;
+  }
+
+  .hp-round-arrow {
+    width: 30px;
+    height: 30px;
+    margin-top: 16px;
+  }
+
+  .hp-market-feed { margin-top: -10px; }
+
+  .hp-market-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .hp-why-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .hp-why-grid li {
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 14px;
+  }
+
+  .hp-why-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .hp-why-grid b { font-size: 14px; }
+  .hp-why-grid small { font-size: 12px; }
+
+  .hp-community-inner { padding-top: 40px; padding-bottom: 44px; }
+
+  .hp-devices-preview-note {
+    margin: 22px 0 0;
+  }
+
+  .hp-phones { height: 340px; }
+
+  .hp-phone {
+    width: 160px;
+    height: 330px;
+  }
+
+  .hp-phone.is-back { left: 4%; }
+  .hp-phone.is-front { left: 40%; }
+
+  .hp-footer { padding-top: 40px; }
+  .hp-footer-grid { grid-template-columns: 1fr 1fr; gap: 28px 20px; }
+
+  .hp-footer-brand,
+  .hp-footer-news { grid-column: span 2; }
+
+  .hp-footer-col:last-of-type { grid-column: span 2; }
+  .hp-footer .neo-brand .neurooption-logo { height: 56px; }
 }
 
-.hp-cta-mobile { display: none; }
-
-@media (max-width: 640px) {
-  .hp-cta-desktop { display: none; }
-  .hp-cta-mobile { display: inline; }
+@media (max-width: 359px) {
+  .hp-wrap { padding-inline: 14px; }
+  .hp-hero h1 { font-size: 34px; }
+  .hp-category-copy small { font-size: 10px; }
+  .hp-category-arrow { display: none; }
+  .hp-exp-grid,
+  .hp-why-grid { grid-template-columns: 1fr; }
+  .hp-exp-card { min-height: 185px; }
+  .hp-stats-grid strong { font-size: 15px; }
 }
 
+/* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .hp-category-card { transition: none; }
-  .hp-float { animation: none; }
+  .hp-hero-copy > *,
+  .hp-stage,
+  .hp-hero-phone,
+  .hp-app-timer,
+  .hp-hero-phone-expiry {
+    animation: none;
+  }
+
+  .hp-btn,
+  .hp-nav-menu,
+  .hp-nav-item button svg,
+  .hp-exp-card,
+  .hp-market-card,
+  .hp-category-card,
+  .hp-category-art,
+  .hp-category-arrow,
+  .hp-round-arrow,
+  .hp-text-link svg,
+  .hp-why-grid li {
+    transition: none;
+  }
+
+  .hp-btn:hover,
+  .hp-exp-card:hover,
+  .hp-market-card:hover,
+  .hp-category-card:hover,
+  .hp-category-card:hover .hp-category-art {
+    transform: none;
+  }
 }
-
-/* Approved public homepage proportions and original market illustrations. */
-.hp-wrap{max-width:1280px}.hp [id]{scroll-margin-top:76px}.hp-header{background:rgba(7,12,23,.95)}.hp-header-inner{height:64px;gap:20px}.hp-nav{margin-left:8px;gap:0}.hp-nav-item button{padding-inline:9px;color:#c6cad2}.hp-header-actions{gap:8px}.hp-btn{border-radius:7px}.hp-btn-primary{background:linear-gradient(180deg,var(--neo-accent-2),var(--brand-gold));border-color:var(--brand-gold);color:#141b27;box-shadow:0 8px 26px rgba(244,199,81,.17)}.hp-btn-primary:hover{filter:brightness(1.06)}.hp-btn-ghost{border-color:rgba(224,215,196,.38);background:rgba(7,12,23,.32)}.hp-btn-outline{color:#69501a;border-color:#cbb379}.hp-eyebrow{color:var(--brand-gold);letter-spacing:.19em;font-size:10px}.hp-light .hp-eyebrow{color:#8a681f}.hp-btn:focus-visible,.hp-category-card:focus-visible,.hp-ticker-item:focus-visible,.hp-menu-btn:focus-visible{outline:3px solid var(--brand-gold);outline-offset:3px}
-.hp-hero{background:radial-gradient(ellipse at 78% 44%,rgba(40,72,111,.18),transparent 54%),linear-gradient(90deg,rgba(7,12,23,.94),rgba(7,12,23,.78) 38%,rgba(7,12,23,.22) 72%,rgba(7,12,23,.64)),linear-gradient(180deg,rgba(7,12,23,.08),rgba(7,12,23,.12) 45%,#070c17),url("/landing/hero-mountains.jpg") center 57% / cover no-repeat,#070c17}.hp-hero-inner{min-height:480px;padding-block:34px;grid-template-columns:minmax(0,.98fr) minmax(0,1.1fr);gap:34px}.hp-hero-copy{position:relative;z-index:5}.hp-hero h1{max-width:550px;font-size:clamp(44px,4.25vw,58px);line-height:1.07;font-weight:760;letter-spacing:-.045em}.hp-hero h1 span{margin-top:5px;color:var(--brand-gold)}.hp-hero-with{font-style:normal;color:var(--text-primary)}.hp-lead{max-width:460px;margin:20px 0 26px;font-size:14px;line-height:1.75;color:#bdc4d0}.hp-hero-cta{gap:12px}.hp-hero-cta .hp-btn{min-height:48px;padding-inline:23px;font-size:13px}.hp-hero-points{gap:10px 19px;margin-top:27px;font-size:10px;color:#cbd0d8}.hp-hero-points svg{width:15px;height:15px;color:var(--brand-gold)}.hp-mobile-highlights{display:none}
-.hp-stage{min-height:380px;padding:0 32px 15px 12px}.hp-glow{background:radial-gradient(ellipse,rgba(71,99,134,.22),transparent 66%)}.hp-laptop{max-width:620px;transform:perspective(1100px) rotateY(-5deg) rotateX(2deg)}.hp-lid{padding:8px 8px 10px;border-color:#555d6b;background:linear-gradient(155deg,#3c434f,#151c28 58%)}.hp-screen{aspect-ratio:16 / 9.6;background:#0a1220}.hp-app-top{padding:7px;background:#111b2c}.hp-app-mark img{height:10px}.hp-app-rail{width:24px;gap:13px}.hp-app-chart{padding:9px 30px 34px 6px;background:#0b1424}.hp-app-axis{top:14px;right:4px;bottom:34px;color:#7889a1}.hp-app-timer{right:30px}.hp-app-volume{right:30px;left:6px;bottom:13px;height:20px}.hp-app-chart-times{position:absolute;right:30px;bottom:2px;left:6px;display:flex;justify-content:space-between;color:#77859a;font-size:5px}.hp-app-panel{width:22%;gap:6px;padding:10px 7px;background:#111b2c}.hp-app-field{gap:3px;padding:6px;font-size:7px}.hp-app-field b{font-size:9px}.hp-app-payout{padding-block:5px;gap:2px}.hp-app-payout b{font-size:14px}.hp-app-buy,.hp-app-sell{padding-block:9px;font-size:9px}.hp-laptop-base{height:14px;background:linear-gradient(180deg,#69707b,#303845 45%,#1d2532)}.hp-float{display:none}.hp-preview-label{position:absolute;bottom:5px;left:0;right:0;color:#8e9aac;font-size:9px;letter-spacing:.04em;text-align:center}.hp-hero-phone{right:0;bottom:27px;width:138px;height:282px;padding:17px 7px 9px;border-color:#303847;border-radius:24px;background:#0a1322;box-shadow:inset 0 0 0 1px #75808e,0 28px 45px rgba(0,0,0,.48);transform:rotate(4deg)}.hp-hero-phone-status{display:flex;justify-content:space-between;color:#d5dbe5;font-size:5px}.hp-hero-phone-head{grid-template-columns:31px 1fr;margin-top:9px}.hp-hero-phone-head b{font-size:8px}.hp-hero-phone-chart{height:109px;margin-top:9px;border-radius:4px;background:repeating-linear-gradient(0deg,transparent 0 26px,rgba(156,179,210,.08) 26px 27px),repeating-linear-gradient(90deg,transparent 0 27px,rgba(156,179,210,.06) 27px 28px),#0d1728}.hp-hero-phone-fields span{gap:2px;padding:5px;background:#162238;border-radius:3px}.hp-hero-phone-profit span{gap:1px}.hp-hero-phone-actions span{border-radius:4px}.hp-hero-phone-home{display:block;width:42px;height:3px;margin:9px auto 0;border-radius:99px;background:#8691a0}
-.hp-ticker{background:#0b1220;border-block-color:rgba(187,201,221,.09)}.hp-ticker-item{gap:7px;padding:13px 9px}.hp-ticker-item>span{gap:3px}.hp-ticker-item small i{display:block;margin-top:2px;color:#baa46f;font-size:7px;font-style:normal}.hp-ticker-item:hover{background:rgba(244,199,81,.04)}.hp-stats-strip{background:#f6f0e4;color:#141b27}.hp-stats-grid{padding-block:20px}.hp-stats-grid>div{gap:6px}.hp-stats-grid strong{font-size:21px;font-weight:750;letter-spacing:-.03em}.hp-stats-grid span{color:#73716c}.hp-section{padding-block:48px}.hp-section h2{font-weight:750;letter-spacing:-.035em}.hp-section.hp-global-markets{padding-block:34px 28px;background:#090f1b}.hp-global-head{gap:32px;margin-bottom:22px}.hp-global-head h2{font-size:30px}.hp-global-head>p{max-width:490px;font-size:12px;color:#95a1b3}
-.hp-category-card{min-height:194px;padding:14px;border-color:rgba(185,204,230,.12);border-radius:8px}.hp-category-card::before{background:radial-gradient(ellipse at 70% 25%,var(--cat-glow),transparent 70%),linear-gradient(150deg,#172133,#0e1726)}.hp-category-card::after{display:none}.hp-category-card.is-forex{--cat-accent:#c5d4e4;--cat-glow:rgba(132,162,197,.18)}.hp-category-card.is-crypto{--cat-accent:#e8aa4e;--cat-glow:rgba(226,151,55,.16)}.hp-category-card.is-commodities{--cat-accent:#ecd17f;--cat-glow:rgba(232,191,96,.13)}.hp-category-card.is-stocks{--cat-accent:#a4c9f6;--cat-glow:rgba(86,146,231,.18)}.hp-category-card.is-indices{--cat-accent:#79d6d7;--cat-glow:rgba(58,160,183,.16)}.hp-category-card.is-otc{--cat-accent:#bdc4fa;--cat-glow:rgba(135,117,220,.17)}.hp-category-art{position:absolute;top:-1px;left:0;z-index:-1;width:100%;height:145px}.hp-category-art>svg{display:block;width:100%;height:100%}.hp-category-copy{position:relative;z-index:1;gap:5px}.hp-category-copy b{font-size:13px;letter-spacing:-.02em}.hp-category-copy small{color:#929eb0;font-size:9px}.hp-category-arrow{bottom:35px;right:13px;color:#e2bf70;font-size:16px}.hp-markets-note{margin-top:16px;color:#8995a8;font-size:10px}.hp-exp-card{border-radius:10px}.hp-exp-card.is-dark{background:radial-gradient(ellipse at 90% 90%,rgba(205,161,70,.1),transparent 60%),linear-gradient(155deg,#152033,#0a1220)}.hp-exp-icon,.hp-why-icon{color:#b68b2e}.hp-exp-card.is-dark .hp-exp-icon{color:#e6c372}.hp-text-link{color:var(--brand-gold)!important}.hp-market-card{background:linear-gradient(180deg,#172237,#10192a)}.hp-market-head span small{color:#baa46f;font-size:8px}.hp-market-feed{margin:-14px 0 20px;color:#8997aa;font-size:10px}.hp-why-icon{border-radius:10px;background:linear-gradient(150deg,#fffdfa,#e9dcc3)}.hp-community{background:radial-gradient(ellipse at 25% 50%,rgba(182,143,67,.1),transparent 60%),linear-gradient(180deg,#09101d,#0d1625)}.hp-devices-preview-note{margin:0 0 22px;color:#867348;font-size:10px}.hp-footer{background:#080e19}.hp-news-field{background:#111c2d}.hp-news-field button{color:#172031}
-@media(min-width:1101px) and (max-width:1220px){.hp-header-inner{gap:10px}.hp-nav{margin-left:0}.hp-nav-item button{padding-inline:6px;font-size:11px}.hp-header .hp-btn-sm{padding-inline:12px;font-size:11px}.hp-lang{margin-right:0}}
-@media(max-width:1000px){.hp-category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hp-category-card{min-height:205px}.hp-category-art{height:156px}.hp-hero-inner{gap:25px}.hp-hero h1{font-size:43px}.hp-hero-points{gap:12px}}
-@media(min-width:641px) and (max-width:860px){.hp-hero-inner{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.hp-hero h1{font-size:37px}.hp-lead{font-size:12px}.hp-hero-cta{gap:8px}.hp-hero-cta .hp-btn{min-height:43px;padding-inline:14px;font-size:11px}.hp-stage{min-height:320px;height:320px;padding:0 16px 12px 0}.hp-hero-phone{width:116px;height:250px;right:-5px;bottom:25px}.hp-hero-phone-chart{height:94px}.hp-app-tabs{display:none}.hp-stats-grid{grid-template-columns:repeat(6,minmax(0,1fr));overflow:visible}.hp-stats-grid strong{font-size:17px}.hp-stats-grid span{font-size:8px}.hp-global-head{align-items:flex-start;flex-direction:column;gap:12px}.hp-global-head>p{max-width:590px}}
-@media(max-width:640px){.hp-wrap{padding-inline:20px}.hp-header-inner{height:60px}.hp-menu-btn{width:42px;height:42px;border-color:rgba(223,201,154,.24);border-radius:7px}.hp-hero{min-height:0;background:linear-gradient(180deg,rgba(7,12,23,.26),rgba(7,12,23,.52) 35%,#070c17 84%),linear-gradient(90deg,rgba(7,12,23,.7),rgba(7,12,23,.2)),url("/landing/hero-mountains.jpg") center 17% / auto 750px no-repeat,#070c17}.hp-hero-inner{display:block;min-height:0;padding-top:37px;padding-bottom:20px}.hp-eyebrow{font-size:9px;margin-bottom:13px}.hp-hero h1{max-width:480px;font-size:clamp(38px,10.5vw,52px);line-height:1.09}.hp-hero h1 span{margin-top:3px}.hp-hero-with{display:block}.hp-lead{margin:18px 0 23px;font-size:13px;line-height:1.65}.hp-hero-cta{display:grid;grid-template-columns:1fr;gap:10px}.hp-hero-cta .hp-btn{width:100%;min-height:48px;font-size:13px}.hp-hero-points{display:none}.hp-mobile-highlights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:25px}.hp-mobile-highlights>div{display:grid;justify-items:center;gap:7px;padding:12px 2px;border-right:1px solid rgba(244,199,81,.16);font-variant-numeric:tabular-nums}.hp-mobile-highlights>div:last-child{border-right:0}.hp-mobile-highlights svg{color:var(--brand-gold);width:23px;height:23px}.hp-mobile-highlights b{font-size:20px;font-weight:800}.hp-mobile-highlights small{font-size:9px;color:var(--text-secondary)}
-.hp-stage{min-height:358px;height:358px;padding:0;margin:25px 0 0}.hp-laptop{display:none}.hp-hero-phone{position:relative;right:auto;bottom:auto;width:198px;height:338px;padding:20px 10px 10px;border-width:6px;border-radius:31px;transform:rotate(-2deg)}.hp-hero-phone-status{font-size:7px}.hp-hero-phone-head{grid-template-columns:45px 1fr;gap:2px 8px;margin-top:10px;font-size:8px}.hp-hero-phone-head img{width:100%}.hp-hero-phone-head b{font-size:11px}.hp-hero-phone-chart{height:138px;margin-top:11px}.hp-hero-phone-fields small,.hp-hero-phone-profit small{font-size:6px}.hp-hero-phone-fields b,.hp-hero-phone-profit b{font-size:9px}.hp-hero-phone-actions span{padding-block:8px;font-size:9px}.hp-preview-label{bottom:-7px;font-size:8px}
-.hp-stats-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:19px 0;padding:20px 10px}.hp-stats-grid>div:nth-child(n+4){display:grid}.hp-stats-grid>div{gap:5px;padding-inline:5px}.hp-stats-grid>div:nth-child(3){border-right:0}.hp-stats-grid strong{font-size:17px}.hp-stats-grid span{font-size:8px}.hp-section{padding-block:38px}.hp-section.hp-global-markets{padding-block:28px 26px}.hp-global-head{gap:12px;margin-bottom:21px}.hp-global-head h2{font-size:28px}.hp-category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.hp-category-card{min-height:190px;padding:13px}.hp-category-art{height:142px}.hp-category-copy b{font-size:13px}.hp-category-copy small{font-size:9px}.hp-category-arrow{right:12px;bottom:35px}.hp-markets-note{align-items:flex-start;font-size:9px;line-height:1.5}.hp-markets-note svg{flex-shrink:0}.hp-exp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.hp-exp-card{min-height:214px;padding:18px 14px 14px}.hp-exp-card b{font-size:13px;margin-top:22px}.hp-exp-card p{font-size:11px}.hp-card-art{width:86%;opacity:.65}.hp-round-arrow{margin-top:16px;width:26px;height:26px}.hp-why-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 14px}.hp-why-grid li{flex-direction:column;gap:9px}.hp-why-grid b{font-size:13px}.hp-why-grid small{font-size:11px}.hp-devices-preview-note{margin-top:20px;margin-bottom:0;font-size:9px}}
-@media(max-width:359px){.hp-wrap{padding-inline:16px}.hp-hero h1{font-size:35px}.hp-category-copy b{font-size:12px}.hp-category-copy small{font-size:8px}.hp-category-arrow{display:none}.hp-exp-grid{grid-template-columns:1fr}.hp-exp-card{min-height:185px}.hp-stats-grid strong{font-size:15px}}
-
-/* Override inherited anchor color for accessible gold and cream buttons. */
-.hp .hp-btn-primary{color:var(--neo-accent-ink,#141b27)}.hp .hp-btn-outline{color:#69501a}
-
-.hp-lang select{height:36px;padding:0 4px;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer}.hp-lang option{background:var(--background-secondary);color:var(--text-primary)}

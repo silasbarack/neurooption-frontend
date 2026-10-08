@@ -100,12 +100,12 @@ const EXPERIENCE = [
 
 // Symbols as the backend names them; quotes fall back to built-in samples offline.
 const POPULAR = [
-  { symbol: "EUR/USD OTC", name: "EUR/USD", color: "#e4b94f" },
-  { symbol: "BTC/USD OTC", name: "BTC/USD", color: "#f59e0b" },
-  { symbol: "Gold OTC", name: "Gold", color: "#eab308" },
-  { symbol: "Tesla OTC", name: "Tesla", color: "#ef4444" },
-  { symbol: "US 500 OTC", name: "US 500", color: "#e4b94f" },
-  { symbol: "WTI Oil OTC", name: "Oil", color: "#ef4444" },
+  { symbol: "EUR/USD OTC", name: "EUR/USD" },
+  { symbol: "BTC/USD OTC", name: "BTC/USD" },
+  { symbol: "Gold OTC", name: "Gold" },
+  { symbol: "Tesla OTC", name: "Tesla" },
+  { symbol: "US 500 OTC", name: "US 500" },
+  { symbol: "WTI Oil OTC", name: "Oil" },
 ];
 
 const WHY = [
@@ -206,12 +206,12 @@ function Sparkline({ seed, change, color }: { seed: number; change: number; colo
     <svg viewBox="0 0 120 40" preserveAspectRatio="none" className="hp-spark" aria-hidden="true">
       <defs>
         <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor={color} stopOpacity="0.35" />
-          <stop offset="1" stopColor={color} stopOpacity="0" />
+          <stop offset="0" style={{ stopColor: color, stopOpacity: 0.28 }} />
+          <stop offset="1" style={{ stopColor: color, stopOpacity: 0 }} />
         </linearGradient>
       </defs>
       <path d={`${line} L120,40 L0,40 Z`} fill={`url(#${id})`} />
-      <path d={line} fill="none" stroke={color} strokeWidth="1.6" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+      <path d={line} fill="none" style={{ stroke: color }} strokeWidth="1.6" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -304,7 +304,7 @@ function HeroArt({ quotes }: { quotes: MarketQuote[] }) {
           <div className="hp-screen">
             <div className="hp-app-top">
               <span className="hp-app-mark">
-                <img src="/neurooption-mark.jpg" alt="" />
+                <img src="/brand/neurooption-emblem-transparent-128.webp" alt="" />
               </span>
               <span className="hp-app-pair">
                 EUR/USD OTC <ChevronDown size={9} aria-hidden="true" />
@@ -370,7 +370,7 @@ function HeroArt({ quotes }: { quotes: MarketQuote[] }) {
         <div className="hp-hero-phone-notch" /><div className="hp-hero-phone-status"><span>9:41</span><span>Demo preview</span></div>
         <div className="hp-hero-phone-head">
           <span className="hp-hero-phone-mark">
-            <img src="/neurooption-mark.jpg" alt="" />
+            <img src="/brand/neurooption-emblem-transparent-128.webp" alt="" />
           </span>
           <span>EUR/USD OTC</span>
           <b>{price.toFixed(5)}</b>
@@ -397,6 +397,13 @@ function HeroArt({ quotes }: { quotes: MarketQuote[] }) {
   );
 }
 
+/* Card illustrations draw with brand tokens through style props (SVG
+   presentation attributes cannot read CSS variables). */
+const ocean = "var(--brand-secondary)";
+const teal = "var(--brand-accent)";
+const navy = "var(--brand-primary)";
+const mist = "var(--background-tertiary)";
+
 function CardArt({ kind }: { kind: (typeof EXPERIENCE)[number]["art"] }) {
   if (kind === "wave") {
     return (
@@ -405,8 +412,8 @@ function CardArt({ kind }: { kind: (typeof EXPERIENCE)[number]["art"] }) {
           <path
             key={i}
             d={`M0 ${120 - i * 3} C 60 ${60 + i * 4}, 120 ${140 - i * 6}, 220 ${30 + i * 5}`}
-            stroke="#e8bf60"
-            strokeOpacity={0.15 + i * 0.06}
+            style={{ stroke: i % 2 ? teal : ocean }}
+            strokeOpacity={0.12 + i * 0.05}
             fill="none"
           />
         ))}
@@ -418,13 +425,13 @@ function CardArt({ kind }: { kind: (typeof EXPERIENCE)[number]["art"] }) {
       <svg className="hp-card-art" viewBox="0 0 220 140" aria-hidden="true">
         <defs>
           <linearGradient id="hp-shield" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#f1d693" />
-            <stop offset="1" stopColor="#987328" />
+            <stop offset="0" style={{ stopColor: teal }} />
+            <stop offset="1" style={{ stopColor: navy }} />
           </linearGradient>
         </defs>
-        <ellipse cx="150" cy="128" rx="54" ry="8" fill="#e4b94f" opacity="0.35" />
-        <path d="M150 20 l44 16 v34 c0 30 -20 48 -44 58 c-24 -10 -44 -28 -44 -58 v-34 z" fill="url(#hp-shield)" opacity="0.9" />
-        <path d="M150 32 l32 12 v26 c0 22 -14 36 -32 44 c-18 -8 -32 -22 -32 -44 v-26 z" fill="#0b1630" opacity="0.35" />
+        <ellipse cx="150" cy="128" rx="54" ry="8" style={{ fill: ocean }} opacity="0.14" />
+        <path d="M150 20 l44 16 v34 c0 30 -20 48 -44 58 c-24 -10 -44 -28 -44 -58 v-34 z" fill="url(#hp-shield)" opacity="0.22" />
+        <path d="M150 32 l32 12 v26 c0 22 -14 36 -32 44 c-18 -8 -32 -22 -32 -44 v-26 z" fill="none" style={{ stroke: ocean }} strokeOpacity="0.35" />
       </svg>
     );
   }
@@ -432,10 +439,10 @@ function CardArt({ kind }: { kind: (typeof EXPERIENCE)[number]["art"] }) {
     return (
       <svg className="hp-card-art" viewBox="0 0 220 140" aria-hidden="true">
         {[0, 1, 2].map((i) => (
-          <rect key={i} x={110 + i * 4} y={112 - i * 14} width="90" height="12" rx="3" fill="#e4d3ad" opacity={0.55 + i * 0.15} />
+          <rect key={i} x={110 + i * 4} y={112 - i * 14} width="90" height="12" rx="3" style={{ fill: i === 1 ? teal : ocean }} opacity={0.14 + i * 0.06} />
         ))}
         {[0, 1, 2].map((i) => (
-          <rect key={`p${i}`} x={130 + i * 18} y={20 + i * 6} width="14" height={52 - i * 6} rx="2" fill="#f3e6ca" stroke="#f1d693" opacity="0.8" />
+          <rect key={`p${i}`} x={130 + i * 18} y={20 + i * 6} width="14" height={52 - i * 6} rx="2" style={{ fill: mist, stroke: ocean }} strokeOpacity="0.35" />
         ))}
       </svg>
     );
@@ -450,9 +457,9 @@ function CardArt({ kind }: { kind: (typeof EXPERIENCE)[number]["art"] }) {
           width="62"
           height="92"
           rx="8"
-          fill="#f3e6ca"
-          stroke="#f1d693"
-          opacity={0.45 + i * 0.18}
+          style={{ fill: mist, stroke: i === 2 ? teal : ocean }}
+          strokeOpacity={0.3 + i * 0.15}
+          opacity={0.55 + i * 0.18}
           transform={`skewY(-12) translate(0 ${30 + i * 4})`}
         />
       ))}
@@ -470,29 +477,29 @@ function Globe3D() {
     <svg className="hp-globe" viewBox="0 0 300 300" aria-hidden="true">
       <defs>
         <radialGradient id="hp-globe-fill" cx="0.38" cy="0.32" r="0.8">
-          <stop offset="0" stopColor="#1e3a8a" />
-          <stop offset="0.6" stopColor="#0b1a3f" />
-          <stop offset="1" stopColor="#050a18" />
+          <stop offset="0" style={{ stopColor: "var(--brand-secondary)" }} />
+          <stop offset="0.6" style={{ stopColor: "var(--brand-primary)" }} />
+          <stop offset="1" style={{ stopColor: "var(--brand-primary-dark)" }} />
         </radialGradient>
         <radialGradient id="hp-globe-halo" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0.75" stopColor="#e4b94f" stopOpacity="0" />
-          <stop offset="0.9" stopColor="#e4b94f" stopOpacity="0.45" />
-          <stop offset="1" stopColor="#e4b94f" stopOpacity="0" />
+          <stop offset="0.75" style={{ stopColor: "var(--brand-accent)", stopOpacity: 0 }} />
+          <stop offset="0.9" style={{ stopColor: "var(--brand-accent)", stopOpacity: 0.32 }} />
+          <stop offset="1" style={{ stopColor: "var(--brand-accent)", stopOpacity: 0 }} />
         </radialGradient>
       </defs>
       <circle cx="150" cy="150" r="140" fill="url(#hp-globe-halo)" />
-      <circle cx="150" cy="150" r="118" fill="url(#hp-globe-fill)" stroke="#e8bf60" strokeOpacity="0.5" />
+      <circle cx="150" cy="150" r="118" fill="url(#hp-globe-fill)" style={{ stroke: "var(--brand-accent)" }} strokeOpacity="0.55" />
       {[-60, -30, 0, 30, 60].map((lat) => (
-        <ellipse key={lat} cx="150" cy={150 + lat * 1.3} rx={118 * Math.cos((lat * Math.PI) / 180)} ry="10" fill="none" stroke="#e8bf60" strokeOpacity="0.16" />
+        <ellipse key={lat} cx="150" cy={150 + lat * 1.3} rx={118 * Math.cos((lat * Math.PI) / 180)} ry="10" fill="none" style={{ stroke: "var(--brand-accent-light)" }} strokeOpacity="0.22" />
       ))}
       {[20, 50, 80].map((rx) => (
-        <ellipse key={rx} cx="150" cy="150" rx={rx} ry="118" fill="none" stroke="#e8bf60" strokeOpacity="0.14" />
+        <ellipse key={rx} cx="150" cy="150" rx={rx} ry="118" fill="none" style={{ stroke: "var(--brand-accent-light)" }} strokeOpacity="0.2" />
       ))}
       {lights.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r={i % 5 === 0 ? 1.8 : 1.1} fill="#fde68a" opacity={p.o} />
+        <circle key={i} cx={p.x} cy={p.y} r={i % 5 === 0 ? 1.8 : 1.1} style={{ fill: "var(--brand-accent-light)" }} opacity={p.o} />
       ))}
-      <ellipse cx="150" cy="150" rx="146" ry="44" fill="none" stroke="#f1d693" strokeOpacity="0.35" transform="rotate(-18 150 150)" />
-      <ellipse cx="150" cy="150" rx="140" ry="64" fill="none" stroke="#cfa754" strokeOpacity="0.25" transform="rotate(22 150 150)" />
+      <ellipse cx="150" cy="150" rx="146" ry="44" fill="none" style={{ stroke: "var(--brand-secondary)" }} strokeOpacity="0.35" transform="rotate(-18 150 150)" />
+      <ellipse cx="150" cy="150" rx="140" ry="64" fill="none" style={{ stroke: "var(--brand-accent)" }} strokeOpacity="0.3" transform="rotate(22 150 150)" />
     </svg>
   );
 }
@@ -553,7 +560,7 @@ function PhoneMockups({ quotes }: { quotes: MarketQuote[] }) {
           <StatusBar />
           <div className="hp-phone-head">
             <span className="hp-phone-mark">
-              <img src="/neurooption-mark.jpg" alt="" />
+              <img src="/brand/neurooption-emblem-transparent-128.webp" alt="" />
             </span>
             <b>Markets</b>
           </div>
@@ -590,7 +597,7 @@ function PhoneMockups({ quotes }: { quotes: MarketQuote[] }) {
           <StatusBar />
           <div className="hp-phone-head">
             <span className="hp-phone-mark">
-              <img src="/neurooption-mark.jpg" alt="" />
+              <img src="/brand/neurooption-emblem-transparent-128.webp" alt="" />
             </span>
             <b>EUR/USD OTC</b>
             <em className={change >= 0 ? "is-up" : "is-down"}>{formatChange(change)}</em>
@@ -841,7 +848,7 @@ export default function LandingPage() {
                         <em className={change >= 0 ? "is-up" : "is-down"}>{formatChange(change)}</em>
                       </span>
                     </div>
-                    <Sparkline seed={index + 3} change={change} color={asset.color} />
+                    <Sparkline seed={index + 3} change={change} color={change >= 0 ? "var(--positive)" : "var(--negative)"} />
                   </Link>
                 );
               })}

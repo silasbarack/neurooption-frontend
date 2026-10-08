@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../api/auth.api";
 import AuthLayout from "../components/auth/AuthLayout";
+import HeroDashboard from "../components/landing/HeroDashboard";
 import { useAuthLanguage } from "../i18n/useAuthLanguage";
 import {
   ArrowRight,
@@ -19,8 +20,6 @@ import {
   Zap,
 } from "lucide-react";
 
-// Decorative candles for the market preview: [open, close, high, low] in px
-// from the bottom of a 120px chart.
 export default function LoginPage() {
   const navigate = useNavigate();
 
@@ -71,23 +70,9 @@ export default function LoginPage() {
       privacyLabel={tt("privacy")}
       contactsLabel={tt("contacts")}
     >
-      <figure className="au-showcase" id="markets">
-        <picture>
-          <source
-            type="image/webp"
-            srcSet="/landing/trading-preview-800.webp 800w, /landing/trading-preview-1600.webp 1600w"
-            sizes="(max-width: 900px) 100vw, 680px"
-          />
-          <img
-            src="/landing/trading-preview-1600.jpg"
-            alt="NeuroOption trading screen: EUR/USD OTC candlestick chart with the Buy and Sell panel"
-            width={1600}
-            height={959}
-            decoding="async"
-            fetchPriority="high"
-          />
-        </picture>
-      </figure>
+      <div className="au-showcase" id="markets">
+        <HeroDashboard />
+      </div>
       <div className="au-hero" id="platform">
         <span className="au-eyebrow">
           <i aria-hidden="true" />
