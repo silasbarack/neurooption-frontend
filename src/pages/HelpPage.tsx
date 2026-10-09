@@ -1,6 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { PageHeader, EmptyState } from "../components/common";
+import { getToken } from "../utils/storage";
+import Logo from "../components/branding/Logo";
 import { FAQ_CATEGORIES, FAQ_ITEMS } from "../data/mockData";
 
 const GUIDE_STEPS = [
@@ -11,6 +13,8 @@ const GUIDE_STEPS = [
 ];
 
 export default function HelpPage() {
+  const supportEmail = import.meta.env.VITE_SUPPORT_EMAIL?.trim();
+  const signedIn = Boolean(getToken());
   const [query, setQuery] = React.useState("");
   const [category, setCategory] = React.useState<string>("All");
   const [openId, setOpenId] = React.useState<string | null>(null);
@@ -25,15 +29,27 @@ export default function HelpPage() {
   return (
     <main className="np-page">
       <div className="np-container">
+        <nav aria-label="Support navigation" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 24 }}>
+          <Link to="/" aria-label="NeuroOption home" style={{ maxWidth: 180 }}><Logo className="np-help-logo" /></Link>
+          <Link to={signedIn ? "/profile" : "/login"} className="np-btn">{signedIn ? "My account" : "Sign in"}</Link>
+        </nav>
         <PageHeader
           title="Help Center"
           subtitle="Find answers fast, or reach out to our support team."
           actions={
-            <Link to="/chat" className="np-btn np-btn-primary">
-              💬 Contact Support
-            </Link>
+            supportEmail ? (
+              <a href={"mailto:" + supportEmail} className="np-btn np-btn-primary">Email Support</a>
+            ) : signedIn ? (
+              <Link to="/chat" className="np-btn np-btn-primary">Contact Support</Link>
+            ) : undefined
           }
         />
+
+        <section className="np-card" style={{ padding: 20, marginBottom: 24 }} aria-labelledby="deletion-support-heading">
+          <h2 id="deletion-support-heading">Support after account deletion</h2>
+          <p>You can contact us after your account is closed. Include your deletion reference so we can investigate. Never send passwords or verification codes.</p>
+          {supportEmail ? <p><a href={"mailto:" + supportEmail}>{supportEmail}</a></p> : <p>Use the Support reply address in your NeuroOption email.</p>}
+        </section>
 
         <div className="np-search">
           <span className="np-search-icon">🔍</span>

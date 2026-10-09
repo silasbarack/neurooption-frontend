@@ -58,15 +58,23 @@ export type DeleteAccountResult = {
   message: string;
   /** Quote this when contacting Support, e.g. "DEL-3F9A12BC". */
   reference: string;
-  /** False when the confirmation email could not be sent. */
+  /** Legacy immediate-send flag; emailDelivery takes precedence for queued notices. */
   emailSent: boolean;
+  emailDelivery?: "queued";
+  deletedAt?: string;
   emailHint: string;
 };
 
 export const accountApi = {
   me: () => api.get<AccountSummary>("/account/me"),
   deletionCheck: () => api.get<DeletionCheck>("/account/deletion"),
-  deleteAccount: (body: DeleteAccountRequest) => api.post<DeleteAccountResult>("/account/delete", body),
+  deleteAccount: async (body: DeleteAccountRequest): Promise<DeleteAccountResult> => {
+    const result = await api.post<DeleteAccountResult>("/account/delete", body);
+    if (!result || result.success !== true || typeof result.reference !== "string" || !result.reference) {
+      throw new Error("Could not verify the deletion result. Check your email or contact Support before trying again.");
+    }
+    return result;
+  },
 };
 
 export const marketQuotesApi = {

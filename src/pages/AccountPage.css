@@ -4,3 +4,5 @@
 @media(prefers-reduced-motion:reduce){.ac-tile,.ac-switch button,.ac-progress-bar i{transition:none}.ac-tile:hover{transform:none}}
 
 @media(max-width:900px){.ac-heading{display:block}.ac-heading .ac-eyebrow,.ac-heading p{display:none}.ac-title{font-size:22px;margin:0}}
+
+.ac-delete-link { color: var(--negative-strong); font-size: 13px; text-decoration: underline; padding: 8px 0; display: inline-block; }

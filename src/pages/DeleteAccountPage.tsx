@@ -14,9 +14,9 @@ const COMMENT_LIMIT = 500;
 
 const WHAT_HAPPENS = [
   "You are signed out everywhere straight away and cannot sign in again.",
-  "Your name, email address and phone number are removed from your profile.",
+  "Your name, email address, phone number and password are removed from the active profile.",
   "This cannot be undone. Nobody, including Support, can bring the account back.",
-  "Records of past deposits, withdrawals and trades are kept as the law requires, but are not used for marketing.",
+  "Historical trading, payment, affiliate, KYC, support and security records may be retained. Contact Support about retention periods or further erasure requests.",
   "You can open a new account with the same email later. It starts fresh, without your old balances or history.",
 ];
 
@@ -64,7 +64,7 @@ export default function DeleteAccountPage() {
   }, [step, check]);
 
   const word = check?.confirmationWord ?? "DELETE";
-  const typedOk = confirmation.trim().toUpperCase() === word;
+  const typedOk = confirmation === word;
   const stepIndex = STEPS.indexOf(step);
   const blocked = check ? !check.canDelete : false;
 
@@ -77,16 +77,17 @@ export default function DeleteAccountPage() {
     try {
       const result = await accountApi.deleteAccount({
         password,
-        confirmation: confirmation.trim(),
+        confirmation,
         reason: reason || undefined,
         comment: comment.trim() || undefined,
       });
       // The account is closed: drop the session, then show the result on a
       // public page (this one needs a signed-in user).
+      setPassword("");
       logout();
       navigate("/account-deleted", {
         replace: true,
-        state: { reference: result.reference, emailSent: result.emailSent, emailHint: result.emailHint },
+        state: { reference: result.reference, emailSent: result.emailSent, emailDelivery: result.emailDelivery, emailHint: result.emailHint, deletedAt: result.deletedAt },
       });
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
@@ -109,7 +110,7 @@ export default function DeleteAccountPage() {
 
   return (
     <div className="da">
-      <Link to="/profile" className="da-back">
+      <Link to="/profile" className="da-back" aria-disabled={submitting} onClick={(event) => { if (submitting) event.preventDefault(); }}>
         <span className="da-back-icon"><ArrowLeft size={20} aria-hidden="true" /></span>
         Back to profile
       </Link>
@@ -163,7 +164,7 @@ export default function DeleteAccountPage() {
               <ul className="da-list">
                 {WHAT_HAPPENS.map((text) => <li key={text}>{text}</li>)}
               </ul>
-              <p className="da-note">We'll email a confirmation with the details to {check.emailHint}.</p>
+              <p className="da-note">A detailed confirmation email will be queued to {check.emailHint}. Deletion does not transfer or withdraw funds.</p>
 
               <div className="da-actions">
                 <Link to="/profile" className="da-btn da-btn-ghost">Keep my account</Link>
@@ -199,6 +200,7 @@ export default function DeleteAccountPage() {
                 onChange={(event) => setComment(event.target.value)}
               />
               <small className="da-count">{comment.length}/{COMMENT_LIMIT}</small>
+              <p className="da-note">Do not include passwords, verification codes or payment details.</p>
 
               <div className="da-actions">
                 <button type="button" className="da-btn da-btn-ghost" onClick={() => setStep("intro")}>Back</button>
@@ -224,9 +226,10 @@ export default function DeleteAccountPage() {
                 className="da-input"
                 type="text"
                 autoComplete="off"
-                autoCapitalize="characters"
+                autoCapitalize="off"
                 spellCheck={false}
                 placeholder={word}
+                disabled={submitting}
                 value={confirmation}
                 onChange={(event) => setConfirmation(event.target.value)}
                 aria-invalid={confirmation.length > 0 && !typedOk}
@@ -238,9 +241,13 @@ export default function DeleteAccountPage() {
                 className="da-input"
                 type="password"
                 autoComplete="current-password"
+                maxLength={200}
+                disabled={submitting}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
               />
+
+              <p className="da-note">Forgot your password? <Link to="/forgot-password">Reset it</Link>, then sign in again before deleting.</p>
 
               {error && (
                 <p className="da-error" role="alert">

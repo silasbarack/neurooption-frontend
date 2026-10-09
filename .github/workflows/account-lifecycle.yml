@@ -1,0 +1,45 @@
+name: Account lifecycle UI
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Install pinned browser test dependency
+        run: |
+          npm install --save-dev --save-exact @playwright/test@1.58.2
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const lifecycleLock = JSON.parse(readFileSync('package-lock.json', 'utf8'));
+          const addedPackages = Object.fromEntries(Object.entries(lifecycleLock.packages).filter(([path]) =>
+            path === 'node_modules/@playwright/test' || path.startsWith('node_modules/playwright') || path.includes('fsevents')));
+          console.log('LIFECYCLE_LOCK_START');
+          console.log(JSON.stringify(addedPackages));
+          console.log('LIFECYCLE_LOCK_END');
+          NODE
+      - name: Lint changed application and browser test code
+        run: npx eslint src/api/account.api.ts src/App.tsx src/utils/storage.ts src/pages/DeleteAccountPage.tsx src/pages/AccountDeletedPage.tsx src/pages/HelpPage.tsx src/pages/ForgotPasswordPage.tsx src/pages/ResetPasswordPage.tsx e2e/account-deletion.spec.ts playwright.config.ts
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: account-lifecycle-browser-failures
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
