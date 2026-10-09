@@ -271,6 +271,11 @@ const MAX_VISIBLE_CANDLES = 120;
 const MIN_VISIBLE_CANDLES = 28;
 /** Keeps candles readable: narrower screens simply show fewer of them. */
 const MIN_CANDLE_SLOT_PX = 7;
+// Pinch zoom limits: fewest candles on screen, and narrowest slot per candle.
+const MIN_ZOOM_CANDLES = 12;
+const MIN_ZOOMED_SLOT_PX = 3;
+const MIN_ZOOM = 0.25;
+const MAX_ZOOM = 6;
 
 function getVisibleCandleCount(timeframe: string, plotWidth: number) {
   const seconds = timeframeToSeconds(timeframe);
@@ -1396,7 +1401,6 @@ function drawBottomPanel(
   }
 
   if (panel.levels) {
-    context.setLineDash([5, 5]);
     context.strokeStyle = panel.levelColor ?? "#cbd5e1";
 
     panel.levels.forEach((level) => {
@@ -1541,6 +1545,8 @@ function TradingChartComponent({
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const [resizeVersion, setResizeVersion] = React.useState(0);
   const drawRef = React.useRef<() => void>(() => {});
+  // Pinch-zoom factor: 1 is the default view, >1 shows fewer candles.
+  const zoomRef = React.useRef(1);
   const lastDrawVersionRef = React.useRef(-1);
   const lastTimedDrawRef = React.useRef(0);
   const axisRangeRef = React.useRef<AxisRange | null>(null);
@@ -1564,6 +1570,82 @@ function TradingChartComponent({
     observer.observe(container);
 
     return () => observer.disconnect();
+  }, []);
+
+  // A new asset or timeframe starts from the default view again.
+  React.useEffect(() => {
+    zoomRef.current = 1;
+  }, [asset.symbol, timeframe]);
+
+  // Two-finger pinch zooms the time axis; a double tap resets it. The chart
+  // surface has touch-action: none, so the browser does not zoom the page.
+  React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const pointers = new Map<number, { x: number; y: number }>();
+    let pinchStartDistance = 0;
+    let pinchStartZoom = 1;
+    let lastTapAt = 0;
+    let tapMoved = false;
+
+    const distance = () => {
+      const [a, b] = Array.from(pointers.values());
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    };
+
+    const onDown = (event: PointerEvent) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      tapMoved = false;
+      if (pointers.size === 2) {
+        pinchStartDistance = Math.max(distance(), 1);
+        pinchStartZoom = zoomRef.current;
+      }
+    };
+
+    const onMove = (event: PointerEvent) => {
+      const known = pointers.get(event.pointerId);
+      if (!known) return;
+      if (Math.abs(event.clientX - known.x) + Math.abs(event.clientY - known.y) > 6) tapMoved = true;
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (pointers.size === 2) {
+        // Fingers apart -> zoom in (fewer, wider candles).
+        zoomRef.current = clamp((pinchStartZoom * distance()) / pinchStartDistance, MIN_ZOOM, MAX_ZOOM);
+        event.preventDefault();
+      }
+    };
+
+    const onUp = (event: PointerEvent) => {
+      const wasPinching = pointers.size >= 2;
+      pointers.delete(event.pointerId);
+      if (wasPinching) {
+        // Keep the zoom steady if one finger lifts and the other stays.
+        pinchStartDistance = 0;
+        lastTapAt = 0;
+        if (Math.abs(zoomRef.current - 1) < 0.08) zoomRef.current = 1;
+        return;
+      }
+      if (event.type !== "pointerup" || tapMoved) return;
+      const now = performance.now();
+      if (now - lastTapAt < 320) {
+        zoomRef.current = 1;
+        lastTapAt = 0;
+      } else {
+        lastTapAt = now;
+      }
+    };
+
+    container.addEventListener("pointerdown", onDown);
+    container.addEventListener("pointermove", onMove);
+    container.addEventListener("pointerup", onUp);
+    container.addEventListener("pointercancel", onUp);
+    return () => {
+      container.removeEventListener("pointerdown", onDown);
+      container.removeEventListener("pointermove", onMove);
+      container.removeEventListener("pointerup", onUp);
+      container.removeEventListener("pointercancel", onUp);
+    };
   }, []);
 
   React.useEffect(() => {
@@ -1646,8 +1728,15 @@ function TradingChartComponent({
     const right = Math.max(left + 1, width - rightSpace);
     const chartWidth = right - left;
 
+    // Pinch zoom scales the default candle count; the cap keeps every
+    // candle at least ~3 px wide so a fully zoomed-out chart stays legible.
+    const baseVisible = getVisibleCandleCount(timeframe, chartWidth);
+    const zoomedVisible = Math.round(baseVisible / zoomRef.current);
+    const maxZoomedOut = Math.max(MIN_ZOOM_CANDLES, Math.floor(chartWidth / MIN_ZOOMED_SLOT_PX));
     const visibleLength = Math.min(
-      getVisibleCandleCount(timeframe, chartWidth),
+      zoomRef.current === 1
+        ? baseVisible
+        : clamp(zoomedVisible, MIN_ZOOM_CANDLES, maxZoomedOut),
       fullCandles.length,
     );
     const visibleCandlesRaw = fullCandles.slice(-visibleLength);
@@ -1781,7 +1870,6 @@ function TradingChartComponent({
 
     context.strokeStyle = liveLatest.close >= liveLatest.open ? "#22c55e" : "#ef4444";
     context.lineWidth = 1.2;
-    context.setLineDash([5, 5]);
     context.beginPath();
     context.moveTo(left, latestY);
     context.lineTo(right + 6, latestY);
@@ -1807,7 +1895,6 @@ function TradingChartComponent({
 
     context.strokeStyle = CHART_EXPIRY;
     context.lineWidth = 1.5;
-    context.setLineDash([6, 5]);
     context.beginPath();
     context.moveTo(expiryX, top);
     context.lineTo(expiryX, chartBottom);
@@ -1831,7 +1918,6 @@ function TradingChartComponent({
 
       context.strokeStyle = color;
       context.lineWidth = 1.2;
-      context.setLineDash([4, 4]);
       context.beginPath();
       context.moveTo(left, y);
       context.lineTo(right, y);

@@ -646,7 +646,7 @@ button {
   padding: 10px;
   border-radius: 9px;
   background: var(--positive-soft);
-  border: 1px dashed var(--positive);
+  border: 1px solid var(--positive);
   display: grid;
   gap: 3px;
   text-align: center;

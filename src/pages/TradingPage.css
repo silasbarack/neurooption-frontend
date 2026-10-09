@@ -79,6 +79,7 @@
   background: var(--nt-surface);
   cursor: default;
   user-select: none;
+  touch-action: none;
 }
 
 .nt-chart-canvas {
