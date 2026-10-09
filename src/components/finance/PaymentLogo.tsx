@@ -13,7 +13,7 @@ export type PaymentBrand =
 // strip). Brands without a file here fall back to the built-in vector below;
 // avoid probing nonexistent URLs.
 const OFFICIAL_ASSETS: Partial<Record<PaymentBrand, string>> = {
-  mpesa: "/payment-logos/mpesa.webp",
+  mpesa: "/payment-logos/mpesa.webp?v=2",
   airtel: "/payment-logos/airtel.webp",
   binance: "/payment-logos/binance.webp",
   visa: "/payment-logos/visa.webp",
