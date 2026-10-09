@@ -102,9 +102,7 @@ export default function App() {
           <Route
             path="/help"
             element={
-              <Shelled title="Support">
-                <HelpPage />
-              </Shelled>
+              <HelpPage />
             }
           />
 

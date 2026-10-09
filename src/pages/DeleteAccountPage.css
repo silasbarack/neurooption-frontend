@@ -84,3 +84,6 @@
 .da-done .da-ref { display: inline-block; margin: 6px 0 16px; padding: 8px 14px; border: 1px solid var(--border-primary); border-radius: 10px; background: var(--surface-secondary); color: var(--text-primary); font-size: 15px; font-variant-numeric: tabular-nums; }
 .da-done .da-warn { padding: 12px 14px; border: 1px solid var(--warning); border-radius: 10px; text-align: left; background: var(--surface-secondary); }
 .da-done-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+
+.da-ref { overflow-wrap: anywhere; }
+.da-back[aria-disabled="true"] { opacity: .6; cursor: wait; }

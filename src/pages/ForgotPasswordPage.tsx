@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
       if (!response.ok) throw new Error(result.message || result.data?.message || "Password recovery request failed");
 
       setSuccess(true);
-      setMessage(result.message || result.data?.message || "If the account exists, a six-digit verification code has been sent.");
+      setMessage(result.message || result.data?.message || "If an account exists for this email, a six-digit verification code will be emailed shortly.");
       window.setTimeout(() => {
         navigate(`/reset-password?email=${encodeURIComponent(normalizedEmail)}`);
       }, 1200);
@@ -106,7 +106,7 @@ export default function ForgotPasswordPage() {
           <MailCheck size={18} aria-hidden="true" />
           <span>
             The code expires in 10 minutes. Check your spam folder if it doesn't
-            arrive within a minute.
+            arrive. Requesting a new code replaces the previous code; requests are limited to one per minute.
           </span>
         </div>
 

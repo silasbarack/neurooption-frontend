@@ -43,4 +43,8 @@ export function clearUser(): void {
 export function logout(): void {
   clearToken();
   clearUser();
+  for (const key of ["token", "accessToken"]) {
+    localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
+  }
 }

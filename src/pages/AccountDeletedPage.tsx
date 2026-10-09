@@ -3,7 +3,7 @@ import { CircleCheck } from "lucide-react";
 import Logo from "../components/branding/Logo";
 import "./DeleteAccountPage.css";
 
-type DeletedState = { reference?: string; emailSent?: boolean; emailHint?: string } | null;
+type DeletedState = { reference?: string; emailSent?: boolean; emailDelivery?: "queued"; emailHint?: string; deletedAt?: string } | null;
 
 /** Public (the person is signed out by now): confirms the deletion and what happens next. */
 export default function AccountDeletedPage() {
@@ -24,7 +24,13 @@ export default function AccountDeletedPage() {
         </p>
       )}
 
-      {emailSent ? (
+      {state?.emailDelivery === "queued" ? (
+        <p role="status">
+          Your confirmation email is queued{state.emailHint ? <> to <strong>{state.emailHint}</strong></> : ""}.
+          It includes your reference, deletion date, selected reason, access changes, retained records and Support details.
+          Check your spam folder if it does not arrive.
+        </p>
+      ) : emailSent ? (
         <p>
           We've emailed the details of the deletion{state?.emailHint ? <> to <strong>{state.emailHint}</strong></> : ""}: what was removed,
           what we keep and why, and how to reach us if this wasn't you.
@@ -36,6 +42,8 @@ export default function AccountDeletedPage() {
         </p>
       ) : null}
 
+      {state?.deletedAt && <p>Deleted on {new Date(state.deletedAt).toLocaleString()}.</p>}
+      <p>Historical records may be retained separately. Contact Support about retention periods or further erasure requests.</p>
       <p>If you didn't ask for this, contact Support straight away and quote your reference.</p>
 
       <div className="da-done-actions">

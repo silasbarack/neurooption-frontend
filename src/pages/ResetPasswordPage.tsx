@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import AuthLayout from "../components/auth/AuthLayout";
 
+import { logout } from "../utils/storage";
+
 type ApiResponse = { message?: string; data?: { message?: string } };
 
 const API_URL = import.meta.env.VITE_API_URL || "https://neurooption-backend.onrender.com";
@@ -51,7 +53,10 @@ export default function ResetPasswordPage() {
       if (!response.ok) throw new Error(result.message || result.data?.message || "Password reset failed");
 
       setSuccess(true);
-      setMessage("Password reset successfully. Redirecting to sign in...");
+      logout();
+      setPassword("");
+      setConfirmPassword("");
+      setMessage("Password reset successfully. A confirmation email is queued. Redirecting to sign in...");
       window.setTimeout(() => navigate("/login", { replace: true }), 1200);
     } catch (error) {
       setSuccess(false);
@@ -81,7 +86,7 @@ export default function ResetPasswordPage() {
       if (!response.ok) throw new Error(result.message || result.data?.message || "Could not send a new code");
 
       setSuccess(true);
-      setMessage("A new six-digit code has been sent if this email is registered.");
+      setMessage(result.message || result.data?.message || "If the account exists, a six-digit code will be emailed shortly.");
       setCode("");
     } catch (error) {
       setSuccess(false);
