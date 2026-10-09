@@ -1,6 +1,5 @@
 import { getToken as getSessionToken } from "../utils/storage";
 import type {
-  DeleteAccountResponse,
   MessageResponse,
   UpdatePasswordPayload,
   UpdateUserPayload,
@@ -59,17 +58,10 @@ export async function updatePassword(payload: UpdatePasswordPayload): Promise<Me
   });
 }
 
-export async function deleteAccount(): Promise<DeleteAccountResponse> {
-  return request<DeleteAccountResponse>("/users/account", {
-    method: "DELETE",
-  });
-}
-
 export const usersApi = {
   getProfile,
   updateProfile,
   updatePassword,
-  deleteAccount,
 };
 
 export default usersApi;

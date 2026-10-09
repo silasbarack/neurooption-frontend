@@ -2,11 +2,6 @@ export type MessageResponse = {
   message: string;
 };
 
-export type DeleteAccountResponse = {
-  message: string;
-  deleted?: boolean;
-};
-
 export type UserStatus = "ACTIVE" | "SUSPENDED" | "LOCKED" | "DELETED";
 
 export type KycStatus = "PENDING" | "APPROVED" | "REJECTED";

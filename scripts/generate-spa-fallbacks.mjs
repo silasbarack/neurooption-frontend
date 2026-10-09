@@ -28,6 +28,7 @@ const routes = [
   "social-trading",
   "express-trades",
   "delete-account",
+  "account-deleted",
 ];
 
 const source = join("dist", "index.html");

@@ -8,6 +8,7 @@ const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 const DeleteAccountPage = lazy(() => import("./pages/DeleteAccountPage"));
+const AccountDeletedPage = lazy(() => import("./pages/AccountDeletedPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const TradingPage = lazy(() => import("./pages/TradingPage"));
 const FinancePage = lazy(() => import("./pages/FinancePage"));
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
 
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/account-deleted" element={<AccountDeletedPage />} />
           <Route path="/signin" element={<Navigate to="/login" replace />} />
 
           <Route path="/register" element={<RegisterPage />} />

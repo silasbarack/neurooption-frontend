@@ -10,6 +10,19 @@ const API_BASE_URL =
   import.meta.env.VITE_API_URL?.replace(/\/$/, "") ||
   "https://neurooption-backend.onrender.com";
 
+/** A refused request. Still an Error with the server's message; also keeps the status and body. */
+export class ApiError extends Error {
+  readonly status: number;
+  readonly body: unknown;
+
+  constructor(message: string, status: number, body: unknown) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.body = body;
+  }
+}
+
 type RequestOptions = {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
   body?: unknown;
@@ -53,7 +66,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
         ? (data as { message: string }).message
         : "Request failed. Please try again.";
 
-    throw new Error(message);
+    throw new ApiError(message, response.status, data);
   }
 
   return data as T;
