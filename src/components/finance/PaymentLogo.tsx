@@ -9,8 +9,16 @@ export type PaymentBrand =
   | "mastercard"
   | "visa";
 
-// Add approved local artwork here when supplied; avoid probing nonexistent URLs.
-const OFFICIAL_ASSETS: Partial<Record<PaymentBrand, string>> = {};
+// Supplied brand artwork (3:2 white plates cut from the approved payment
+// strip). Brands without a file here fall back to the built-in vector below;
+// avoid probing nonexistent URLs.
+const OFFICIAL_ASSETS: Partial<Record<PaymentBrand, string>> = {
+  mpesa: "/payment-logos/mpesa.webp",
+  airtel: "/payment-logos/airtel.webp",
+  binance: "/payment-logos/binance.webp",
+  visa: "/payment-logos/visa.webp",
+  mastercard: "/payment-logos/mastercard.webp",
+};
 
 const ART: Record<PaymentBrand, ReactElement> = {
   mpesa: (
@@ -144,9 +152,13 @@ export default function PaymentLogo({ brand, label, className = "" }: PaymentLog
   if (src) {
     return (
       <img
-        className={`pay-logo ${className}`}
+        className={`pay-logo pay-logo-img ${className}`}
         src={src}
         alt={label}
+        width={360}
+        height={240}
+        loading="lazy"
+        decoding="async"
       />
     );
   }

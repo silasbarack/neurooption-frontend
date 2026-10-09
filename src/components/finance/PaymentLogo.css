@@ -17,3 +17,9 @@
   width: 100%;
   height: auto;
 }
+
+/* Supplied artwork is a square white plate; match the vector plates' corners. */
+.pay-logo-img {
+  border-radius: 4px;
+  background: #ffffff;
+}
