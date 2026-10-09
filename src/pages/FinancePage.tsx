@@ -12,10 +12,9 @@ import {
   Smartphone,
 } from "lucide-react";
 import AppShell from "../components/shell/AppShell";
-import { refreshAccount } from "../components/shell/useAccount";
-import type { PaymentBrand } from "../components/finance/PaymentLogo";
-import PaymentMethodCard from "../components/finance/PaymentMethodCard";
-import MpesaDepositDialog from "../components/finance/MpesaDepositDialog";
+import { refreshAccount, useAccount } from "../components/shell/useAccount";
+import DepositMethods, { type DepositMethod } from "../components/finance/DepositMethods";
+import MpesaDepositPanel from "../components/finance/MpesaDepositPanel";
 import { financeApi, type FinanceOverview, type FinanceStatus } from "../api";
 import "./FinancePage.css";
 
@@ -45,18 +44,14 @@ const TABS: Array<{ key: Tab; label: string }> = [
   { key: "history", label: "History" },
 ];
 
-// Shown as "Coming soon" until each provider is connected.
-const OTHER_METHODS: Array<{
-  name: string;
-  detail: string;
-  currencies: string;
-  brand: PaymentBrand;
-}> = [
-  { name: "Airtel Money", detail: "Instant deposit", currencies: "KES", brand: "airtel" },
-  { name: "Equitel", detail: "Instant deposit", currencies: "KES", brand: "equitel" },
-  { name: "Binance Pay", detail: "Crypto deposit", currencies: "USDT, BTC, BNB", brand: "binance" },
-  { name: "Mastercard", detail: "Card payment", currencies: "KES, USD, EUR", brand: "mastercard" },
-  { name: "Visa", detail: "Card payment", currencies: "KES, USD, EUR", brand: "visa" },
+// Shown as "Coming soon" until each provider is connected. M-Pesa is added
+// at render time from the live finance details.
+const COMING_SOON_METHODS: DepositMethod[] = [
+  { id: "airtel", name: "Airtel Money", brand: "airtel", available: false },
+  { id: "equitel", name: "Equitel", brand: "equitel", available: false },
+  { id: "binance", name: "Binance Pay", brand: "binance", available: false },
+  { id: "mastercard", name: "Mastercard", brand: "mastercard", available: false },
+  { id: "visa", name: "Visa", brand: "visa", available: false },
 ];
 
 function formatKes(value: number): string {
@@ -81,8 +76,10 @@ export default function FinancePage() {
   const [overview, setOverview] = React.useState<FinanceOverview | null>(null);
   const [loadError, setLoadError] = React.useState("");
   const [loading, setLoading] = React.useState(true);
-  const [depositOpen, setDepositOpen] = React.useState(false);
-  const closeDeposit = React.useCallback(() => setDepositOpen(false), []);
+  const { account } = useAccount();
+  // Which deposit method's screen is open; null shows the method list.
+  const [depositMethod, setDepositMethod] = React.useState<string | null>(null);
+  const closeDeposit = React.useCallback(() => setDepositMethod(null), []);
 
   const [withdrawPhone, setWithdrawPhone] = React.useState("");
   const [withdrawAmount, setWithdrawAmount] = React.useState("");
@@ -125,6 +122,32 @@ export default function FinancePage() {
   const transactions = React.useMemo(() => overview?.transactions ?? [], [overview]);
   const mpesaReady = Boolean(overview?.mpesa?.configured);
 
+  const depositMethods = React.useMemo<DepositMethod[]>(
+    () => [
+      {
+        id: "mpesa",
+        name: "M-Pesa",
+        brand: "mpesa",
+        available: mpesaReady,
+        minKes: mpesaReady ? overview?.mpesa.minAmount : undefined,
+        time: mpesaReady ? "Instant" : undefined,
+      },
+      ...COMING_SOON_METHODS,
+    ],
+    [mpesaReady, overview],
+  );
+
+  // Methods already used for a deposit, from the user's real history.
+  const recentDepositIds = React.useMemo(() => {
+    const ids: string[] = [];
+    for (const t of transactions) {
+      if (t.type !== "Deposit") continue;
+      const id = /pesa/i.test(t.method) ? "mpesa" : null;
+      if (id && !ids.includes(id)) ids.push(id);
+    }
+    return ids;
+  }, [transactions]);
+
   function selectTab(next: Tab) {
     setSearchParams(next === "deposit" ? {} : { tab: next }, { replace: true });
   }
@@ -151,7 +174,7 @@ export default function FinancePage() {
     }
   }
 
-  const title = tab === "withdraw" ? "Withdraw" : tab === "history" ? "Transactions" : "Deposit";
+  const title = tab === "withdraw" ? "Withdraw" : tab === "history" ? "Transactions" : "Account top-up";
 
   return (
     <AppShell title={title}>
@@ -196,23 +219,22 @@ export default function FinancePage() {
         <div className="fin-grid" data-tab={tab}>
           <div className="fin-main">
             {tab !== "withdraw" ? (
-              <section>
-                <h2 className="fin-section-title">Choose Payment Method</h2>
-                <ul className="fin-paylist">
-                  <li>
-                    <PaymentMethodCard name="M-Pesa" detail="Instant deposit" currencies="KES" brand="mpesa"
-                      available={mpesaReady} status={loading && !loadError ? "Checking…" : "Unavailable"}
-                      onSelect={() => setDepositOpen(true)} />
-                  </li>
-                  {OTHER_METHODS.map((method) => (
-                    <li key={method.name}><PaymentMethodCard {...method} /></li>
-                  ))}
-                </ul>
-                <p className="fin-note">
-                  <ShieldCheck size={15} aria-hidden="true" />
-                  M-Pesa sends a prompt to your phone. Enter your PIN to confirm; NeuroOption never asks for your PIN.
-                </p>
-              </section>
+              depositMethod === "mpesa" && overview ? (
+                <MpesaDepositPanel
+                  minAmount={overview.mpesa.minAmount}
+                  maxAmount={overview.mpesa.maxAmount}
+                  defaultPhone={account?.phone}
+                  onBack={closeDeposit}
+                  onFinished={loadOverview}
+                />
+              ) : (
+                <DepositMethods
+                  methods={depositMethods}
+                  recentIds={recentDepositIds}
+                  loading={loading && !loadError}
+                  onSelect={setDepositMethod}
+                />
+              )
             ) : (
               <section className="fin-card is-plain">
                 <div className="fin-card-head">
@@ -332,14 +354,6 @@ export default function FinancePage() {
             </section>
         </div>
 
-        {depositOpen && overview && (
-          <MpesaDepositDialog
-            minAmount={overview.mpesa.minAmount}
-            maxAmount={overview.mpesa.maxAmount}
-            onClose={closeDeposit}
-            onFinished={loadOverview}
-          />
-        )}
       </div>
     </AppShell>
   );
