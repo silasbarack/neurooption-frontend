@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- reCAPTCHA token and widget share one lifecycle. */
 /* eslint-disable react-refresh/only-export-components -- shared widget control API */
 import { useEffect, useRef, useState } from "react";
 
