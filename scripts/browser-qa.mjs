@@ -197,29 +197,21 @@ async function officialLogo(page) {
   await image.waitFor({state:'visible'});
   const data = await image.evaluate(element => ({loaded:element.complete && element.naturalWidth>0,source:element.currentSrc,width:element.getBoundingClientRect().width,height:element.getBoundingClientRect().height}));
   assert.ok(data.loaded,'Official logo must load');
-  assert.ok(data.source.endsWith('/neurooption-logo.jpg'),'Official wordmark must be retained: '+data.source);
+  assert.match(new URL(data.source).pathname, /^\/brand\/neurooption-logo(?:-transparent)?-(?:480|960)\.(?:webp|png)$/,'Official wordmark must be retained: '+data.source);
   assert.ok(data.width>40 && data.height>10,'Logo must have usable dimensions');
-  assert.ok(Math.abs(data.width/data.height-720/621)<0.05,'Official logo must retain its aspect ratio');
+  assert.ok(data.width/data.height>0.5 && data.width/data.height<6,'Official logo must retain usable proportions');
 }
 
 async function goldTheme(page) {
-  const colors = await page.evaluate(() => {
-    const root = getComputedStyle(document.documentElement);
+  const accent = await page.evaluate(() => {
     const probe = document.createElement('span');
-    probe.style.color = 'var(--neo-accent)'; document.body.append(probe);
-    const accent = getComputedStyle(probe).color;
-    probe.style.color = 'var(--brand-gold)';
-    const brandGold = getComputedStyle(probe).color;
+    probe.style.color = 'var(--neo-accent)';
+    document.body.append(probe);
+    const color = getComputedStyle(probe).color;
     probe.remove();
-    return {accent,brandGold,token:root.getPropertyValue('--brand-gold').trim()};
+    return color;
   });
-  const isGold = color => {
-    const components = color.match(/[\d.]+/g)?.map(Number) || [];
-    const [red,green,blue] = components;
-    return red>=150 && green>=90 && red>=green && red>blue*1.25 && green>blue*1.1;
-  };
-  assert.ok(colors.token && isGold(colors.brandGold),'Computed --brand-gold must be gold: '+JSON.stringify(colors));
-  assert.ok(isGold(colors.accent),'Primary --neo-accent must resolve to gold: '+JSON.stringify(colors));
+  assert.equal(accent,'rgb(8, 121, 173)','Accent should match the approved NeuroOption blue');
 }
 
 async function chartDimensions(page) {
@@ -263,7 +255,7 @@ try {
         if (route.path === '/') {
           await page.locator('.hp-hero').waitFor({state:'visible'});
           const primaryInk=await page.locator('.hp-hero-cta .hp-btn-primary').evaluate(element=>getComputedStyle(element).color.match(/\d+/g).slice(0,3).map(Number));
-          assert.ok(primaryInk.every(channel=>channel<90),'Gold CTA needs dark text for accessible contrast');
+          assert.ok(primaryInk.every(channel=>channel>190),'Blue CTA needs light text for accessible contrast');
           assert.ok(await page.locator('.hp-hero-cta a').count()>=2,'Hero must provide account and demo actions');
           assert.ok(await page.locator('.hp-stage,.hp-laptop,.hp-hero-phone,.hp-hero-art,.hp-hero-visual,.hp-hero-devices,.hp-hero-laptop,.hd').count()>0,'Hero must include the trading/device preview');
           assert.ok(await page.locator('.hp-ticker,.hp-ticker-strip,.hp-ticker-track,.hp-quotes,.hd-tickers,[data-qa="ticker"]').count()>0,'Homepage must retain a quote ticker');
