@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { createElement, useEffect, useRef, useState } from "react";
 
 export type RecaptchaAction = "register" | "login" | "forgot_password" | "reset_password" | "delete_account";
 type Config = { enabled: boolean; siteKey: string; version: "v2" };
@@ -71,8 +71,8 @@ export function RecaptchaCheckbox({ action }: { action: RecaptchaAction }) {
     };
   }, [action]);
   if (!enabled && !error) return null;
-  return <div className="neo-recaptcha" style={{ margin: "16px 0", maxWidth: "100%", overflow: "auto" }}>
-    <div ref={host} aria-label="I'm not a robot verification" />
-    {error && <p role="alert" style={{ color: "#b42318", fontSize: 13 }}>{error}</p>}
-  </div>;
+  return createElement("div", { className: "neo-recaptcha", style: { margin: "16px 0", maxWidth: "100%", overflow: "auto" } },
+    createElement("div", { ref: host, "aria-label": "I'm not a robot verification" }),
+    error ? createElement("p", { role: "alert", style: { color: "#b42318", fontSize: 13 } }, error) : null,
+  );
 }
