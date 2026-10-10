@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- shared widget control API */
 import { useEffect, useRef, useState } from "react";
 
 export type RecaptchaAction = "register" | "login" | "forgot_password" | "reset_password" | "delete_account";
