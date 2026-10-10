@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../api/auth.api";
-import { getRecaptchaToken } from "../security/recaptcha";
+import { getRecaptchaToken, RecaptchaCheckbox, resetRecaptcha } from "../security/recaptcha";
 import AuthLayout from "../components/auth/AuthLayout";
 import HeroDashboard from "../components/landing/HeroDashboard";
 import { useAuthLanguage } from "../i18n/useAuthLanguage";
@@ -60,6 +60,7 @@ export default function LoginPage() {
         error instanceof Error ? error.message : tt("cannotConnect");
       setMessage(errorMessage || tt("internalError"));
     } finally {
+      resetRecaptcha("login");
       setLoading(false);
     }
   }
@@ -183,6 +184,7 @@ export default function LoginPage() {
             <span>{tt("rememberMe")}</span>
           </label>
 
+          <RecaptchaCheckbox action="login" />
           <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
               <>
