@@ -45,6 +45,7 @@ export default function ForgotPasswordPage() {
         navigate(`/reset-password?email=${encodeURIComponent(normalizedEmail)}`);
       }, 1200);
     } catch (error) {
+      resetRecaptcha('forgot_password');
       setSuccess(false);
       setMessage(error instanceof Error ? error.message : "Cannot connect to backend");
     } finally {
@@ -89,6 +90,7 @@ export default function ForgotPasswordPage() {
             </div>
           </div>
 
+          <RecaptchaCheckbox action="forgot_password" />
           <RecaptchaCheckbox action="forgot_password" />
           <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
