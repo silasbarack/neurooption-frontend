@@ -47,6 +47,7 @@ export type DeletionCheck = {
 };
 
 export type DeleteAccountRequest = {
+  recaptchaToken?: string;
   password: string;
   confirmation: string;
   reason?: string;
