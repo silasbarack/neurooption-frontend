@@ -12,7 +12,7 @@ import {
   MailCheck,
 } from "lucide-react";
 import AuthLayout from "../components/auth/AuthLayout";
-import { getRecaptchaToken } from "../security/recaptcha";
+import { getRecaptchaToken, RecaptchaCheckbox, resetRecaptcha } from "../security/recaptcha";
 
 type ForgotPasswordResponse = { message?: string; data?: { message?: string } };
 
@@ -45,9 +45,11 @@ export default function ForgotPasswordPage() {
         navigate(`/reset-password?email=${encodeURIComponent(normalizedEmail)}`);
       }, 1200);
     } catch (error) {
+      resetRecaptcha('forgot_password');
       setSuccess(false);
       setMessage(error instanceof Error ? error.message : "Cannot connect to backend");
     } finally {
+      resetRecaptcha("forgot_password");
       setLoading(false);
     }
   }
@@ -88,6 +90,8 @@ export default function ForgotPasswordPage() {
             </div>
           </div>
 
+          <RecaptchaCheckbox action="forgot_password" />
+          <RecaptchaCheckbox action="forgot_password" />
           <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
               <>

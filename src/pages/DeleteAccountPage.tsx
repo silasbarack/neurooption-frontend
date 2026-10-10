@@ -5,7 +5,7 @@ import { ArrowLeft, CircleAlert, LoaderCircle, ShieldAlert, TriangleAlert } from
 import { ApiError } from "../api/api";
 import { accountApi, type DeletionBlocker, type DeletionCheck } from "../api";
 import { logout } from "../utils/storage";
-import { getRecaptchaToken } from "../security/recaptcha";
+import { getRecaptchaToken, RecaptchaCheckbox, resetRecaptcha } from "../security/recaptcha";
 import "./DeleteAccountPage.css";
 
 type Step = "intro" | "reason" | "confirm";
@@ -102,9 +102,11 @@ export default function DeleteAccountPage() {
           return;
         }
       }
+      resetRecaptcha('delete_account');
       setError(err instanceof Error ? err.message : "Could not delete the account. Please try again.");
       setPassword("");
     } finally {
+      resetRecaptcha("delete_account");
       setSubmitting(false);
     }
   }
@@ -250,6 +252,8 @@ export default function DeleteAccountPage() {
                 </p>
               )}
 
+              <RecaptchaCheckbox action="delete_account" />
+              <RecaptchaCheckbox action="delete_account" />
               <div className="da-actions">
                 <button type="button" className="da-btn da-btn-ghost" onClick={() => setStep("reason")} disabled={submitting}>Back</button>
                 <button type="submit" className="da-btn da-btn-danger" disabled={!typedOk || !password || submitting}>

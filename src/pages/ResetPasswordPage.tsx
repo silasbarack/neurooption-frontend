@@ -14,7 +14,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import AuthLayout from "../components/auth/AuthLayout";
-import { getRecaptchaToken } from "../security/recaptcha";
+import { getRecaptchaToken, RecaptchaCheckbox, resetRecaptcha } from "../security/recaptcha";
 
 type ApiResponse = { message?: string; data?: { message?: string } };
 
@@ -55,9 +55,11 @@ export default function ResetPasswordPage() {
       setMessage("Password reset successfully. Redirecting to sign in...");
       window.setTimeout(() => navigate("/login", { replace: true }), 1200);
     } catch (error) {
+      resetRecaptcha('reset_password');
       setSuccess(false);
       setMessage(error instanceof Error ? error.message : "Cannot connect to backend");
     } finally {
+      resetRecaptcha("reset_password");
       setLoading(false);
     }
   }
@@ -76,7 +78,7 @@ export default function ResetPasswordPage() {
       const response = await fetch(`${API_URL}/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: normalizedEmail, recaptchaToken: await getRecaptchaToken("forgot_password") }),
+        body: JSON.stringify({ email: normalizedEmail, recaptchaToken: await getRecaptchaToken("reset_password") }),
       });
       const result: ApiResponse = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.message || result.data?.message || "Could not send a new code");
@@ -88,6 +90,7 @@ export default function ResetPasswordPage() {
       setSuccess(false);
       setMessage(error instanceof Error ? error.message : "Cannot connect to backend");
     } finally {
+      resetRecaptcha("forgot_password");
       setResending(false);
     }
   }
@@ -198,6 +201,8 @@ export default function ResetPasswordPage() {
             {mismatch && <p className="au-field-error">Passwords do not match.</p>}
           </div>
 
+          <RecaptchaCheckbox action="reset_password" />
+          <RecaptchaCheckbox action="reset_password" />
           <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
               <>
@@ -210,6 +215,7 @@ export default function ResetPasswordPage() {
           </button>
         </form>
 
+        <RecaptchaCheckbox action="forgot_password" />
         <div className="au-card-foot">
           <Link to="/login" className="au-back">
             <ArrowLeft size={16} aria-hidden="true" />

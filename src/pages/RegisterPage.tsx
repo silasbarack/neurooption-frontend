@@ -19,7 +19,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { authApi } from "../api/auth.api";
-import { getRecaptchaToken } from "../security/recaptcha";
+import { getRecaptchaToken, RecaptchaCheckbox, resetRecaptcha } from "../security/recaptcha";
 import AuthLayout from "../components/auth/AuthLayout";
 import { useAuthLanguage } from "../i18n/useAuthLanguage";
 
@@ -114,11 +114,13 @@ export default function RegisterPage() {
         navigate("/trading");
       }, 900);
     } catch (error) {
+      resetRecaptcha('register');
       const errorMessage =
         error instanceof Error ? error.message : tt("cannotConnect");
       setSuccess(false);
       setMessage(errorMessage || tt("internalError"));
     } finally {
+      resetRecaptcha("register");
       setLoading(false);
     }
   }
@@ -271,6 +273,8 @@ export default function RegisterPage() {
             </span>
           </label>
 
+          <RecaptchaCheckbox action="register" />
+          <RecaptchaCheckbox action="register" />
           <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
               <>
