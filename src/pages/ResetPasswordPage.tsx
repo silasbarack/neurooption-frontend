@@ -14,7 +14,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import AuthLayout from "../components/auth/AuthLayout";
-import { getRecaptchaToken } from "../security/recaptcha";
+import { getRecaptchaToken, RecaptchaCheckbox, resetRecaptcha } from "../security/recaptcha";
 
 type ApiResponse = { message?: string; data?: { message?: string } };
 
@@ -58,6 +58,7 @@ export default function ResetPasswordPage() {
       setSuccess(false);
       setMessage(error instanceof Error ? error.message : "Cannot connect to backend");
     } finally {
+      resetRecaptcha("reset_password");
       setLoading(false);
     }
   }
@@ -88,6 +89,7 @@ export default function ResetPasswordPage() {
       setSuccess(false);
       setMessage(error instanceof Error ? error.message : "Cannot connect to backend");
     } finally {
+      resetRecaptcha("forgot_password");
       setResending(false);
     }
   }
@@ -198,6 +200,7 @@ export default function ResetPasswordPage() {
             {mismatch && <p className="au-field-error">Passwords do not match.</p>}
           </div>
 
+          <RecaptchaCheckbox action="reset_password" />
           <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
               <>
@@ -210,6 +213,7 @@ export default function ResetPasswordPage() {
           </button>
         </form>
 
+        <RecaptchaCheckbox action="forgot_password" />
         <div className="au-card-foot">
           <Link to="/login" className="au-back">
             <ArrowLeft size={16} aria-hidden="true" />
