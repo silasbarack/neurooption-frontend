@@ -19,6 +19,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { authApi } from "../api/auth.api";
+import { getRecaptchaToken } from "../security/recaptcha";
 import AuthLayout from "../components/auth/AuthLayout";
 import { useAuthLanguage } from "../i18n/useAuthLanguage";
 
@@ -93,6 +94,7 @@ export default function RegisterPage() {
 
     try {
       const response = await authApi.register({
+        recaptchaToken: await getRecaptchaToken("register"),
         fullName: fullName.trim(),
         email: email.trim().toLowerCase(),
         password,
