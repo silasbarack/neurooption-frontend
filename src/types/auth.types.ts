@@ -51,6 +51,8 @@ export type ResetPasswordPayload = {
 };
 
 export type AuthResponse = {
+  welcomeEmailSent?: boolean;
+  welcomeEmailHint?: string;
   accessToken?: string;
   token?: string;
   user?: AuthUser;

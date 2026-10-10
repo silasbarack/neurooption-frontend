@@ -33,7 +33,7 @@ export default function AccountPage() {
     setWelcomeStatus("");
     try {
       const response = await authApi.resendWelcomeEmail();
-      setWelcomeStatus(response.message);
+      setWelcomeStatus(`${response.message} Recipient: ${response.emailHint || "registered email"}.`);
     } catch (error) {
       setWelcomeStatus(error instanceof Error ? error.message : "Unable to send the welcome email.");
     } finally {
