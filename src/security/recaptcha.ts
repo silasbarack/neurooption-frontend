@@ -3,6 +3,8 @@ type Config = { enabled: boolean; siteKey: string };
 type GoogleCaptcha = { ready(callback: () => void): void; execute(siteKey: string, options: { action: string }): Promise<string> };
 declare global { interface Window { grecaptcha?: GoogleCaptcha } }
 const API = import.meta.env.VITE_API_URL || "https://neurooption-backend.onrender.com";
+// Google reCAPTCHA v3 site key is public and safe to store in GitHub.
+const PUBLIC_SITE_KEY = "6LfsHOktAAAAAAabNKVJm3UEoC22Jh6vwTjSV3ZE";
 let configPromise: Promise<Config> | undefined;
 let scriptPromise: Promise<void> | undefined;
 
@@ -11,7 +13,8 @@ async function configuration(): Promise<Config> {
     configPromise = fetch(API.replace(/\/$/, "") + "/auth/recaptcha-config")
       .then(async response => {
         if (!response.ok) throw new Error("Could not load the account security configuration.");
-        return response.json() as Promise<Config>;
+        const config = await response.json() as Config;
+        return { ...config, siteKey: config.enabled ? (config.siteKey || PUBLIC_SITE_KEY) : "" };
       }).catch(error => { configPromise = undefined; throw error; });
   }
   return configPromise;
