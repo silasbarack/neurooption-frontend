@@ -274,7 +274,6 @@ export default function RegisterPage() {
           </label>
 
           <RecaptchaCheckbox action="register" />
-          <RecaptchaCheckbox action="register" />
           <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
               <>

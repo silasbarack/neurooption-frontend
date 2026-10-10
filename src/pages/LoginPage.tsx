@@ -186,7 +186,6 @@ export default function LoginPage() {
           </label>
 
           <RecaptchaCheckbox action="login" />
-          <RecaptchaCheckbox action="login" />
           <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
               <>

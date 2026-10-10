@@ -253,7 +253,6 @@ export default function DeleteAccountPage() {
               )}
 
               <RecaptchaCheckbox action="delete_account" />
-              <RecaptchaCheckbox action="delete_account" />
               <div className="da-actions">
                 <button type="button" className="da-btn da-btn-ghost" onClick={() => setStep("reason")} disabled={submitting}>Back</button>
                 <button type="submit" className="da-btn da-btn-danger" disabled={!typedOk || !password || submitting}>
