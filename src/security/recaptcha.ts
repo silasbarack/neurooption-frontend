@@ -1,73 +1,78 @@
 import { useEffect, useRef, useState } from "react";
-type CaptchaConfig = { enabled: boolean; siteKey: string; version: string };
-type WidgetAPI = { render(el: HTMLElement, options: { sitekey: string; callback: (token: string) => void; "expired-callback": () => void; "error-callback": () => void }): number; reset(id?: number): void };
-declare global { interface Window { grecaptcha?: WidgetAPI } }
+
+export type RecaptchaAction = "register" | "login" | "forgot_password" | "reset_password" | "delete_account";
+type Config = { enabled: boolean; siteKey: string; version: "v2" };
+type Widget = { render(container: HTMLElement, options: { sitekey: string; callback: (token: string) => void; "expired-callback": () => void; "error-callback": () => void }): number; reset(id: number): void };
+declare global { interface Window { grecaptcha?: Widget } }
+
 const API = import.meta.env.VITE_API_URL || "https://neurooption-backend.onrender.com";
-let configPromise: Promise<CaptchaConfig> | undefined;
-let scriptPromise: Promise<void> | undefined;
-let token = "";
-async function config(): Promise<CaptchaConfig> {
-  if (!configPromise) configPromise = fetch(API.replace(/\/$/, "") + "/auth/recaptcha-config").then(async r => {
-    if (!r.ok) throw new Error("Security settings could not load.");
-    return r.json() as Promise<CaptchaConfig>;
-  }).catch(e => { configPromise = undefined; throw e; });
+const tokens = new Map<RecaptchaAction, string>();
+const widgets = new Map<RecaptchaAction, number>();
+let configPromise: Promise<Config> | undefined;
+let loadPromise: Promise<void> | undefined;
+
+function config(): Promise<Config> {
+  if (!configPromise) configPromise = fetch(API.replace(/\/$/, "") + "/auth/recaptcha-config")
+    .then(async response => {
+      if (!response.ok) throw new Error("Security configuration unavailable");
+      return response.json() as Promise<Config>;
+    }).catch(error => { configPromise = undefined; throw error; });
   return configPromise;
 }
-function load(): Promise<void> {
-  if (window.grecaptcha) return Promise.resolve();
-  if (!scriptPromise) scriptPromise = new Promise((resolve, reject) => {
+function loadScript(): Promise<void> {
+  if (!loadPromise) loadPromise = new Promise<void>((resolve, reject) => {
+    if (window.grecaptcha) { resolve(); return; }
     const script = document.createElement("script");
     script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
     script.async = true; script.defer = true;
     script.onload = () => resolve();
-    script.onerror = () => { scriptPromise = undefined; reject(new Error("Google verification couldn't load.")); };
-    document.head.append(script);
+    script.onerror = () => { loadPromise = undefined; reject(new Error("Google security check could not load.")); };
+    document.head.appendChild(script);
   });
-  return scriptPromise;
+  return loadPromise;
 }
-export async function getRecaptchaToken(_action: string): Promise<string | undefined> {
-  const c = await config();
-  if (!c.enabled) return undefined;
-  if (c.version !== "v2") throw new Error("Security configuration mismatch.");
-  if (!token) throw new Error("Please complete the 'I'm not a robot' checkbox first.");
-  const singleUse = token;
-  token = "";
-  return singleUse;
+export function resetRecaptcha(action: RecaptchaAction): void {
+  tokens.delete(action);
+  const id = widgets.get(action);
+  if (id !== undefined) window.grecaptcha?.reset(id);
 }
-export function resetRecaptcha() {
-  token = "";
-  window.dispatchEvent(new Event("neurooption-recaptcha-reset"));
+export async function getRecaptchaToken(action: RecaptchaAction): Promise<string | undefined> {
+  const settings = await config();
+  if (!settings.enabled) return undefined;
+  if (settings.version !== "v2") throw new Error("Security check is not configured for a checkbox.");
+  const token = tokens.get(action);
+  if (!token) throw new Error("Please complete the I'm not a robot checkbox.");
+  return token;
 }
-export default function RecaptchaCheckbox() {
-  const ref = useRef<HTMLDivElement>(null);
-  const widget = useRef<number | null>(null);
-  const [settings, setSettings] = useState<CaptchaConfig | null>(null);
+export function RecaptchaCheckbox({ action }: { action: RecaptchaAction }) {
+  const host = useRef<HTMLDivElement>(null);
+  const [enabled, setEnabled] = useState(false);
   const [error, setError] = useState("");
   useEffect(() => {
-    let alive = true;
-    config().then(v => { if (alive) setSettings(v); }).catch(e => { if (alive) setError(String(e)); });
-    return () => { alive = false; token = ""; };
-  }, []);
-  useEffect(() => {
-    if (!settings?.enabled || !ref.current) return;
-    if (settings.version !== "v2" || !settings.siteKey) { setError("Visible verification isn't configured."); return; }
     let active = true;
-    load().then(() => {
-      if (!active || !ref.current || !window.grecaptcha) return;
-      widget.current = window.grecaptcha.render(ref.current, {
+    config().then(async settings => {
+      if (!active || !settings.enabled) return;
+      setEnabled(true);
+      if (settings.version !== "v2" || !settings.siteKey) throw new Error("Checkbox security check is not configured.");
+      await loadScript();
+      if (!active || !host.current || !window.grecaptcha) return;
+      const id = window.grecaptcha.render(host.current, {
         sitekey: settings.siteKey,
-        callback: value => { token = value; setError(""); },
-        "expired-callback": () => { token = ""; setError("Verification expired. Please try again."); },
-        "error-callback": () => { token = ""; setError("Verification failed to load. Please refresh."); },
+        callback: token => tokens.set(action, token),
+        "expired-callback": () => tokens.delete(action),
+        "error-callback": () => { tokens.delete(action); setError("Verification failed. Please retry."); },
       });
-    }).catch(e => { if(active) setError(e instanceof Error ? e.message : "Verification unavailable."); });
-    const reset = () => { token = ""; if (widget.current !== null) window.grecaptcha?.reset(widget.current); };
-    window.addEventListener("neurooption-recaptcha-reset", reset);
-    return () => { active = false; window.removeEventListener("neurooption-recaptcha-reset", reset); };
-  }, [settings]);
-  if (!settings?.enabled && !error) return null;
-  return <div style={{ padding: "12px 0", maxWidth: "100%" }} aria-label="Human verification">
-    <div ref={ref} style={{ maxWidth: "100%", overflow: "hidden" }} />
-    {error && <p role="alert" style={{ color: "#ae3131", fontSize: 13 }}>{error}</p>}
+      widgets.set(action, id);
+    }).catch(e => { if (active) setError(e instanceof Error ? e.message : "Security verification unavailable."); });
+    return () => {
+      active = false;
+      tokens.delete(action);
+      widgets.delete(action);
+    };
+  }, [action]);
+  if (!enabled && !error) return null;
+  return <div className="neo-recaptcha" style={{ margin: "16px 0", maxWidth: "100%", overflow: "auto" }}>
+    <div ref={host} aria-label="I'm not a robot verification" />
+    {error && <p role="alert" style={{ color: "#b42318", fontSize: 13 }}>{error}</p>}
   </div>;
 }
