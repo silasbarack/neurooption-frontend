@@ -55,6 +55,7 @@ export default function ResetPasswordPage() {
       setMessage("Password reset successfully. Redirecting to sign in...");
       window.setTimeout(() => navigate("/login", { replace: true }), 1200);
     } catch (error) {
+      resetRecaptcha('reset_password');
       setSuccess(false);
       setMessage(error instanceof Error ? error.message : "Cannot connect to backend");
     } finally {
@@ -200,6 +201,7 @@ export default function ResetPasswordPage() {
             {mismatch && <p className="au-field-error">Passwords do not match.</p>}
           </div>
 
+          <RecaptchaCheckbox action="reset_password" />
           <RecaptchaCheckbox action="reset_password" />
           <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
