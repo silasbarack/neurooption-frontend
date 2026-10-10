@@ -4,7 +4,7 @@ type GoogleCaptcha = { ready(callback: () => void): void; execute(siteKey: strin
 declare global { interface Window { grecaptcha?: GoogleCaptcha } }
 const API = import.meta.env.VITE_API_URL || "https://neurooption-backend.onrender.com";
 // Google reCAPTCHA v3 site key is public and safe to store in GitHub.
-const PUBLIC_SITE_KEY = "6LfsHOktAAAAAAabNKVJm3UEoC22Jh6vwTjSV3ZE";
+const PUBLIC_SITE_KEY = "6LfsHOktAAAAAGIU04FNETNix458zKFL3qGfyVQq";
 let configPromise: Promise<Config> | undefined;
 let scriptPromise: Promise<void> | undefined;
 
