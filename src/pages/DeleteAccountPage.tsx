@@ -102,6 +102,7 @@ export default function DeleteAccountPage() {
           return;
         }
       }
+      resetRecaptcha('delete_account');
       setError(err instanceof Error ? err.message : "Could not delete the account. Please try again.");
       setPassword("");
     } finally {
@@ -251,6 +252,7 @@ export default function DeleteAccountPage() {
                 </p>
               )}
 
+              <RecaptchaCheckbox action="delete_account" />
               <RecaptchaCheckbox action="delete_account" />
               <div className="da-actions">
                 <button type="button" className="da-btn da-btn-ghost" onClick={() => setStep("reason")} disabled={submitting}>Back</button>
