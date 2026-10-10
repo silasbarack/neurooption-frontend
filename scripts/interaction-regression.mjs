@@ -17,11 +17,11 @@ async function check(name, fn) {
 }
 await page.goto("http://127.0.0.1:4173/markets");
 await page.locator(".mk-star").first().waitFor();
-await check("gold accent matches approved brand", async () => {
+await check("ocean-blue accent matches approved brand", async () => {
   const value = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--neo-accent").trim());
   // Resolve aliases through actual computed color rather than compare CSS spelling.
   const color = await page.evaluate(() => { const el=document.createElement("span");el.style.color="var(--neo-accent)";document.body.append(el);const color=getComputedStyle(el).color;el.remove();return color; });
-  assert.equal(color,"rgb(244, 199, 81)",value);
+  assert.equal(color,"rgb(8, 121, 173)",value);
 });
 await check("closed drawer controls cannot receive keyboard focus", async () => {
   assert.equal(await page.locator(".neo-drawer").evaluate(el=>el.inert),true);
