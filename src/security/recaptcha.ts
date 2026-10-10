@@ -70,8 +70,7 @@ export function RecaptchaCheckbox({ action }: { action: RecaptchaAction }) {
       widgets.delete(action);
     };
   }, [action]);
-  if (!enabled && !error) return null;
-  return createElement("div", { className: "neo-recaptcha", style: { margin: "16px 0", maxWidth: "100%", overflow: "auto" } },
+  return createElement("div", { className: "neo-recaptcha", style: { display: enabled || error ? "block" : "none", margin: "16px 0", maxWidth: "100%", overflow: "auto" } },
     createElement("div", { ref: host, "aria-label": "I'm not a robot verification" }),
     error ? createElement("p", { role: "alert", style: { color: "#b42318", fontSize: 13 } }, error) : null,
   );
