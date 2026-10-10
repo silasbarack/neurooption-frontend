@@ -14,6 +14,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import AuthLayout from "../components/auth/AuthLayout";
+import { getRecaptchaToken } from "../security/recaptcha";
 
 type ApiResponse = { message?: string; data?: { message?: string } };
 
@@ -45,7 +46,7 @@ export default function ResetPasswordPage() {
       const response = await fetch(`${API_URL}/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), code, password }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), code, password, recaptchaToken: await getRecaptchaToken("reset_password") }),
       });
       const result: ApiResponse = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.message || result.data?.message || "Password reset failed");
@@ -75,7 +76,7 @@ export default function ResetPasswordPage() {
       const response = await fetch(`${API_URL}/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: normalizedEmail }),
+        body: JSON.stringify({ email: normalizedEmail, recaptchaToken: await getRecaptchaToken("forgot_password") }),
       });
       const result: ApiResponse = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.message || result.data?.message || "Could not send a new code");

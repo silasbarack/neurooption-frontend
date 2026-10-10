@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../api/auth.api";
+import { getRecaptchaToken } from "../security/recaptcha";
 import AuthLayout from "../components/auth/AuthLayout";
 import HeroDashboard from "../components/landing/HeroDashboard";
 import { useAuthLanguage } from "../i18n/useAuthLanguage";
@@ -40,7 +41,7 @@ export default function LoginPage() {
     setSuccess(false);
 
     try {
-      const response = await authApi.login({ email, password });
+      const response = await authApi.login({ email, password, recaptchaToken: await getRecaptchaToken("login") });
 
       if (response.token) {
         const storage = rememberMe ? localStorage : sessionStorage;

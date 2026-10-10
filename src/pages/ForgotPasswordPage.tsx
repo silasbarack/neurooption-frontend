@@ -12,6 +12,7 @@ import {
   MailCheck,
 } from "lucide-react";
 import AuthLayout from "../components/auth/AuthLayout";
+import { getRecaptchaToken } from "../security/recaptcha";
 
 type ForgotPasswordResponse = { message?: string; data?: { message?: string } };
 
@@ -33,7 +34,7 @@ export default function ForgotPasswordPage() {
       const response = await fetch(`${API_URL}/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: normalizedEmail }),
+        body: JSON.stringify({ email: normalizedEmail, recaptchaToken: await getRecaptchaToken("forgot_password") }),
       });
       const result: ForgotPasswordResponse = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.message || result.data?.message || "Password recovery request failed");

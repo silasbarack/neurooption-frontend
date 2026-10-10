@@ -5,6 +5,7 @@ import { ArrowLeft, CircleAlert, LoaderCircle, ShieldAlert, TriangleAlert } from
 import { ApiError } from "../api/api";
 import { accountApi, type DeletionBlocker, type DeletionCheck } from "../api";
 import { logout } from "../utils/storage";
+import { getRecaptchaToken } from "../security/recaptcha";
 import "./DeleteAccountPage.css";
 
 type Step = "intro" | "reason" | "confirm";
@@ -76,6 +77,7 @@ export default function DeleteAccountPage() {
     setError("");
     try {
       const result = await accountApi.deleteAccount({
+        recaptchaToken: await getRecaptchaToken("delete_account"),
         password,
         confirmation: confirmation.trim(),
         reason: reason || undefined,
