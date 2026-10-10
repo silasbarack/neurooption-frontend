@@ -56,6 +56,7 @@ export default function LoginPage() {
         navigate("/trading");
       }, 350);
     } catch (error) {
+      resetRecaptcha('login');
       const errorMessage =
         error instanceof Error ? error.message : tt("cannotConnect");
       setMessage(errorMessage || tt("internalError"));
@@ -184,6 +185,7 @@ export default function LoginPage() {
             <span>{tt("rememberMe")}</span>
           </label>
 
+          <RecaptchaCheckbox action="login" />
           <RecaptchaCheckbox action="login" />
           <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
