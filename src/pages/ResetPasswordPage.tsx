@@ -202,7 +202,6 @@ export default function ResetPasswordPage() {
           </div>
 
           <RecaptchaCheckbox action="reset_password" />
-          <RecaptchaCheckbox action="reset_password" />
           <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
               <>
@@ -215,7 +214,6 @@ export default function ResetPasswordPage() {
           </button>
         </form>
 
-        <RecaptchaCheckbox action="forgot_password" />
         <div className="au-card-foot">
           <Link to="/login" className="au-back">
             <ArrowLeft size={16} aria-hidden="true" />

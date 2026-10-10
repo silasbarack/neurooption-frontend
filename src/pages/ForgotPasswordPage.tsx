@@ -91,7 +91,6 @@ export default function ForgotPasswordPage() {
           </div>
 
           <RecaptchaCheckbox action="forgot_password" />
-          <RecaptchaCheckbox action="forgot_password" />
           <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
               <>
