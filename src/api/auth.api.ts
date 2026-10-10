@@ -9,8 +9,8 @@ import type {
 } from "../types/auth.types";
 
 export const authApi = {
-  resendWelcomeEmail(): Promise<{ success: boolean; emailSent: boolean; message: string }> {
-    return api.post<{ success: boolean; emailSent: boolean; message: string }>("/auth/resend-welcome", {});
+  resendWelcomeEmail(): Promise<{ success: boolean; emailSent: boolean; emailHint?: string; message: string }> {
+    return api.post<{ success: boolean; emailSent: boolean; emailHint?: string; message: string }>("/auth/resend-welcome", {});
   },
 
   login(payload: LoginPayload): Promise<AuthResponse> {
