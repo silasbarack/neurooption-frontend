@@ -1,46 +1,73 @@
-/** Fresh single-use reCAPTCHA v3 tokens for security-sensitive actions. */
-type Config = { enabled: boolean; siteKey: string };
-type GoogleCaptcha = { ready(callback: () => void): void; execute(siteKey: string, options: { action: string }): Promise<string> };
-declare global { interface Window { grecaptcha?: GoogleCaptcha } }
+import { useEffect, useRef, useState } from "react";
+type CaptchaConfig = { enabled: boolean; siteKey: string; version: string };
+type WidgetAPI = { render(el: HTMLElement, options: { sitekey: string; callback: (token: string) => void; "expired-callback": () => void; "error-callback": () => void }): number; reset(id?: number): void };
+declare global { interface Window { grecaptcha?: WidgetAPI } }
 const API = import.meta.env.VITE_API_URL || "https://neurooption-backend.onrender.com";
-// Google reCAPTCHA v3 site key is public and safe to store in GitHub.
-const PUBLIC_SITE_KEY = "6LfsHOktAAAAAGIU04FNETNix458zKFL3qGfyVQq";
-let configPromise: Promise<Config> | undefined;
+let configPromise: Promise<CaptchaConfig> | undefined;
 let scriptPromise: Promise<void> | undefined;
-
-async function configuration(): Promise<Config> {
-  if (!configPromise) {
-    configPromise = fetch(API.replace(/\/$/, "") + "/auth/recaptcha-config")
-      .then(async response => {
-        if (!response.ok) throw new Error("Could not load the account security configuration.");
-        const config = await response.json() as Config;
-        return { ...config, siteKey: config.enabled ? (config.siteKey || PUBLIC_SITE_KEY) : "" };
-      }).catch(error => { configPromise = undefined; throw error; });
-  }
+let token = "";
+async function config(): Promise<CaptchaConfig> {
+  if (!configPromise) configPromise = fetch(API.replace(/\/$/, "") + "/auth/recaptcha-config").then(async r => {
+    if (!r.ok) throw new Error("Security settings could not load.");
+    return r.json() as Promise<CaptchaConfig>;
+  }).catch(e => { configPromise = undefined; throw e; });
   return configPromise;
 }
-function load(siteKey: string): Promise<void> {
-  if (!scriptPromise) {
-    scriptPromise = new Promise<void>((resolve, reject) => {
-      if (window.grecaptcha) { resolve(); return; }
-      const script = document.createElement("script");
-      script.src = "https://www.google.com/recaptcha/api.js?render=" + encodeURIComponent(siteKey);
-      script.async = true;
-      script.defer = true;
-      script.onload = () => resolve();
-      script.onerror = () => { scriptPromise = undefined; reject(new Error("Security verification could not load. Please retry.")); };
-      document.head.appendChild(script);
-    });
-  }
+function load(): Promise<void> {
+  if (window.grecaptcha) return Promise.resolve();
+  if (!scriptPromise) scriptPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
+    script.async = true; script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => { scriptPromise = undefined; reject(new Error("Google verification couldn't load.")); };
+    document.head.append(script);
+  });
   return scriptPromise;
 }
-
-export async function getRecaptchaToken(action: "register" | "login" | "forgot_password" | "reset_password" | "delete_account"): Promise<string | undefined> {
-  const config = await configuration();
-  if (!config.enabled) return undefined;
-  if (!config.siteKey) throw new Error("Security verification is not configured. Contact Support.");
-  await load(config.siteKey);
-  if (!window.grecaptcha) throw new Error("Security verification is unavailable.");
-  await new Promise<void>(resolve => window.grecaptcha!.ready(resolve));
-  return window.grecaptcha.execute(config.siteKey, { action });
+export async function getRecaptchaToken(_action: string): Promise<string | undefined> {
+  const c = await config();
+  if (!c.enabled) return undefined;
+  if (c.version !== "v2") throw new Error("Security configuration mismatch.");
+  if (!token) throw new Error("Please complete the 'I'm not a robot' checkbox first.");
+  const singleUse = token;
+  token = "";
+  return singleUse;
+}
+export function resetRecaptcha() {
+  token = "";
+  window.dispatchEvent(new Event("neurooption-recaptcha-reset"));
+}
+export default function RecaptchaCheckbox() {
+  const ref = useRef<HTMLDivElement>(null);
+  const widget = useRef<number | null>(null);
+  const [settings, setSettings] = useState<CaptchaConfig | null>(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    let alive = true;
+    config().then(v => { if (alive) setSettings(v); }).catch(e => { if (alive) setError(String(e)); });
+    return () => { alive = false; token = ""; };
+  }, []);
+  useEffect(() => {
+    if (!settings?.enabled || !ref.current) return;
+    if (settings.version !== "v2" || !settings.siteKey) { setError("Visible verification isn't configured."); return; }
+    let active = true;
+    load().then(() => {
+      if (!active || !ref.current || !window.grecaptcha) return;
+      widget.current = window.grecaptcha.render(ref.current, {
+        sitekey: settings.siteKey,
+        callback: value => { token = value; setError(""); },
+        "expired-callback": () => { token = ""; setError("Verification expired. Please try again."); },
+        "error-callback": () => { token = ""; setError("Verification failed to load. Please refresh."); },
+      });
+    }).catch(e => { if(active) setError(e instanceof Error ? e.message : "Verification unavailable."); });
+    const reset = () => { token = ""; if (widget.current !== null) window.grecaptcha?.reset(widget.current); };
+    window.addEventListener("neurooption-recaptcha-reset", reset);
+    return () => { active = false; window.removeEventListener("neurooption-recaptcha-reset", reset); };
+  }, [settings]);
+  if (!settings?.enabled && !error) return null;
+  return <div style={{ padding: "12px 0", maxWidth: "100%" }} aria-label="Human verification">
+    <div ref={ref} style={{ maxWidth: "100%", overflow: "hidden" }} />
+    {error && <p role="alert" style={{ color: "#ae3131", fontSize: 13 }}>{error}</p>}
+  </div>;
 }
