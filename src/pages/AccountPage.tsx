@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { authApi } from "../api/auth.api";
 import { Link } from "react-router-dom";
 import { ArrowDownToLine, ArrowUpFromLine, Award, BadgeCheck, ChevronRight, Eye, EyeOff, FileText, Fingerprint, Settings, ShieldCheck, Trophy, Wallet } from "lucide-react";
 import AppShell from "../components/shell/AppShell";
@@ -25,6 +26,20 @@ export default function AccountPage() {
   const { account, error, displayName } = useAccount();
   const [mode, setMode] = useState<Mode>("real");
   const [hidden, setHidden] = useState(false);
+  const [welcomeStatus, setWelcomeStatus] = useState("");
+  const [resendingWelcome, setResendingWelcome] = useState(false);
+  async function resendWelcome() {
+    setResendingWelcome(true);
+    setWelcomeStatus("");
+    try {
+      const response = await authApi.resendWelcomeEmail();
+      setWelcomeStatus(response.message);
+    } catch (error) {
+      setWelcomeStatus(error instanceof Error ? error.message : "Unable to send the welcome email.");
+    } finally {
+      setResendingWelcome(false);
+    }
+  }
   const mask = (text: string) => (hidden ? "••••••" : text);
   const selected = account?.[mode];
   const balanceValid = typeof selected?.balance === "number" && Number.isFinite(selected.balance) && selected.balance >= 0;
@@ -54,6 +69,7 @@ export default function AccountPage() {
     <section className="ac-col" aria-label="Account tools"><div className="ac-section-heading"><h2>Account tools</h2><span>Made for your next move</span></div><div className="ac-tiles">{TILES.map(({ label, to, icon: Icon }) => <Link key={label} to={to} className="ac-tile neo-card"><span className="ac-tile-icon"><Icon size={23} strokeWidth={1.6} aria-hidden="true" /></span><span>{label}</span><ChevronRight className="ac-tile-chevron" size={13} aria-hidden="true" /></Link>)}</div>
       <Link to="/settings" className="ac-progress neo-card"><span className="ac-progress-icon"><ShieldCheck size={23} strokeWidth={1.6} aria-hidden="true" /></span><span className="ac-progress-text"><b>{account ? completion >= 100 ? "Your profile is complete" : "Complete your profile" : "Your profile"}</b><small>{account ? completion >= 100 ? "All your profile steps are complete." : "Next step: "+(nextStep?.label ?? "Review your profile")+"." : error ? "Profile status is currently unavailable." : "Loading your profile progress…"}</small></span><ChevronRight size={18} className="ac-chev" aria-hidden="true" />{account ? <><span className="ac-progress-bar" role="progressbar" aria-label="Profile completeness" aria-valuemin={0} aria-valuemax={100} aria-valuenow={completion}><i style={{ width: completion+"%" }} /></span><em>{completion}%</em></> : !error && <span className="neo-skeleton ac-progress-loading" style={{ height: 6 }} />}</Link>
       {account && <section className="ac-details neo-card" aria-label="Personal information"><h2>Personal information <Link to="/settings">Edit <ChevronRight size={13} aria-hidden="true" /></Link></h2><dl><div><dt>Email address</dt><dd>{account.email}</dd></div><div><dt>Phone number</dt><dd>{account.phone || "Not added"}</dd></div><div><dt>Member since</dt><dd>{new Date(account.memberSince).toLocaleDateString("en-KE", { month: "long", year: "numeric" })}</dd></div></dl></section>}
+      <div className="neo-card" style={{ padding: 18, display: "grid", gap: 10 }}><strong>Welcome email</strong><p style={{ margin: 0, fontSize: 13 }}>Did not receive your registration confirmation? Request another copy.</p><button type="button" className="neo-btn neo-btn-outline" onClick={resendWelcome} disabled={resendingWelcome}>{resendingWelcome ? "Sending…" : "Resend welcome email"}</button>{welcomeStatus && <p role="status" style={{ margin: 0, fontSize: 12 }}>{welcomeStatus}</p>}</div>
       <div className="ac-security-note"><ShieldCheck size={16} aria-hidden="true" /><p>Keep your details up to date and review your security settings regularly.</p></div>
     </section>
   </div></AppShell>;
