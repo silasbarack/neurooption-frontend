@@ -114,6 +114,7 @@ export default function RegisterPage() {
         navigate("/trading");
       }, 900);
     } catch (error) {
+      resetRecaptcha('register');
       const errorMessage =
         error instanceof Error ? error.message : tt("cannotConnect");
       setSuccess(false);
@@ -272,6 +273,7 @@ export default function RegisterPage() {
             </span>
           </label>
 
+          <RecaptchaCheckbox action="register" />
           <RecaptchaCheckbox action="register" />
           <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
