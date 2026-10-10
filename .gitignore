@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Never commit runtime credentials
+.env
+.env.*
+!.env.example
