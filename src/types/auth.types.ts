@@ -30,11 +30,13 @@ export type AuthUser = {
 };
 
 export type LoginPayload = {
+  recaptchaToken?: string;
   email: string;
   password: string;
 };
 
 export type RegisterPayload = {
+  recaptchaToken?: string;
   fullName?: string;
   name?: string;
   email: string;
@@ -42,6 +44,7 @@ export type RegisterPayload = {
 };
 
 export type ForgotPasswordPayload = {
+  recaptchaToken?: string;
   email: string;
 };
 
