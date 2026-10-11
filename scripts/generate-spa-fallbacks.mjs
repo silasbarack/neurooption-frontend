@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 const routes = [
   "login",
   "admin",
+  "admin/setup",
   "signin",
   "register",
   "registration",
