@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 export type RecaptchaAction = "register" | "login" | "forgot_password" | "reset_password" | "delete_account";
 type Config = { enabled: boolean; siteKey: string; version: "v2" };
-type Widget = { render(container: HTMLElement, options: { sitekey: string; callback: (token: string) => void; "expired-callback": () => void; "error-callback": () => void }): number; reset(id: number): void };
+type Widget = { render(container: HTMLElement, options: { sitekey: string; callback: (token: string) => void; "expired-callback": () => void; "error-callback": () => void }): number; reset(id: number): void; getResponse(id: number): string };
 declare global { interface Window { grecaptcha?: Widget } }
 
 const API = import.meta.env.VITE_API_URL || "https://neurooption-backend.onrender.com";
@@ -55,8 +55,18 @@ export async function getRecaptchaToken(action: RecaptchaAction): Promise<string
   const settings = await config();
   if (!settings.enabled) return undefined;
   if (settings.version !== "v2") throw new Error("Security check is not configured for a checkbox.");
-  const token = tokens.get(action);
+  const widgetId = widgets.get(action);
+  // Read directly from Google's widget at the moment of form submission.
+  // Do not submit a cached callback token after an expiry or reset.
+  const token = widgetId === undefined ? "" :
+    typeof window.grecaptcha?.getResponse === "function"
+      ? window.grecaptcha.getResponse(widgetId)
+      : "";
   if (!token) throw new Error("Please complete the I'm not a robot checkbox.");
+  if (token.length < 20 || token.length > 4096) {
+    resetRecaptcha(action);
+    throw new Error("The security check returned an invalid response. Please try again.");
+  }
   return token;
 }
 export function RecaptchaCheckbox({ action }: { action: RecaptchaAction }) {
