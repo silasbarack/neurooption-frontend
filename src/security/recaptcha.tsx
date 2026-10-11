@@ -23,11 +23,24 @@ function config(): Promise<Config> {
 }
 function loadScript(): Promise<void> {
   if (!loadPromise) loadPromise = new Promise<void>((resolve, reject) => {
-    if (window.grecaptcha) { resolve(); return; }
+    if (typeof window.grecaptcha?.render === "function") { resolve(); return; }
     const script = document.createElement("script");
     script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
     script.async = true; script.defer = true;
-    script.onload = () => resolve();
+    script.onload = () => {
+      let attempts = 0;
+      const checkReady = () => {
+        if (typeof window.grecaptcha?.render === "function") {
+          resolve();
+        } else if (++attempts >= 80) {
+          loadPromise = undefined;
+          reject(new Error("Google reCAPTCHA checkbox did not initialize. Please reload and retry."));
+        } else {
+          window.setTimeout(checkReady, 125);
+        }
+      };
+      checkReady();
+    };
     script.onerror = () => { loadPromise = undefined; reject(new Error("Google security check could not load.")); };
     document.head.appendChild(script);
   });
@@ -36,7 +49,7 @@ function loadScript(): Promise<void> {
 export function resetRecaptcha(action: RecaptchaAction): void {
   tokens.delete(action);
   const id = widgets.get(action);
-  if (id !== undefined) window.grecaptcha?.reset(id);
+  if (id !== undefined && typeof window.grecaptcha?.reset === "function") window.grecaptcha.reset(id);
 }
 export async function getRecaptchaToken(action: RecaptchaAction): Promise<string | undefined> {
   const settings = await config();
@@ -57,7 +70,7 @@ export function RecaptchaCheckbox({ action }: { action: RecaptchaAction }) {
       setEnabled(true);
       if (settings.version !== "v2" || !settings.siteKey) throw new Error("Checkbox security check is not configured.");
       await loadScript();
-      if (!active || !host.current || !window.grecaptcha) return;
+      if (!active || !host.current || typeof window.grecaptcha?.render !== "function") return;
       const id = window.grecaptcha.render(host.current, {
         sitekey: settings.siteKey,
         callback: token => tokens.set(action, token),
