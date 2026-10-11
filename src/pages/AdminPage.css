@@ -88,3 +88,16 @@
 @media(max-width:1200px){.na-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.na-analysis-grid{grid-template-columns:1fr}.na-sidebar{width:210px;flex-basis:210px}.na-content{padding:26px 23px}}
 @media(max-width:760px){.na-shell{display:block}.na-sidebar{position:relative;width:100%;min-height:0;padding:12px 18px;display:flex;flex-direction:row;align-items:center;gap:12px}.na-sidebar-brand{margin:0 auto 0 0}.na-sidebar-section,.na-nav-item,.na-sidebar-spacer,.na-admin-profile{display:none}.na-logout{padding:8px 10px;white-space:nowrap;font-size:11px}.na-topbar{height:auto;padding:13px 17px;flex-wrap:wrap}.na-content{padding:24px 14px}.na-heading-row{display:block}.na-update{margin-top:14px}.na-stats{gap:10px}.na-stat{padding:15px}.na-stat strong{font-size:23px}.na-filter-note{width:100%}.na-analysis-grid{gap:11px}.na-table-controls{flex-wrap:wrap}.na-table-controls select{width:100%}.na-bar-label{font-size:8px;writing-mode:vertical-rl;height:31px}.na-chart{gap:6px}.na-panel-heading{padding:19px 17px 12px}.na-login-card{padding:26px}}
 @media(max-width:390px){.na-stats{grid-template-columns:1fr}.na-tabs button{padding:8px 9px;font-size:11px}}
+
+/* Responsive landscape administrator sign-in */
+.na-auth{min-height:100svh;padding:20px}
+.na-login-card{width:min(860px,100%);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);padding:0;overflow:hidden}
+.na-login-card>.na-login-brand{grid-column:1;grid-row:1/span 8;background:#102549;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.na-login-card>.na-login-brand .neurooption-logo-picture{display:block;width:180px;max-width:100%;height:140px}
+.na-login-card>.na-login-brand .neurooption-logo{display:block;width:180px!important;height:140px!important;object-fit:contain!important}
+.na-login-card>.na-login-brand span{color:#a9d3f5}
+.na-login-card>:not(.na-login-brand){grid-column:2;margin-left:30px;margin-right:30px}
+.na-login-card>.na-login-icon{margin-top:25px;margin-bottom:12px}
+.na-login-card>.na-auth-footer{margin-bottom:24px}
+@media(max-width:680px) and (orientation:portrait){.na-login-card{display:block;padding:22px}.na-login-card>.na-login-brand{background:white;display:flex;flex-direction:row;padding:0}.na-login-card>.na-login-brand .neurooption-logo-picture{height:70px;width:100px}.na-login-card>.na-login-brand .neurooption-logo{height:70px!important;width:100px!important}.na-login-card>.na-login-brand span{color:#3473b1}.na-login-card>:not(.na-login-brand){margin-left:0;margin-right:0}}
+@media(orientation:landscape) and (max-height:560px){.na-auth{padding:8px}.na-login-card>.na-login-icon{display:none}.na-login-card>.na-eyebrow{margin-top:12px}.na-login-card>h1{font-size:22px}.na-login-form{gap:7px}}
