@@ -5,6 +5,7 @@ import { getToken } from "./utils/storage";
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
+const AdminSetupPage = lazy(() => import("./pages/AdminSetupPage"));
 const RecaptchaTestPage = lazy(() => import("./pages/RecaptchaTestPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
@@ -59,6 +60,7 @@ export default function App() {
 
           <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/setup" element={<AdminSetupPage />} />
           <Route path="/security/recaptcha-test" element={<RequireAuth><RecaptchaTestPage /></RequireAuth>} />
           <Route path="/account-deleted" element={<AccountDeletedPage />} />
           <Route path="/signin" element={<Navigate to="/login" replace />} />
