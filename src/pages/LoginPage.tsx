@@ -191,10 +191,10 @@ export default function LoginPage() {
           <RecaptchaCheckbox action="login" />
           {captchaFailures > 0 && (
             <div role="status" className="au-hint">
-              {captchaFailures < 3 ? `Verification attempt ${captchaFailures} of 3 failed. Please complete a new Google check.` : "Three verification attempts failed. Refresh this page to restart verification."}
+              {captchaFailures < 3 ? `Verification attempt ${captchaFailures} of 3 failed. Please complete a new Google check.` : "Three attempts did not pass. You may retry Google verification or refresh the page."}
             </div>
           )}
-          <button className="au-submit" type="submit" disabled={loading || captchaFailures >= 3}>
+          <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
               <>
                 <LoaderCircle size={18} className="au-spin" aria-hidden="true" />
