@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import AdminSetupPage from "./AdminSetupPage";
 import {
   Activity, ArrowDownRight, ArrowRight, ArrowUpRight, BarChart3,
   CircleAlert, Clock3, Eye, EyeOff, Filter, LayoutDashboard,
@@ -67,6 +68,7 @@ async function adminRequest<T>(path: string, token: string, options?: RequestIni
 }
 
 export default function AdminPage() {
+  const location = useLocation();
   const [token, setToken] = useState(() => sessionStorage.getItem(SESSION_KEY) || "");
   const [admin, setAdmin] = useState<Admin | null>(null);
   const [authChecking, setAuthChecking] = useState(Boolean(token));
@@ -165,6 +167,11 @@ export default function AdminPage() {
     }
   }
 
+  // Serve initial provisioning on the stable /admin path as a CDN-safe fallback.
+  if (new URLSearchParams(location.search).get("mode") === "setup") {
+    return <AdminSetupPage />;
+  }
+
   if (!access) {
     return (
       <main className="na-auth">
@@ -187,6 +194,7 @@ export default function AdminPage() {
               <button className="na-primary" type="submit" disabled={signingIn}>{signingIn ? "Verifying…" : "Sign in to dashboard"}<ArrowRight size={17}/></button>
             </form>
           )}
+          <div className="na-initial-setup"><Link to="/admin?mode=setup">First-time setup: Create Super Administrator →</Link></div>
           <div className="na-auth-footer"><LockKeyhole size={15}/> Protected administrator workspace <Link to="/">Return to NeuroOption</Link></div>
         </div>
       </main>
