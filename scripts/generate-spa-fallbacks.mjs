@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 
 const routes = [
   "login",
+  "admin",
   "signin",
   "register",
   "registration",
