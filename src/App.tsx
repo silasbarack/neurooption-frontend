@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { getToken } from "./utils/storage";
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
+const RecaptchaTestPage = lazy(() => import("./pages/RecaptchaTestPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
 
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/security/recaptcha-test" element={<RequireAuth><RecaptchaTestPage /></RequireAuth>} />
           <Route path="/account-deleted" element={<AccountDeletedPage />} />
           <Route path="/signin" element={<Navigate to="/login" replace />} />
 
