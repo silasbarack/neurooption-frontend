@@ -101,3 +101,5 @@
 .na-login-card>.na-auth-footer{margin-bottom:24px}
 @media(max-width:680px) and (orientation:portrait){.na-login-card{display:block;padding:22px}.na-login-card>.na-login-brand{background:white;display:flex;flex-direction:row;padding:0}.na-login-card>.na-login-brand .neurooption-logo-picture{height:70px;width:100px}.na-login-card>.na-login-brand .neurooption-logo{height:70px!important;width:100px!important}.na-login-card>.na-login-brand span{color:#3473b1}.na-login-card>:not(.na-login-brand){margin-left:0;margin-right:0}}
 @media(orientation:landscape) and (max-height:560px){.na-auth{padding:8px}.na-login-card>.na-login-icon{display:none}.na-login-card>.na-eyebrow{margin-top:12px}.na-login-card>h1{font-size:22px}.na-login-form{gap:7px}}
+
+.na-initial-setup{display:flex;justify-content:center;margin:6px 20px 2px;font-size:12px}.na-initial-setup a{color:#1e72df;font-weight:750;text-decoration:underline;text-underline-offset:3px}.na-initial-setup a:focus-visible{outline:2px solid #4388f0;outline-offset:3px}
