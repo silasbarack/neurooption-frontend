@@ -32,7 +32,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
-  const [captchaFailures, setCaptchaFailures] = useState(0);
 
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -57,9 +56,6 @@ export default function LoginPage() {
         navigate("/trading");
       }, 350);
     } catch (error) {
-      const reason = error instanceof Error ? error.message : '';
-      if (/security verification|captcha|robot/i.test(reason)) setCaptchaFailures(count => Math.min(3, count + 1));
-      resetRecaptcha('login');
       const errorMessage =
         error instanceof Error ? error.message : tt("cannotConnect");
       setMessage(errorMessage || tt("internalError"));
@@ -189,11 +185,6 @@ export default function LoginPage() {
           </label>
 
           <RecaptchaCheckbox action="login" />
-          {captchaFailures > 0 && (
-            <div role="status" className="au-hint">
-              {captchaFailures < 3 ? `Verification attempt ${captchaFailures} of 3 failed. Please complete a new Google check.` : "Three attempts did not pass. You may retry Google verification or refresh the page."}
-            </div>
-          )}
           <button className="au-submit" type="submit" disabled={loading}>
             {loading ? (
               <>
