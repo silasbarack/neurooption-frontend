@@ -21,7 +21,7 @@
   --violet: #a78bfa;
   --radius: 16px;
   --shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 20px 40px -24px rgba(0, 0, 0, 0.7);
-  font-family: Inter, "Noto Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: "Noto Sans", Arial, sans-serif;
   color: var(--ink);
   background:
     radial-gradient(1200px 600px at 85% -10%, rgba(59, 130, 246, 0.16), transparent 60%),
