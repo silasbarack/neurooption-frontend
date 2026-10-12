@@ -28,7 +28,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <NavLink to="/finance">Finance</NavLink>
           <NavLink to="/profile">Profile</NavLink>
           <NavLink to="/market">Market</NavLink>
-          <NavLink to="/chat">Chat</NavLink>
+          <NavLink to="/support">Support</NavLink>
           <NavLink to="/help">Help</NavLink>
         </nav>
 

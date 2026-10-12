@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { Send } from "lucide-react";
 import { kenyaDate, label, query, useAdminAction, useAdminQuery } from "./api";
 import type { Paged } from "./api";
 import { Alert, Badge, Drawer, Empty, Loading, PageHeader, Pager, Panel, Person, RefreshButton, SearchBox, Segmented } from "./ui";
 
 type Ticket = { id: string; subject: string; status: string; user: { id: string; fullName: string; email: string }; messages: number; createdAt: string; updatedAt: string };
-type TicketDetail = Ticket & { messages: { id: string; senderRole: string; message: string; createdAt: string }[] };
+type TicketDetail = Ticket & { messages: { id: string; senderRole: string; message: string; createdAt: string; admin: { fullName: string } | null }[] };
 
 const TABS = [["all", "All"], ["OPEN", "Open"], ["PENDING_SUPPORT", "Needs reply"], ["PENDING_USER", "Waiting on client"], ["CLOSED", "Closed"]] as const;
 const STATUSES = ["OPEN", "PENDING_SUPPORT", "PENDING_USER", "CLOSED"] as const;
@@ -55,6 +56,8 @@ function TicketDrawer({ id, onClose, onChanged }: { id: string; onClose: () => v
   const { data, error, reload } = useAdminQuery<TicketDetail>(`/admin/console/support/${id}`);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [reply, setReply] = useState("");
+  const [notice, setNotice] = useState("");
 
   async function setStatus(status: string) {
     setBusy(true);
@@ -70,14 +73,36 @@ function TicketDrawer({ id, onClose, onChanged }: { id: string; onClose: () => v
     }
   }
 
+  async function sendReply(close: boolean) {
+    setBusy(true);
+    setActionError("");
+    setNotice("");
+    try {
+      const result = await act<{ emailSent: boolean }>(`/admin/console/support/${id}/reply`, "POST", { message: reply.trim(), close });
+      setReply("");
+      setNotice(result.emailSent ? "Reply sent. The client was emailed." : "Reply saved. The email to the client could not be sent; they will see it on their Support page.");
+      reload();
+      onChanged();
+    } catch (err) {
+      setActionError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const footer = data ? (
     <div className="nx-confirm">
+      <label htmlFor="nx-ticket-reply">Reply to {data.user.fullName}</label>
+      <textarea id="nx-ticket-reply" rows={3} maxLength={4000} value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Write your reply. The client gets it on their Support page and by email." />
       {actionError && <p className="nx-error">{actionError}</p>}
+      {notice && <p className="nx-muted" role="status">{notice}</p>}
       <div className="nx-row-end">
         <label className="nx-inline-label" htmlFor="nx-ticket-status">Status</label>
         <select id="nx-ticket-status" value={data.status} disabled={busy} onChange={(e) => setStatus(e.target.value)}>
           {STATUSES.map((s) => <option key={s} value={s}>{label(s)}</option>)}
         </select>
+        <button type="button" className="nx-btn nx-btn-ghost" disabled={busy || reply.trim().length < 2} onClick={() => sendReply(true)}>Reply &amp; close</button>
+        <button type="button" className="nx-btn nx-btn-primary" disabled={busy || reply.trim().length < 2} onClick={() => sendReply(false)}><Send size={15} /> {busy ? "Sending…" : "Send reply"}</button>
       </div>
     </div>
   ) : undefined;
@@ -94,7 +119,7 @@ function TicketDrawer({ id, onClose, onChanged }: { id: string; onClose: () => v
             {data.messages.length === 0 && <p className="nx-muted">No messages yet.</p>}
             {data.messages.map((m) => (
               <div key={m.id} className={`nx-msg ${m.senderRole === "USER" ? "from-client" : "from-staff"}`}>
-                <small>{m.senderRole === "USER" ? data.user.fullName : "NeuroOption support"} · {kenyaDate(m.createdAt)}</small>
+                <small>{m.senderRole === "USER" ? data.user.fullName : m.admin?.fullName ? `${m.admin.fullName} · Support` : "NeuroOption support"} · {kenyaDate(m.createdAt)}</small>
                 <p>{m.message}</p>
               </div>
             ))}

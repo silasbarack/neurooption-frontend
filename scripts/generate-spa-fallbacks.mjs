@@ -19,6 +19,8 @@ const routes = [
   "withdraw",
   "transactions",
   "chat",
+  "support",
+  "newsletter/unsubscribe",
   "help",
   "profile",
   "settings",

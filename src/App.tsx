@@ -18,7 +18,8 @@ const FinancePage = lazy(() => import("./pages/FinancePage"));
 const MarketsPage = lazy(() => import("./pages/MarketsPage"));
 const AccountPage = lazy(() => import("./pages/AccountPage"));
 import AppShell from "./components/shell/AppShell";
-const ChatPage = lazy(() => import("./pages/ChatPage"));
+const SupportPage = lazy(() => import("./pages/SupportPage"));
+const NewsletterUnsubscribePage = lazy(() => import("./pages/NewsletterUnsubscribePage"));
 const HelpPage = lazy(() => import("./pages/HelpPage"));
 const AchievementsPage = lazy(() => import("./pages/AchievementsPage"));
 const TournamentsPage = lazy(() => import("./pages/TournamentsPage"));
@@ -63,6 +64,7 @@ export default function App() {
           <Route path="/admin/setup" element={<AdminSetupPage />} />
           <Route path="/security/recaptcha-test" element={<RequireAuth><RecaptchaTestPage /></RequireAuth>} />
           <Route path="/account-deleted" element={<AccountDeletedPage />} />
+          <Route path="/newsletter/unsubscribe" element={<NewsletterUnsubscribePage />} />
           <Route path="/signin" element={<Navigate to="/login" replace />} />
 
           <Route path="/register" element={<RegisterPage />} />
@@ -97,13 +99,14 @@ export default function App() {
           <Route path="/transactions" element={<Navigate to="/finance?tab=history" replace />} />
 
           <Route
-            path="/chat"
+            path="/support"
             element={
-              <Shelled title="Chat">
-                <ChatPage />
+              <Shelled title="Support">
+                <SupportPage />
               </Shelled>
             }
           />
+          <Route path="/chat" element={<Navigate to="/support" replace />} />
 
           <Route
             path="/help"
