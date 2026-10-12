@@ -82,7 +82,6 @@ html .neo-btn {
   transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 html .neo-btn-primary,
-html .hp .hp-btn-primary,
 html .au-submit {
   background: var(--cta-gradient);
   background-size: 100% 100%;
@@ -90,22 +89,17 @@ html .au-submit {
   color: #fff;
 }
 html .neo-btn-primary:hover:not(:disabled),
-html .hp .hp-btn-primary:hover,
 html .au-submit:hover:not(:disabled) {
   filter: brightness(1.08);
   transform: translateY(-1px);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 16px 32px -14px rgba(10, 42, 85, 0.7);
 }
-html .neo-btn-outline,
-html .hp .hp-btn-outline,
-html .hp .hp-btn-ghost {
+html .neo-btn-outline {
   border-color: var(--border-strong);
   background: rgba(255, 255, 255, 0.9);
   color: var(--brand-primary);
 }
-html .neo-btn-outline:hover,
-html .hp .hp-btn-outline:hover,
-html .hp .hp-btn-ghost:hover {
+html .neo-btn-outline:hover {
   border-color: var(--brand-secondary);
   background: var(--surface-primary);
   box-shadow: var(--shadow-sm);
@@ -186,120 +180,6 @@ html .neo-bottomnav {
   backdrop-filter: saturate(1.6) blur(18px);
 }
 html .neo-drawer-panel { box-shadow: -30px 0 60px -30px rgba(10, 31, 61, 0.45); }
-
-/* ---------- Homepage ---------- */
-html .hp { background: var(--background-primary); }
-html .hp-header {
-  background: rgba(255, 255, 255, 0.86);
-  border-bottom-color: rgba(10, 31, 61, 0.06);
-  box-shadow: 0 10px 30px -24px rgba(10, 31, 61, 0.45);
-}
-
-/* Hero becomes a midnight band; the logo stays in the light header above. */
-html .hp-hero {
-  border-bottom: 0;
-  color: var(--midnight-text);
-  background:
-    radial-gradient(720px 460px at 78% 40%, rgba(23, 173, 180, 0.22), transparent 70%),
-    radial-gradient(620px 420px at 0% 0%, rgba(8, 121, 173, 0.28), transparent 70%),
-    radial-gradient(500px 300px at 30% 110%, rgba(176, 141, 87, 0.16), transparent 70%),
-    linear-gradient(90deg, rgba(5, 17, 37, 0.9) 0%, rgba(6, 22, 48, 0.62) 42%, rgba(7, 26, 54, 0.3) 100%),
-    url("/landing/hero-candles-2400.webp") center / cover no-repeat,
-    #061630;
-}
-@media (max-width: 900px) {
-  html .hp-hero {
-    background:
-      radial-gradient(520px 360px at 80% 30%, rgba(23, 173, 180, 0.2), transparent 70%),
-      linear-gradient(180deg, rgba(5, 17, 37, 0.84) 0%, rgba(6, 22, 48, 0.6) 55%, rgba(6, 22, 48, 0.88) 100%),
-      url("/landing/hero-candles-1200.webp") 62% center / cover no-repeat,
-      #061630;
-  }
-}
-html .hp-hero::before {
-  background-image:
-    linear-gradient(rgba(170, 196, 230, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(170, 196, 230, 0.05) 1px, transparent 1px);
-  opacity: 1;
-}
-html .hp-hero::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background: var(--gold-hairline);
-}
-html .hp-hero h1 { color: #FFFFFF; }
-html .hp-hero-with { color: #FFFFFF; -webkit-text-fill-color: #FFFFFF; }
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  html .hp-hero h1 span {
-    background: linear-gradient(100deg, #8FD8F5 0%, #3FC6D0 45%, #E3C690 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  html .hp-hero-with { -webkit-text-fill-color: #FFFFFF; }
-}
-html .hp-hero .hp-eyebrow { color: #E3C690; }
-html .hp-hero .hp-eyebrow::before { background: linear-gradient(90deg, #E3C690, rgba(227, 198, 144, 0.2)); }
-html .hp-lead { color: var(--midnight-muted); }
-html .hp-hero-points { color: #DCE6F3; }
-html .hp-hero-points svg { color: #3FC6D0; }
-html .hp-hero .hp-btn-primary {
-  background: linear-gradient(135deg, #17ADB4 0%, #0879AD 60%, #0B4F86 100%);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 14px 30px -14px rgba(23, 173, 180, 0.75);
-}
-html .hp-hero :is(.hp-btn-ghost, .hp-btn-outline) {
-  border-color: rgba(220, 232, 246, 0.35);
-  background: rgba(255, 255, 255, 0.06);
-  color: #FFFFFF;
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-}
-html .hp-hero :is(.hp-btn-ghost, .hp-btn-outline):hover { border-color: rgba(227, 198, 144, 0.7); background: rgba(255, 255, 255, 0.1); color: #FFFFFF; }
-html .hp-hero .hp-preview-label,
-html .hp-hero .hp-mobile-highlights { color: var(--midnight-muted); }
-html .hp-glow { opacity: 1; }
-
-/* Stats strip continues the band, with gold figures. */
-html .hp-stats-strip {
-  border: 0;
-  background: linear-gradient(180deg, #0B2E58 0%, #0A2750 100%);
-}
-html .hp-stats-grid > div { border-color: rgba(170, 196, 230, 0.14); }
-html .hp-stats-grid strong {
-  color: #FFFFFF;
-  letter-spacing: -0.02em;
-}
-html .hp-stats-grid span { color: var(--midnight-muted); }
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  html .hp-stats-grid strong {
-    background: linear-gradient(180deg, #FFFFFF 30%, #E3C690 140%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-}
-html .hp-ticker {
-  border: 0;
-  border-top: 1px solid rgba(170, 196, 230, 0.12);
-  background: #0A2750;
-}
-html .hp-ticker-item,
-html .hp-ticker-item:first-child { border-color: rgba(170, 196, 230, 0.12); color: var(--midnight-text); }
-html .hp-ticker-item:hover { background: rgba(255, 255, 255, 0.05); }
-html .hp-ticker-item b { color: #FFFFFF; }
-html .hp-ticker-item small,
-html .hp-ticker-item small i { color: var(--midnight-muted); }
-html .hp-stats-strip { border-top: 1px solid rgba(170, 196, 230, 0.12); }
-html .hp-section h2 { color: var(--brand-primary); font-weight: 800; }
-html :is(.hp-category-card, .hp-exp-card, .hp-market-card) {
-  border-radius: 18px;
-  border-color: var(--border-primary);
-  box-shadow: var(--shadow-md);
-}
 
 /* ---------- Sign in / registration ---------- */
 html .au { background: radial-gradient(900px 500px at 90% 0%, rgba(8, 121, 173, 0.08), transparent 65%), radial-gradient(700px 400px at 0% 100%, rgba(176, 141, 87, 0.08), transparent 65%), var(--background-primary); }
@@ -409,20 +289,12 @@ html .nt-premium .nt-white-payout {
   background: linear-gradient(145deg, rgba(15, 157, 88, 0.08), rgba(15, 157, 88, 0.02));
 }
 
-/* ---------- Footers ---------- */
-html .hp-footer { border-top: 1px solid var(--border-primary); background: linear-gradient(180deg, #FFFFFF, #F6F8FB); }
-html .hp-footer::before { content: ""; display: block; height: 1px; background: var(--gold-hairline); margin-top: -1px; }
 
-@media (max-width: 900px) {
-  html .hp-hero::after { left: 16px; right: 16px; }
-}
 @media (prefers-reduced-motion: reduce) {
   html :is(.ac-tile, .soc-card, .hp-category-card, .hp-exp-card, .hp-market-card):hover { transform: none; }
 }
 
-/* Ticker figures on the midnight band need brighter rise/fall tones. */
-html .hp-ticker .is-up { color: #34D399; }
-html .hp-ticker .is-down { color: #F87171; }
+
 
 /* ---------- Finance ---------- */
 html .fin-real {

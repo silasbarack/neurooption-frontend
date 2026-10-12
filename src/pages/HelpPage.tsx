@@ -29,7 +29,7 @@ export default function HelpPage() {
           title="Help Center"
           subtitle="Find answers fast, or reach out to our support team."
           actions={
-            <Link to="/chat" className="np-btn np-btn-primary">
+            <Link to="/support" className="np-btn np-btn-primary">
               💬 Contact Support
             </Link>
           }

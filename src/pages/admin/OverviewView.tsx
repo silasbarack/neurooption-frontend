@@ -6,7 +6,7 @@ import { Alert, Bars, Empty, Kpi, Loading, PageHeader, Panel, RefreshButton } fr
 type Overview = {
   generatedAt: string;
   users: { total: number; new24h: number; new7d: number; byStatus: Record<string, number> };
-  queues: { kycPending: number; ticketsOpen: number; depositsPending: { count: number; amount: number }; withdrawalsPending: { count: number; amount: number } };
+  queues: { kycPending: number; ticketsOpen: number; newsletterSubscribers?: number; depositsPending: { count: number; amount: number }; withdrawalsPending: { count: number; amount: number } };
   money7d: { deposits: { count: number; amount: number }; withdrawals: { count: number; amount: number }; currency: string };
   trading24h: { trades: number; openTrades: number; volumeUsd: number; winRate: number | null };
   signups14d: { day: string; signups: number }[];
@@ -61,6 +61,7 @@ export default function OverviewView({ go }: { go: (area: Area) => void }) {
                   <li key={s}><span className={`dot s-${s.toLowerCase()}`} />{label(s)}<b>{(data.users.byStatus[s] ?? 0).toLocaleString()}</b></li>
                 ))}
               </ul>
+              <p className="nx-muted" style={{ marginTop: 14 }}>Newsletter subscribers: <b>{(data.queues.newsletterSubscribers ?? 0).toLocaleString()}</b></p>
             </Panel>
           </div>
 
