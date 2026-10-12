@@ -203,12 +203,23 @@ html .hp-hero {
     radial-gradient(720px 460px at 78% 40%, rgba(23, 173, 180, 0.22), transparent 70%),
     radial-gradient(620px 420px at 0% 0%, rgba(8, 121, 173, 0.28), transparent 70%),
     radial-gradient(500px 300px at 30% 110%, rgba(176, 141, 87, 0.16), transparent 70%),
-    linear-gradient(160deg, #061630 0%, #0A2547 55%, #0B2E58 100%);
+    linear-gradient(90deg, rgba(5, 17, 37, 0.9) 0%, rgba(6, 22, 48, 0.62) 42%, rgba(7, 26, 54, 0.3) 100%),
+    url("/landing/hero-candles-2400.webp") center / cover no-repeat,
+    #061630;
+}
+@media (max-width: 900px) {
+  html .hp-hero {
+    background:
+      radial-gradient(520px 360px at 80% 30%, rgba(23, 173, 180, 0.2), transparent 70%),
+      linear-gradient(180deg, rgba(5, 17, 37, 0.84) 0%, rgba(6, 22, 48, 0.6) 55%, rgba(6, 22, 48, 0.88) 100%),
+      url("/landing/hero-candles-1200.webp") 62% center / cover no-repeat,
+      #061630;
+  }
 }
 html .hp-hero::before {
   background-image:
-    linear-gradient(rgba(170, 196, 230, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(170, 196, 230, 0.07) 1px, transparent 1px);
+    linear-gradient(rgba(170, 196, 230, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(170, 196, 230, 0.05) 1px, transparent 1px);
   opacity: 1;
 }
 html .hp-hero::after {
