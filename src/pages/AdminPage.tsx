@@ -1,70 +1,40 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import AdminSetupPage from "./AdminSetupPage";
 import {
-  Activity, ArrowDownRight, ArrowRight, ArrowUpRight, BarChart3,
-  CircleAlert, Clock3, Eye, EyeOff, Filter, LayoutDashboard,
-  LockKeyhole, LogOut, RefreshCw, Search, ShieldCheck, Users, Wallet,
+  ArrowRight, BadgeCheck, Banknote, CandlestickChart, CircleAlert, Eye, EyeOff, LayoutDashboard,
+  LifeBuoy, LockKeyhole, LogOut, Menu, ScrollText, ShieldCheck, UserCog, Users, X,
 } from "lucide-react";
 import Logo from "../components/branding/Logo";
-import "./AdminPage.css";
+import AdminSetupPage from "./AdminSetupPage";
+import { SESSION_KEY, SessionContext, adminRequest, initials, label } from "./admin/api";
+import type { Admin, ApiError, Area } from "./admin/api";
+import OverviewView from "./admin/OverviewView";
+import UsersView from "./admin/UsersView";
+import KycView from "./admin/KycView";
+import FinanceView from "./admin/FinanceView";
+import TradingView from "./admin/TradingView";
+import SupportView from "./admin/SupportView";
+import AuditView from "./admin/AuditView";
+import TeamView from "./admin/TeamView";
+import "./admin/AdminConsole.css";
 
-const API = (import.meta.env.VITE_API_URL || "https://neurooption-backend.onrender.com").replace(/\/$/, "");
-const SESSION_KEY = "neurooption_admin_session";
-const ROLES = ["SUPER_ADMIN", "RISK_ADMIN", "COMPLIANCE_ADMIN", "FINANCE_ADMIN"];
+type NavItem = { area: Area; text: string; icon: ReactNode; group: "Operations" | "Compliance" | "Administration" };
 
-type Admin = { id: string; fullName: string; email: string; role: string };
-type Trade = {
-  id: string; userId: string; clientName: string; clientEmail: string | null;
-  asset: string; side: string; status: string; accountType: string;
-  currency: string; stakeAmount: number; stakeUsd: number; payoutPercent: number;
-  profitUsd: number | null; entryTime: string; expiryTime: string;
-};
-type Data = {
-  generatedAt: string; period: string; account: string;
-  stats: {
-    trades24: number; openTrades: number; volumeUsd24: number;
-    wins24: number; losses24: number; winRate24: number | null; activeClients24: number;
-  };
-  activity: { hour: string; trades: number; volumeUsd: number }[];
-  activitySampled: boolean;
-  trades: { total: number; page: number; limit: number; pages: number; items: Trade[] };
-};
+const NAV: NavItem[] = [
+  { area: "overview", text: "Overview", icon: <LayoutDashboard size={18} />, group: "Operations" },
+  { area: "users", text: "Clients", icon: <Users size={18} />, group: "Operations" },
+  { area: "trading", text: "Trading monitor", icon: <CandlestickChart size={18} />, group: "Operations" },
+  { area: "finance", text: "Payments", icon: <Banknote size={18} />, group: "Operations" },
+  { area: "support", text: "Support", icon: <LifeBuoy size={18} />, group: "Operations" },
+  { area: "kyc", text: "Verification", icon: <BadgeCheck size={18} />, group: "Compliance" },
+  { area: "audit", text: "Audit log", icon: <ScrollText size={18} />, group: "Compliance" },
+  { area: "team", text: "Team & roles", icon: <UserCog size={18} />, group: "Administration" },
+];
 
-const money = (value: number) => new Intl.NumberFormat("en-US", {
-  style: "currency", currency: "USD", maximumFractionDigits: 2,
-}).format(value);
-const compact = (value: number) => new Intl.NumberFormat("en-US", {
-  notation: "compact", maximumFractionDigits: 1,
-}).format(value);
-const kenyaDate = (value: string) => new Intl.DateTimeFormat("en-KE", {
-  dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Nairobi",
-}).format(new Date(value));
-const kenyaClock = (value: string) => new Intl.DateTimeFormat("en-KE", {
-  hour: "2-digit", minute: "2-digit", timeZone: "Africa/Nairobi",
-}).format(new Date(value));
-const errorMessage = (value: unknown) => value instanceof Error ? value.message : "Request failed.";
-
-async function adminRequest<T>(path: string, token: string, options?: RequestInit, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(API + path, {
-    ...options,
-    signal,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: "Bearer " + token } : {}),
-      ...options?.headers,
-    },
-    cache: "no-store",
-  });
-  const data: unknown = await response.json().catch(() => null);
-  if (!response.ok) {
-    const msg = data && typeof data === "object" && "message" in data ? (data as { message: unknown }).message : null;
-    const error = new Error(typeof msg === "string" ? msg : "Unable to complete request.");
-    Object.assign(error, { status: response.status });
-    throw error;
-  }
-  return data as T;
+function areaFromHash(): Area | null {
+  const value = window.location.hash.replace("#", "");
+  return NAV.some((item) => item.area === value) ? (value as Area) : null;
 }
 
 export default function AdminPage() {
@@ -72,262 +42,176 @@ export default function AdminPage() {
   const [showSetup, setShowSetup] = useState(false);
   const [token, setToken] = useState(() => sessionStorage.getItem(SESSION_KEY) || "");
   const [admin, setAdmin] = useState<Admin | null>(null);
-  const [authChecking, setAuthChecking] = useState(Boolean(token));
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [signingIn, setSigningIn] = useState(false);
+  const [permissions, setPermissions] = useState<Area[]>([]);
   const [authError, setAuthError] = useState("");
-  const [data, setData] = useState<Data | null>(null);
-  const [account, setAccount] = useState("all");
-  const [status, setStatus] = useState("all");
-  const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [refreshCount, setRefreshCount] = useState(0);
+  const [area, setArea] = useState<Area>(() => areaFromHash() ?? "overview");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const signOut = useCallback(() => {
     sessionStorage.removeItem(SESSION_KEY);
     setToken("");
     setAdmin(null);
-    setData(null);
+    setPermissions([]);
   }, []);
 
+  const onExpired = useCallback(() => {
+    signOut();
+    setAuthError("Your session expired. Please sign in again.");
+  }, [signOut]);
+
   useEffect(() => {
-    if (!token) { setAuthChecking(false); return; }
+    if (!token) return;
     let cancelled = false;
-    setAuthChecking(true);
-    adminRequest<{ admin: Admin }>("/admin/session", token)
-      .then(result => {
+    adminRequest<{ admin: Admin; permissions?: Area[] }>("/admin/session", token)
+      .then((result) => {
         if (cancelled) return;
-        if (!ROLES.includes(result.admin.role)) {
-          setAuthError("Your administrator role cannot access trading monitoring.");
-          signOut();
-        } else {
-          setAdmin(result.admin);
-        }
+        setAdmin(result.admin);
+        setPermissions(result.permissions ?? []);
       })
-      .catch(err => {
-        if (!cancelled) { setAuthError(errorMessage(err)); signOut(); }
-      })
-      .finally(() => { if (!cancelled) setAuthChecking(false); });
+      .catch((err: ApiError) => { if (!cancelled) { setAuthError(err.message); signOut(); } });
     return () => { cancelled = true; };
   }, [token, signOut]);
 
+  const nav = useMemo(() => NAV.filter((item) => permissions.includes(item.area)), [permissions]);
+  const current = nav.some((item) => item.area === area) ? area : nav[0]?.area;
+
   useEffect(() => {
-    if (!admin || !token) return;
-    const controller = new AbortController();
-    let active = true;
-    const refresh = async (silent = false) => {
-      if (!silent) setLoading(true);
-      try {
-        const params = new URLSearchParams({
-          account, status, search, page: String(page), limit: "20",
-        });
-        const result = await adminRequest<Data>("/admin/trading-monitor?" + params.toString(), token, undefined, controller.signal);
-        if (active) { setData(result); setError(""); }
-      } catch (err) {
-        if (!active) return;
-        if ((err as Error).name === "AbortError") return;
-        if ((err as Error & { status?: number }).status === 401) {
-          signOut();
-          setAuthError("Session expired. Please sign in again.");
-        } else {
-          setError(errorMessage(err));
-        }
-      } finally {
-        if (active && !silent) setLoading(false);
-      }
-    };
-    void refresh();
-    const interval = window.setInterval(() => { void refresh(true); }, 15000);
-    return () => { active = false; controller.abort(); window.clearInterval(interval); };
-  }, [admin, token, account, status, search, page, refreshCount, signOut]);
+    const onHash = () => { const next = areaFromHash(); if (next) setArea(next); };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
 
-  const maxActivity = useMemo(() => Math.max(1, ...(data?.activity.map(item => item.trades) || [])), [data]);
-  const access = admin && ROLES.includes(admin.role);
+  const go = useCallback((next: Area) => {
+    setArea(next);
+    setMenuOpen(false);
+    if (window.location.hash !== `#${next}`) window.history.replaceState(null, "", `#${next}`);
+    window.scrollTo({ top: 0 });
+  }, []);
 
-  async function signIn(event: FormEvent<HTMLFormElement>) {
+  const session = useMemo(() => (admin ? { token, admin, permissions, onExpired } : null), [token, admin, permissions, onExpired]);
+
+  if (showSetup || new URLSearchParams(location.search).get("mode") === "setup") return <AdminSetupPage />;
+
+  if (!session) {
+    return <SignIn checking={Boolean(token)} initialError={authError} onSetup={() => setShowSetup(true)} onSignedIn={(t) => { setAuthError(""); setToken(t); }} />;
+  }
+
+  const groups = (["Operations", "Compliance", "Administration"] as const).map((g) => [g, nav.filter((item) => item.group === g)] as const).filter(([, items]) => items.length);
+
+  return (
+    <SessionContext.Provider value={session}>
+      <div className="nx-shell">
+        <aside className={`nx-sidebar ${menuOpen ? "is-open" : ""}`} aria-label="Admin navigation">
+          <div className="nx-brand">
+            <Link to="/" aria-label="NeuroOption home"><Logo variant="emblem" /></Link>
+            <div><strong>NeuroOption</strong><small>Admin console</small></div>
+            <button type="button" className="nx-icon-btn nx-close-menu" onClick={() => setMenuOpen(false)} aria-label="Close menu"><X size={18} /></button>
+          </div>
+          <nav>
+            {groups.map(([group, items]) => (
+              <div key={group} className="nx-nav-group">
+                <p>{group}</p>
+                {items.map((item) => (
+                  <button key={item.area} type="button" className={`nx-nav-item ${current === item.area ? "is-active" : ""}`} aria-current={current === item.area ? "page" : undefined} onClick={() => go(item.area)}>
+                    {item.icon}<span>{item.text}</span>
+                  </button>
+                ))}
+              </div>
+            ))}
+          </nav>
+          <div className="nx-sidebar-foot">
+            <div className="nx-me">
+              <span className="nx-avatar is-lg" aria-hidden="true">{initials(session.admin.fullName)}</span>
+              <span><strong>{session.admin.fullName}</strong><small>{label(session.admin.role)}</small></span>
+            </div>
+            <button type="button" className="nx-signout" onClick={signOut}><LogOut size={16} /> Sign out</button>
+          </div>
+        </aside>
+        {menuOpen && <div className="nx-scrim" onClick={() => setMenuOpen(false)} />}
+
+        <div className="nx-main">
+          <header className="nx-topbar">
+            <button type="button" className="nx-icon-btn nx-menu-btn" onClick={() => setMenuOpen(true)} aria-label="Open menu"><Menu size={20} /></button>
+            <div className="nx-topbar-title">{nav.find((item) => item.area === current)?.text}</div>
+            <div className="nx-topbar-right">
+              <span className="nx-secure"><ShieldCheck size={15} aria-hidden="true" /> Secure session</span>
+              <span className="nx-avatar" title={session.admin.email} aria-hidden="true">{initials(session.admin.fullName)}</span>
+            </div>
+          </header>
+          <main className="nx-content">
+            {!current && <p className="nx-muted">Your role has no console areas yet. Ask a Super Administrator to change your role.</p>}
+            {current === "overview" && <OverviewView go={go} />}
+            {current === "users" && <UsersView />}
+            {current === "trading" && <TradingView />}
+            {current === "finance" && <FinanceView />}
+            {current === "support" && <SupportView />}
+            {current === "kyc" && <KycView />}
+            {current === "audit" && <AuditView />}
+            {current === "team" && <TeamView />}
+          </main>
+        </div>
+      </div>
+    </SessionContext.Provider>
+  );
+}
+
+function SignIn({ checking, initialError, onSetup, onSignedIn }: { checking: boolean; initialError: string; onSetup: () => void; onSignedIn: (token: string) => void }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [show, setShow] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const shown = error || initialError;
+
+  async function submit(event: FormEvent) {
     event.preventDefault();
-    setSigningIn(true);
-    setAuthError("");
+    setBusy(true);
+    setError("");
     try {
-      const result = await adminRequest<{ token: string }>("/admin/login", "", {
-        method: "POST", body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
-      });
+      const result = await adminRequest<{ token: string }>("/admin/login", "", { method: "POST", body: JSON.stringify({ email: email.trim().toLowerCase(), password }) });
       if (!result.token) throw new Error("No administrator session returned.");
       sessionStorage.setItem(SESSION_KEY, result.token);
       setPassword("");
-      setToken(result.token);
+      onSignedIn(result.token);
     } catch (err) {
-      setAuthError(errorMessage(err));
+      setError((err as Error).message);
     } finally {
-      setSigningIn(false);
+      setBusy(false);
     }
   }
 
-  // Serve initial provisioning on the stable /admin path as a CDN-safe fallback.
-  if (showSetup || new URLSearchParams(location.search).get("mode") === "setup") {
-    return <AdminSetupPage />;
-  }
-
-  if (!access) {
-    return (
-      <main className="na-auth">
-        <div className="na-login-card">
-          <div className="na-login-brand"><Logo /><span>ADMIN CONSOLE</span></div>
-          <div className="na-login-icon"><ShieldCheck size={25} /></div>
-          <p className="na-eyebrow">NEUROOPTION · SECURE OPERATIONS</p>
-          <h1>Administrator access</h1>
-          <p className="na-muted">Sign in with an authorized administrator account to monitor trading activity. Client accounts cannot access this console.</p>
-          {authChecking ? <p className="na-alert" role="status">Checking administrator session…</p> : (
-            <form onSubmit={signIn} className="na-login-form">
-              {authError && <p className="na-alert error" role="alert"><CircleAlert size={16}/>{authError}</p>}
-              <label htmlFor="admin-email">Administrator email</label>
-              <input id="admin-email" type="email" value={email} autoComplete="username" onChange={e => setEmail(e.target.value)} required placeholder="admin@neurooption.com" />
-              <label htmlFor="admin-password">Password</label>
-              <div className="na-password-wrap">
-                <input id="admin-password" type={showPassword ? "text" : "password"} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} placeholder="Enter admin password" />
-                <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button>
-              </div>
-              <button className="na-primary" type="submit" disabled={signingIn}>{signingIn ? "Verifying…" : "Sign in to dashboard"}<ArrowRight size={17}/></button>
-            </form>
-          )}
-          <div className="na-initial-setup"><button type="button" onClick={() => setShowSetup(true)}>First-time setup — Create Super Administrator →</button></div>
-          <div className="na-auth-footer"><LockKeyhole size={15}/> Protected administrator workspace <Link to="/">Return to NeuroOption</Link></div>
-        </div>
-      </main>
-    );
-  }
-
   return (
-    <main className="na-shell">
-      <aside className="na-sidebar">
-        <Link to="/" className="na-sidebar-brand"><Logo /><span>ADMIN</span></Link>
-        <div className="na-sidebar-section">OPERATIONS</div>
-        <div className="na-nav-item active"><LayoutDashboard size={19}/> Trading overview</div>
-        <div className="na-sidebar-spacer"/>
-        <div className="na-admin-profile">
-          <div className="na-profile-circle">{(admin?.fullName || "A").slice(0,1).toUpperCase()}</div>
-          <div><strong>{admin?.fullName}</strong><small>{admin?.role.replaceAll("_", " ")}</small></div>
+    <main className="nx-auth">
+      <section className="nx-auth-art" aria-hidden="true">
+        <div className="nx-auth-brand"><Logo variant="emblem" /><span>NeuroOption</span></div>
+        <div>
+          <p className="nx-eyebrow">ADMIN CONSOLE</p>
+          <h2>Run the platform with clarity.</h2>
+          <ul>
+            <li><Users size={16} /> Clients, verification and support in one place</li>
+            <li><CandlestickChart size={16} /> Live trading and payment surveillance</li>
+            <li><ScrollText size={16} /> Every sensitive action audited</li>
+          </ul>
         </div>
-        <button className="na-logout" onClick={signOut}><LogOut size={17}/> Sign out</button>
-      </aside>
-      <section className="na-main">
-        <header className="na-topbar">
-          <div className="na-topbar-left"><ShieldCheck size={17}/><span>Restricted admin workspace</span><span className="na-pill">AUTHORIZED</span></div>
-          <div className="na-topbar-right"><span className="na-live-dot"/> Auto-refresh: 15 sec <button onClick={() => setRefreshCount(n => n + 1)} aria-label="Refresh now" title="Refresh now"><RefreshCw size={18}/></button></div>
-        </header>
-        <div className="na-content">
-          <div className="na-heading-row">
-            <div>
-              <div className="na-breadcrumb">OPERATIONS / TRADING ACTIVITY</div>
-              <h1>Trading command center</h1>
-              <p className="na-muted">Monitor client positions, trading volume, settlements and platform activity.</p>
-            </div>
-            <div className="na-update"><Clock3 size={16}/> {data ? "Updated " + kenyaDate(data.generatedAt) : "Awaiting data"} EAT</div>
-          </div>
-
-          {error && <div className="na-alert error" role="alert"><CircleAlert size={18}/>{error}<button onClick={() => setRefreshCount(n => n + 1)}>Retry</button></div>}
-
-          <div className="na-filters-top">
-            <div className="na-filter-title"><Filter size={17}/> Account type</div>
-            <div className="na-tabs" aria-label="Account type filter">
-              {([["all","All accounts"],["demo","Demo only"],["real","Real only"]] as const).map(([value,label]) =>
-                <button key={value} className={account===value?"selected":""} onClick={() => { setAccount(value); setPage(1); }}>{label}</button>
-              )}
-            </div>
-            <div className="na-filter-note">{account==="all"?"Demo and real stakes are combined below; this is not company revenue.":account==="demo"?"Only simulated demo-account activity is displayed.":"Only real-account trades are displayed."}</div>
-          </div>
-
-          <div className="na-stats">
-            <div className="na-stat">
-              <div className="na-stat-top"><span>Trades · last 24h</span><div className="na-stat-icon"><Activity size={19}/></div></div>
-              <strong>{data ? compact(data.stats.trades24) : "—"}</strong>
-              <small>Trade orders recorded</small>
-            </div>
-            <div className="na-stat">
-              <div className="na-stat-top"><span>Open positions</span><div className="na-stat-icon"><Clock3 size={19}/></div></div>
-              <strong>{data ? compact(data.stats.openTrades) : "—"}</strong>
-              <small>Pending settlement</small>
-            </div>
-            <div className="na-stat">
-              <div className="na-stat-top"><span>Staked volume · 24h</span><div className="na-stat-icon"><Wallet size={19}/></div></div>
-              <strong>{data ? money(data.stats.volumeUsd24) : "—"}</strong>
-              <small>USD-equivalent stake, not revenue</small>
-            </div>
-            <div className="na-stat">
-              <div className="na-stat-top"><span>Win rate · last 24h</span><div className="na-stat-icon"><BarChart3 size={19}/></div></div>
-              <strong>{data?.stats.winRate24 == null ? "—" : data.stats.winRate24 + "%"}</strong>
-              <small>{data ? data.stats.wins24 + " wins / " + data.stats.losses24 + " losses" : "Settled trades only"}</small>
-            </div>
-          </div>
-
-          <div className="na-analysis-grid">
-            <section className="na-panel na-activity-panel">
-              <div className="na-panel-heading"><div><h2>Trading activity</h2><p>Trades per 2-hour interval · rolling 24 hours</p></div><span className="na-data-caption">EAT (Kenya)</span></div>
-              <div className="na-chart" role="img" aria-label="Trade activity in two-hour intervals over the last 24 hours">
-                {data?.activity.map((item, index) => (
-                  <div className="na-bar-column" key={item.hour}>
-                    <span className="na-bar-value">{item.trades || ""}</span>
-                    <div className="na-bar-track"><div style={{ height: (item.trades / maxActivity * 100) + "%" }} className={"na-bar " + (index===data.activity.length-1?"last":"")}/></div>
-                    <span className="na-bar-label">{kenyaClock(item.hour)}</span>
-                  </div>
-                )) || <div className="na-loading-chart">{loading?"Loading activity…":"Activity unavailable"}</div>}
-              </div>
-              <p className="na-panel-footer">{data?.activitySampled ? "Chart is sampled from the 2,500 most recent trades; KPIs use full counts." : "Activity reflects recorded trades. Empty periods appear at zero."}</p>
-            </section>
-            <section className="na-panel na-outcome-panel">
-              <div className="na-panel-heading"><div><h2>Settlement outcomes</h2><p>Last 24h · wins versus losses</p></div></div>
-              <div className="na-outcomes">
-                <div className="na-outcome-row"><span className="na-outcome-symbol positive"><ArrowUpRight size={19}/></span><div><small>Winning trades</small><strong>{data ? compact(data.stats.wins24) : "—"}</strong></div></div>
-                <div className="na-outcome-row"><span className="na-outcome-symbol negative"><ArrowDownRight size={19}/></span><div><small>Losing trades</small><strong>{data ? compact(data.stats.losses24) : "—"}</strong></div></div>
-                <div className="na-outcome-row"><span className="na-outcome-symbol neutral"><Users size={19}/></span><div><small>Active trading accounts / users</small><strong>{data ? compact(data.stats.activeClients24) : "—"}</strong></div></div>
-              </div>
-              <p className="na-panel-footer">Active count includes the shared guest demo identity when used.</p>
-            </section>
-          </div>
-
-          <section className="na-panel na-trades-panel">
-            <div className="na-panel-heading na-table-title"><div><h2>Client trading ledger</h2><p>Recent trades with recorded outcome and exposure</p></div><span className="na-count">{data?.trades.total ?? "—"} matching trades</span></div>
-            <div className="na-table-controls">
-              <form onSubmit={e => {e.preventDefault();setSearch(searchInput.trim());setPage(1);}} className="na-search">
-                <Search size={17}/><input aria-label="Search trades, assets or clients" placeholder="Search trade ID, asset or client…" value={searchInput} onChange={e=>setSearchInput(e.target.value)}/><button type="submit">Search</button>
-              </form>
-              <select value={status} aria-label="Filter trade status" onChange={e=>{setStatus(e.target.value);setPage(1);}}>
-                <option value="all">All statuses</option><option value="PENDING">Open / pending</option>
-                <option value="WON">Won</option><option value="LOST">Lost</option><option value="DRAW">Draw</option>
-              </select>
-            </div>
-            <div className="na-table-scroll">
-              <table className="na-table"><thead><tr><th>CLIENT</th><th>ASSET / TRADE</th><th>DIRECTION</th><th>ACCOUNT</th><th>STAKE</th><th>PAYOUT</th><th>CLIENT P&L</th><th>STATUS</th><th>OPENED (EAT)</th></tr></thead>
-                <tbody>
-                  {data?.trades.items.map(trade => <tr key={trade.id}>
-                    <td><strong>{trade.clientName}</strong><small>{trade.clientEmail || trade.userId.slice(0,13)}</small></td>
-                    <td><strong>{trade.asset}</strong><small title={trade.id}>{trade.id.slice(0,11)}…</small></td>
-                    <td><span className={"na-side "+(trade.side==="BUY"?"buy":"sell")}>{trade.side==="BUY"?<ArrowUpRight size={14}/>:<ArrowDownRight size={14}/>} {trade.side}</span></td>
-                    <td><span className={"na-account-type "+(trade.accountType==="QT Demo"?"demo":"real")}>{trade.accountType==="QT Demo"?"Demo":"Real"}</span></td>
-                    <td><strong>{new Intl.NumberFormat("en-US",{maximumFractionDigits:2}).format(trade.stakeAmount)} {trade.currency}</strong><small>{money(trade.stakeUsd)}</small></td>
-                    <td>{trade.payoutPercent}%</td>
-                    <td className={trade.profitUsd===null?"":trade.profitUsd>=0?"na-positive":"na-negative"}>{trade.profitUsd==null?"—":money(trade.profitUsd)}</td>
-                    <td><span className={"na-status "+trade.status.toLowerCase()}>{trade.status}</span></td>
-                    <td>{kenyaDate(trade.entryTime)}</td>
-                  </tr>)}
-                  {!loading && data?.trades.items.length===0 && <tr><td className="na-empty" colSpan={9}>No trades match these filters. Try another account type, status, or search term.</td></tr>}
-                  {loading && !data && <tr><td className="na-empty" colSpan={9}>Loading authorized trading records…</td></tr>}
-                </tbody>
-              </table>
-            </div>
-            <div className="na-table-footer">
-              <span>Page {data?.trades.page ?? page} of {Math.max(1,data?.trades.pages??1)} · {data?.trades.total ?? 0} results</span>
-              <div><button disabled={page<=1} onClick={()=>setPage(x=>x-1)}>Previous</button><button disabled={!data||page>=data.trades.pages} onClick={()=>setPage(x=>x+1)}>Next <ArrowRight size={14}/></button></div>
-            </div>
-          </section>
-
-          <div className="na-disclaimer"><ShieldCheck size={16}/> Read-only trading surveillance. Figures are derived from stored orders; trade outcomes and account balances cannot be altered here.</div>
-        </div>
+        <small>Restricted to authorized NeuroOption staff.</small>
+      </section>
+      <section className="nx-auth-card">
+        <div className="nx-auth-icon"><LockKeyhole size={22} aria-hidden="true" /></div>
+        <h1>Administrator sign in</h1>
+        <p className="nx-muted">Use your administrator email and password. Client accounts cannot sign in here.</p>
+        {checking ? <p className="nx-loading" role="status">Checking your session…</p> : (
+          <form className="nx-form" onSubmit={submit}>
+            {shown && <p className="nx-alert" role="alert"><CircleAlert size={16} aria-hidden="true" /> {shown}</p>}
+            <label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" required placeholder="you@neurooption.com" /></label>
+            <label>Password
+              <span className="nx-password"><input type={show ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
+                <button type="button" onClick={() => setShow(!show)} aria-label={show ? "Hide password" : "Show password"}>{show ? <EyeOff size={16} /> : <Eye size={16} />}</button></span>
+            </label>
+            <button type="submit" className="nx-btn nx-btn-primary nx-btn-block" disabled={busy}>{busy ? "Signing in…" : "Sign in"} <ArrowRight size={16} aria-hidden="true" /></button>
+          </form>
+        )}
+        <button type="button" className="nx-link nx-setup-link" onClick={onSetup}>First-time setup or forgotten Super Administrator password →</button>
+        <Link to="/" className="nx-back-home">← Back to NeuroOption</Link>
       </section>
     </main>
   );
