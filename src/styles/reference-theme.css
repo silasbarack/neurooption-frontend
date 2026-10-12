@@ -8,7 +8,7 @@
   --neo-radius: 12px;
   --neo-radius-sm: 8px;
   --neo-bottom-nav: 68px;
-  --neo-font: "Noto Sans", Inter, Arial, sans-serif;
+  --neo-font: "Noto Sans", Arial, sans-serif;
 }
 html { background: var(--background-primary); scroll-padding-top: 80px; }
 body { background: var(--background-primary); color: var(--text-primary); }
