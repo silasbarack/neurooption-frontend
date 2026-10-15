@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import {
   ArrowRight, BarChart3, ChevronDown, ChevronRight, CircleCheck, CircleHelp, Clock3, GraduationCap,
@@ -282,9 +283,52 @@ function Newsletter() {
   );
 }
 
+/** Mobile menu as a real modal: focus moves in and is trapped, the page behind is inert, Escape closes. */
+function MobileMenu({ onClose, children }: { onClose: () => void; children: ReactNode }) {
+  const portalRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    const siblings = Array.from(document.body.children).filter(
+      (node): node is HTMLElement => node instanceof HTMLElement && node !== portalRef.current,
+    );
+    const previousInert = siblings.map((node) => node.inert);
+    siblings.forEach((node) => { node.inert = true; });
+    document.body.style.overflow = "hidden";
+    const focusables = () => Array.from(portalRef.current?.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]',
+    ) ?? []).filter((node) => node.getClientRects().length > 0);
+    const frame = requestAnimationFrame(() => portalRef.current?.querySelector<HTMLElement>(".ho-menu-close")?.focus({ preventScroll: true }));
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") { event.preventDefault(); onClose(); return; }
+      if (event.key !== "Tab") return;
+      const items = focusables();
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (!first || !last) return;
+      const inside = portalRef.current?.contains(document.activeElement);
+      if (event.shiftKey && (document.activeElement === first || !inside)) { event.preventDefault(); last.focus({ preventScroll: true }); }
+      else if (!event.shiftKey && (document.activeElement === last || !inside)) { event.preventDefault(); first.focus({ preventScroll: true }); }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+      siblings.forEach((node, index) => { node.inert = previousInert[index]; });
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+    };
+  }, [onClose]);
+  return createPortal(
+    <div ref={portalRef} className="ho ho-mobile-menu" role="dialog" aria-modal="true" aria-label="Menu">{children}</div>,
+    document.body,
+  );
+}
+
 export default function LandingPage() {
   const signedIn = Boolean(getToken());
   const [menuOpen, setMenuOpen] = useState(false);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   useEffect(() => {
     document.title = "NeuroOption | Trade with clarity";
@@ -315,10 +359,10 @@ export default function LandingPage() {
       </header>
 
       {menuOpen && (
-        <div className="ho-mobile-menu" role="dialog" aria-modal="true" aria-label="Menu">
+        <MobileMenu onClose={closeMenu}>
           <div className="ho-mobile-head">
             <Link to="/" className="ho-logo" onClick={() => setMenuOpen(false)}><Logo /></Link>
-            <button type="button" className="ho-menu-btn" aria-label="Close menu" onClick={() => setMenuOpen(false)}><X size={22} /></button>
+            <button type="button" className="ho-menu-btn ho-menu-close" aria-label="Close menu" onClick={() => setMenuOpen(false)}><X size={22} /></button>
           </div>
           <nav aria-label="Mobile">
             {NAV.flatMap((item) => item.links ? item.links.map((l) => ({ ...l, group: item.label })) : [{ label: item.label, to: item.to ?? "/", group: "" }]).map((link) => (
@@ -333,7 +377,7 @@ export default function LandingPage() {
               <Link to="/login" className="ho-btn ho-btn-outline">Log in</Link>
             </>}
           </div>
-        </div>
+        </MobileMenu>
       )}
 
       <main>
