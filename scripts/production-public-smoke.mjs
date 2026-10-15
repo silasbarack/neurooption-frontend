@@ -27,19 +27,20 @@ async function checkHome(name,screenshot){
   const previousReads=backendReads.length;
   await page.goto(baseURL+'/',{waitUntil:'domcontentloaded',timeout:60000});
   await page.locator('#app-splash,.app-splash').first().waitFor({state:'hidden',timeout:30000});
-  const logo=page.locator('img[src="/neurooption-logo.jpg"]:visible').first();
+  const logo=page.locator('img.neurooption-logo:visible').first();
   await logo.waitFor({state:'visible'});
   await page.waitForFunction(element=>element.complete && element.naturalWidth>0,await logo.elementHandle());
-  await page.waitForFunction(()=>document.querySelector('.hp-market-feed')?.textContent.includes('Market feed connected'),undefined,{timeout:45000});
-  assert.match(await page.locator('.hp-ticker').first().getAttribute('aria-label') || '',/^Market prices/);
-  assert.ok(backendReads.slice(previousReads).some(read=>read.method==='GET' && read.status===200),'Connected feed must use a successful real backend GET');
-  const categories=await page.locator('.hp-category-grid a.hp-category-card').evaluateAll(elements=>elements.map(element=>({label:element.innerText.trim(),href:element.href})));
-  assert.equal(categories.length,6);
-  for(const category of categories){assert.ok(category.label.length>0);assert.equal(new URL(category.href).pathname,'/markets');}
-  assert.ok(categories.some(category=>/forex|currencies/i.test(category.label)));
-  assert.ok(categories.some(category=>/crypto/i.test(category.label)));
+  const marquee=page.getByRole('region',{name:'Markets you can trade'});
+  await marquee.waitFor({state:'attached',timeout:45000});
+  assert.ok(backendReads.slice(previousReads).some(read=>read.method==='GET' && read.status===200),'Live asset strip must use a successful real backend GET');
+  const assets=await marquee.locator('.ho-marquee-row:not([aria-hidden]) a.ho-marquee-item').evaluateAll(elements=>elements.map(element=>({label:element.innerText.trim(),href:element.href})));
+  assert.ok(assets.length>=4,'Homepage must show live assets');
+  for(const asset of assets){assert.ok(asset.label.length>0);assert.equal(new URL(asset.href).pathname,'/markets');}
+  const chips=await page.locator('.ho-chart-chips a.ho-chip').evaluateAll(elements=>elements.map(element=>element.href));
+  assert.equal(chips.length,4);
+  for(const href of chips) assert.equal(new URL(href).pathname,'/markets');
   await page.screenshot({path:screenshot,fullPage:false,animations:'disabled'});
-  checks.push({name,feed:'connected',categories:categories.length});
+  checks.push({name,feed:'connected',assets:assets.length});
 }
 try{
   await checkHome('desktop','artifacts/production-public-desktop.png');
@@ -53,7 +54,7 @@ try{
   await page.keyboard.press('Escape');
   await dialog.waitFor({state:'hidden'});
   assert.ok(await trigger.evaluate(element=>element===document.activeElement),'Escape must restore menu-trigger focus');
-  await page.locator('.hp-hero-cta a[href="/register"]').first().click();
+  await page.locator('.ho-hero-cta a[href="/register"]').first().click();
   await page.waitForURL(url=>url.pathname==='/register');
   await page.locator('input[type="email"]').first().waitFor({state:'visible'});
   assert.deepEqual(mutations,[],'Public smoke must make no mutation requests');

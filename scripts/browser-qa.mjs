@@ -96,6 +96,7 @@ async function makeContext(options) {
     }
     if (isAPI && method === 'GET') {
       telemetry.fixtureHits.push(endpoint);
+      if (endpoint === '/auth/recaptcha-config') return fulfill({enabled:false,siteKey:'',version:'v2'});
       if (endpoint === '/account/me') return fulfill(account);
       if (endpoint === '/finance/me') return fulfill({wallet:account.real,mpesa:{configured:Boolean(options.mpesaConfigured),environment:'sandbox',minAmount:1,maxAmount:100000},transactions:[]});
       if (endpoint === '/market-data/quotes') {
@@ -253,15 +254,28 @@ try {
         await noOverflow(page);
         await goldTheme(page);
         if (route.path === '/') {
-          await page.locator('.hp-hero').waitFor({state:'visible'});
-          const primaryInk=await page.locator('.hp-hero-cta .hp-btn-primary').evaluate(element=>getComputedStyle(element).color.match(/\d+/g).slice(0,3).map(Number));
+          await page.locator('.ho-hero').waitFor({state:'visible'});
+          const primaryInk=await page.locator('.ho-hero-cta .ho-btn-primary').first().evaluate(element=>getComputedStyle(element).color.match(/\d+/g).slice(0,3).map(Number));
           assert.ok(primaryInk.every(channel=>channel>190),'Blue CTA needs light text for accessible contrast');
-          assert.ok(await page.locator('.hp-hero-cta a').count()>=2,'Hero must provide account and demo actions');
-          assert.ok(await page.locator('.hp-stage,.hp-laptop,.hp-hero-phone,.hp-hero-art,.hp-hero-visual,.hp-hero-devices,.hp-hero-laptop,.hd').count()>0,'Hero must include the trading/device preview');
-          assert.ok(await page.locator('.hp-ticker,.hp-ticker-strip,.hp-ticker-track,.hp-quotes,.hd-tickers,[data-qa="ticker"]').count()>0,'Homepage must retain a quote ticker');
-          assert.ok(await page.locator('#devices,.hp-devices').count()>0,'Homepage must retain its device section');
-          const text=await page.locator('main').innerText();
-          for (const category of [/Forex|Currencies/i,/Crypto/i,/Stocks/i,/Indices/i,/Commodities/i]) assert.match(text,category,'Homepage must present asset categories');
+          assert.ok(await page.locator('.ho-hero-cta a').count()>=2,'Hero must provide account and demo actions');
+          assert.ok(await page.locator('.ho-hero .ho-laptop,.ho-hero .ho-phone').count()>0,'Hero must include the trading/device preview');
+          assert.ok(await page.locator('.ho-marquee').count()>0,'Homepage must retain a moving asset strip');
+          assert.ok(await page.locator('.ho-devices').count()>0,'Homepage must retain its device section');
+          // Asset categories live in the Markets menu (desktop) or the mobile menu.
+          let text;
+          if (await page.locator('.ho-nav').isVisible()) {
+            await page.locator('.ho-nav').getByRole('button',{name:/Markets/}).hover();
+            await page.locator('.ho-nav [role="menuitem"]').first().waitFor({state:'visible'});
+            text=(await page.locator('.ho-nav [role="menuitem"]').allInnerTexts()).join(' ');
+            await page.mouse.move(0,0);
+          } else {
+            await page.getByRole('button',{name:'Open menu',exact:true}).click();
+            const menu=page.getByRole('dialog',{name:'Menu',exact:true});
+            text=await menu.innerText();
+            await page.keyboard.press('Escape');
+            await menu.waitFor({state:'hidden'});
+          }
+          for (const category of [/Forex|Currencies/i,/Crypto/i,/Stocks/i,/Commodities/i]) assert.match(text,category,'Homepage must present asset categories');
         }
         if (route.path === '/markets') {
           await page.getByRole('button',{name:/Add .* to favou?rites/i}).first().waitFor({state:'visible'});
@@ -304,12 +318,12 @@ try {
 
   for (const width of [1440,390]) {
     await scenario('guest-hero-actions-'+width,{path:'/',width,auth:false},async page => {
-      await page.locator('.hp-hero-cta a[href="/register"]').first().click();
+      await page.locator('.ho-hero-cta a[href="/register"]').first().click();
       await page.waitForURL(url => url.pathname === '/register');
       await page.locator('input[type="email"]').waitFor({state:'visible'});
       await page.goto(baseURL+'/',{waitUntil:'domcontentloaded'});
       await settle(page);
-      await page.locator('.hp-hero-cta a[href="/trading"]').first().click();
+      await page.locator('.ho-hero-cta a[href="/trading"]').first().click();
       await page.waitForURL(url => url.pathname === '/login');
     });
   }
@@ -370,7 +384,7 @@ try {
       await noOverflow(page);
     });
     await scenario('unavailable-payments-'+width,{path:'/finance',width,auth:true,mpesaConfigured:false},async page => {
-      const controls=page.locator('button.fin-pay');
+      const controls=page.locator('button.fin-method');
       await controls.first().waitFor({state:'visible'});
       assert.ok(await controls.count()>=2,'Finance must show payment choices');
       for (const control of await controls.all()) assert.equal(await control.isDisabled(),true,'Unconfigured and unavailable payment methods must be disabled');
@@ -444,19 +458,18 @@ try {
     await noOverflow(page);
   });
 
-  await scenario('deposit-dialog-keyboard',{path:'/finance',width:390,auth:true,mpesaConfigured:true},async page => {
-    const trigger=page.locator('button.fin-pay').filter({hasText:'M-Pesa'}).first();
-    await page.waitForFunction(() => [...document.querySelectorAll('button.fin-pay')].some(button => button.textContent.includes('M-Pesa') && !button.disabled));
-    await trigger.click();
-    const dialog=page.getByRole('dialog',{name:/Deposit.*M.Pesa/i});
-    await dialog.waitFor({state:'visible'});
-    assert.equal(await dialog.getAttribute('aria-modal'),'true');
-    assert.ok(await dialog.evaluate(element => element.contains(document.activeElement)),'Deposit dialog must receive focus');
-    await trapFocus(page,dialog);
-    await page.keyboard.press('Escape');
-    await dialog.waitFor({state:'hidden'});
-    assert.ok(await trigger.evaluate(element => element===document.activeElement),'Closing deposit dialog must restore focus');
-    assert.equal(await page.evaluate(() => document.getElementById('root')?.inert),false,'Deposit dialog must release background');
+  await scenario('deposit-panel-keyboard',{path:'/finance',width:390,auth:true,mpesaConfigured:true},async page => {
+    const trigger=page.locator('button.fin-method[data-method="mpesa"]').first();
+    await page.waitForFunction(() => { const b=document.querySelector('button.fin-method[data-method="mpesa"]'); return b && !b.disabled; });
+    await trigger.focus();
+    await page.keyboard.press('Enter');
+    const back=page.locator('button.fin-back');
+    await back.waitFor({state:'visible'});
+    assert.ok(await back.evaluate(element => element===document.activeElement),'Opening the M-Pesa deposit must move focus into it');
+    assert.equal(await page.getByRole('dialog').count(),0,'The deposit opens inline, not as a modal');
+    await page.keyboard.press('Enter');
+    await page.locator('button.fin-method[data-method="mpesa"]').waitFor({state:'visible'});
+    assert.ok(await page.locator('button.fin-method[data-method="mpesa"]').evaluate(element => element===document.activeElement),'Back must return focus to the M-Pesa method');
   });
 
   await scenario('client-navigation-trading-to-markets',{path:'/trading',width:390,auth:true},async page => {

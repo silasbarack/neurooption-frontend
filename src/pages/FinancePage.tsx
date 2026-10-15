@@ -80,6 +80,14 @@ export default function FinancePage() {
   // Which deposit method's screen is open; null shows the method list.
   const [depositMethod, setDepositMethod] = React.useState<string | null>(null);
   const closeDeposit = React.useCallback(() => setDepositMethod(null), []);
+  // After Back, keyboard focus returns to the method that was opened.
+  const lastMethod = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    if (depositMethod) { lastMethod.current = depositMethod; return; }
+    const id = lastMethod.current;
+    lastMethod.current = null;
+    if (id) document.querySelector<HTMLElement>(`.fin-method[data-method="${id}"]`)?.focus({ preventScroll: true });
+  }, [depositMethod]);
 
   const [withdrawPhone, setWithdrawPhone] = React.useState("");
   const [withdrawAmount, setWithdrawAmount] = React.useState("");

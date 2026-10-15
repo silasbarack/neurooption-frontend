@@ -21,7 +21,7 @@
 }
 .ho *, .ho *::before, .ho *::after { box-sizing: border-box; }
 .ho h1, .ho h2, .ho h3, .ho p { margin: 0; }
-.ho a { color: inherit; text-decoration: none; }
+:where(.ho) a { color: inherit; text-decoration: none; }
 .ho :focus-visible { outline: 3px solid rgba(11, 127, 180, 0.55); outline-offset: 3px; border-radius: 8px; }
 .ho-container { width: min(1180px, calc(100% - 48px)); margin: 0 auto; }
 .ho-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
