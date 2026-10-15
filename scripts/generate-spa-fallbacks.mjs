@@ -21,6 +21,7 @@ const routes = [
   "chat",
   "support",
   "newsletter/unsubscribe",
+  "verify-email",
   "help",
   "profile",
   "settings",

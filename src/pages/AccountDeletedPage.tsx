@@ -26,8 +26,8 @@ export default function AccountDeletedPage() {
 
       {emailSent ? (
         <p>
-          We've emailed the details of the deletion{state?.emailHint ? <> to <strong>{state.emailHint}</strong></> : ""}: what was removed,
-          what we keep and why, and how to reach us if this wasn't you.
+          We've sent the details of the deletion{state?.emailHint ? <> to <strong>{state.emailHint}</strong></> : ""}: what was removed,
+          what we keep and why, and how to reach us if this wasn't you. If it isn't in your inbox within a few minutes, check Spam.
         </p>
       ) : state ? (
         <p className="da-warn" role="status">

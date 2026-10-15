@@ -10,6 +10,8 @@ export type AccountSummary = {
   status: string;
   kycStatus: "NOT_SUBMITTED" | "PENDING" | "APPROVED" | "REJECTED";
   verified: boolean;
+  /** Missing on older backends; treat as unknown. */
+  emailVerified?: boolean;
   memberSince: string;
   profile: {
     completion: number;

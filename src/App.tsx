@@ -20,6 +20,7 @@ const AccountPage = lazy(() => import("./pages/AccountPage"));
 import AppShell from "./components/shell/AppShell";
 const SupportPage = lazy(() => import("./pages/SupportPage"));
 const NewsletterUnsubscribePage = lazy(() => import("./pages/NewsletterUnsubscribePage"));
+const VerifyEmailPage = lazy(() => import("./pages/VerifyEmailPage"));
 const HelpPage = lazy(() => import("./pages/HelpPage"));
 const AchievementsPage = lazy(() => import("./pages/AchievementsPage"));
 const TournamentsPage = lazy(() => import("./pages/TournamentsPage"));
@@ -65,6 +66,7 @@ export default function App() {
           <Route path="/security/recaptcha-test" element={<RequireAuth><RecaptchaTestPage /></RequireAuth>} />
           <Route path="/account-deleted" element={<AccountDeletedPage />} />
           <Route path="/newsletter/unsubscribe" element={<NewsletterUnsubscribePage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/signin" element={<Navigate to="/login" replace />} />
 
           <Route path="/register" element={<RegisterPage />} />

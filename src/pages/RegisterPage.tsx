@@ -108,7 +108,7 @@ export default function RegisterPage() {
       setSuccess(true);
       setMessage(response.welcomeEmailSent === false
         ? `Account created, but the welcome email could not be sent to ${response.welcomeEmailHint || "your registered address"}. You can resend it from My Account.`
-        : `Account created. A welcome email was accepted for delivery to ${response.welcomeEmailHint || "your registered address"}. Check Inbox and Spam.`);
+        : `Account created. A welcome email with a link to confirm your address was accepted for delivery to ${response.welcomeEmailHint || "your registered address"}. Check Inbox and Spam.`);
 
       setTimeout(() => {
         navigate("/trading");

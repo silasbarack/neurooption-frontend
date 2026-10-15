@@ -70,13 +70,15 @@
 .da-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 20px; border: 1px solid transparent; border-radius: 10px; font: inherit; font-size: 15px; text-decoration: none; cursor: pointer; }
 .da-btn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
 .da-btn-ghost { border-color: var(--border-primary); background: var(--surface-primary); color: var(--text-primary); }
+.da-btn-primary { background: var(--brand-primary); color: #fff; }
+.da-btn-primary:hover { filter: brightness(1.08); }
 .da-btn-danger { background: var(--negative-strong); color: #fff; }
 .da-btn-danger:hover:not(:disabled) { filter: brightness(1.08); }
 .da-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 @media (max-width: 520px) { .da-actions { flex-direction: column-reverse; } .da-btn { width: 100%; } }
 
 /* Public page shown after deletion */
-.da-done { max-width: 560px; margin: 0 auto; padding: 56px 20px; text-align: center; color: var(--text-primary); }
+.da-done { box-sizing: border-box; min-height: 100vh; max-width: 560px; margin: 0 auto; padding: 56px 20px; text-align: center; color: var(--text-primary); }
 .da-done .da-logo { display: block; width: auto; height: 64px; margin: 0 auto 28px; }
 .da-done-icon { display: inline-grid; place-items: center; width: 64px; height: 64px; margin-bottom: 14px; border-radius: 50%; background: var(--positive-soft); color: var(--positive-strong); }
 .da-done h1 { margin: 0 0 10px; font-size: 26px; }
