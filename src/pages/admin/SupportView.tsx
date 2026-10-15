@@ -80,7 +80,7 @@ function TicketDrawer({ id, onClose, onChanged }: { id: string; onClose: () => v
     try {
       const result = await act<{ emailSent: boolean }>(`/admin/console/support/${id}/reply`, "POST", { message: reply.trim(), close });
       setReply("");
-      setNotice(result.emailSent ? "Reply sent. The client was emailed." : "Reply saved. The email to the client could not be sent; they will see it on their Support page.");
+      setNotice(result.emailSent ? "Reply sent. The email notification was accepted by the provider (see Email delivery for its status)." : "Reply saved. The email to the client could not be sent; they will see it on their Support page.");
       reload();
       onChanged();
     } catch (err) {

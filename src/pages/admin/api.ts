@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 export const API = (import.meta.env.VITE_API_URL || "https://neurooption-backend.onrender.com").replace(/\/$/, "");
 export const SESSION_KEY = "neurooption_admin_session";
 
-export type Area = "overview" | "users" | "userStatus" | "kyc" | "finance" | "trading" | "support" | "audit" | "team";
+export type Area = "overview" | "users" | "userStatus" | "kyc" | "finance" | "trading" | "support" | "emails" | "audit" | "team";
 export type Admin = { id: string; fullName: string; email: string; role: string };
 export type Paged<T> = { total: number; page: number; limit: number; pages: number; items: T[] };
 

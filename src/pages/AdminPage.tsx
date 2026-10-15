@@ -3,7 +3,7 @@ import type { FormEvent, ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   ArrowRight, BadgeCheck, Banknote, CandlestickChart, CircleAlert, Eye, EyeOff, LayoutDashboard,
-  LifeBuoy, LockKeyhole, LogOut, Menu, ScrollText, ShieldCheck, UserCog, Users, X,
+  LifeBuoy, LockKeyhole, LogOut, Mail, Menu, ScrollText, ShieldCheck, UserCog, Users, X,
 } from "lucide-react";
 import Logo from "../components/branding/Logo";
 import AdminSetupPage from "./AdminSetupPage";
@@ -17,6 +17,7 @@ import TradingView from "./admin/TradingView";
 import SupportView from "./admin/SupportView";
 import AuditView from "./admin/AuditView";
 import TeamView from "./admin/TeamView";
+import EmailsView from "./admin/EmailsView";
 import "./admin/AdminConsole.css";
 
 type NavItem = { area: Area; text: string; icon: ReactNode; group: "Operations" | "Compliance" | "Administration" };
@@ -27,6 +28,7 @@ const NAV: NavItem[] = [
   { area: "trading", text: "Trading monitor", icon: <CandlestickChart size={18} />, group: "Operations" },
   { area: "finance", text: "Payments", icon: <Banknote size={18} />, group: "Operations" },
   { area: "support", text: "Support", icon: <LifeBuoy size={18} />, group: "Operations" },
+  { area: "emails", text: "Email delivery", icon: <Mail size={18} />, group: "Operations" },
   { area: "kyc", text: "Verification", icon: <BadgeCheck size={18} />, group: "Compliance" },
   { area: "audit", text: "Audit log", icon: <ScrollText size={18} />, group: "Compliance" },
   { area: "team", text: "Team & roles", icon: <UserCog size={18} />, group: "Administration" },
@@ -145,6 +147,7 @@ export default function AdminPage() {
             {current === "trading" && <TradingView />}
             {current === "finance" && <FinanceView />}
             {current === "support" && <SupportView />}
+            {current === "emails" && <EmailsView />}
             {current === "kyc" && <KycView />}
             {current === "audit" && <AuditView />}
             {current === "team" && <TeamView />}

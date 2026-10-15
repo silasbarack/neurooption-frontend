@@ -13,6 +13,14 @@ export const authApi = {
     return api.post<{ success: boolean; emailSent: boolean; emailHint?: string; message: string }>("/auth/resend-welcome", {});
   },
 
+  verifyEmail(token: string): Promise<{ success: boolean; alreadyVerified: boolean; message: string }> {
+    return api.post<{ success: boolean; alreadyVerified: boolean; message: string }>("/auth/verify-email", { token }, false);
+  },
+
+  resendVerification(): Promise<{ success: boolean; emailSent: boolean; alreadyVerified?: boolean; emailHint?: string; message: string }> {
+    return api.post<{ success: boolean; emailSent: boolean; alreadyVerified?: boolean; emailHint?: string; message: string }>("/auth/resend-verification", {});
+  },
+
   login(payload: LoginPayload): Promise<AuthResponse> {
     return api.post<AuthResponse>("/auth/login", payload, false);
   },

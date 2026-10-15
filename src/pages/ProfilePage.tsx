@@ -27,9 +27,8 @@ export default function ProfilePage() {
   const { account, reload } = useAccount();
 
   const [fullNameDraft, setFullName] = React.useState<string | null>(null);
-  const [emailDraft, setEmail] = React.useState<string | null>(null);
   const fullName = fullNameDraft ?? account?.fullName ?? initialUser?.fullName ?? "";
-  const email = emailDraft ?? account?.email ?? initialUser?.email ?? "";
+  const email = account?.email ?? initialUser?.email ?? "";
   const [country, setCountry] = React.useState(localStorage.getItem("neurooption_country_preference") || initialUser?.country || "");
   const [accountType, setAccountType] = React.useState<"QT Demo" | "QT Real">("QT Demo");
   const [currency, setCurrency] = React.useState<Currency>("USD");
@@ -56,10 +55,11 @@ export default function ProfilePage() {
     event.preventDefault();
     setSaved(false); setSaveError(""); setSaving(true);
     try {
-      const updated = await usersApi.updateProfile({ fullName, email });
-      setFullName(updated.fullName || fullName); setEmail(updated.email || email);
+      // Email changes go through Support (the backend refuses them here), so only the name is sent.
+      const updated = await usersApi.updateProfile({ fullName });
+      setFullName(updated.fullName || fullName);
       const stored = getUser();
-      if (stored) saveUser({ ...stored, fullName: updated.fullName || fullName, email: updated.email });
+      if (stored) saveUser({ ...stored, fullName: updated.fullName || fullName });
       try { if (country) localStorage.setItem("neurooption_country_preference", country); } catch { /* The account update succeeded; local preferences are optional. */ }
       setSaved(true);
       await reload();
@@ -171,9 +171,12 @@ export default function ProfilePage() {
                   className="np-input"
                   type="email"
                   value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="you@example.com"
+                  readOnly
+                  aria-describedby="email-help"
                 />
+                <small id="email-help" className="np-text-muted" style={{ fontSize: 12 }}>
+                  To change your email address, please <Link to="/support">contact Support</Link>.
+                </small>
               </div>
 
               <div className="np-field">
@@ -203,9 +206,7 @@ export default function ProfilePage() {
             <h3 className="np-card-title">Security</h3>
 
             <div style={{ display: "grid", gap: 12 }}>
-              <Link to="/forgot-password" className="np-btn np-btn-ghost" style={{ justifyContent: "flex-start" }}>
-                🔑 Change Password
-              </Link>
+              <ChangePasswordForm />
 
               <div className="np-btn np-btn-ghost" style={{ justifyContent: "space-between", cursor: "default" }}>
                 <span>🛡️ Two-Factor Authentication</span>
@@ -244,5 +245,58 @@ export default function ProfilePage() {
         </section>
       </div>
     </section>
+  );
+}
+
+function ChangePasswordForm() {
+  const [currentPassword, setCurrent] = React.useState("");
+  const [newPassword, setNew] = React.useState("");
+  const [confirm, setConfirm] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  const [result, setResult] = React.useState<{ ok: boolean; text: string } | null>(null);
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    setResult(null);
+    if (newPassword.length < 8) return setResult({ ok: false, text: "Use at least 8 characters for your new password." });
+    if (newPassword !== confirm) return setResult({ ok: false, text: "The new passwords do not match." });
+    setBusy(true);
+    try {
+      const response = await usersApi.updatePassword({ currentPassword, newPassword }) as { message: string; emailSent?: boolean };
+      setCurrent(""); setNew(""); setConfirm("");
+      setResult({
+        ok: true,
+        text: response.emailSent === false
+          ? "Password changed. We could not send the confirmation email just now."
+          : "Password changed. A confirmation email was accepted for delivery to your registered address.",
+      });
+    } catch (error) {
+      setResult({ ok: false, text: error instanceof Error ? error.message : "Could not change your password." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={submit} style={{ display: "grid", gap: 10 }} aria-label="Change password">
+      <strong style={{ fontSize: 14 }}>🔑 Change password</strong>
+      <div className="np-field" style={{ margin: 0 }}>
+        <label htmlFor="pw-current">Current password</label>
+        <input id="pw-current" className="np-input" type="password" autoComplete="current-password" required value={currentPassword} onChange={(e) => setCurrent(e.target.value)} />
+      </div>
+      <div className="np-field" style={{ margin: 0 }}>
+        <label htmlFor="pw-new">New password</label>
+        <input id="pw-new" className="np-input" type="password" autoComplete="new-password" required minLength={8} maxLength={128} value={newPassword} onChange={(e) => setNew(e.target.value)} />
+      </div>
+      <div className="np-field" style={{ margin: 0 }}>
+        <label htmlFor="pw-confirm">Confirm new password</label>
+        <input id="pw-confirm" className="np-input" type="password" autoComplete="new-password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+      </div>
+      <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <button type="submit" className="np-btn np-btn-primary" disabled={busy}>{busy ? "Changing…" : "Change password"}</button>
+        <Link to="/forgot-password" className="np-text-muted" style={{ fontSize: 13 }}>Forgot your current password?</Link>
+      </div>
+      {result && <p role={result.ok ? "status" : "alert"} className={result.ok ? "np-text-success" : "np-text-danger"} style={{ margin: 0, fontSize: 13 }}>{result.text}</p>}
+    </form>
   );
 }
