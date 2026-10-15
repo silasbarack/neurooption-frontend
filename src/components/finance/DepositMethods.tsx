@@ -30,6 +30,7 @@ function MethodCard({ method, loading, onSelect }: { method: DepositMethod; load
     <button
       type="button"
       className={`fin-method${live ? "" : " is-soon"}`}
+      data-method={method.id}
       disabled={!live}
       onClick={() => onSelect(method.id)}
       aria-label={live ? `Deposit with ${method.name}` : `${method.name}, coming soon`}
