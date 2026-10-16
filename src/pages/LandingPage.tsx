@@ -41,6 +41,16 @@ const NAV: NavItem[] = [
   { label: "Support", to: "/help" },
 ];
 
+/** Hero highlights: only things the platform really does today. */
+const HERO_POINTS = [
+  { title: "Free demo account", text: "Practise with virtual funds on live-moving prices. No deposit needed." },
+  { title: "M-Pesa deposits and withdrawals", text: "Fund your real account in KES and withdraw back to M-Pesa." },
+  { title: "Payout locked when you trade", text: "See the payout before you open a trade; it stays fixed until it closes." },
+  { title: "Charts in Kenya time (EAT)", text: "Chart times and your trade history follow East Africa Time." },
+];
+
+const HERO_MARKETS = ["Currencies", "Cryptocurrencies", "Commodities", "Stocks"];
+
 const FEATURES = [
   { icon: <BarChart3 size={26} />, title: "Clear charting", text: "Clean, interactive charts with simple controls." },
   { icon: <GraduationCap size={26} />, title: "Demo practice", text: "Explore the markets risk-free with a demo account." },
@@ -386,12 +396,31 @@ export default function LandingPage() {
             <div className="ho-hero-copy">
               <p className="ho-eyebrow">NeuroOption trading platform</p>
               <h1>Trade with <span>clarity.</span></h1>
-              <p className="ho-lead">Explore the markets with clear charts, simple controls and a free demo account.</p>
+              <p className="ho-lead">
+                NeuroOption is a fixed-time trading platform for the global markets. Learn on a free demo account,
+                follow live charts, and move to a real account funded with <span className="ho-nowrap">M-Pesa</span> when you feel ready.
+              </p>
               <div className="ho-hero-cta">
                 <PrimaryLink to="/trading">Try free demo <ArrowRight size={17} aria-hidden="true" /></PrimaryLink>
                 <Link to="/register" className="ho-btn ho-btn-outline">Create account</Link>
               </div>
-              <p className="ho-hero-note">Practice first. Build your understanding.</p>
+              <ul className="ho-hero-points">
+                {HERO_POINTS.map((point) => (
+                  <li key={point.title}>
+                    <CircleCheck size={19} aria-hidden="true" />
+                    <span><b>{point.title}</b>{point.text}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="ho-hero-markets" aria-label="Markets available">
+                <span>Markets</span>
+                {HERO_MARKETS.map((market) => (
+                  <Link key={market} to={`/markets?category=${market}`}>{market}</Link>
+                ))}
+              </div>
+              <p className="ho-hero-note">
+                Practice first. Trading involves risk: only trade with money you can afford to lose.
+              </p>
             </div>
             <Devices />
           </div>
