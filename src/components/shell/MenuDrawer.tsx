@@ -98,8 +98,8 @@ export default function MenuDrawer({ open, onClose }: MenuDrawerProps) {
         <footer className="neo-drawer-foot">
           <div>
             <Link to="/#why" onClick={onClose}>About</Link>
-            <Link to="/help" onClick={onClose}>Terms</Link>
-            <Link to="/help" onClick={onClose}>Privacy</Link>
+            <Link to="/legal/terms" onClick={onClose}>Terms</Link>
+            <Link to="/legal/privacy" onClick={onClose}>Privacy</Link>
             <Link to="/#risk" onClick={onClose}>Risk Disclosure</Link>
           </div>
           <small>© {new Date().getFullYear()} NeuroOption. All rights reserved.</small>

@@ -64,9 +64,9 @@ export default function AuthLayout({
       <footer className="au-footer">
         <span>&copy; 2026 NeuroOption</span>
         <nav aria-label="Legal">
-          <a href="#terms">Terms</a>
-          <a href="#privacy">{privacyLabel}</a>
-          <a href="#contacts">{contactsLabel}</a>
+          <Link to="/legal/terms">Terms</Link>
+          <Link to="/legal/privacy">{privacyLabel}</Link>
+          <Link to="/help">{contactsLabel}</Link>
         </nav>
         <span className="au-age">21+</span>
       </footer>
