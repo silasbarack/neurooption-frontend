@@ -1304,7 +1304,7 @@ const policy: Policy = {
             <li>the account (demo or real), the instrument, the direction and the stake;</li>
             <li>the approximate time of the trade in EAT;</li>
             <li>what you expected and what happened; and</li>
-            <li>a screenshot, if you have one.</li>
+            <li>a description of anything you saw on screen (support tickets are text only and cannot carry attachments).</li>
           </ul>
           <p>
             Raising a question early helps us investigate while the details are fresh. We will still consider a question you raise later, although

@@ -90,7 +90,7 @@ const policy: Policy = {
           <Definitions
             items={[
               ["AML", <>Anti-money-laundering: the laws, rules and controls that aim to stop criminal money from being disguised as legitimate funds.</>],
-              ["Authorised staff", <>NeuroOption staff who have been given a role with permission to review verification documents, monitor accounts or make compliance decisions, and whose actions are recorded in an audit log.</>],
+              ["Authorised staff", <>NeuroOption staff who have been given a role with permission to review verification documents, monitor accounts or make compliance decisions, and whose actions in the administration console are recorded in an audit log.</>],
               ["CTF", <>Countering the financing of terrorism, and of the proliferation of weapons.</>],
               ["Customer due diligence (CDD)", <>The basic steps we take to identify you, verify your identity and understand your purpose for using the platform.</>],
               ["Enhanced due diligence (EDD)", <>Additional steps we take for clients or situations that carry a higher risk, described in section 10.</>],
@@ -250,7 +250,7 @@ const policy: Policy = {
             ]}
           />
           <p>
-            Staff can use only the parts of the administrator system that their role allows. The platform records administrator actions, including changes to a client's verification status or account status, in an audit log. Role names in the administrator system do not by themselves appoint a compliance officer: the compliance officer in this policy is the person we have designated to carry out that function.
+            Staff can use only the parts of the administrator system that their role allows. The platform records actions taken in the administration console, including changes to a client's account status, in an audit log. Some back-office actions, including identity verification decisions, are not recorded in that log (see the <PolicyLink slug="conflicts-of-interest">Conflicts of Interest Policy</PolicyLink>), so we also rely on written records of each decision. Role names in the administrator system do not by themselves appoint a compliance officer: the compliance officer in this policy is the person we have designated to carry out that function.
           </p>
 
           <h3>6.2 Training</h3>
@@ -325,7 +325,7 @@ const policy: Policy = {
         <>
           <Callout tone="warn" title="Document submission is not yet available in the app">
             <p>
-              The platform does not yet let you upload verification documents inside the app. The verification button shows "Verification Submission Unavailable". When we need documents from you, we will tell you how to send them securely, by email to your registered address or in your Support ticket. Do not send identity documents by any other route, and never send them to anyone who is not clearly a NeuroOption representative, because criminals pretend to be companies in order to collect identity documents. We never ask for your password, your M-Pesa PIN or a one-time code.
+              The platform does not yet let you upload verification documents inside the app. The verification button shows "Verification Submission Unavailable". When we need documents from you, we will tell you how to send them securely, by email to your registered address (support tickets are text only and cannot carry attachments, so do not paste identity documents into a ticket). Do not send identity documents by any other route, and never send them to anyone who is not clearly a NeuroOption representative, because criminals pretend to be companies in order to collect identity documents. We never ask for your password, your M-Pesa PIN or a one-time code.
             </p>
           </Callout>
 
@@ -410,7 +410,7 @@ const policy: Policy = {
 
           <h3>9.2 Decisions and records</h3>
           <p>
-            The reviewer records a decision of approved or rejected, and a reason where it is rejected. The platform stores the decision with the time and the member of staff who made it in the audit log. We then email you the outcome. Where a case is complex, the reviewer passes it to the compliance officer.
+            The reviewer records a decision of approved or rejected, and a reason where it is rejected. The platform stores the decision and the reason on your verification record. Decisions made through the back-office interface are not currently written to the console audit log (see the <PolicyLink slug="conflicts-of-interest">Conflicts of Interest Policy</PolicyLink>), so the reviewer also keeps a written note of the decision. We then email you the outcome. Where a case is complex, the reviewer passes it to the compliance officer.
           </p>
 
           <h3>9.3 How long it takes</h3>

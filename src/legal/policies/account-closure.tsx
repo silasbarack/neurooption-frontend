@@ -373,7 +373,7 @@ const policy: Policy = {
             rows={[
               [
                 "Deposits, withdrawals, trades and ledger entries",
-                <>The history of money movements and trading on the account, with amounts, dates, payout percentages, prices and results, including demo trades and demo balance records. This includes payment records such as the M-Pesa phone number used, the M-Pesa receipt reference and the provider's response. The records are linked to the closed account record, which no longer shows your name or email address.</>,
+                <>The history of money movements and trading on the account, with amounts, dates, payout percentages, prices and results, including demo trades and demo balance records (demo trades are not posted to the ledger; only real-money postings are). This includes payment records such as the M-Pesa phone number used, the M-Pesa receipt reference and the provider's response. The records are linked to the closed account record, which no longer shows your name or email address.</>,
                 <>Accounting, audit, tax and anti-money-laundering record-keeping duties; the ability to answer a dispute, a regulator, a court or law enforcement; and to protect ourselves in legal claims.</>,
               ],
               [
@@ -408,7 +408,7 @@ const policy: Policy = {
               ],
               [
                 "Administrative audit records",
-                <>Records of actions staff took on your account (for example a status change, a support reply or a KYC decision), with the date and time.</>,
+                <>Records of actions staff took on your account in the administration console (for example a status change), with the date and time. Some back-office actions are not recorded in this log.</>,
                 <>Internal control, fraud prevention and audit.</>,
               ],
             ]}
@@ -495,7 +495,7 @@ const policy: Policy = {
       body: (
         <>
           <h3>9.1 Permitted uses</h3>
-          <p>We use retained records only where the law requires or allows, and only for the following purposes:</p>
+          <p>We use retained records only where the law requires it, and only for the following purposes:</p>
           <ul>
             <li>meeting our legal, tax, accounting and anti-money-laundering obligations;</li>
             <li>responding to lawful requests and orders from courts, regulators, the Financial Reporting Centre, tax authorities and law enforcement;</li>
@@ -515,7 +515,7 @@ const policy: Policy = {
 
           <h3>9.3 Access and security</h3>
           <p>
-            Access to retained records is limited to authorised staff whose role requires it (for example Finance, Compliance or Support), and actions that staff take on accounts are recorded in an audit log. Our website and interface are hosted by Render and our data is held in a managed database, and we apply technical and organisational measures that are appropriate to the risk, including password hashing and role-based access to staff functions. No system is completely secure, but we take care to protect the records that we hold.
+            Access to retained records is limited to authorised staff whose role requires it (for example Finance, Compliance or Support), and actions that staff take in the administration console are recorded in an audit log. Our website and interface are hosted by Render and our data is held in a managed database, and we apply technical and organisational measures that are appropriate to the risk, including password hashing and role-based access to staff functions. No system is completely secure, but we take care to protect the records that we hold.
           </p>
 
           <h3>9.4 Sharing</h3>

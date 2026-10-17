@@ -424,7 +424,7 @@ const policy: Policy = {
               The price engine and the payout engine do not use information about who is trading, client balances, open positions or trade results.
             </li>
             <li>The payout is fixed when your trade is accepted, and later payout changes do not affect it.</li>
-            <li>Actions taken by our staff in our administration tools are recorded in an audit log.</li>
+            <li>Actions that our staff take in the administration console are recorded in an audit log. Some back-office actions are not recorded in that log (see the <PolicyLink slug="conflicts-of-interest">Conflicts of Interest Policy</PolicyLink>).</li>
           </ul>
           <p>
             These measures reduce the conflict but do not remove it. See the{" "}

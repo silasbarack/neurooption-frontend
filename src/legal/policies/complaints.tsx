@@ -306,7 +306,7 @@ const policy: Policy = {
 
           <h3>5.3 Access to your information</h3>
           <p>
-            Staff see only what they need. Access to client records on the platform is limited by role, and actions that staff take on accounts, tickets and payments are recorded in an audit log that only some roles can open. An Investigator is given the records that are relevant to your complaint, and the audit log can show who changed what and when.
+            Staff see only what they need. Access to client records on the platform is limited by role, and actions that staff take in the administration console are recorded in an audit log that only some roles can open. Some back-office actions, such as withdrawal decisions and identity verification decisions, are not recorded in that log (see the <PolicyLink slug="conflicts-of-interest">Conflicts of Interest Policy</PolicyLink>). An Investigator is given the records that are relevant to your complaint, and the audit log can show who changed what and when for the actions it covers.
           </p>
         </>
       ),
@@ -441,7 +441,7 @@ const policy: Policy = {
               ["Payout history", <>The payout percentage published for each instrument over time, with a version number and the reason for each change. A trade records the payout version it was accepted at.</>, <>Explaining why the payout on an instrument was what it was when you traded.</>],
               ["Deposit and withdrawal records", <>For real accounts: the amount, the status, the M-Pesa phone number, the M-Pesa receipt and the provider's response, and the review status and any reason for declining a withdrawal.</>, <>Payment complaints: whether a deposit was confirmed by Safaricom, held for review or failed, and whether locked funds were returned.</>],
               ["Account status and KYC records", <>Account status, KYC status and the reason for any rejection, and the dates of changes.</>, <>Complaints about restrictions, locks, closures and identity checks.</>],
-              ["Audit log", <>Actions taken by staff on an account or a payment, who took them and when.</>, <>Whether staff acted within their authority and who made a decision.</>],
+              ["Audit log", <>Actions taken by staff in the administration console, who took them and when. It does not cover every back-office action.</>, <>Whether staff acted within their authority and who made a decision.</>],
               ["Support tickets and messages", <>What you wrote, what we replied and when.</>, <>Delay and service complaints, and what you were told.</>],
               ["Email delivery records", <>The recipient, subject and delivery status of emails the platform sent you (not the content).</>, <>Whether a notice, a confirmation or a reply was sent.</>],
               ["System and server records", <>Platform logs and monitoring information for the relevant time, to the extent they are still held.</>, <>Complaints about outages, errors or delays.</>],

@@ -698,8 +698,8 @@ const policy: Policy = {
           <ul>
             <li>
               Our support team will pass your request to a member of staff who is authorised to change account status. That person will mark your
-              account as suspended and record the reason. Every change of account status is recorded in our audit log, with the name of the
-              staff member who made it.
+              account as suspended and record the reason. Account status changes made in the administration console are recorded in our audit log, with the name of the
+              staff member who made them.
             </li>
             <li>We will act on your request as soon as we can, and at the latest by the end of the next business day after we receive it.</li>
             <li>We will confirm in your ticket when your account has been suspended, and we will email you to let you know that we have replied.</li>
@@ -1125,7 +1125,7 @@ const policy: Policy = {
 
           <h3>15.2 Records</h3>
           <p>
-            We keep records of suspension and closure requests in your support tickets, and every change to your account status is recorded in our
+            We keep records of suspension and closure requests in your support tickets, and changes to your account status made in the administration console are recorded in our
             audit log with the reason given. We use these records to make sure that requests are acted on and to review how well this policy is
             working.
           </p>
