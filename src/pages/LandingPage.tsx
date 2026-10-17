@@ -542,9 +542,11 @@ export default function LandingPage() {
             </div>
             <div className="ho-footer-col">
               <h3>Legal</h3>
-              <Link to="/help">Terms of use</Link>
-              <Link to="/help">Privacy policy</Link>
-              <Link to="/help">Risk disclosure</Link>
+              <Link to="/legal/terms">Terms and conditions</Link>
+              <Link to="/legal/privacy">Privacy policy</Link>
+              <Link to="/legal/risk-disclosure">Risk disclosure</Link>
+              <Link to="/legal/aml-kyc">AML and KYC policy</Link>
+              <Link to="/legal">All policies</Link>
             </div>
           </div>
           <div className="ho-footer-bottom">

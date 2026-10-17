@@ -267,9 +267,10 @@ export default function RegisterPage() {
               required
             />
             <span>
-              I am 21 or older and agree to the{" "}
-              <a href="#terms" className="au-link">{tt("terms")}</a> and{" "}
-              <a href="#privacy" className="au-link">{tt("privacy")}</a>.
+              I am 21 or older, agree to the{" "}
+              <a href="/legal/terms" target="_blank" rel="noopener" className="au-link">{tt("terms")}</a> and{" "}
+              <a href="/legal/privacy" target="_blank" rel="noopener" className="au-link">{tt("privacy")}</a>, and have read the{" "}
+              <a href="/legal/risk-disclosure" target="_blank" rel="noopener" className="au-link">Risk Disclosure</a>.
             </span>
           </label>
 

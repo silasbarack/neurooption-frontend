@@ -21,6 +21,7 @@ import AppShell from "./components/shell/AppShell";
 const SupportPage = lazy(() => import("./pages/SupportPage"));
 const NewsletterUnsubscribePage = lazy(() => import("./pages/NewsletterUnsubscribePage"));
 const VerifyEmailPage = lazy(() => import("./pages/VerifyEmailPage"));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
 const HelpPage = lazy(() => import("./pages/HelpPage"));
 const AchievementsPage = lazy(() => import("./pages/AchievementsPage"));
 const TournamentsPage = lazy(() => import("./pages/TournamentsPage"));
@@ -67,6 +68,11 @@ export default function App() {
           <Route path="/account-deleted" element={<AccountDeletedPage />} />
           <Route path="/newsletter/unsubscribe" element={<NewsletterUnsubscribePage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/legal" element={<LegalPage />} />
+          <Route path="/legal/:slug" element={<LegalPage />} />
+          <Route path="/terms" element={<Navigate to="/legal/terms" replace />} />
+          <Route path="/privacy" element={<Navigate to="/legal/privacy" replace />} />
+          <Route path="/risk-disclosure" element={<Navigate to="/legal/risk-disclosure" replace />} />
           <Route path="/signin" element={<Navigate to="/login" replace />} />
 
           <Route path="/register" element={<RegisterPage />} />
