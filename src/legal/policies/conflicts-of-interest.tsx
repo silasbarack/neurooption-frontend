@@ -336,7 +336,7 @@ const policy: Policy = {
               [
                 "Our staff can see your data and accounts",
                 <>Information could be misused.</>,
-                <>Role-based access; audit log of staff actions; confidentiality rules.</>,
+                <>Role-based access in the console; audit log of console actions; confidentiality rules; limits on access outside the console.</>,
                 <>10</>,
               ],
               [
@@ -558,14 +558,15 @@ const policy: Policy = {
             </li>
             <li>
               <strong>Locked when your trade is accepted.</strong> If the payout changed between the moment it was shown to you and the moment
-              your trade request reached our server, the trade is rejected and you are shown the new payout to confirm. Once a trade is
-              accepted, its payout is fixed, and later payout changes do not affect it.
+              your trade request reached our server, the trade is rejected and you are shown the new payout to confirm. (The app sends the payout it showed you
+              with every trade request.) Once a trade is accepted, its payout is fixed, and later payout changes do not affect it.
             </li>
             <li>
-              <strong>Fixed limits.</strong> A payout can never be below 20% or above 92%.
+              <strong>Limits.</strong> The payout engine holds every payout between 20% and 92%. These limits are part of the platform's
+              configuration, which is described in section 7.4.
             </li>
             <li>
-              <strong>Gradual changes.</strong> The payout engine is built to move payouts slowly, so that they cannot jump suddenly. The
+              <strong>Gradual changes.</strong> The payout engine is built to move payouts slowly, so that they do not jump suddenly. The
               current settings are shown in the table below.
             </li>
             <li>
@@ -590,8 +591,11 @@ const policy: Policy = {
 
           <h3>7.4 Changes to payout settings</h3>
           <p>
-            The settings in this section are system-wide. A change to them applies to every client equally and never to one client. A change
-            does not affect a trade that has already been accepted. We will describe any change to the 20% and 92% limits or to the expiry
+            The limits and settings in this section are part of the platform's configuration. They are not controlled from the administration
+            console; they can be changed only by authorised technical staff with access to the platform's hosting configuration, and the
+            payout engine can be switched off there, in which case the last published payouts stay in place. The settings are system-wide. A
+            change to them applies to every client equally and never to one client. A change does not affect a trade that has already been
+            accepted. We will describe any change to the 20% and 92% limits or to the expiry
             adjustments in the <PolicyLink slug="trading-rules">Trading Rules and Execution Policy</PolicyLink> before it takes effect, and
             we will give you notice of any change that is to your disadvantage in the way the Terms and Conditions require.
           </p>
@@ -617,7 +621,7 @@ const policy: Policy = {
             </li>
             <li>
               Our administration console has no function to change a trade's outcome, entry price, settlement price, payout or stake, or to
-              change a client's balance. The parts of the console that show trades and payments are read-only.
+              change a client's balance. The parts of the console that show trades and payments are read-only. Access outside the console is described in section 10.9.
             </li>
           </ul>
 
@@ -650,8 +654,8 @@ const policy: Policy = {
               and why.
             </li>
             <li>
-              Any correction to a trade or a balance will be made only by authorised staff, through restricted back-office processes, with the
-              reason recorded.
+              Any correction to a trade or a balance will be made only by authorised staff, through restricted back-office processes (section
+              10.9), with the reason recorded in writing.
             </li>
             <li>
               If you disagree, you can complain under the <PolicyLink slug="complaints">Complaints Handling Policy</PolicyLink>.
@@ -687,14 +691,14 @@ const policy: Policy = {
               account that is not in your name, suspected fraud or money laundering, a legal requirement, or an investigation into a manifest
               error.
             </li>
-            <li>We will record each withdrawal decision, who made it and the reason for any decline.</li>
+            <li>We will keep a written record of each withdrawal decision, who made it and the reason for any decline (see section 10.9).</li>
           </ul>
 
           <h3>9.3 Identity verification</h3>
           <ul>
             <li>
-              Verification decisions are made by authorised staff. Each approval or rejection is recorded in the audit log with the staff
-              member who made it and, for a rejection, the reason, and you are told the decision by email.
+              Verification decisions are made by authorised staff. Each approval or rejection made in the administration console is recorded in the audit log with the staff
+              member who made it and, for a rejection, the reason, and we email you the decision.
             </li>
             <li>
               We apply the same verification requirements to every client, whatever their trading results, and we will not ask for further
@@ -735,7 +739,9 @@ const policy: Policy = {
           <p>
             Staff use the administration console through staff accounts that are separate from client accounts. Each staff account has one
             role, which decides which parts of the console it can use. A staff session ends automatically after 8 hours. Only a Super Admin
-            can create staff accounts, change their roles, or disable or remove them.
+            can create staff accounts, change their roles, or disable or remove them within the console. A separate owner recovery
+            procedure, protected by a secret setup key held by the owner, can create the first Super Admin account or reset a Super
+            Admin's password; it is not part of the console and is not recorded in the audit log.
           </p>
 
           <h3>10.2 What staff can see and do</h3>
@@ -775,7 +781,8 @@ const policy: Policy = {
             ]}
           />
           <p>
-            No part of the console allows staff to place, close or change a trade, to set a price or payout, or to change a balance.
+            No part of the console allows staff to place, close or change a trade, to set a price or payout, or to change a balance. See section 10.9 for access
+            outside the console.
           </p>
 
           <h3>10.3 The audit log</h3>
@@ -788,9 +795,11 @@ const policy: Policy = {
             <li>test emails sent from the console.</li>
           </ul>
           <p>
-            Each entry shows which staff member acted, what they did, which record it concerned and when. Only Super Admins and Compliance
-            Admins can view the audit log, and the console has no function to edit or delete entries. The audit log records actions that change
-            something; it does not currently record each time a staff member views a client's details. Access to client information is
+            Each entry shows which staff member acted, what they did, which record it concerned and when. If a staff account is later removed, its past entries are kept but no longer name the staff
+            member. Only Super Admins and Compliance
+            Admins can view the audit log, and the console has no function to edit or delete entries. The audit log records actions taken in the console that change
+            something; it does not currently record each time a staff member views a client's details, and it does not record actions
+            taken outside the console (section 10.9). Access to client information is
             therefore also controlled by staff roles and by the confidentiality rules below.
           </p>
 
@@ -847,6 +856,36 @@ const policy: Policy = {
           <p>
             A breach of these rules is a disciplinary matter and may lead to dismissal or the end of a contract. We will reverse any benefit a
             client lost because of the breach, and we will report the matter to the authorities where the law requires.
+          </p>
+
+          <h3>10.9 Access outside the administration console</h3>
+          <p>
+            The administration console is not the only way staff can reach the platform, and we do not want this policy to suggest otherwise:
+          </p>
+          <ul>
+            <li>
+              Decisions on withdrawals, and some payment status changes, are made through a separate back-office interface that is limited to
+              accounts holding the platform's administrator role. It is not divided into the console's roles, and it does not currently write
+              entries to the console audit log. A withdrawal record shows its status and, if declined, the reason, but it does not currently
+              record which staff member decided. Changing the status of a withdrawal moves the amount between a client's available and
+              locked balances, and changing the status of a deposit can credit a client's balance.
+            </li>
+            <li>
+              The same interface can also approve or reject identity verification submissions and edit client profile details. Those
+              actions are not recorded in the console audit log either.
+            </li>
+            <li>
+              Authorised technical staff with access to our hosting and database accounts could in principle read or change stored data
+              directly. That access is limited to the people who need it to run the platform, and what they do there is not recorded in the
+              console audit log.
+            </li>
+          </ul>
+          <p>
+            For these reasons our controls over this access rely on restricting who has it, on the staff rules in this section and on the
+            reviews described in section 17, rather than on a complete automatic record. Staff may use this access only to carry out a
+            decision made under this policy, the Terms and Conditions or the law, must never use it to change a trade, a price, a payout or
+            a client's balance for any other reason, and must keep a written note of the reason for each manual payment or balance
+            correction.
           </p>
         </>
       ),
@@ -1078,7 +1117,7 @@ const policy: Policy = {
                 </>,
               ],
               ["Payout history", <>Each payout published by the payout engine, with its version, time and reason code.</>],
-              ["Audit log", <>Staff actions taken in the administration console, as described in section 10.3.</>],
+              ["Audit log", <>Staff actions taken in the administration console, as described in section 10.3. Actions outside the console are covered in section 10.9.</>],
               [
                 "Conflicts register",
                 <>Each conflict identified, how it is managed, decisions taken, and any disclosure made to clients.</>,

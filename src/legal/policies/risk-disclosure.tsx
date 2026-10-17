@@ -204,7 +204,8 @@ const policy: Policy = {
           <h3>3.4 You cannot close a trade early</h3>
           <p>
             Once we accept a trade, you cannot close, cancel or sell it back before expiry, even if the price moves strongly against you. You are
-            committed until the trade settles.
+            committed until the trade settles. A trade placed by mistake, for example by pressing Buy instead of Sell or entering the wrong stake, is
+            binding once we accept it, subject only to section 10.3.
           </p>
           <h3>3.5 You do not own anything</h3>
           <p>
@@ -300,8 +301,7 @@ const policy: Policy = {
           </p>
           <h3>5.5 No method reliably beats the break-even rate</h3>
           <p>
-            Our price engine generates price movements using seeded random processes (see section 7). Over short periods the prices behave close to
-            a random walk. We do not know of any indicator, chart pattern, system or strategy that can reliably predict their direction, and you
+            Our price engine generates price movements using software and seeded random processes (see section 7). We do not know of any indicator, chart pattern, system or strategy that can reliably predict their direction, and you
             should assume that none will give you a win rate above the break-even rate over time. A run of wins is not evidence that a strategy
             works.
           </p>
@@ -474,7 +474,7 @@ const policy: Policy = {
           </p>
           <h3>9.4 Your entry price may differ from what you saw</h3>
           <p>
-            Prices on the platform update many times a second. The entry price is the price on our server when your trade is accepted, not the
+            Prices on the platform update frequently. The entry price is the price on our server when your trade is accepted, not the
             price on your screen when you pressed Buy or Sell. Because of network delay, the price may have moved in between. Check the entry price
             recorded for each trade.
           </p>
@@ -556,7 +556,14 @@ const policy: Policy = {
             Charts, candles, countdown timers and indicators on your screen can lag behind, or briefly differ from, the prices and times on our
             server. Trades are accepted, timed and settled using the records on our server.
           </p>
-          <h3>11.4 Account security</h3>
+          <h3>11.4 Account restrictions</h3>
+          <p>
+            We may suspend, lock or restrict an account, for example for security reasons, suspected misuse, unpaid or disputed transactions or
+            legal and compliance reasons, as set out in the <PolicyLink slug="terms">Terms and Conditions</PolicyLink>. While an account is
+            restricted you may be unable to trade, deposit or withdraw. Trades that are already open when a restriction is applied may still be
+            settled at expiry or may be reviewed under section 10.3.
+          </p>
+          <h3>11.5 Account security</h3>
           <ul>
             <li>
               Anyone who has your password, or access to a device where you are signed in, can trade on your account. Use a strong password that you
@@ -778,7 +785,7 @@ const policy: Policy = {
             <li>the European Union and European Economic Area, where selling them to retail clients is prohibited;</li>
             <li>the United Kingdom, where the Financial Conduct Authority banned their sale to retail consumers in 2019;</li>
             <li>Australia, where the Australian Securities and Investments Commission banned their issue and distribution to retail clients in 2021;</li>
-            <li>Canada, where securities regulators prohibit offering short-term binary options to individuals;</li>
+            <li>Canada, where securities regulators have prohibited the offer of short-term binary options to individuals;</li>
             <li>Israel, where the binary options business has been prohibited;</li>
             <li>the United States, where they may be offered to the public only on exchanges registered with US regulators.</li>
           </ul>
@@ -843,9 +850,9 @@ const policy: Policy = {
             <li>a loss by the smallest price step can feel like a "near miss" that invites another try;</li>
             <li>synthetic instruments are not tied to market hours, so trading may be available at any hour, including late at night and at weekends;</li>
             <li>
-              our Achievements page awards experience points (XP), levels and badges for the number of trades, winning trades, consecutive trading
-              days and the total amount staked. These have no cash value and are not a measure of skill, but they can encourage you to trade more
-              often or stake more than you intended.
+              our Achievements page awards experience points (XP), levels and badges based on the number of trades you settle, the number you win and
+              the number of consecutive days on which you trade, and some badges are linked to goals such as placing a single large stake. These
+              have no cash value and are not a measure of skill, but they can encourage you to trade more often or stake more than you intended.
             </li>
           </ul>
           <h3>18.2 Chasing losses and doubling stakes</h3>
@@ -868,7 +875,8 @@ const policy: Policy = {
             ]}
           />
           <p>
-            In 100 trades with a 50% chance of losing each one, the chance of at least one run of 8 losses in a row is about 17% (section 4.2). At
+            Using the same assumptions as section 4.2 (a 50% chance of losing each trade, trades independent), the chance of at least one run of 8
+            losses in a row within 100 trades is about 17%. At
             that point you would have lost KES 25,500 chasing a KES 100 stake.
           </p>
           <h3>18.3 Warning signs</h3>
@@ -892,7 +900,7 @@ const policy: Policy = {
             <li>
               Contact us through <a href="/support">Support</a> if you want help to take a break or stop. You can also close your account through{" "}
               <a href="/delete-account">Delete account</a> once your balance is zero and you have no open trades or pending deposits or withdrawals.
-              Closing an account cannot be undone.
+              Closing an account cannot be undone. See the <PolicyLink slug="account-closure">Account Closure and Data Retention Policy</PolicyLink>.
             </li>
           </ul>
           <p>

@@ -243,7 +243,7 @@ const policy: Policy = {
 
           <h3>6.4 Showing that a line is yours</h3>
           <p>
-            We may ask you at any time to show that an M-Pesa line is registered in your name, for example by sending us an M-Pesa statement for that line together with your identity document. Until you do, we may decline deposits from, or withdrawals to, that line.
+            We may ask you at any time to show that an M-Pesa line is registered in your name, for example by sending us an M-Pesa statement for that line together with your identity document. Until you do, we may decline deposits from, or withdrawals to, that line. The platform does not check automatically whose name a line is registered in; these checks are carried out by our staff, and the rule in section 6.1 applies whether or not we have checked.
           </p>
 
           <h3>6.5 Using the same line for deposits and withdrawals</h3>
@@ -333,7 +333,7 @@ const policy: Policy = {
               ["Processing", <>Safaricom has reported a result and we are confirming and recording it. This normally lasts only moments.</>, <>Not yet</>],
               ["Completed", <>Safaricom has confirmed the payment and the amount has been added to your available balance.</>, <>Yes</>],
               ["Failed", <>The payment was not completed, for example because the prompt was cancelled or timed out, the PIN was wrong, there was not enough money in M-Pesa, or the amount paid did not match the amount requested (section 8.4).</>, <>No</>],
-              ["Cancelled", <>The deposit was cancelled before any payment was made.</>, <>No</>],
+              ["Cancelled", <>The deposit was cancelled before any payment was made. A prompt that you cancel on your phone normally shows as Failed rather than Cancelled.</>, <>No</>],
             ]}
           />
 
@@ -452,7 +452,7 @@ const policy: Policy = {
         <>
           <h3>10.1 What you can withdraw</h3>
           <ul>
-            <li>You can withdraw any amount from KES 1 up to your available balance. A request for more than your available balance is refused.</li>
+            <li>You can withdraw any amount from KES 1 up to your available balance (amounts are recorded to two decimal places). A request for more than your available balance is refused.</li>
             <li>You cannot withdraw locked funds, the stakes of trades that are still open, or virtual funds.</li>
             <li>Withdrawals are paid in KES to a Safaricom M-Pesa line registered in your name (section 6).</li>
           </ul>
@@ -615,7 +615,7 @@ const policy: Policy = {
 
           <h3>13.2 Asking us to cancel</h3>
           <p>
-            If you want to cancel a withdrawal, contact <a href="/support">Support</a> as soon as possible and give the withdrawal reference from the "Withdrawal Request Received" email. If we have not yet sent the payment, we will cancel it: the withdrawal is marked Cancelled, the locked amount returns to your available balance, and you receive a "Withdrawal Declined" email that gives cancellation as the reason.
+            If you want to cancel a withdrawal, contact <a href="/support">Support</a> as soon as possible and give the withdrawal reference from the "Withdrawal Request Received" email. If we have not yet sent the payment, we will cancel it: the withdrawal is marked Cancelled, the locked amount returns to your available balance, and you receive a "Withdrawal Declined" email, which is the email the system sends for every cancelled, failed or rejected withdrawal and which states the reason we record.
           </p>
 
           <h3>13.3 After the payment has been sent</h3>
@@ -727,7 +727,7 @@ const policy: Policy = {
 
           <h3>16.3 Reversing a genuine payment is not allowed</h3>
           <p>
-            Asking for a reversal of a payment you made and authorised, for example to recover money after losing trades, is fraud and is prohibited by section 11 of the Terms and Conditions. We may close your account, recover the amount and report the matter to the relevant authorities.
+            Asking for a reversal of a payment you made and authorised, for example to recover money after losing trades, may be fraud and is prohibited by section 11 of the Terms and Conditions. We may close your account, recover the amount and report the matter to the relevant authorities.
           </p>
 
           <h3>16.4 Unauthorised use of your M-Pesa</h3>

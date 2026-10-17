@@ -651,8 +651,12 @@ const policy: Policy = {
               <li>deposit limits;</li>
               <li>loss limits or stake limits that you set for yourself;</li>
               <li>session time limits, or reminders of how long you have been trading;</li>
-              <li>cooling-off periods or "time-out" buttons that you can switch on yourself; and</li>
-              <li>self-exclusion, meaning a tool that stops you from using the platform, or from opening a new account, for a fixed period.</li>
+              <li>cooling-off periods or "time-out" buttons that you can switch on yourself;</li>
+              <li>self-exclusion, meaning a tool that stops you from using the platform, or from opening a new account, for a fixed period; and</li>
+              <li>
+                reality checks or warnings during trading. The platform does not interrupt your trading to warn you, and the only cap on a
+                stake is your available balance.
+              </li>
             </ul>
             <p>
               We are considering tools of this kind for the future. Until they exist, please do not rely on the platform to stop you: set your
@@ -816,10 +820,14 @@ const policy: Policy = {
             <li>we read or reply to your support tickets;</li>
             <li>we review your account for another reason, such as identity verification or a suspected breach of the Terms and Conditions;</li>
             <li>we review a withdrawal request, when real-money accounts are available, since every withdrawal is reviewed by a member of our staff; or</li>
-            <li>you give a reason for closing your account that suggests you are struggling.</li>
+            <li>someone close to you contacts us with a concern (section 13.5).</li>
           </ul>
+          <p>
+            We do not currently review clients' trading activity on a routine basis, so we may not see a pattern of stakes, deposits or trading
+            hours unless one of the situations above leads us to look at your account.
+          </p>
 
-          <h3>11.2 Signs we take seriously</h3>
+          <h3>11.2 Signs we take seriously if we see them</h3>
           <ul>
             <li>you tell us that you have lost control of your trading, that you are in financial difficulty, or that trading is harming you or your family;</li>
             <li>you tell us that you have borrowed money to trade, or are trading with money meant for essentials;</li>

@@ -153,7 +153,7 @@ const policy: Policy = {
               ["Loss", <>A trade that settles against the direction you chose. You lose the whole stake.</>],
               [
                 "Mid price",
-                <>The single price our price engine produces for an instrument at a given moment, with no spread added or taken away.</>,
+                <>The price our price engine quotes for an instrument at a given moment, midway between its internal bid and ask quotes. Trades use only the mid price, with no spread added or taken away.</>,
               ],
               [
                 "OTC",
@@ -377,18 +377,18 @@ const policy: Policy = {
           <p>
             Every trade uses the instrument's mid price. The entry price and the settlement price are both mid prices. There is no separate buying
             and selling price for your trades, and no spread is added to or taken away from the price you receive, whether you choose BUY or
-            SELL.
+            SELL. The engine also produces bid and ask quotes either side of the mid price, but they are not used to enter or settle trades.
           </p>
           <h3>5.4 No independent reference price</h3>
           <p>
             Because the prices are synthetic, there is no independent market price against which a NeuroOption price can be checked. The price
-            that counts is the one our engine produced, as recorded by our server. When we consider whether a price is wrong, we compare it with
+            that counts is the one our engine produced, as recorded with your trade by our server. When we consider whether a price is wrong, we compare it with
             how the instrument normally behaves on our platform, not with real-world markets (section 15.1).
           </p>
           <h3>5.5 Restarts and price gaps</h3>
           <p>
-            If our servers are restarted, updated or interrupted, the engine starts again and an instrument's price series may restart from a
-            different level. A chart can then show a gap or a sudden jump. Section 14.6 explains how we deal with trades that are open when this
+            If our servers are restarted, updated or interrupted, the engine starts again and each instrument's price series restarts from the instrument's own starting level,
+            which can be far from where its price was before. A chart can then show a gap or a sudden jump. Section 14.6 explains how we deal with trades that are open when this
             happens.
           </p>
           <h3>5.6 Charts, indicators and the sentiment gauge</h3>
@@ -715,8 +715,8 @@ const policy: Policy = {
               payout is shown on the Buy and Sell buttons.
             </li>
             <li>
-              Where the expiry adjustment applies, the trading panel can show the asset payout and the adjustment, for example "Asset payout 86%,
-              adjusted -3 for this trade length".
+              Where the expiry adjustment applies, hovering over the payout figure in the trading panel can show the asset payout and the
+              adjustment, for example "Asset payout 86%, adjusted -3 for this trade length".
             </li>
             <li>
               The instrument list and the Markets page show the asset payout, which is the payout for a 60-second trade. The final payout for your
@@ -872,7 +872,8 @@ const policy: Policy = {
             </ul>
             <p>
               The profit is fixed at acceptance from the stake and the locked payout. Because the payout is always below 100%, you must win more
-              than half of your trades to break even. The <PolicyLink slug="risk-disclosure">Risk Disclosure</PolicyLink> explains this in
+              than half of your trades to break even. For example, at an 87% payout you need to win about 53.5% of your trades (1 ÷ 1.87),
+              ignoring draws. The <PolicyLink slug="risk-disclosure">Risk Disclosure</PolicyLink> explains this in
               detail.
             </p>
           </Callout>
@@ -897,7 +898,8 @@ const policy: Policy = {
           <h3>12.5 Rounding</h3>
           <p>
             Amounts are calculated from the exact stake and the whole-number payout percentage and recorded to two decimal places in the currency
-            of the trade.
+            of the trade. On the demo account viewed in another currency, balances move in US dollars and amounts shown in the other
+            currency are converted at the indicative rate (section 16.5).
           </p>
           <h3>12.6 How your balance changes</h3>
           <ul>
@@ -930,6 +932,12 @@ const policy: Policy = {
           <p>
             A trade you placed by mistake, for example in the wrong account, in the wrong direction, with the wrong stake or with the wrong
             expiry, is not a technical error and will not be cancelled or voided for that reason.
+          </p>
+          <h3>13.4 Account status and open trades</h3>
+          <p>
+            Restricting or suspending your account does not by itself cancel a trade that has already been accepted. The trade still runs to
+            expiry and is settled under these rules, except that we may void trades connected with prohibited conduct (section 13.2). The
+            self-service account deletion on the platform is not available while you have open trades.
           </p>
         </>
       ),
@@ -984,7 +992,8 @@ const policy: Policy = {
             A settlement that is delayed by a restart, outage or other fault in our systems is a technical error under section 15. If you think a
             delay changed the result of your trade, tell us through <a href="/support">Support</a>. We will review the trade and, where we find
             that a delay caused by our systems changed its result, we will either settle it at the price that applied at the expiry time, where
-            our records show that price reliably, or void it and return your stake. We may also review such trades on our own initiative.
+            we can establish that price reliably, or void it and return your stake. We do not keep a permanent record of every price the engine
+            produces, so where the price at the expiry time cannot be established reliably, we will void the trade. We may also review such trades on our own initiative.
           </p>
           <h3>14.6 Price restarts while a trade is open</h3>
           <p>
@@ -1064,7 +1073,7 @@ const policy: Policy = {
           </p>
           <h3>15.6 How we decide</h3>
           <p>
-            Reviews are carried out by our authorised staff using our records of prices, payouts, trades and balances. We act fairly and
+            Reviews are carried out by our authorised staff using our records of trades, payouts, balances and transactions and, where available, the prices held in our systems. We act fairly and
             consistently, apply the same approach to every client affected by the same error, and keep a record of each review and its outcome.
           </p>
           <h3>15.7 Time limits</h3>
