@@ -18,7 +18,7 @@ const policy: Policy = {
             In this policy, "NeuroOption", "we", "us" and "our" mean <Co field="legalName" /> (trading as NeuroOption), a company
             incorporated in <Co field="jurisdiction" /> with registration number <Co field="registrationNumber" /> and its registered office
             at <Co field="registeredAddress" />. "You" and "your" mean any person who uses the NeuroOption website and platform at
-            https://neurooption.com, whether with a demo account or, when real-money accounts are available, a real-money account.
+            https://neurooption.com, whether with a demo account or a real-money account.
           </p>
 
           <h3>1.2 What this policy is for</h3>
@@ -34,15 +34,6 @@ const policy: Policy = {
             <li>where you can get help; and</li>
             <li>the rules we follow in our marketing.</li>
           </ul>
-
-          <Callout tone="info" title="Real-money services are not available yet">
-            <p>
-              Today NeuroOption offers demo trading with virtual US dollars (USD) only. Real-money deposits, withdrawals and trades are switched
-              off on the platform. Parts of this policy describe how things will work when real-money accounts are available. Nothing in this
-              policy means that real-money services are available now. When they are, real-money accounts will be held in Kenya Shillings
-              (KES).
-            </p>
-          </Callout>
 
           <h3>1.3 How this policy fits with our other policies</h3>
           <p>This policy forms part of the information you should read before you trade, together with:</p>
@@ -130,7 +121,7 @@ const policy: Policy = {
               ],
               [
                 "Real-money account",
-                <>An account in Kenya Shillings (KES) funded with real money through M-Pesa, when real-money accounts are available.</>,
+                <>An account in Kenya Shillings (KES) funded with real money through M-Pesa.</>,
               ],
               [
                 "Harmful trading",
@@ -410,7 +401,7 @@ const policy: Policy = {
           <h3>5.6 Use the demo account first</h3>
           <p>
             The demo account lets you learn how fixed-time options and the platform work without risking money. It uses the same synthetic
-            prices and the same payout percentages that real-money trading will use. To get the most from it:
+            prices and the same payout percentages that real-money trading uses. To get the most from it:
           </p>
           <ul>
             <li>
@@ -528,8 +519,8 @@ const policy: Policy = {
             <li>Uploading identity documents in the platform is not available yet.</li>
           </ul>
           <p>
-            We may ask you at any time for an identity document, such as your national identity card or passport, to confirm your age. When
-            real-money accounts are available, we may ask for this before you deposit or withdraw. The{" "}
+            We may ask you at any time for an identity document, such as your national identity card or passport, to confirm your age, including
+            before you deposit or withdraw. The{" "}
             <PolicyLink slug="aml-kyc">AML, CTF and KYC Policy</PolicyLink> explains how we verify identity.
           </p>
 
@@ -539,7 +530,7 @@ const policy: Policy = {
             <li>suspend the account while we look into it (section 9.4 explains what a suspension does today), and may ask for proof of age;</li>
             <li>close the account if the holder does not give us satisfactory proof of age within a reasonable time, or if we confirm that they are under 21;</li>
             <li>
-              when real-money accounts are available, deal with any money in the account as the Terms and Conditions set out for accounts that
+              deal with any money in the account as the Terms and Conditions set out for accounts that
               we close, after any checks the law requires us to carry out; and
             </li>
             <li>keep the records we are required to keep by law, as described in the Account Closure and Data Retention Policy.</li>
@@ -599,7 +590,7 @@ const policy: Policy = {
               ["Open Trades", <>Shows trades that are still running.</>, <><a href="/open-trades">Open Trades</a></>],
               [
                 "Transaction history",
-                <>Shows your deposits and withdrawals, when real-money accounts are available.</>,
+                <>Shows your deposits and withdrawals.</>,
                 <>The History tab on the <a href="/finance">Finance</a> page</>,
               ],
               [
@@ -716,7 +707,7 @@ const policy: Policy = {
               steps in section 9.6.
             </p>
           </Callout>
-          <p>When real-money accounts are available, while your account is suspended at your request:</p>
+          <p>While your account is suspended at your request:</p>
           <ul>
             <li>we will not accept deposits to your account and we will not accept real-money trades from it;</li>
             <li>trades already accepted before the suspension will run to expiry and settle normally, because trades cannot be closed early; and</li>
@@ -819,7 +810,7 @@ const policy: Policy = {
             <li>you, or someone close to you, tells us about it;</li>
             <li>we read or reply to your support tickets;</li>
             <li>we review your account for another reason, such as identity verification or a suspected breach of the Terms and Conditions;</li>
-            <li>we review a withdrawal request, when real-money accounts are available, since every withdrawal is reviewed by a member of our staff; or</li>
+            <li>we review a withdrawal request, since every withdrawal is reviewed by a member of our staff; or</li>
             <li>someone close to you contacts us with a concern (section 13.5).</li>
           </ul>
           <p>
@@ -832,7 +823,7 @@ const policy: Policy = {
             <li>you tell us that you have lost control of your trading, that you are in financial difficulty, or that trading is harming you or your family;</li>
             <li>you tell us that you have borrowed money to trade, or are trading with money meant for essentials;</li>
             <li>you show distress, anger or desperation in your messages to us, or say that you need to win back losses;</li>
-            <li>you make repeated deposits soon after losing, or deposit again soon after withdrawing, when real-money accounts are available;</li>
+            <li>you make repeated deposits soon after losing, or deposit again soon after withdrawing;</li>
             <li>you sharply increase your stakes after losses, or trade for very long periods, including through the night;</li>
             <li>you repeatedly ask us to end a suspension early, or to reopen your account after closing it; or</li>
             <li>there are signs that you may be under 21 (section 7.4).</li>
@@ -858,7 +849,7 @@ const policy: Policy = {
               ],
               [
                 "Decline deposits",
-                <>When real-money accounts are available, we decline further deposits for a period.</>,
+                <>We decline further deposits for a period.</>,
                 <>You tell us you are depositing money meant for rent.</>,
               ],
               [
@@ -882,8 +873,7 @@ const policy: Policy = {
           <h3>11.4 Your money and your rights</h3>
           <ul>
             <li>
-              When real-money accounts are available, if we restrict, suspend or close your account under this section, you will still be able to
-              withdraw your available balance, subject to the checks in the Deposit, Withdrawal and Refund Policy. We will not hold back money
+              If we restrict, suspend or close your account under this section, you will still be able to withdraw your available balance, subject to the checks in the Deposit, Withdrawal and Refund Policy. We will not hold back money
               you are owed because of this policy.
             </li>
             <li>We will tell you what we have done and why, unless the law prevents us from doing so.</li>
@@ -1113,7 +1103,7 @@ const policy: Policy = {
           <h3>15.1 Our staff</h3>
           <ul>
             <li>
-              Staff who handle support tickets, account reviews and, when real-money accounts are available, withdrawals will be made familiar with
+              Staff who handle support tickets, account reviews and withdrawals will be made familiar with
               this policy, the warning signs in section 6 and the steps in section 11.
             </li>
             <li>Our staff will not encourage you to trade, to deposit more, to use shorter expiries or to raise your stakes.</li>
@@ -1144,7 +1134,7 @@ const policy: Policy = {
       body: (
         <>
           <p>
-            We may update this policy, for example when we introduce new responsible-trading tools, when real-money accounts become available, or
+            We may update this policy, for example when we introduce new responsible-trading tools or
             when the law changes. The date at the top of this page shows when it was last updated. If we make a significant change, we will take
             reasonable steps to tell you, for example by email or a notice on the platform. We will not reduce the protections in this policy for a
             suspension or closure you have already asked for.

@@ -18,14 +18,13 @@ const policy: Policy = {
             In this policy, "NeuroOption", "we", "us" and "our" mean <Co field="legalName" /> (trading as NeuroOption), a company
             incorporated in <Co field="jurisdiction" /> with registration number <Co field="registrationNumber" /> and its registered
             office at <Co field="registeredAddress" />. "You" and "your" mean any person who uses the NeuroOption website and platform at
-            https://neurooption.com, whether with a demo account or, when real-money accounts are available, a real-money account.
+            https://neurooption.com, whether with a demo account or a real-money account.
           </p>
 
           <h3>1.2 Why we have this policy</h3>
           <p>
             NeuroOption is not a neutral marketplace. We take the other side of every trade, we generate the prices of every instrument,
-            we set the payout percentages, and we run the systems that settle trades and, when real-money accounts are available, process
-            deposits and withdrawals. Each of these puts our interests in tension with yours. This policy explains:
+            we set the payout percentages, and we run the systems that settle trades and process deposits and withdrawals. Each of these puts our interests in tension with yours. This policy explains:
           </p>
           <ul>
             <li>the conflicts of interest we have identified in our business;</li>
@@ -42,7 +41,7 @@ const policy: Policy = {
           <h3>1.3 Who and what this policy covers</h3>
           <ul>
             <li>
-              <strong>Services:</strong> the demo account, real-money accounts when they are available, trading, prices and payouts,
+              <strong>Services:</strong> the demo account, real-money accounts, trading, prices and payouts,
               deposits and withdrawals, identity verification, customer support, our website, and our emails and other communications.
             </li>
             <li>
@@ -54,15 +53,6 @@ const policy: Policy = {
               anything from us in connection with the services we provide to you.
             </li>
           </ul>
-
-          <Callout tone="info" title="Real-money services are not available yet">
-            <p>
-              Today NeuroOption offers demo trading with virtual US dollars (USD) only. Real-money deposits, withdrawals and trades are
-              switched off on the platform. Where this policy describes real-money accounts, deposits or withdrawals, it explains how they
-              will work, and how we will manage the related conflicts, when real-money accounts are available. Nothing in this policy means
-              that real-money services are available now.
-            </p>
-          </Callout>
 
           <h3>1.4 Our regulatory status</h3>
           <Table
@@ -392,7 +382,7 @@ const policy: Policy = {
 
           <h3>5.2 Example</h3>
           <p>
-            A stake of KES 1,000 on a real-money account, when real-money accounts are available, with a locked payout of 85%:
+            A stake of KES 1,000 on a real-money account with a locked payout of 85%:
           </p>
           <Table
             head={["Result", "What you receive", "Effect on NeuroOption"]}
@@ -677,7 +667,6 @@ const policy: Policy = {
           </p>
 
           <h3>9.2 Withdrawals</h3>
-          <p>When real-money accounts are available:</p>
           <ul>
             <li>
               Every withdrawal request is reviewed by our staff. While it is pending, the amount is moved from your available balance into
@@ -963,7 +952,7 @@ const policy: Policy = {
           <p>
             A firm could make its demo account easier to win on, so that clients move to real money with false confidence. On NeuroOption, the
             price engine and the payout engine do not distinguish between demo and real-money accounts: the demo account uses the same prices
-            and payouts that real-money trading will use. Demo funds are virtual, have no value and cannot be withdrawn, and demo results do not
+            and payouts that real-money trading uses. Demo funds are virtual, have no value and cannot be withdrawn, and demo results do not
             guarantee real results. Trading with real money can also feel very different from trading with virtual funds.
           </p>
 
@@ -1017,7 +1006,7 @@ const policy: Policy = {
           <Table
             head={["Provider", "What it does for us"]}
             rows={[
-              ["Safaricom (M-Pesa)", <>Deposits and withdrawals by M-Pesa, when real-money accounts are available.</>],
+              ["Safaricom (M-Pesa)", <>Deposits and withdrawals by M-Pesa.</>],
               ["Google", <>reCAPTCHA checks that may be used on sign-up, sign-in and password pages, and the fonts used on our website.</>],
               ["Email delivery provider", <>Sending account, security, payment and support emails, and the newsletter.</>],
               ["Render", <>Hosting of our website and platform.</>],
@@ -1070,8 +1059,7 @@ const policy: Policy = {
               <PolicyLink slug="terms">Terms and Conditions</PolicyLink> and the <PolicyLink slug="risk-disclosure">Risk Disclosure</PolicyLink>.
             </li>
             <li>
-              <strong>Before real-money trading:</strong> we will draw these conflicts to your attention before you open a real-money account,
-              when real-money accounts are available.
+              <strong>Before real-money trading:</strong> we will draw these conflicts to your attention before you open a real-money account.
             </li>
             <li>
               <strong>Individually:</strong> by email or through <a href="/support">Support</a>, where a specific conflict affects you, for
@@ -1175,7 +1163,7 @@ const policy: Policy = {
           <p>At least every three months, the person responsible for compliance will review:</p>
           <ul>
             <li>the audit log, including account restrictions and verification decisions;</li>
-            <li>declined and delayed withdrawals, when real-money accounts are available;</li>
+            <li>declined and delayed withdrawals;</li>
             <li>trades voided or re-settled and balances corrected;</li>
             <li>the payout history, to check that payouts stayed within the limits and settings described in section 7; and</li>
             <li>complaints that raise a possible conflict of interest.</li>
@@ -1184,7 +1172,6 @@ const policy: Policy = {
           <h3>17.4 Review of this policy</h3>
           <p>We review this policy at least once every 12 months, and also before:</p>
           <ul>
-            <li>real-money accounts become available;</li>
             <li>we launch any referral, affiliate, bonus, promotion, social trading, copy trading or tournament feature;</li>
             <li>we add instruments based on real market prices, or new types of product;</li>
             <li>we make a material change to the price engine or the payout engine; and</li>

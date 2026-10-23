@@ -48,8 +48,8 @@ const policy: Policy = {
               trading; and
             </li>
             <li>
-              the <PolicyLink slug="deposits-withdrawals">Deposit, Withdrawal and Refund Policy</PolicyLink>, which explains how money will
-              move into and out of a real account.
+              the <PolicyLink slug="deposits-withdrawals">Deposit, Withdrawal and Refund Policy</PolicyLink>, which explains how money moves
+              into and out of a real account.
             </li>
           </ul>
           <h3>1.4 Our regulatory status</h3>
@@ -65,14 +65,6 @@ const policy: Policy = {
             this policy limits any right you have under Kenyan law that cannot be limited by agreement, including under the Consumer Protection
             Act 2012.
           </p>
-          <Callout tone="info" title="Real-money services are not available yet">
-            <p>
-              Today NeuroOption offers demo trading with virtual funds only. Real-money deposits, withdrawals and trades are switched off on the
-              platform, and a real-money trade request is refused with the message "Real-money transactions are not available." Where this policy
-              describes real accounts, it explains how they will work when real-money accounts are available. Nothing in this policy means that
-              real-money services are available now.
-            </p>
-          </Callout>
           <Callout tone="risk" title="Key points">
             <ul>
               <li>
@@ -178,8 +170,7 @@ const policy: Policy = {
               [
                 "Real account",
                 <>
-                  The account shown on the platform as "QT Real", held in Kenya Shillings (KES) and funded with real money, when real-money
-                  accounts are available.
+                  The account shown on the platform as "QT Real", held in Kenya Shillings (KES) and funded with real money.
                 </>,
               ],
               ["SELL", <>A trade that wins if the settlement price is lower than the entry price.</>],
@@ -251,7 +242,7 @@ const policy: Policy = {
           </p>
           <h3>3.6 The same rules for demo and real accounts</h3>
           <p>
-            The rules in this policy apply in the same way to the demo account and, when they are available, to real accounts. The only
+            The rules in this policy apply in the same way to the demo account and to real accounts. The only
             differences are the ones set out in sections 16 and 17, such as the currency and the fact that virtual funds have no value.
           </p>
         </>
@@ -423,12 +414,12 @@ const policy: Policy = {
           <ul>
             <li>
               <strong>Check the account.</strong> A trade is placed in whichever account is selected on the trading screen when you press Buy or
-              Sell: the demo account ("QT Demo") or, when available, your real account ("QT Real"). We cannot move a trade from one account to
+              Sell: the demo account ("QT Demo") or your real account ("QT Real"). We cannot move a trade from one account to
               another after acceptance.
             </li>
             <li>
               <strong>Sign in for your own account.</strong> If you are not signed in, you can only use the public demo (section 16.7). You must be
-              signed in to use your own demo account and, when available, your real account.
+              signed in to use your own demo account and your real account.
             </li>
             <li>
               <strong>Wait for live data.</strong> The Buy and Sell buttons work only when the trading screen is receiving live prices and the
@@ -495,9 +486,8 @@ const policy: Policy = {
             <li>the account type and direction (BUY or SELL) are valid;</li>
             <li>the instrument exists and is available for trading;</li>
             <li>the expiry is a whole number of seconds from 5 to 18,000 (5 hours);</li>
-            <li>the stake is at least 1 and no more than your available balance;</li>
-            <li>a payout is available for the instrument, and it is the same payout that was shown to you (section 9.11); and</li>
-            <li>real-money services are available, if the request is for a real account.</li>
+            <li>the stake is at least 1 and no more than your available balance; and</li>
+            <li>a payout is available for the instrument, and it is the same payout that was shown to you (section 9.11).</li>
           </ul>
           <p>If any check fails, the request is rejected and no trade is placed (section 10).</p>
           <h3>6.6 When a trade exists</h3>
@@ -523,7 +513,7 @@ const policy: Policy = {
           <h3>7.1 Minimum stake</h3>
           <p>
             The minimum stake is 1 unit of the currency in which you enter it: USD 1 of virtual funds on the demo account (or 1 unit of another
-            currency you have chosen to view it in, see section 16.5), or KES 1 on a real account when real accounts are available. A trade
+            currency you have chosen to view it in, see section 16.5), or KES 1 on a real account. A trade
             request with a stake below 1 is rejected.
           </p>
           <h3>7.2 Maximum stake</h3>
@@ -777,7 +767,6 @@ const policy: Policy = {
               ["The stake is above your available balance", <>"Amount exceeds available balance" or "Insufficient balance."</>, <>No trade.</>],
               ["The stake is below 1 or is not a valid amount", <>An error message</>, <>No trade.</>],
               ["The expiry is outside 5 seconds to 5 hours", <>"Expiry must be between 5 seconds and 5 hours."</>, <>No trade.</>],
-              ["Real-money trading is switched off", <>"Real-money transactions are not available."</>, <>No trade. This applies to every real-account request today.</>],
               ["A real-account request from someone not signed in", <>"Sign in to trade with your real account."</>, <>No trade.</>],
               ["The platform is not working normally", <>An error message, or no response</>, <>No trade unless our server confirms acceptance.</>],
             ]}
@@ -889,7 +878,7 @@ const policy: Policy = {
               ["E", <>BUY Apple OTC on the demo account, 2 hours, minimum stake USD 1, payout 88%</>, "214.850 → 214.849", "LOSS", "USD 0.00", "−USD 1.00"],
             ]}
           />
-          <p>The KES examples show how real accounts will work when real-money accounts are available.</p>
+          <p>The KES examples are trades on a real account.</p>
           <h3>12.4 Only the direction matters</h3>
           <p>
             The size of the price movement makes no difference. In example E, a fall of one price step (0.001) was enough for the trade to lose
@@ -1190,17 +1179,17 @@ const policy: Policy = {
         <>
           <h3>17.1 Availability</h3>
           <p>
-            Real accounts ("QT Real") are not available today. When real-money accounts are available, you will need to be signed in to use
-            yours, and the rules in this policy will apply to it in full.
+            Real accounts ("QT Real") are available to signed-in clients. You need to be signed in to use yours, and the rules in this policy
+            apply to it in full.
           </p>
           <h3>17.2 Kenya Shillings</h3>
           <p>
-            Real accounts will be held in Kenya Shillings (KES). Stakes, payouts, profits, balances and trade records on a real account will be in
-            KES. The minimum stake will be KES 1.
+            Real accounts are held in Kenya Shillings (KES). Stakes, payouts, profits, balances and trade records on a real account are in KES.
+            The minimum stake is KES 1.
           </p>
           <h3>17.3 Funding a real account</h3>
           <p>
-            Real accounts will be funded by deposits in whole Kenya Shillings through M-Pesa, and withdrawals will be paid in KES to M-Pesa. The
+            Real accounts are funded by deposits in whole Kenya Shillings through M-Pesa, and withdrawals are paid in KES to M-Pesa. The
             rules, limits and checks are in the <PolicyLink slug="deposits-withdrawals">Deposit, Withdrawal and Refund Policy</PolicyLink> and
             the <PolicyLink slug="aml-kyc">AML, CTF and KYC Policy</PolicyLink>. Only your available balance can be used to stake; money that is
             locked, for example for a pending withdrawal, cannot.

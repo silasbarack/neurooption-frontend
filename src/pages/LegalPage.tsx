@@ -3,7 +3,7 @@ import { Link, Navigate, useLocation, useNavigate, useParams } from "react-route
 import { ArrowLeft, ArrowRight, FileText, Printer } from "lucide-react";
 import Logo from "../components/branding/Logo";
 import { getToken } from "../utils/storage";
-import { COMPANY, missingCompanyFields } from "../legal/company";
+import { missingCompanyFields } from "../legal/company";
 import { CATALOGUE } from "../legal/catalogue";
 import { POLICIES, groupOf, policyBySlug } from "../legal/registry";
 import type { Policy } from "../legal/types";
@@ -33,17 +33,9 @@ function LegalHeader() {
 function Notices() {
   return (
     <div className="lg-notices">
-      {!COMPANY.realMoneyAvailable && (
-        <p className="lg-notice is-demo">
-          <strong>Demo mode only.</strong> NeuroOption currently offers demo accounts with virtual funds. Deposits, withdrawals and
-          real-money trading are not available yet. Where a policy describes real-money services, it explains how they will work once
-          they are switched on; we will update the policies before that happens.
-        </p>
-      )}
       {missingCompanyFields.length > 0 && (
         <p className="lg-notice is-draft">
-          Some company details are still being finalised and are shown <mark className="lg-todo">[like this]</mark>. They will be
-          completed before real-money services launch.
+          Some company details are still being finalised and are shown <mark className="lg-todo">[like this]</mark>.
         </p>
       )}
     </div>

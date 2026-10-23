@@ -5,7 +5,7 @@ const policy: Policy = {
   slug: "deposits-withdrawals",
   title: "Deposit, Withdrawal and Refund Policy",
   summary:
-    "How money will move into and out of a NeuroOption real account when real-money accounts are available: M-Pesa deposits and withdrawals in KES, the limits, checks and timings that apply, and when a deposit can be refunded or corrected. Real-money services are not available today, and demo funds can never be deposited or withdrawn.",
+    "How money moves into and out of a NeuroOption real account: M-Pesa deposits and withdrawals in KES, the limits, checks and timings that apply, and when a deposit can be refunded or corrected. Demo funds can never be deposited or withdrawn.",
   updated: "2026-10-16",
   sections: [
     {
@@ -19,7 +19,7 @@ const policy: Policy = {
 
           <h3>1.1 What this policy covers</h3>
           <p>
-            This policy explains how money will move into and out of a NeuroOption real account: the payment method we accept, how deposits and withdrawals work step by step, the limits that apply, the checks we carry out before we pay you, how long payments take, what happens when a payment fails or is wrong, when a deposit can be refunded, and how we correct mistakes. It also explains what you can and cannot do with demo funds.
+            This policy explains how money moves into and out of a NeuroOption real account: the payment method we accept, how deposits and withdrawals work step by step, the limits that apply, the checks we carry out before we pay you, how long payments take, what happens when a payment fails or is wrong, when a deposit can be refunded, and how we correct mistakes. It also explains what you can and cannot do with demo funds.
           </p>
 
           <h3>1.2 How this policy fits with our other documents</h3>
@@ -56,19 +56,13 @@ const policy: Policy = {
             Do not assume that NeuroOption is licensed, regulated or supervised by any authority beyond what is stated in this table. Nothing in this policy limits any right you have under Kenyan law that cannot be limited by agreement, including under the Consumer Protection Act 2012.
           </p>
 
-          <Callout tone="info" title="Real-money services are not available yet">
-            <p>
-              Today NeuroOption offers demo trading with virtual funds only. Real-money deposits, withdrawals and trades are switched off on the platform, and any real-money request is refused with the message "Real-money transactions are not available." This policy describes how deposits, withdrawals and refunds will work when real-money accounts are available. Nothing in it means that you can deposit or withdraw real money now.
-            </p>
-          </Callout>
-
           <Callout tone="risk" title="Key points">
             <ul>
               <li>
                 <strong>Demo funds are not money.</strong> They can never be deposited, withdrawn or exchanged for money.
               </li>
               <li>
-                <strong>M-Pesa will be the only payment method.</strong> Other methods shown as "Coming soon" are not available.
+                <strong>M-Pesa is the only payment method.</strong> Other methods shown as "Coming soon" are not available.
               </li>
               <li>
                 <strong>Your own name only.</strong> You must pay from, and be paid to, an M-Pesa line registered in your own name.
@@ -103,7 +97,7 @@ const policy: Policy = {
               ["M-Pesa", <>The mobile money service operated by Safaricom.</>],
               ["M-Pesa line", <>A Safaricom mobile number that is registered for M-Pesa.</>],
               ["M-Pesa transaction code", <>The reference code of letters and numbers that M-Pesa gives each transaction and shows in its confirmation SMS. Our records and emails call it the M-Pesa receipt or reference.</>],
-              ["Real account", <>Your "QT Real" account, held in Kenya Shillings (KES), which you fund with real money when real-money accounts are available.</>],
+              ["Real account", <>Your "QT Real" account, held in Kenya Shillings (KES), which you fund with real money.</>],
               ["Refund", <>The return of all or part of a specific deposit to the M-Pesa line it came from, for one of the reasons in section 14. A refund is not the same as a withdrawal.</>],
               ["Reversal", <>The undoing of an M-Pesa transaction, either by M-Pesa itself or at the request of the person who made it.</>],
               ["STK Push", <>A payment prompt that M-Pesa sends to your phone at our request. You approve it by entering your M-Pesa PIN on your own phone.</>],
@@ -119,14 +113,14 @@ const policy: Policy = {
       title: "3. Availability of real-money services and demo funds",
       body: (
         <>
-          <h3>3.1 Real-money services are switched off</h3>
+          <h3>3.1 Real-money services</h3>
           <p>
-            At the "Last updated" date of this policy, the platform does not accept real-money deposits, withdrawal requests or real-account trades. M-Pesa is shown as unavailable on the Finance page, and any real-money request is refused with the message "Real-money transactions are not available." No real money can be taken from you, or paid to you, through the platform while this is the case.
+            Real-money deposits, withdrawals and trades take place in your real account, which is held in Kenya Shillings (KES) (section 4). Deposits and withdrawals are made by M-Pesa only, started from the <a href="/finance">Finance</a> page (section 5).
           </p>
 
-          <h3>3.2 When real-money accounts become available</h3>
+          <h3>3.2 How this policy applies</h3>
           <p>
-            We will make real-money services available only when we are ready to provide them lawfully. When we do, we will update this policy and the notice on this page, and the Finance page will show M-Pesa as available. Until then, read every description of deposits, withdrawals and refunds in this policy as a description of how those services will work.
+            This policy describes how deposits, withdrawals and refunds work on your real account. A payment method is available only if this policy says it is (section 5.2), and deposits and withdrawals depend on M-Pesa and Safaricom's systems (section 8.7).
           </p>
 
           <h3>3.3 Demo funds cannot be deposited or withdrawn</h3>
@@ -143,7 +137,7 @@ const policy: Policy = {
 
           <Callout tone="warn" title="Beware of scams">
             <p>
-              Nobody can turn demo funds into money, and real-money services are not open yet. NeuroOption will never ask you to pay a fee to "activate" or "unlock" a withdrawal, to upgrade your account, or to send money to a personal number in our name. If anyone asks you to do this, it is a scam: do not pay, and report it to us through <a href="/support">Support</a>.
+              Nobody can turn demo funds into money. NeuroOption will never ask you to pay a fee to "activate" or "unlock" a withdrawal, to upgrade your account, or to send money to a personal number in our name. If anyone asks you to do this, it is a scam: do not pay, and report it to us through <a href="/support">Support</a>.
             </p>
           </Callout>
         </>
@@ -196,7 +190,7 @@ const policy: Policy = {
           <Table
             head={["Method", "Deposits", "Withdrawals", "Status"]}
             rows={[
-              ["M-Pesa (Safaricom)", <>By STK Push prompt to your phone, started from the Finance page</>, <>To your own Safaricom M-Pesa line</>, <>The only method we will accept, once real-money accounts are available</>],
+              ["M-Pesa (Safaricom)", <>By STK Push prompt to your phone, started from the Finance page</>, <>To your own Safaricom M-Pesa line</>, <>The only method we accept</>],
               ["Airtel Money, Equitel, Binance Pay, Visa and Mastercard", <>Not accepted</>, <>Not available</>, <>Shown on the Finance page as "Coming soon". Not available.</>],
               ["Bank transfer, cash, cheque, cryptocurrency or any other method", <>Not accepted</>, <>Not available</>, <>Not offered</>],
             ]}
@@ -844,7 +838,7 @@ const policy: Policy = {
         <>
           <ul>
             <li>
-              We may change this policy, for example when real-money accounts become available, when we add a payment method, when we change limits or timings, or when the law changes. The "Last updated" date shows when it last changed.
+              We may change this policy, for example when we add a payment method, when we change limits or timings, or when the law changes. The "Last updated" date shows when it last changed.
             </li>
             <li>
               We will tell you about important changes by email or on the platform before they take effect, unless we must make a change sooner for legal or security reasons. New fees will always be announced at least 30 days in advance (section 9.3).

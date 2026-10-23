@@ -47,13 +47,6 @@ const policy: Policy = {
             cannot describe every risk that may affect you. If you do not understand any part of it, do not trade, and contact us through{" "}
             <a href="/support">Support</a> with your questions.
           </p>
-          <Callout tone="info" title="Real-money services are not available yet">
-            <p>
-              Today NeuroOption offers demo trading with virtual funds only. Real-money deposits, withdrawals and trades are switched off on the
-              platform. This disclosure explains the risks of the product as it works on the demo account today and as it will work when
-              real-money accounts are available. Nothing in it means that real-money services are available now.
-            </p>
-          </Callout>
         </>
       ),
     },
@@ -149,7 +142,7 @@ const policy: Policy = {
               ],
               [
                 "Real account",
-                <>An account held in Kenya Shillings (KES) for trading with real money, when real-money accounts are available.</>,
+                <>An account held in Kenya Shillings (KES) for trading with real money.</>,
               ],
               ["EAT", <>East Africa Time (UTC+3). Times on the platform are shown in EAT.</>],
             ]}
@@ -466,8 +459,7 @@ const policy: Policy = {
             </li>
             <li>no payout is available for the instrument at that moment, for example while the platform is reconnecting;</li>
             <li>the instrument is not available for trading;</li>
-            <li>the stake is below the minimum or above your available balance, or the expiry is outside the 5-second to 5-hour range;</li>
-            <li>the trade is a real-money trade while real-money services are switched off.</li>
+            <li>the stake is below the minimum or above your available balance, or the expiry is outside the 5-second to 5-hour range.</li>
           </ul>
           <p>
             A rejected trade cannot be reinstated at the earlier price or payout. By the time you resubmit, the price and payout may be different.
@@ -612,8 +604,8 @@ const policy: Policy = {
           </p>
           <h3>12.4 Past results</h3>
           <p>
-            Your past results, on the demo or a real account, are not a reliable indicator of future results. When real-money accounts are
-            available, they will use the same synthetic prices and payout rules as the demo account unless we tell you otherwise.
+            Your past results, on the demo or a real account, are not a reliable indicator of future results. Real accounts use the same
+            synthetic prices and payout rules as the demo account unless we tell you otherwise.
           </p>
         </>
       ),
@@ -661,9 +653,8 @@ const policy: Policy = {
         <>
           <h3>14.1 Account currencies</h3>
           <p>
-            When real-money accounts are available, real accounts will be held in Kenya Shillings (KES). Deposits and withdrawals will be in whole
-            Kenya Shillings through M-Pesa, and stakes, payouts and balances on a real account will be in KES. The demo account uses virtual US
-            dollars.
+            Real accounts are held in Kenya Shillings (KES). Deposits and withdrawals are in whole Kenya Shillings through M-Pesa, and stakes,
+            payouts and balances on a real account are in KES. The demo account uses virtual US dollars.
           </p>
           <h3>14.2 Indicative conversions</h3>
           <p>
@@ -691,7 +682,7 @@ const policy: Policy = {
         <>
           <h3>15.1 One payment method</h3>
           <p>
-            When real-money accounts are available, deposits and withdrawals will be made only through Safaricom M-Pesa. Other methods shown on the
+            Deposits and withdrawals are made only through Safaricom M-Pesa. Other methods shown on the
             platform as "coming soon", such as Airtel Money, Equitel, Binance Pay, Visa and Mastercard, are not available. If M-Pesa is unavailable,
             you will not be able to deposit or receive withdrawals until it is restored.
           </p>
@@ -949,8 +940,7 @@ const policy: Policy = {
         <>
           <h3>20.1 Your acknowledgement</h3>
           <p>
-            By creating an account, using the demo account or, when real-money accounts are available, depositing money or placing a real-money
-            trade, you confirm that:
+            By creating an account, using the demo account, depositing money or placing a real-money trade, you confirm that:
           </p>
           <ul>
             <li>you have read and understood this Risk Disclosure;</li>
