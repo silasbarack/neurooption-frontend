@@ -43,7 +43,6 @@
 .lg-print:hover { border-color: #9fc6de; }
 .lg-notices { display: grid; gap: 10px; max-width: 860px; margin-top: 20px; }
 .lg-notice { padding: 12px 16px; border: 1px solid; border-radius: 10px; font-size: 14px; line-height: 1.55; }
-.lg-notice.is-demo { border-color: #bfe0ef; background: #eef8fd; color: #0d4a6e; }
 .lg-notice.is-draft { border-color: #f1dfa6; background: #fffaeb; color: #6b5310; }
 .lg-todo { padding: 0 4px; border-radius: 4px; background: #fff1bf; color: #6b5310; font-weight: 600; }
 

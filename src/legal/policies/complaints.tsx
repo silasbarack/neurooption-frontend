@@ -19,7 +19,7 @@ const policy: Policy = {
 
           <h3>1.1 What this policy covers</h3>
           <p>
-            This policy explains how to tell us that something has gone wrong, what counts as a complaint, how we deal with it, the timelines we work to, the outcomes you can expect, and what you can do if you are not satisfied with our answer. It applies to complaints about demo accounts today and, when real-money accounts are available, to complaints about real accounts as well.
+            This policy explains how to tell us that something has gone wrong, what counts as a complaint, how we deal with it, the timelines we work to, the outcomes you can expect, and what you can do if you are not satisfied with our answer. It applies to complaints about demo accounts and real accounts.
           </p>
 
           <h3>1.2 How this policy fits with our other documents</h3>
@@ -82,12 +82,6 @@ const policy: Policy = {
             ]}
           />
 
-          <Callout tone="info" title="Real-money services are not available yet">
-            <p>
-              Today NeuroOption offers demo trading with virtual funds only. Real-money deposits, withdrawals and trades are switched off on the platform. This policy describes how complaints about real-money services will be handled when real-money accounts are available, as well as how complaints about the demo service and the website are handled now. Nothing in it means that you can deposit, trade or withdraw real money today.
-            </p>
-          </Callout>
-
           <Callout tone="risk" title="Key points">
             <ul>
               <li>
@@ -129,7 +123,7 @@ const policy: Policy = {
               ["EAT", <>East Africa Time (UTC+3). All times in this policy and on the Support page are EAT, and we state times in EAT in our replies.</>],
               ["Final response", <>Our written answer that tells you whether we uphold, partly uphold or reject your complaint, explains why, and says what we will do about it. See section 8.</>],
               ["Investigator", <>The member of staff who looks into the facts of a complaint and proposes an outcome.</>],
-              ["Real account", <>Your "QT Real" account, held in Kenya Shillings (KES), which you fund with real money when real-money accounts are available.</>],
+              ["Real account", <>Your "QT Real" account, held in Kenya Shillings (KES), which you fund with real money.</>],
               ["Reference", <>The unique complaint reference we give you in our acknowledgement. Quote it every time you write to us about the same complaint.</>],
               ["Support ticket", <>A conversation you open with our team on the Support page of the platform, which is available when you are signed in.</>],
               ["Days", <>Calendar days, unless the policy says "working days".</>],
@@ -151,7 +145,7 @@ const policy: Policy = {
           <ul>
             <li>a trade that you believe was accepted, priced, settled or recorded incorrectly, including a payout that differs from the payout shown to you when you placed the trade;</li>
             <li>a trade that you believe was affected by a technical fault on our platform, such as a delayed settlement or a trade that was rejected or not shown correctly;</li>
-            <li>a deposit that was taken from your M-Pesa account but not credited, or a withdrawal that is delayed, declined or paid incorrectly (when real-money accounts are available);</li>
+            <li>a deposit that was taken from your M-Pesa account but not credited, or a withdrawal that is delayed, declined or paid incorrectly;</li>
             <li>a decision to refuse, suspend, restrict, lock or close your account, or to refuse or delay a payment, that you believe is unfair or wrongly applied;</li>
             <li>a decision on identity verification (KYC) that you believe is wrong, or a request for documents that you believe is unreasonable;</li>
             <li>how we have handled your personal data, or a request you made about your data;</li>
@@ -376,7 +370,7 @@ const policy: Policy = {
           <h3>7.2 Priority complaints</h3>
           <p>We treat a complaint as a priority if it is about:</p>
           <ul>
-            <li>funds that you say have been taken but not credited, or a withdrawal that you say is overdue beyond the time stated in the <PolicyLink slug="deposits-withdrawals">Deposit, Withdrawal and Refund Policy</PolicyLink> (when real-money accounts are available);</li>
+            <li>funds that you say have been taken but not credited, or a withdrawal that you say is overdue beyond the time stated in the <PolicyLink slug="deposits-withdrawals">Deposit, Withdrawal and Refund Policy</PolicyLink>;</li>
             <li>an account that has been locked, suspended or closed, where you say you cannot access money that belongs to you;</li>
             <li>unauthorised access to your account, or a security concern;</li>
             <li>a trade that is still open or a technical problem that may affect other clients;</li>
@@ -437,7 +431,7 @@ const policy: Policy = {
             rows={[
               ["Trade record", <>The instrument, direction (BUY or SELL), stake, expiry, the payout percentage that was locked when the trade was accepted, the entry price, the settlement price, the outcome (win, loss or draw) and the times of acceptance and settlement.</>, <>Whether the trade was accepted and settled as the rules say, and whether the payout and result are correct.</>],
               ["Account transaction records", <>For each movement on your account, such as a stake placed, a payout or a refund: the type, the amount, the balance after it and the time. Demo trades are recorded in this way only.</>, <>Whether your balance is correct and whether a stake or payout was credited or debited once and only once, for demo and real accounts.</>],
-              ["Ledger entries (real accounts)", <>When real-money accounts are available, deposits, withdrawals, stakes, wins, losses and refunds on a real account are also posted to a double-entry ledger. Ledger entries are added and never changed or deleted. The ledger is not used for demo trades.</>, <>Checking a real account balance against an unchangeable record, and that each posting was made only once.</>],
+              ["Ledger entries (real accounts)", <>Deposits, withdrawals, stakes, wins, losses and refunds on a real account are also posted to a double-entry ledger. Ledger entries are added and never changed or deleted. The ledger is not used for demo trades.</>, <>Checking a real account balance against an unchangeable record, and that each posting was made only once.</>],
               ["Payout history", <>The payout percentage published for each instrument over time, with a version number and the reason for each change. A trade records the payout version it was accepted at.</>, <>Explaining why the payout on an instrument was what it was when you traded.</>],
               ["Deposit and withdrawal records", <>For real accounts: the amount, the status, the M-Pesa phone number, the M-Pesa receipt and the provider's response, and the review status and any reason for declining a withdrawal.</>, <>Payment complaints: whether a deposit was confirmed by Safaricom, held for review or failed, and whether locked funds were returned.</>],
               ["Account status and KYC records", <>Account status, KYC status and the reason for any rejection, and the dates of changes.</>, <>Complaints about restrictions, locks, closures and identity checks.</>],
@@ -474,7 +468,7 @@ const policy: Policy = {
 
           <h3>9.4 Payment complaints</h3>
           <p>
-            When real-money accounts are available, a deposit is credited only after Safaricom confirms it, and a deposit whose paid amount differs from the requested amount is held under review. In a payment complaint we check the deposit or withdrawal record against the M-Pesa receipt you give us. If the money was taken by M-Pesa but the deposit failed or was cancelled, the money is reversed by the provider. If it was not reversed, we help you raise it with Safaricom and we will not charge you for doing so. Each withdrawal is reviewed by our staff before it is paid, and a declined, failed or cancelled withdrawal returns the locked funds to your balance. See the <PolicyLink slug="deposits-withdrawals">Deposit, Withdrawal and Refund Policy</PolicyLink>.
+            A deposit is credited only after Safaricom confirms it, and a deposit whose paid amount differs from the requested amount is held under review. In a payment complaint we check the deposit or withdrawal record against the M-Pesa receipt you give us. If the money was taken by M-Pesa but the deposit failed or was cancelled, the money is reversed by the provider. If it was not reversed, we help you raise it with Safaricom and we will not charge you for doing so. Each withdrawal is reviewed by our staff before it is paid, and a declined, failed or cancelled withdrawal returns the locked funds to your balance. See the <PolicyLink slug="deposits-withdrawals">Deposit, Withdrawal and Refund Policy</PolicyLink>.
           </p>
 
           <h3>9.5 What we ask of you</h3>
@@ -687,7 +681,7 @@ const policy: Policy = {
         <>
           <h3>16.1 Review and changes</h3>
           <p>
-            We review this policy at least once a year, when we start offering real-money accounts, when the law changes, when a regulator or outside body gives us guidance, and after any serious failure in how we handled complaints. The date at the top of the page shows when it was last updated. If we change it in a way that matters to you, we will tell you through the platform or by email. A change does not affect a complaint that you made before the change: we deal with it under the policy that applied when you made it, unless the new policy is better for you.
+            We review this policy at least once a year, when the law changes, when a regulator or outside body gives us guidance, and after any serious failure in how we handled complaints. The date at the top of the page shows when it was last updated. If we change it in a way that matters to you, we will tell you through the platform or by email. A change does not affect a complaint that you made before the change: we deal with it under the policy that applied when you made it, unless the new policy is better for you.
           </p>
 
           <h3>16.2 Contact details</h3>

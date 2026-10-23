@@ -322,7 +322,7 @@ const policy: Policy = {
 
           <h3>7.3 Services that do not set cookies in your browser through our pages</h3>
           <p>
-            Other service providers, such as the Safaricom M-Pesa payment service (when real-money accounts are available), our email delivery provider and our hosting provider, work with us on our servers. They do not place their own scripts or cookies in your browser through the NeuroOption website. The <PolicyLink slug="privacy">Privacy Policy</PolicyLink> describes how we share personal data with them.
+            Other service providers, such as the Safaricom M-Pesa payment service, our email delivery provider and our hosting provider, work with us on our servers. They do not place their own scripts or cookies in your browser through the NeuroOption website. The <PolicyLink slug="privacy">Privacy Policy</PolicyLink> describes how we share personal data with them.
           </p>
 
           <h3>7.4 Links to other websites</h3>

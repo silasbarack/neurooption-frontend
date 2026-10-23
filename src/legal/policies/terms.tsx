@@ -102,7 +102,7 @@ const policy: Policy = {
           <p>In these Terms, the following words have these meanings:</p>
           <Definitions
             items={[
-              ["Account", <>Your NeuroOption client account, opened in your name, including your demo account and, when available, your real account.</>],
+              ["Account", <>Your NeuroOption client account, opened in your name, including your demo account and your real account.</>],
               ["Available balance", <>The amount in an account that you can use to trade or, for a real account, withdraw. It does not include locked funds.</>],
               ["Demo account", <>The practice account (shown as "QT Demo") funded with virtual funds.</>],
               ["Draw", <>A trade whose settlement price is equal to its entry price. Your stake is returned.</>],
@@ -117,7 +117,7 @@ const policy: Policy = {
               ["Platform", <>The NeuroOption website, trading interface, price engine and related systems.</>],
               ["Policies", <>The documents listed in section 1.2.</>],
               ["Price engine", <>NeuroOption's own system that generates the prices of every instrument on the platform.</>],
-              ["Real account", <>An account (shown as "QT Real") held in KES and funded with real money, when real-money accounts are available.</>],
+              ["Real account", <>An account (shown as "QT Real") held in KES and funded with real money.</>],
               ["Services", <>Everything we provide through the platform, including accounts, trading, deposits, withdrawals and support.</>],
               ["Settlement price", <>The platform's price for the instrument when the trade is settled, at or after expiry.</>],
               ["Stake", <>The amount you commit to a trade.</>],
@@ -234,8 +234,8 @@ const policy: Policy = {
           <h3>4.5 Accurate information</h3>
           <ul>
             <li>
-              The name you give us must be your full legal name as it appears on your national identity card or passport. When
-              real-money accounts are available, the M-Pesa number you use must be registered in that same name.
+              The name you give us must be your full legal name as it appears on your national identity card or passport. The
+              M-Pesa number you use must be registered in that same name.
             </li>
             <li>The email address you register must be one that you control and check regularly.</li>
             <li>All information you give us must be true, complete and not misleading, and you must keep it up to date in your profile.</li>
@@ -365,14 +365,9 @@ const policy: Policy = {
 
           <h3>6.3 Real account</h3>
           <p>
-            When real-money accounts are available, your real account ("QT Real") is held in Kenya Shillings (KES). You fund it by
-            deposit, trade with it, and withdraw from it as described in sections 8 and 9.
+            Your real account ("QT Real") is held in Kenya Shillings (KES). You fund it by deposit, trade with it, and withdraw from
+            it as described in sections 8 and 9.
           </p>
-          <Callout tone="info" title="Real-money services">
-            At the "Last updated" date of these Terms, real-money accounts are not yet available. The platform refuses real-money
-            deposits, withdrawals and trades and tells you so. We will make real-money services available only when we are ready to
-            provide them lawfully, and we will update these Terms and the platform at that time.
-          </Callout>
 
           <h3>6.4 Choosing the right account</h3>
           <p>
@@ -569,7 +564,7 @@ const policy: Policy = {
             <li>your available balance is too low, or the stake or expiry is outside the permitted range;</li>
             <li>the payout percentage has changed since it was shown to you;</li>
             <li>the instrument is unavailable, or the platform is not working normally;</li>
-            <li>real-money services are not available, or your account is restricted under section 13; or</li>
+            <li>your account is restricted under section 13; or</li>
             <li>we reasonably suspect conduct prohibited by section 11.</li>
           </ul>
 
@@ -587,7 +582,7 @@ const policy: Policy = {
       body: (
         <>
           <p>
-            This section applies when real-money accounts are available. Full details are in the{" "}
+            This section applies to real accounts. Full details are in the{" "}
             <PolicyLink slug="deposits-withdrawals">Deposit, Withdrawal and Refund Policy</PolicyLink>.
           </p>
 

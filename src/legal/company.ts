@@ -32,8 +32,6 @@ export const COMPANY = {
   retentionPeriod: null as string | null,
   /** Minimum age to open an account (matches the sign-up checkbox). */
   minimumAge: 21,
-  /** Real-money deposits, withdrawals and trading are switched off in the platform today. */
-  realMoneyAvailable: false,
   realCurrency: "KES",
   demoCurrency: "USD",
 } as const;

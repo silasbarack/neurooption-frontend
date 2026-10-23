@@ -5,7 +5,7 @@ const policy: Policy = {
   slug: "aml-kyc",
   title: "AML, CTF and KYC Policy",
   summary:
-    "How NeuroOption works to prevent money laundering, terrorism financing and fraud: the identity checks we may ask for, when they apply, how we monitor accounts, what we report, and what happens if we cannot complete our checks. Real-money services are not available today, so most checks described here apply once real-money accounts are available.",
+    "How NeuroOption works to prevent money laundering, terrorism financing and fraud: the identity checks we may ask for, when they apply, how we monitor accounts, what we report, and what happens if we cannot complete our checks.",
   updated: "2026-10-16",
   sections: [
     {
@@ -53,12 +53,6 @@ const policy: Policy = {
             Do not assume that NeuroOption is licensed, regulated or supervised by any authority beyond what is stated in this table. Following the standards in this policy does not mean that any authority has approved our business or that we are registered with any authority as a reporting institution.
           </p>
 
-          <Callout tone="info" title="Real-money services are not available yet">
-            <p>
-              Today NeuroOption offers demo trading with virtual funds only. Real-money deposits, withdrawals and trades are switched off on the platform. Demo funds have no monetary value and cannot be withdrawn, so no money can move through a demo account. This policy describes the checks that will apply when real-money accounts are available, as well as the basic checks that apply to every account today.
-            </p>
-          </Callout>
-
           <Callout tone="risk" title="Key points">
             <ul>
               <li>
@@ -99,7 +93,7 @@ const policy: Policy = {
               ["KYC", <>"Know your customer": the process of identifying and verifying a client and keeping that information current.</>],
               ["Money laundering", <>Dealing with money or property that comes from crime, or helping someone to do so, in a way that hides its origin or ownership.</>],
               ["Politically exposed person (PEP)", <>A person who holds, or has recently held, a prominent public position, together with their family members and close associates. Section 10.2 gives a fuller description.</>],
-              ["Real account", <>Your "QT Real" account, held in Kenya Shillings (KES), which you fund with real money when real-money accounts are available.</>],
+              ["Real account", <>Your "QT Real" account, held in Kenya Shillings (KES), which you fund with real money.</>],
               ["Demo account", <>Your "QT Demo" account and the virtual US dollars (USD) in it. Virtual funds are for practice only and have no monetary value.</>],
               ["Source of funds", <>Where the money used for a particular deposit or transaction comes from, for example your salary or business income.</>],
               ["Source of wealth", <>How your overall wealth was built up, for example employment, business, inheritance or investments.</>],
@@ -176,7 +170,7 @@ const policy: Policy = {
           <h3>4.3 What this framework does not say about us</h3>
           <Callout tone="warn" title="No claim of registration or approval">
             <p>
-              Saying that we follow this framework does not mean that NeuroOption is registered with the FRC, licensed by the Capital Markets Authority or any other regulator, or approved or supervised by any authority. Our regulatory status is stated in section 1.3 only. We apply these standards because we believe they are the right ones for a platform of this kind and in order to be ready for real-money services, not because any authority has certified us.
+              Saying that we follow this framework does not mean that NeuroOption is registered with the FRC, licensed by the Capital Markets Authority or any other regulator, or approved or supervised by any authority. Our regulatory status is stated in section 1.3 only. We apply these standards because we believe they are the right ones for a platform of this kind, not because any authority has certified us.
             </p>
           </Callout>
 
@@ -260,7 +254,7 @@ const policy: Policy = {
 
           <h3>6.3 Independent review</h3>
           <p>
-            We will arrange for this policy and the way we carry it out to be reviewed independently of the people who run it, at intervals appropriate to the size and risk of the business and in any case before real-money accounts are made available.
+            We will arrange for this policy and the way we carry it out to be reviewed independently of the people who run it, at intervals appropriate to the size and risk of the business.
           </p>
         </>
       ),
@@ -336,12 +330,12 @@ const policy: Policy = {
 
           <h3>8.2 Real accounts</h3>
           <p>
-            When real-money accounts are available, verification will apply as follows.
+            For real accounts, verification applies as follows.
           </p>
           <Table
             head={["Situation", "What we require"]}
             rows={[
-              ["Before your first withdrawal", <>We will require you to have completed identity verification (identity document and selfie) and to have an approved KYC status. We may also ask for proof of address and proof that the M-Pesa line is registered in your name. This is company policy: the platform does not itself block a withdrawal because verification is missing, so we will check your verification status when staff review the request.</>],
+              ["Before your first withdrawal", <>We require you to have completed identity verification (identity document and selfie) and to have an approved KYC status. We may also ask for proof of address and proof that the M-Pesa line is registered in your name. This is company policy: the platform does not itself block a withdrawal because verification is missing, so we check your verification status when staff review the request.</>],
               ["Before your first deposit", <>We may allow deposits before verification, or we may ask you to verify first. If we set a limit for unverified deposits, we will tell you what it is when you are asked to verify.</>],
               ["When your deposits or withdrawals reach a set total", <>When your total deposits or total withdrawals pass the threshold we set for the relevant period, we may require additional documents, including proof of address and source of funds. We will tell you the threshold that applies to you when we ask. We may change the thresholds, and we may apply lower ones to a client or a payment that we consider higher risk.</>],
               ["When you change a key detail", <>If you change your name, phone number or the M-Pesa line you use, we may ask you to re-verify.</>],

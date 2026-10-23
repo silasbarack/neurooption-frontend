@@ -53,12 +53,6 @@ const policy: Policy = {
             Do not assume that NeuroOption is licensed, regulated or supervised by any authority beyond what is stated in this table. Nothing in this policy limits any right you have under Kenyan law that cannot be limited by agreement, including your rights under the Data Protection Act, 2019 and the Consumer Protection Act 2012.
           </p>
 
-          <Callout tone="info" title="Real-money services are not available yet">
-            <p>
-              Today NeuroOption offers demo trading with virtual funds only. Real-money deposits, withdrawals and trades are switched off on the platform. Where this policy talks about real balances, payouts or financial records, it describes how things will work when real-money accounts are available. Closing an account today works in the same way. Demo funds have no value and cannot be recovered after closure.
-            </p>
-          </Callout>
-
           <Callout tone="risk" title="Key points">
             <ul>
               <li>
@@ -89,7 +83,7 @@ const policy: Policy = {
           <p>In this policy, the following words have these meanings. Other capitalised words have the meanings given in the Terms and Conditions.</p>
           <Definitions
             items={[
-              ["Account", <>Your NeuroOption profile, with its demo account ("QT Demo") and, when real-money accounts are available, its real account ("QT Real").</>],
+              ["Account", <>Your NeuroOption profile, with its demo account ("QT Demo") and its real account ("QT Real").</>],
               ["Anonymise", <>To replace your personal details in our system with neutral placeholders so that the remaining record no longer shows who you are on its face. It does not delete the underlying record.</>],
               ["Available balance", <>The part of your real-account balance that you can use to trade or withdraw.</>],
               ["Closure", <>The permanent closing of your account. The platform provides a self-service page for you to do this (sections 4 to 6). Section 11 explains what we may do ourselves. The platform records an account that you have closed with the status "Deleted".</>],
@@ -200,7 +194,7 @@ const policy: Policy = {
 
           <Callout tone="warn" title="Withdraw first">
             <p>
-              When real-money accounts are available, a real balance must be withdrawn before you can close. Withdrawals are reviewed by our staff and are typically paid within 24 to 48 hours, although this is not guaranteed. We may require identity verification before we pay you (see the <PolicyLink slug="aml-kyc">AML, CTF and KYC Policy</PolicyLink>). Start the withdrawal well before you plan to close, because you cannot close until it is completed or declined.
+              A real balance must be withdrawn before you can close. Withdrawals are reviewed by our staff and are typically paid within 24 to 48 hours, although this is not guaranteed. We may require identity verification before we pay you (see the <PolicyLink slug="aml-kyc">AML, CTF and KYC Policy</PolicyLink>). Start the withdrawal well before you plan to close, because you cannot close until it is completed or declined.
             </p>
           </Callout>
 
@@ -598,7 +592,7 @@ const policy: Policy = {
 
           <h3>11.5 Your balance when we close or restrict your account</h3>
           <p>
-            When real-money accounts are available, we will not keep a real balance that belongs to you merely because we closed your account. Unless the law prevents us, we will pay the balance to which you are entitled to your M-Pesa line after we have completed our checks, which may include identity verification and anti-money-laundering checks, and after any amount you owe us has been deducted. We pay only to an M-Pesa line in your own name.
+            We will not keep a real balance that belongs to you merely because we closed your account. Unless the law prevents us, we will pay the balance to which you are entitled to your M-Pesa line after we have completed our checks, which may include identity verification and anti-money-laundering checks, and after any amount you owe us has been deducted. We pay only to an M-Pesa line in your own name.
           </p>
           <p>We may delay, withhold or refuse a payout, and we may freeze all or part of a balance, where:</p>
           <ul>
@@ -635,7 +629,7 @@ const policy: Policy = {
 
           <h3>12.2 Possible future rules</h3>
           <p>
-            If we decide to introduce rules for inactive or dormant accounts, we will tell you in advance by email and on the platform, publish them in this policy, and apply them only after a reasonable notice period. Any such rule would be applied in a way that is fair and lawful and, when real-money accounts exist, would not cause a real balance to be forfeited. We will not apply a new inactivity fee or closure to an existing account without that prior notice.
+            If we decide to introduce rules for inactive or dormant accounts, we will tell you in advance by email and on the platform, publish them in this policy, and apply them only after a reasonable notice period. Any such rule would be applied in a way that is fair and lawful and would not cause a real balance to be forfeited. We will not apply a new inactivity fee or closure to an existing account without that prior notice.
           </p>
 
           <h3>12.3 Keep your details up to date</h3>
@@ -761,7 +755,7 @@ const policy: Policy = {
 
           <h3>16.2 Changes to this policy</h3>
           <p>
-            We may update this policy, for example when real-money accounts become available, when the law changes or when we change how closure works. We will change the "Last updated" date at the top of the page. If a change is material and affects your rights (for example, a new retention period or new rules for inactive accounts), we will tell you in advance by email or on the platform where we can. A change does not apply retroactively to a closure that has already been completed, but it may apply to the retained records we still hold.
+            We may update this policy, for example when the law changes or when we change how closure works. We will change the "Last updated" date at the top of the page. If a change is material and affects your rights (for example, a new retention period or new rules for inactive accounts), we will tell you in advance by email or on the platform where we can. A change does not apply retroactively to a closure that has already been completed, but it may apply to the retained records we still hold.
           </p>
 
           <h3>16.3 If part of this policy cannot be enforced</h3>
