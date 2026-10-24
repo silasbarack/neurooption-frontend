@@ -1,0 +1,2100 @@
+import React from "react";
+import type {
+  Asset,
+  Candle,
+  ChartType,
+  ResultMarker,
+  TradeMarker,
+} from "./trading.types";
+import {
+  DEFAULT_INDICATOR_SETTINGS,
+  DEFAULT_INDICATOR_STYLES,
+  type IndicatorSettingsMap,
+  type IndicatorStylesMap,
+} from "./indicator-settings";
+import {
+  formatKenyaDate,
+  formatKenyaTime,
+  kenyaDayKey,
+  kenyaOffsetMs,
+  KENYA_ZONE_LABEL,
+} from "../../utils/kenyaTime";
+
+type TradingChartProps = {
+  asset: Asset;
+  candles: Candle[];
+  candlesRef?: React.MutableRefObject<Candle[]>;
+  marketFrameVersionRef?: React.MutableRefObject<number>;
+  serverOffsetRef?: React.MutableRefObject<number>;
+  marketReceivedAtRef?: React.MutableRefObject<number>;
+  onFrameRendered?: () => void;
+  chartType: ChartType;
+  timeframe: string;
+  expirySeconds: number;
+  selectedIndicators: string[];
+  indicatorSettings?: IndicatorSettingsMap;
+  indicatorStyles?: IndicatorStylesMap;
+  activeTrades: TradeMarker[];
+  resultMarkers: ResultMarker[];
+  background?: ChartBackground;
+};
+
+type Value = number | null;
+type SeriesMode = "line" | "histogram" | "dots";
+
+type Series = {
+  name: string;
+  values: Value[];
+  color: string;
+  mode?: SeriesMode;
+  width?: number;
+  positiveColor?: string;
+  negativeColor?: string;
+  visible?: boolean;
+};
+
+type BottomPanel = {
+  key: string;
+  title: string;
+  series: Series[];
+  levels?: number[];
+  levelColor?: string;
+  min?: number;
+  max?: number;
+};
+
+const MAX_HISTORY_CANDLES = 520;
+
+export type ChartBackground = "black" | "white";
+
+// Canvas chrome colours for each chart background. Canvas cannot read CSS
+// variables per frame without extra work, so these mirror the brand tokens in
+// src/styles/brand.css. The chart surface itself is painted by CSS (solid
+// black or white with the faint mountain photo), so the canvas stays clear.
+const CHART_PALETTES = {
+  black: {
+    panel: "rgba(0, 0, 0, 0.55)",
+    panelAlt: "rgba(0, 0, 0, 0.35)",
+    text: "#C9D6E3",
+    textMuted: "#8FA3B8",
+    grid: "rgba(173, 199, 222, 0.07)",
+    gridSoft: "rgba(173, 199, 222, 0.06)",
+    divider: "rgba(173, 199, 222, 0.16)",
+    expiry: "#17ADB4", // --brand-accent
+    expiryText: "#0D315E", // --brand-primary
+  },
+  white: {
+    panel: "rgba(255, 255, 255, 0.7)",
+    panelAlt: "rgba(246, 249, 252, 0.6)", // --background-secondary
+    text: "#182B43", // --text-primary
+    textMuted: "#526579", // --text-secondary
+    grid: "rgba(13, 49, 94, 0.08)",
+    gridSoft: "rgba(13, 49, 94, 0.06)",
+    divider: "rgba(13, 49, 94, 0.16)",
+    expiry: "#0879AD", // --brand-secondary
+    expiryText: "#FFFFFF",
+  },
+} as const;
+
+// The palette in use; set at the start of every draw from the chart's
+// background prop, so the module-level drawing helpers can read it.
+let CHART_PANEL: string = CHART_PALETTES.black.panel;
+let CHART_PANEL_ALT: string = CHART_PALETTES.black.panelAlt;
+let CHART_TEXT: string = CHART_PALETTES.black.text;
+let CHART_TEXT_MUTED: string = CHART_PALETTES.black.textMuted;
+let CHART_GRID: string = CHART_PALETTES.black.grid;
+let CHART_GRID_SOFT: string = CHART_PALETTES.black.gridSoft;
+let CHART_DIVIDER: string = CHART_PALETTES.black.divider;
+let CHART_EXPIRY: string = CHART_PALETTES.black.expiry;
+let CHART_EXPIRY_TEXT: string = CHART_PALETTES.black.expiryText;
+
+function applyChartPalette(background: ChartBackground) {
+  const palette = CHART_PALETTES[background];
+  CHART_PANEL = palette.panel;
+  CHART_PANEL_ALT = palette.panelAlt;
+  CHART_TEXT = palette.text;
+  CHART_TEXT_MUTED = palette.textMuted;
+  CHART_GRID = palette.grid;
+  CHART_GRID_SOFT = palette.gridSoft;
+  CHART_DIVIDER = palette.divider;
+  CHART_EXPIRY = palette.expiry;
+  CHART_EXPIRY_TEXT = palette.expiryText;
+}
+
+const BOTTOM_INDICATORS = new Set([
+  "AWESOME_OSCILLATOR",
+  "RSI",
+  "MACD",
+  "CCI",
+  "ADX",
+  "ATR",
+  "WILLIAMS_R",
+  "MOMENTUM",
+  "STOCHASTIC_OSCILLATOR",
+  "OSMA",
+  "ACCELERATOR_OSCILLATOR",
+  "BULLS_POWER",
+  "DEMARKER",
+  "RATE_OF_CHANGE",
+]);
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function numSetting(
+  settings: IndicatorSettingsMap,
+  indicator: string,
+  key: string,
+  fallback: number,
+) {
+  const value =
+    settings[indicator]?.[key] ??
+    DEFAULT_INDICATOR_SETTINGS[indicator]?.[key] ??
+    fallback;
+
+  return Number.isFinite(value) ? Number(value) : fallback;
+}
+
+function intSetting(
+  settings: IndicatorSettingsMap,
+  indicator: string,
+  key: string,
+  fallback: number,
+) {
+  return Math.max(1, Math.round(numSetting(settings, indicator, key, fallback)));
+}
+
+function styleColor(
+  styles: IndicatorStylesMap,
+  indicator: string,
+  key: string,
+  fallback: string,
+) {
+  const value =
+    styles[indicator]?.[key] ??
+    DEFAULT_INDICATOR_STYLES[indicator]?.[key] ??
+    fallback;
+
+  return typeof value === "string" ? value : fallback;
+}
+
+function styleNumber(
+  styles: IndicatorStylesMap,
+  indicator: string,
+  key: string,
+  fallback: number,
+) {
+  const value =
+    styles[indicator]?.[key] ??
+    DEFAULT_INDICATOR_STYLES[indicator]?.[key] ??
+    fallback;
+
+  return Number.isFinite(Number(value)) ? Number(value) : fallback;
+}
+
+function styleBool(
+  styles: IndicatorStylesMap,
+  indicator: string,
+  key: string,
+  fallback: boolean,
+) {
+  const value =
+    styles[indicator]?.[key] ??
+    DEFAULT_INDICATOR_STYLES[indicator]?.[key] ??
+    fallback;
+
+  return Boolean(value);
+}
+
+function normalizeIndicatorName(indicator: string) {
+  const name = indicator.trim().toLowerCase();
+
+  if (name === "moving average" || name === "ma" || name === "simple ma") return "SMA";
+  if (name.includes("exponential")) return "EMA";
+  if (name.includes("weighted")) return "WMA";
+  if (name.includes("alligator")) return "ALLIGATOR";
+  if (name.includes("bollinger")) return "BOLLINGER_BANDS";
+  if (name.includes("parabolic") || name.includes("sar")) return "PARABOLIC_SAR";
+  if (name.includes("ichimoku")) return "ICHIMOKU";
+  if (name.includes("donchian")) return "DONCHIAN_CHANNEL";
+  if (name.includes("envelope")) return "ENVELOPES";
+  if (name.includes("awesome")) return "AWESOME_OSCILLATOR";
+  if (name === "rsi" || name.includes("relative strength")) return "RSI";
+  if (name.includes("macd")) return "MACD";
+  if (name.includes("cci")) return "CCI";
+  if (name.includes("adx")) return "ADX";
+  if (name.includes("atr")) return "ATR";
+  if (name.includes("williams")) return "WILLIAMS_R";
+  if (name.includes("momentum")) return "MOMENTUM";
+  if (name.includes("stochastic")) return "STOCHASTIC_OSCILLATOR";
+  if (name.includes("osma")) return "OSMA";
+  if (name.includes("accelerator")) return "ACCELERATOR_OSCILLATOR";
+  if (name.includes("bull")) return "BULLS_POWER";
+  if (name.includes("demarker")) return "DEMARKER";
+  if (name.includes("rate of change") || name === "roc") return "RATE_OF_CHANGE";
+
+  return indicator.toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "");
+}
+
+function uniqueCanonicalIndicators(indicators: string[]) {
+  const seen = new Set<string>();
+  const output: string[] = [];
+
+  indicators.forEach((indicator) => {
+    const canonical = normalizeIndicatorName(indicator);
+    if (seen.has(canonical)) return;
+    seen.add(canonical);
+    output.push(canonical);
+  });
+
+  return output;
+}
+
+function timeframeToSeconds(timeframe: string) {
+  const normalized = timeframe.trim().toUpperCase();
+  const value = Number(normalized.slice(1)) || 1;
+
+  if (normalized.startsWith("S")) return value;
+  if (normalized.startsWith("M")) return value * 60;
+  if (normalized.startsWith("H")) return value * 3600;
+  if (normalized.startsWith("D")) return value * 86400;
+
+  return 60;
+}
+
+const MAX_VISIBLE_CANDLES = 120;
+const MIN_VISIBLE_CANDLES = 28;
+/** Keeps candles readable: narrower screens simply show fewer of them. */
+const MIN_CANDLE_SLOT_PX = 7;
+// Pinch zoom limits: fewest candles on screen, and narrowest slot per candle.
+const MIN_ZOOM_CANDLES = 12;
+const MIN_ZOOMED_SLOT_PX = 3;
+const MIN_ZOOM = 0.25;
+const MAX_ZOOM = 6;
+
+function getVisibleCandleCount(timeframe: string, plotWidth: number) {
+  const seconds = timeframeToSeconds(timeframe);
+
+  const byTimeframe =
+    seconds <= 15 ? 120
+    : seconds <= 60 ? 110
+    : seconds <= 300 ? 96
+    : seconds <= 1800 ? 84
+    : 68;
+
+  const byWidth = Math.floor(Math.max(plotWidth, 0) / MIN_CANDLE_SLOT_PX);
+
+  return Math.max(
+    MIN_VISIBLE_CANDLES,
+    Math.min(MAX_VISIBLE_CANDLES, byTimeframe, byWidth || byTimeframe),
+  );
+}
+
+function formatDuration(totalSeconds: number) {
+  const safe = Math.max(0, totalSeconds);
+  const hours = Math.floor(safe / 3600);
+  const minutes = Math.floor((safe % 3600) / 60);
+  const seconds = safe % 60;
+
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+    2,
+    "0",
+  )}:${String(seconds).padStart(2, "0")}`;
+}
+
+function sma(values: number[], period: number): Value[] {
+  const safePeriod = Math.max(1, Math.round(period));
+  let rolling = 0;
+
+  return values.map((value, index) => {
+    rolling += value;
+
+    if (index >= safePeriod) rolling -= values[index - safePeriod];
+
+    if (index < safePeriod - 1) return null;
+
+    return rolling / safePeriod;
+  });
+}
+
+function ema(values: number[], period: number): Value[] {
+  if (values.length === 0) return [];
+
+  const safePeriod = Math.max(1, Math.round(period));
+  const multiplier = 2 / (safePeriod + 1);
+  const output: Value[] = [];
+  let previous = values[0];
+
+  values.forEach((value, index) => {
+    previous = index === 0 ? value : value * multiplier + previous * (1 - multiplier);
+    output.push(previous);
+  });
+
+  return output;
+}
+
+function wma(values: number[], period: number): Value[] {
+  const safePeriod = Math.max(1, Math.round(period));
+  const weightTotal = (safePeriod * (safePeriod + 1)) / 2;
+
+  return values.map((_, index) => {
+    if (index < safePeriod - 1) return null;
+
+    let total = 0;
+
+    for (let offset = 0; offset < safePeriod; offset += 1) {
+      total += values[index - offset] * (safePeriod - offset);
+    }
+
+    return total / weightTotal;
+  });
+}
+
+function highest(values: number[], period: number): Value[] {
+  const safePeriod = Math.max(1, Math.round(period));
+
+  return values.map((_, index) => {
+    if (index < safePeriod - 1) return null;
+    return Math.max(...values.slice(index - safePeriod + 1, index + 1));
+  });
+}
+
+function lowest(values: number[], period: number): Value[] {
+  const safePeriod = Math.max(1, Math.round(period));
+
+  return values.map((_, index) => {
+    if (index < safePeriod - 1) return null;
+    return Math.min(...values.slice(index - safePeriod + 1, index + 1));
+  });
+}
+
+function standardDeviation(values: number[], period: number): Value[] {
+  const safePeriod = Math.max(1, Math.round(period));
+
+  return values.map((_, index) => {
+    if (index < safePeriod - 1) return null;
+
+    const slice = values.slice(index - safePeriod + 1, index + 1);
+    const average = slice.reduce((sum, value) => sum + value, 0) / safePeriod;
+    const variance =
+      slice.reduce((sum, value) => sum + (value - average) ** 2, 0) / safePeriod;
+
+    return Math.sqrt(variance);
+  });
+}
+
+function trueRange(candles: Candle[]) {
+  return candles.map((candle, index) => {
+    const previousClose = candles[index - 1]?.close ?? candle.close;
+
+    return Math.max(
+      candle.high - candle.low,
+      Math.abs(candle.high - previousClose),
+      Math.abs(candle.low - previousClose),
+    );
+  });
+}
+
+function atr(candles: Candle[], period: number) {
+  return sma(trueRange(candles), period);
+}
+
+function rsi(closes: number[], period: number): Value[] {
+  const safePeriod = Math.max(1, Math.round(period));
+
+  return closes.map((_, index) => {
+    if (index < safePeriod) return null;
+
+    let gains = 0;
+    let losses = 0;
+
+    for (let i = index - safePeriod + 1; i <= index; i += 1) {
+      const difference = closes[i] - closes[i - 1];
+
+      if (difference >= 0) gains += difference;
+      else losses += Math.abs(difference);
+    }
+
+    if (losses === 0) return 100;
+
+    const rs = gains / losses;
+
+    return 100 - 100 / (1 + rs);
+  });
+}
+
+function macd(
+  closes: number[],
+  fastPeriod: number,
+  slowPeriod: number,
+  signalPeriod: number,
+) {
+  const fast = ema(closes, fastPeriod);
+  const slow = ema(closes, slowPeriod);
+
+  const macdLine = closes.map((_, index) => {
+    const fastValue = fast[index];
+    const slowValue = slow[index];
+
+    return isFiniteNumber(fastValue) && isFiniteNumber(slowValue)
+      ? fastValue - slowValue
+      : null;
+  });
+
+  const numericMacd = macdLine.map((value) => (isFiniteNumber(value) ? value : 0));
+  const signal = sma(numericMacd, signalPeriod);
+
+  const histogram = macdLine.map((value, index) =>
+    isFiniteNumber(value) && isFiniteNumber(signal[index])
+      ? value - signal[index]!
+      : null,
+  );
+
+  return { macdLine, signal, histogram };
+}
+
+function cci(candles: Candle[], period: number): Value[] {
+  const typical = candles.map((candle) => (candle.high + candle.low + candle.close) / 3);
+  const average = sma(typical, period);
+  const safePeriod = Math.max(1, Math.round(period));
+
+  return typical.map((value, index) => {
+    if (index < safePeriod - 1 || average[index] === null) return null;
+
+    const slice = typical.slice(index - safePeriod + 1, index + 1);
+    const meanDeviation =
+      slice.reduce((sum, item) => sum + Math.abs(item - average[index]!), 0) /
+      safePeriod;
+
+    if (meanDeviation === 0) return 0;
+
+    return (value - average[index]!) / (0.015 * meanDeviation);
+  });
+}
+
+function williamsR(candles: Candle[], period: number): Value[] {
+  const highs = candles.map((candle) => candle.high);
+  const lows = candles.map((candle) => candle.low);
+  const high = highest(highs, period);
+  const low = lowest(lows, period);
+
+  return candles.map((candle, index) => {
+    if (!isFiniteNumber(high[index]) || !isFiniteNumber(low[index])) return null;
+
+    const range = high[index]! - low[index]!;
+    if (range === 0) return 0;
+
+    return -100 * ((high[index]! - candle.close) / range);
+  });
+}
+
+function stochastic(candles: Candle[], kPeriod: number, dPeriod: number, slowing: number) {
+  const highs = candles.map((candle) => candle.high);
+  const lows = candles.map((candle) => candle.low);
+  const high = highest(highs, kPeriod);
+  const low = lowest(lows, kPeriod);
+
+  const rawK = candles.map((candle, index) => {
+    if (!isFiniteNumber(high[index]) || !isFiniteNumber(low[index])) return null;
+
+    const range = high[index]! - low[index]!;
+    if (range === 0) return 50;
+
+    return ((candle.close - low[index]!) / range) * 100;
+  });
+
+  const k = sma(rawK.map((value) => (isFiniteNumber(value) ? value : 50)), slowing);
+  const d = sma(k.map((value) => (isFiniteNumber(value) ? value : 50)), dPeriod);
+
+  return { k, d };
+}
+
+function adx(candles: Candle[], period: number): Value[] {
+  const safePeriod = Math.max(1, Math.round(period));
+  const tr = trueRange(candles);
+  const plusDm: number[] = [0];
+  const minusDm: number[] = [0];
+
+  for (let index = 1; index < candles.length; index += 1) {
+    const upMove = candles[index].high - candles[index - 1].high;
+    const downMove = candles[index - 1].low - candles[index].low;
+
+    plusDm.push(upMove > downMove && upMove > 0 ? upMove : 0);
+    minusDm.push(downMove > upMove && downMove > 0 ? downMove : 0);
+  }
+
+  const trSma = sma(tr, safePeriod);
+  const plusSma = sma(plusDm, safePeriod);
+  const minusSma = sma(minusDm, safePeriod);
+
+  const dx = candles.map((_, index) => {
+    if (!isFiniteNumber(trSma[index]) || trSma[index] === 0) return null;
+
+    const plusDi = (100 * (plusSma[index] ?? 0)) / trSma[index]!;
+    const minusDi = (100 * (minusSma[index] ?? 0)) / trSma[index]!;
+    const sum = plusDi + minusDi;
+
+    if (sum === 0) return 0;
+
+    return (100 * Math.abs(plusDi - minusDi)) / sum;
+  });
+
+  return sma(dx.map((value) => (isFiniteNumber(value) ? value : 0)), safePeriod);
+}
+
+function deMarker(candles: Candle[], period: number): Value[] {
+  const deMax: number[] = [0];
+  const deMin: number[] = [0];
+
+  for (let index = 1; index < candles.length; index += 1) {
+    deMax.push(Math.max(candles[index].high - candles[index - 1].high, 0));
+    deMin.push(Math.max(candles[index - 1].low - candles[index].low, 0));
+  }
+
+  const maxSma = sma(deMax, period);
+  const minSma = sma(deMin, period);
+
+  return candles.map((_, index) => {
+    if (!isFiniteNumber(maxSma[index]) || !isFiniteNumber(minSma[index])) return null;
+
+    const denominator = maxSma[index]! + minSma[index]!;
+    if (denominator === 0) return 0.5;
+
+    return maxSma[index]! / denominator;
+  });
+}
+
+function heikenAshi(candles: Candle[]) {
+  const output: Candle[] = [];
+
+  candles.forEach((candle, index) => {
+    const previous = output[index - 1];
+    const close = (candle.open + candle.high + candle.low + candle.close) / 4;
+    const open = previous ? (previous.open + previous.close) / 2 : candle.open;
+    const high = Math.max(candle.high, open, close);
+    const low = Math.min(candle.low, open, close);
+
+    output.push({ ...candle, open, high, low, close });
+  });
+
+  return output;
+}
+
+function sliceSeries(values: Value[], visibleLength: number) {
+  return values.slice(Math.max(0, values.length - visibleLength));
+}
+
+function drawLine(
+  context: CanvasRenderingContext2D,
+  data: Value[],
+  color: string,
+  indexToX: (index: number) => number,
+  valueToY: (value: number) => number,
+  width = 1.5,
+) {
+  context.strokeStyle = color;
+  context.lineWidth = width;
+  context.beginPath();
+
+  let started = false;
+
+  data.forEach((value, index) => {
+    if (!isFiniteNumber(value)) return;
+
+    const x = indexToX(index);
+    const y = valueToY(value);
+
+    if (!started) {
+      context.moveTo(x, y);
+      started = true;
+    } else {
+      context.lineTo(x, y);
+    }
+  });
+
+  if (started) context.stroke();
+}
+
+function drawHistogram(
+  context: CanvasRenderingContext2D,
+  data: Value[],
+  series: Series,
+  indexToX: (index: number) => number,
+  valueToY: (value: number) => number,
+  zeroY: number,
+  candleGap: number,
+) {
+  data.forEach((value, index) => {
+    if (!isFiniteNumber(value)) return;
+
+    const x = indexToX(index);
+    const y = valueToY(value);
+    const top = Math.min(y, zeroY);
+    const height = Math.max(Math.abs(zeroY - y), 1.2);
+
+    context.fillStyle =
+      value >= 0
+        ? series.positiveColor ?? series.color
+        : series.negativeColor ?? series.color;
+
+    context.fillRect(
+      x - candleGap * 0.32,
+      top,
+      Math.max(candleGap * 0.64, 2),
+      height,
+    );
+  });
+}
+
+function drawDots(
+  context: CanvasRenderingContext2D,
+  data: Value[],
+  color: string,
+  indexToX: (index: number) => number,
+  valueToY: (value: number) => number,
+) {
+  context.fillStyle = color;
+
+  data.forEach((value, index) => {
+    if (!isFiniteNumber(value)) return;
+
+    context.beginPath();
+    context.arc(indexToX(index), valueToY(value), 2.4, 0, Math.PI * 2);
+    context.fill();
+  });
+}
+
+function drawTextPill(
+  context: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  background: string,
+  foreground = "#ffffff",
+) {
+  context.font = "400 11px 'Noto Sans', Arial, sans-serif";
+  const pillWidth = context.measureText(text).width + 14;
+  const canvasWidth = context.canvas.width / (context.getTransform().a || 1);
+  x = clamp(x, 4, Math.max(4, canvasWidth - pillWidth - 4));
+
+  context.fillStyle = background;
+  context.beginPath();
+  context.roundRect(x, y - 11, pillWidth, 22, 7);
+  context.fill();
+
+  context.fillStyle = foreground;
+  context.textAlign = "left";
+  context.textBaseline = "middle";
+  context.fillText(text, x + 7, y);
+}
+
+function collectFiniteValues(series: Series[]) {
+  return series.flatMap((item) => item.values.filter(isFiniteNumber));
+}
+
+function buildOverlaySeries(
+  canonical: string,
+  settings: IndicatorSettingsMap,
+  styles: IndicatorStylesMap,
+  fullCandles: Candle[],
+  visibleLength: number,
+): Series[] {
+  const closes = fullCandles.map((candle) => candle.close);
+  const highs = fullCandles.map((candle) => candle.high);
+  const lows = fullCandles.map((candle) => candle.low);
+
+  if (canonical === "SMA") {
+    return [
+      {
+        name: "SMA",
+        color: styleColor(styles, canonical, "lineColor", "#22c55e"),
+        width: styleNumber(styles, canonical, "lineWidth", 1.5),
+        values: sliceSeries(sma(closes, intSetting(settings, canonical, "period", 20)), visibleLength),
+      },
+    ];
+  }
+
+  if (canonical === "EMA") {
+    return [
+      {
+        name: "EMA",
+        color: styleColor(styles, canonical, "lineColor", "#f97316"),
+        width: styleNumber(styles, canonical, "lineWidth", 1.5),
+        values: sliceSeries(ema(closes, intSetting(settings, canonical, "period", 20)), visibleLength),
+      },
+    ];
+  }
+
+  if (canonical === "WMA") {
+    return [
+      {
+        name: "WMA",
+        color: styleColor(styles, canonical, "lineColor", "#2563eb"),
+        width: styleNumber(styles, canonical, "lineWidth", 1.5),
+        values: sliceSeries(wma(closes, intSetting(settings, canonical, "period", 20)), visibleLength),
+      },
+    ];
+  }
+
+  if (canonical === "ALLIGATOR") {
+    const jaw = intSetting(settings, canonical, "jawPeriod", 13);
+    const teeth = intSetting(settings, canonical, "teethPeriod", 8);
+    const lips = intSetting(settings, canonical, "lipsPeriod", 5);
+    const width = styleNumber(styles, canonical, "lineWidth", 1.5);
+
+    return [
+      {
+        name: `Alligator Jaw ${jaw}`,
+        color: styleColor(styles, canonical, "jawColor", "#3b82f6"),
+        width,
+        values: sliceSeries(sma(closes, jaw), visibleLength),
+      },
+      {
+        name: `Alligator Teeth ${teeth}`,
+        color: styleColor(styles, canonical, "teethColor", "#ef4444"),
+        width,
+        values: sliceSeries(sma(closes, teeth), visibleLength),
+      },
+      {
+        name: `Alligator Lips ${lips}`,
+        color: styleColor(styles, canonical, "lipsColor", "#a3e635"),
+        width,
+        values: sliceSeries(sma(closes, lips), visibleLength),
+      },
+    ];
+  }
+
+  if (canonical === "BOLLINGER_BANDS") {
+    const period = intSetting(settings, canonical, "period", 20);
+    const deviation = numSetting(settings, canonical, "deviation", 2);
+    const mid = sma(closes, period);
+    const sd = standardDeviation(closes, period);
+
+    const upper = mid.map((value, index) =>
+      isFiniteNumber(value) && isFiniteNumber(sd[index])
+        ? value + sd[index]! * deviation
+        : null,
+    );
+
+    const lower = mid.map((value, index) =>
+      isFiniteNumber(value) && isFiniteNumber(sd[index])
+        ? value - sd[index]! * deviation
+        : null,
+    );
+
+    return [
+      { name: "BB Upper", color: "#2563eb", width: 1.2, values: sliceSeries(upper, visibleLength) },
+      { name: "BB Middle", color: "#64748b", width: 1, values: sliceSeries(mid, visibleLength) },
+      { name: "BB Lower", color: "#2563eb", width: 1.2, values: sliceSeries(lower, visibleLength) },
+    ];
+  }
+
+  if (canonical === "DONCHIAN_CHANNEL") {
+    const period = intSetting(settings, canonical, "period", 20);
+
+    return [
+      {
+        name: "Donchian High",
+        color: "#38bdf8",
+        width: 1.2,
+        values: sliceSeries(highest(highs, period), visibleLength),
+      },
+      {
+        name: "Donchian Low",
+        color: "#38bdf8",
+        width: 1.2,
+        values: sliceSeries(lowest(lows, period), visibleLength),
+      },
+    ];
+  }
+
+  if (canonical === "ENVELOPES") {
+    const period = intSetting(settings, canonical, "period", 20);
+    const deviation = numSetting(settings, canonical, "deviation", 0.1) / 100;
+    const mid = sma(closes, period);
+
+    return [
+      {
+        name: "Envelope Upper",
+        color: "#9333ea",
+        width: 1.2,
+        values: sliceSeries(
+          mid.map((value) => (isFiniteNumber(value) ? value * (1 + deviation) : null)),
+          visibleLength,
+        ),
+      },
+      {
+        name: "Envelope Lower",
+        color: "#9333ea",
+        width: 1.2,
+        values: sliceSeries(
+          mid.map((value) => (isFiniteNumber(value) ? value * (1 - deviation) : null)),
+          visibleLength,
+        ),
+      },
+    ];
+  }
+
+  return [];
+}
+
+function buildBottomPanel(
+  canonical: string,
+  settings: IndicatorSettingsMap,
+  styles: IndicatorStylesMap,
+  fullCandles: Candle[],
+  visibleLength: number,
+): BottomPanel | null {
+  const closes = fullCandles.map((candle) => candle.close);
+  const highs = fullCandles.map((candle) => candle.high);
+  const median = fullCandles.map((candle) => (candle.high + candle.low) / 2);
+
+  if (canonical === "RSI") {
+    const period = intSetting(settings, canonical, "period", 14);
+
+    return {
+      key: canonical,
+      title: `RSI ${period}`,
+      min: 0,
+      max: 100,
+      levels: [30, 70],
+      levelColor: styleColor(styles, canonical, "upperLevelColor", "#38bdf8"),
+      series: [
+        {
+          name: "RSI",
+          color: styleColor(styles, canonical, "lineColor", "#d7d36a"),
+          width: styleNumber(styles, canonical, "lineWidth", 1.4),
+          values: sliceSeries(rsi(closes, period), visibleLength),
+        },
+      ],
+    };
+  }
+
+  if (canonical === "MACD") {
+    const fast = intSetting(settings, canonical, "fastPeriod", 12);
+    const slow = intSetting(settings, canonical, "slowPeriod", 26);
+    const signalPeriod = intSetting(settings, canonical, "signalPeriod", 9);
+    const output = macd(closes, fast, slow, signalPeriod);
+
+    const series: Series[] = [];
+
+    if (styleBool(styles, canonical, "showHistogram", true)) {
+      series.push({
+        name: "Histogram",
+        color: "#94a3b8",
+        mode: "histogram",
+        positiveColor: styleColor(styles, canonical, "histogramUpColor", "#b6e34b"),
+        negativeColor: styleColor(styles, canonical, "histogramDownColor", "#ef4444"),
+        values: sliceSeries(output.histogram, visibleLength),
+      });
+    }
+
+    if (styleBool(styles, canonical, "showMacdLine", true)) {
+      series.push({
+        name: "MACD",
+        color: styleColor(styles, canonical, "macdLineColor", "#b6e34b"),
+        width: styleNumber(styles, canonical, "macdLineWidth", 1.3),
+        values: sliceSeries(output.macdLine, visibleLength),
+      });
+    }
+
+    if (styleBool(styles, canonical, "showSignalLine", true)) {
+      series.push({
+        name: "Signal",
+        color: styleColor(styles, canonical, "signalLineColor", "#ef4444"),
+        width: styleNumber(styles, canonical, "signalLineWidth", 1.3),
+        values: sliceSeries(output.signal, visibleLength),
+      });
+    }
+
+    return {
+      key: canonical,
+      title: `MACD ${fast} ${slow} ${signalPeriod}`,
+      levels: [0],
+      series,
+    };
+  }
+
+  if (canonical === "OSMA") {
+    const fast = intSetting(settings, canonical, "fastPeriod", 12);
+    const slow = intSetting(settings, canonical, "slowPeriod", 26);
+    const signalPeriod = intSetting(settings, canonical, "signalPeriod", 9);
+    const output = macd(closes, fast, slow, signalPeriod);
+
+    return {
+      key: canonical,
+      title: `OsMA ${fast} ${slow} ${signalPeriod}`,
+      levels: [0],
+      series: [
+        {
+          name: "OsMA",
+          mode: "histogram",
+          color: "#94a3b8",
+          positiveColor: styleColor(styles, canonical, "histogramUpColor", "#b6e34b"),
+          negativeColor: styleColor(styles, canonical, "histogramDownColor", "#ef4444"),
+          values: sliceSeries(output.histogram, visibleLength),
+        },
+      ],
+    };
+  }
+
+  if (canonical === "RATE_OF_CHANGE") {
+    const period = intSetting(settings, canonical, "period", 14);
+    const values = closes.map((value, index) =>
+      index < period || closes[index - period] === 0
+        ? null
+        : ((value - closes[index - period]) / closes[index - period]) * 100,
+    );
+
+    return {
+      key: canonical,
+      title: `Rate of Change ${period}`,
+      levels: [0],
+      levelColor: styleColor(styles, canonical, "zeroLineColor", "#94a3b8"),
+      series: [
+        {
+          name: "ROC",
+          color: styleColor(styles, canonical, "lineColor", "#facc15"),
+          width: styleNumber(styles, canonical, "lineWidth", 1.4),
+          values: sliceSeries(values, visibleLength),
+        },
+      ],
+    };
+  }
+
+  if (canonical === "CCI") {
+    const period = intSetting(settings, canonical, "period", 20);
+
+    return {
+      key: canonical,
+      title: `CCI ${period}`,
+      levels: [-100, 100],
+      levelColor: styleColor(styles, canonical, "levelColor", "#f59e0b"),
+      series: [
+        {
+          name: "CCI",
+          color: styleColor(styles, canonical, "lineColor", "#facc15"),
+          width: styleNumber(styles, canonical, "lineWidth", 1.4),
+          values: sliceSeries(cci(fullCandles, period), visibleLength),
+        },
+      ],
+    };
+  }
+
+  if (canonical === "AWESOME_OSCILLATOR") {
+    const fast = intSetting(settings, canonical, "fastPeriod", 5);
+    const slow = intSetting(settings, canonical, "slowPeriod", 34);
+    const fastSma = sma(median, fast);
+    const slowSma = sma(median, slow);
+
+    const values = median.map((_, index) =>
+      isFiniteNumber(fastSma[index]) && isFiniteNumber(slowSma[index])
+        ? fastSma[index]! - slowSma[index]!
+        : null,
+    );
+
+    return {
+      key: canonical,
+      title: `Awesome Oscillator ${fast} ${slow}`,
+      levels: [0],
+      series: [
+        {
+          name: "AO",
+          mode: "histogram",
+          color: "#94a3b8",
+          positiveColor: styleColor(styles, canonical, "histogramUpColor", "#22c55e"),
+          negativeColor: styleColor(styles, canonical, "histogramDownColor", "#ef4444"),
+          values: sliceSeries(values, visibleLength),
+        },
+      ],
+    };
+  }
+
+  if (canonical === "ACCELERATOR_OSCILLATOR") {
+    const fast = intSetting(settings, canonical, "fastPeriod", 5);
+    const slow = intSetting(settings, canonical, "slowPeriod", 34);
+    const signal = intSetting(settings, canonical, "signalPeriod", 5);
+    const fastSma = sma(median, fast);
+    const slowSma = sma(median, slow);
+
+    const ao = median.map((_, index) =>
+      isFiniteNumber(fastSma[index]) && isFiniteNumber(slowSma[index])
+        ? fastSma[index]! - slowSma[index]!
+        : null,
+    );
+
+    const signalLine = sma(ao.map((value) => (isFiniteNumber(value) ? value : 0)), signal);
+
+    const values = ao.map((value, index) =>
+      isFiniteNumber(value) && isFiniteNumber(signalLine[index])
+        ? value - signalLine[index]!
+        : null,
+    );
+
+    return {
+      key: canonical,
+      title: `Accelerator Oscillator ${fast} ${slow} ${signal}`,
+      levels: [0],
+      series: [
+        {
+          name: "AC",
+          mode: "histogram",
+          color: "#94a3b8",
+          positiveColor: styleColor(styles, canonical, "histogramUpColor", "#22c55e"),
+          negativeColor: styleColor(styles, canonical, "histogramDownColor", "#ef4444"),
+          values: sliceSeries(values, visibleLength),
+        },
+      ],
+    };
+  }
+
+  if (canonical === "STOCHASTIC_OSCILLATOR") {
+    const output = stochastic(
+      fullCandles,
+      intSetting(settings, canonical, "kPeriod", 14),
+      intSetting(settings, canonical, "dPeriod", 3),
+      intSetting(settings, canonical, "slowing", 3),
+    );
+
+    return {
+      key: canonical,
+      title: "Stochastic Oscillator",
+      min: 0,
+      max: 100,
+      levels: [20, 80],
+      series: [
+        { name: "%K", color: "#22c55e", values: sliceSeries(output.k, visibleLength) },
+        { name: "%D", color: "#ef4444", values: sliceSeries(output.d, visibleLength) },
+      ],
+    };
+  }
+
+  if (canonical === "ADX") {
+    const period = intSetting(settings, canonical, "period", 14);
+
+    return {
+      key: canonical,
+      title: `ADX ${period}`,
+      min: 0,
+      max: 100,
+      levels: [20, 50],
+      series: [
+        {
+          name: "ADX",
+          color: styleColor(styles, canonical, "lineColor", "#38bdf8"),
+          width: styleNumber(styles, canonical, "lineWidth", 1.4),
+          values: sliceSeries(adx(fullCandles, period), visibleLength),
+        },
+      ],
+    };
+  }
+
+  if (canonical === "ATR") {
+    const period = intSetting(settings, canonical, "period", 14);
+
+    return {
+      key: canonical,
+      title: `ATR ${period}`,
+      series: [
+        {
+          name: "ATR",
+          color: styleColor(styles, canonical, "lineColor", "#f97316"),
+          width: styleNumber(styles, canonical, "lineWidth", 1.4),
+          values: sliceSeries(atr(fullCandles, period), visibleLength),
+        },
+      ],
+    };
+  }
+
+  if (canonical === "WILLIAMS_R") {
+    const period = intSetting(settings, canonical, "period", 14);
+
+    return {
+      key: canonical,
+      title: `Williams %R ${period}`,
+      min: -100,
+      max: 0,
+      levels: [-80, -20],
+      series: [
+        {
+          name: "Williams %R",
+          color: styleColor(styles, canonical, "lineColor", "#a78bfa"),
+          width: styleNumber(styles, canonical, "lineWidth", 1.4),
+          values: sliceSeries(williamsR(fullCandles, period), visibleLength),
+        },
+      ],
+    };
+  }
+
+  if (canonical === "MOMENTUM") {
+    const period = intSetting(settings, canonical, "period", 10);
+    const values = closes.map((value, index) =>
+      index < period ? null : value - closes[index - period],
+    );
+
+    return {
+      key: canonical,
+      title: `Momentum ${period}`,
+      levels: [0],
+      series: [
+        {
+          name: "Momentum",
+          color: styleColor(styles, canonical, "lineColor", "#22c55e"),
+          width: styleNumber(styles, canonical, "lineWidth", 1.4),
+          values: sliceSeries(values, visibleLength),
+        },
+      ],
+    };
+  }
+
+  if (canonical === "BULLS_POWER") {
+    const period = intSetting(settings, canonical, "period", 13);
+    const emaValues = ema(closes, period);
+
+    const bulls = highs.map((high, index) =>
+      isFiniteNumber(emaValues[index]) ? high - emaValues[index]! : null,
+    );
+
+    return {
+      key: canonical,
+      title: `Bulls Power ${period}`,
+      levels: [0],
+      series: [
+        {
+          name: "Bulls",
+          color: "#22c55e",
+          mode: "histogram",
+          positiveColor: "#22c55e",
+          negativeColor: "#ef4444",
+          values: sliceSeries(bulls, visibleLength),
+        },
+      ],
+    };
+  }
+
+  if (canonical === "DEMARKER") {
+    const period = intSetting(settings, canonical, "period", 14);
+
+    return {
+      key: canonical,
+      title: `DeMarker ${period}`,
+      min: 0,
+      max: 1,
+      levels: [0.3, 0.7],
+      series: [
+        {
+          name: "DeMarker",
+          color: "#38bdf8",
+          values: sliceSeries(deMarker(fullCandles, period), visibleLength),
+        },
+      ],
+    };
+  }
+
+  return null;
+}
+
+function drawCandles(
+  context: CanvasRenderingContext2D,
+  renderCandles: Candle[],
+  chartType: ChartType,
+  indexToX: (index: number) => number,
+  priceToY: (price: number) => number,
+  candleWidth: number,
+) {
+  if (chartType === "Line") {
+    drawLine(
+      context,
+      renderCandles.map((candle) => candle.close),
+      "#2563eb",
+      indexToX,
+      priceToY,
+      2,
+    );
+
+    return;
+  }
+
+  renderCandles.forEach((candle, index) => {
+    const x = indexToX(index);
+    const openY = priceToY(candle.open);
+    const closeY = priceToY(candle.close);
+    const highY = priceToY(candle.high);
+    const lowY = priceToY(candle.low);
+    const bullish = candle.close >= candle.open;
+    const color = bullish ? "#22c55e" : "#ef4444";
+
+    context.strokeStyle = color;
+    context.fillStyle = color;
+    context.lineWidth = 1.2;
+
+    context.beginPath();
+    context.moveTo(x, highY);
+    context.lineTo(x, lowY);
+    context.stroke();
+
+    if (chartType === "Bars") {
+      context.beginPath();
+      context.moveTo(x - candleWidth * 0.45, openY);
+      context.lineTo(x, openY);
+      context.moveTo(x, closeY);
+      context.lineTo(x + candleWidth * 0.45, closeY);
+      context.stroke();
+      return;
+    }
+
+    const bodyTop = Math.min(openY, closeY);
+    const bodyHeight = Math.max(Math.abs(closeY - openY), 1.4);
+
+    context.fillRect(x - candleWidth / 2, bodyTop, candleWidth, bodyHeight);
+  });
+}
+
+function priceRangeFromCandles(candles: Candle[], extras: number[]) {
+  const candleValues = candles.flatMap((candle) => [
+    candle.open,
+    candle.high,
+    candle.low,
+    candle.close,
+  ]);
+  const candleMin = Math.min(...candleValues);
+  const candleMax = Math.max(...candleValues);
+  const candleRange = Math.max(candleMax - candleMin, Math.abs(candleMax) * 0.0005);
+  const relevantExtras = extras.filter(
+    (value) =>
+      value >= candleMin - candleRange * 1.5 &&
+      value <= candleMax + candleRange * 1.5,
+  );
+  const values = [...candleValues, ...relevantExtras];
+
+  let min = Math.min(...values);
+  let max = Math.max(...values);
+
+  if (!Number.isFinite(min) || !Number.isFinite(max) || min === max) {
+    min = 0;
+    max = 1;
+  }
+
+  const padding = Math.max((max - min) * 0.1, Math.abs(max) * 0.00018, 0.00001);
+
+  return { min: min - padding, max: max + padding };
+}
+
+type AxisRange = { min: number; max: number; key: string };
+
+/**
+ * Keeps the price axis still while price stays inside it. Recomputing the
+ * range every frame rescales the whole chart on each new high or low, so every
+ * candle shifts on every tick. Instead, re-frame only when price leaves the
+ * view or the data has shrunk to a small part of it, and leave headroom so the
+ * next few ticks fit. This moves the axis, never a price.
+ */
+function stabilizeAxisRange(
+  previous: AxisRange | null,
+  target: { min: number; max: number },
+  key: string,
+): AxisRange {
+  const span = Math.max(target.max - target.min, Number.EPSILON);
+
+  if (previous && previous.key === key) {
+    const fits = target.min >= previous.min && target.max <= previous.max;
+    const viewSpan = previous.max - previous.min;
+    const stillTight = span >= viewSpan * 0.62;
+    if (fits && stillTight) return previous;
+  }
+
+  const headroom = span * 0.12;
+  return { min: target.min - headroom, max: target.max + headroom, key };
+}
+
+function drawGrid(
+  context: CanvasRenderingContext2D,
+  left: number,
+  right: number,
+  top: number,
+  bottom: number,
+  columns: number,
+  rows: number,
+) {
+  context.strokeStyle = CHART_GRID;
+  context.lineWidth = 1;
+
+  for (let i = 0; i <= columns; i += 1) {
+    const x = left + ((right - left) / columns) * i;
+    context.beginPath();
+    context.moveTo(x, top);
+    context.lineTo(x, bottom);
+    context.stroke();
+  }
+
+  for (let i = 0; i <= rows; i += 1) {
+    const y = top + ((bottom - top) / rows) * i;
+    context.beginPath();
+    context.moveTo(left, y);
+    context.lineTo(right, y);
+    context.stroke();
+  }
+}
+
+function drawBottomPanel(
+  context: CanvasRenderingContext2D,
+  panel: BottomPanel,
+  panelIndex: number,
+  visibleLength: number,
+  left: number,
+  right: number,
+  top: number,
+  bottom: number,
+  candleGap: number,
+  scrollOffset: number,
+) {
+  context.fillStyle = panelIndex % 2 === 0 ? CHART_PANEL : CHART_PANEL_ALT;
+  context.fillRect(left, top, right - left, bottom - top);
+
+  context.strokeStyle = CHART_DIVIDER;
+  context.lineWidth = 1;
+  context.beginPath();
+  context.moveTo(left, top);
+  context.lineTo(right, top);
+  context.stroke();
+
+  context.fillStyle = CHART_TEXT;
+  context.font = "400 11px 'Noto Sans', Arial, sans-serif";
+  context.textAlign = "left";
+  context.textBaseline = "top";
+  context.fillText(panel.title, left + 8, top + 5);
+
+  const values = collectFiniteValues(panel.series);
+
+  let min = panel.min ?? Math.min(...values, ...(panel.levels ?? []), 0);
+  let max = panel.max ?? Math.max(...values, ...(panel.levels ?? []), 0);
+
+  if (!Number.isFinite(min) || !Number.isFinite(max) || min === max) {
+    min = -1;
+    max = 1;
+  }
+
+  const padding = (max - min) * 0.14;
+  min -= padding;
+  max += padding;
+
+  const valueToY = (value: number) =>
+    bottom - ((value - min) / (max - min)) * (bottom - top - 18) - 9;
+
+  const indexToX = (index: number) =>
+    left + (index / Math.max(visibleLength - 1, 1)) * (right - left) - scrollOffset;
+
+  context.strokeStyle = CHART_GRID_SOFT;
+  context.lineWidth = 1;
+
+  for (let i = 1; i < 3; i += 1) {
+    const y = top + ((bottom - top) / 3) * i;
+    context.beginPath();
+    context.moveTo(left, y);
+    context.lineTo(right, y);
+    context.stroke();
+  }
+
+  if (panel.levels) {
+    context.strokeStyle = panel.levelColor ?? "#cbd5e1";
+
+    panel.levels.forEach((level) => {
+      const y = valueToY(level);
+
+      context.beginPath();
+      context.moveTo(left, y);
+      context.lineTo(right, y);
+      context.stroke();
+      context.fillStyle = CHART_TEXT;
+      context.fillText(String(level), right + 10, y - 5);
+    });
+
+    context.setLineDash([]);
+  }
+
+  const zeroY = clamp(valueToY(0), top + 6, bottom - 6);
+
+  context.save();
+  context.beginPath();
+  context.rect(left, top + 18, right - left, Math.max(0, bottom - top - 18));
+  context.clip();
+  panel.series
+    .filter((series) => series.visible !== false)
+    .forEach((series) => {
+      if (series.mode === "histogram") {
+        drawHistogram(context, series.values, series, indexToX, valueToY, zeroY, candleGap);
+        return;
+      }
+
+      if (series.mode === "dots") {
+        drawDots(context, series.values, series.color, indexToX, valueToY);
+        return;
+      }
+
+      drawLine(
+        context,
+        series.values,
+        series.color,
+        indexToX,
+        valueToY,
+        series.width ?? 1.35,
+      );
+    });
+  context.restore();
+}
+
+
+// Label spacings the time axis may use; each must be a whole number of
+// candles so every label sits on a real candle's opening time.
+const AXIS_STEPS_MS = [
+  5_000, 10_000, 15_000, 30_000,
+  60_000, 2 * 60_000, 5 * 60_000, 10 * 60_000, 15 * 60_000, 30 * 60_000,
+  3_600_000, 2 * 3_600_000, 3 * 3_600_000, 4 * 3_600_000, 6 * 3_600_000, 12 * 3_600_000,
+  86_400_000, 2 * 86_400_000, 7 * 86_400_000,
+];
+
+/**
+ * Time axis in East Africa Time. Candle times are UTC bucket starts; labels
+ * go on candles that start on a round Kenya-local boundary (e.g. every
+ * 15 minutes), and a label that falls on Kenya midnight shows the date.
+ */
+function drawKenyaTimeAxis(
+  context: CanvasRenderingContext2D,
+  candles: Candle[],
+  candleIntervalMs: number,
+  candleGap: number,
+  xForIndex: (index: number) => number,
+  left: number,
+  right: number,
+  width: number,
+  height: number,
+) {
+  context.font = "400 10px 'Noto Sans', Arial, sans-serif";
+  context.fillStyle = CHART_TEXT_MUTED;
+  context.textBaseline = "middle";
+
+  const minSpacing = width < 560 ? 64 : 88;
+  const step =
+    AXIS_STEPS_MS.find(
+      (candidate) =>
+        candidate >= candleIntervalMs &&
+        candidate % candleIntervalMs === 0 &&
+        (candidate / candleIntervalMs) * candleGap >= minSpacing,
+    ) ?? AXIS_STEPS_MS[AXIS_STEPS_MS.length - 1];
+  const withSeconds = step < 60_000;
+  const y = height - 10;
+  const zoneWidth = context.measureText(KENYA_ZONE_LABEL).width + 16;
+  let lastX = -Infinity;
+  let lastDay = 0;
+
+  // Candles of 4 hours or a day open on UTC boundaries (03:00, 07:00 … in
+  // Kenya), so for those the labels follow the UTC grid instead.
+  const firstTime = candles[0]?.time ?? 0;
+  const alignToKenya = kenyaOffsetMs(firstTime) % candleIntervalMs === 0;
+
+  context.textAlign = "center";
+  for (let index = 0; index < candles.length; index += 1) {
+    const time = candles[index].time;
+    if (!Number.isFinite(time)) continue;
+    const local = time + kenyaOffsetMs(time);
+    if ((alignToKenya ? local : time) % step !== 0) continue;
+
+    const x = xForIndex(index);
+    if (x < left + 14 || x > right - zoneWidth / 2 || x - lastX < minSpacing * 0.8) continue;
+
+    // The date replaces the time where the Kenya calendar day changes.
+    const day = kenyaDayKey(time);
+    const newDay = lastDay !== 0 && day !== lastDay;
+    const label =
+      step >= 86_400_000 || newDay || (alignToKenya && local % 86_400_000 === 0)
+        ? formatKenyaDate(time)
+        : formatKenyaTime(time, withSeconds);
+    context.fillText(label, x, y);
+    lastX = x;
+    lastDay = day;
+  }
+
+  context.textAlign = "right";
+  context.fillText(KENYA_ZONE_LABEL, width - 10, y);
+}
+
+function TradingChartComponent({
+  asset,
+  candles,
+  candlesRef,
+  marketFrameVersionRef,
+  serverOffsetRef,
+  marketReceivedAtRef,
+  onFrameRendered,
+  chartType,
+  timeframe,
+  expirySeconds,
+  selectedIndicators,
+  indicatorSettings = DEFAULT_INDICATOR_SETTINGS,
+  indicatorStyles = DEFAULT_INDICATOR_STYLES,
+  activeTrades,
+  resultMarkers,
+  background = "black",
+}: TradingChartProps) {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const [resizeVersion, setResizeVersion] = React.useState(0);
+  const drawRef = React.useRef<() => void>(() => {});
+  // Pinch-zoom factor: 1 is the default view, >1 shows fewer candles.
+  const zoomRef = React.useRef(1);
+  const lastDrawVersionRef = React.useRef(-1);
+  const lastTimedDrawRef = React.useRef(0);
+  const axisRangeRef = React.useRef<AxisRange | null>(null);
+  const indicatorCacheRef = React.useRef<{
+    computedAt: number;
+    visibleLength: number;
+    latestCandleTime: number;
+    bottomPanels: BottomPanel[];
+    overlaySeries: Series[];
+  } | null>(null);
+
+  React.useEffect(() => {
+    const container = containerRef.current;
+
+    if (!container || typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver(() => {
+      setResizeVersion((version) => version + 1);
+    });
+
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, []);
+
+  // A new asset or timeframe starts from the default view again.
+  React.useEffect(() => {
+    zoomRef.current = 1;
+  }, [asset.symbol, timeframe]);
+
+  // Two-finger pinch zooms the time axis; a double tap resets it. The chart
+  // surface has touch-action: none, so the browser does not zoom the page.
+  React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const pointers = new Map<number, { x: number; y: number }>();
+    let pinchStartDistance = 0;
+    let pinchStartZoom = 1;
+    let lastTapAt = 0;
+    let tapMoved = false;
+
+    const distance = () => {
+      const [a, b] = Array.from(pointers.values());
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    };
+
+    const onDown = (event: PointerEvent) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      tapMoved = false;
+      if (pointers.size === 2) {
+        pinchStartDistance = Math.max(distance(), 1);
+        pinchStartZoom = zoomRef.current;
+      }
+    };
+
+    const onMove = (event: PointerEvent) => {
+      const known = pointers.get(event.pointerId);
+      if (!known) return;
+      if (Math.abs(event.clientX - known.x) + Math.abs(event.clientY - known.y) > 6) tapMoved = true;
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (pointers.size === 2) {
+        // Fingers apart -> zoom in (fewer, wider candles).
+        zoomRef.current = clamp((pinchStartZoom * distance()) / pinchStartDistance, MIN_ZOOM, MAX_ZOOM);
+        event.preventDefault();
+      }
+    };
+
+    const onUp = (event: PointerEvent) => {
+      const wasPinching = pointers.size >= 2;
+      pointers.delete(event.pointerId);
+      if (wasPinching) {
+        // Keep the zoom steady if one finger lifts and the other stays.
+        pinchStartDistance = 0;
+        lastTapAt = 0;
+        if (Math.abs(zoomRef.current - 1) < 0.08) zoomRef.current = 1;
+        return;
+      }
+      if (event.type !== "pointerup" || tapMoved) return;
+      const now = performance.now();
+      if (now - lastTapAt < 320) {
+        zoomRef.current = 1;
+        lastTapAt = 0;
+      } else {
+        lastTapAt = now;
+      }
+    };
+
+    container.addEventListener("pointerdown", onDown);
+    container.addEventListener("pointermove", onMove);
+    container.addEventListener("pointerup", onUp);
+    container.addEventListener("pointercancel", onUp);
+    return () => {
+      container.removeEventListener("pointerdown", onDown);
+      container.removeEventListener("pointermove", onMove);
+      container.removeEventListener("pointerup", onUp);
+      container.removeEventListener("pointercancel", onUp);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    let frame = 0;
+
+    const loop = (timestamp: number) => {
+      const marketVersion = marketFrameVersionRef?.current ?? 0;
+      const marketChanged = marketVersion !== lastDrawVersionRef.current;
+      // Keep time-axis/expiry motion fluid even between authoritative price
+      // ticks. Vertical price movement still changes only with marketVersion.
+      const clockRefresh = timestamp - lastTimedDrawRef.current >= 33;
+
+      // Paint every real market update on the next animation frame. The
+      // slower timed refresh exists only for countdown/scroll movement and
+      // never invents intermediate market prices.
+      if (marketChanged || clockRefresh) {
+        drawRef.current();
+        lastDrawVersionRef.current = marketVersion;
+        lastTimedDrawRef.current = timestamp;
+      }
+
+      frame = window.requestAnimationFrame(loop);
+    };
+
+    frame = window.requestAnimationFrame(loop);
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [marketFrameVersionRef]);
+
+  React.useEffect(() => {
+    indicatorCacheRef.current = null;
+    drawRef.current = () => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+
+    if (!canvas || !context) return;
+
+    const liveNowMs = Date.now() + (serverOffsetRef?.current ?? 0);
+
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+
+    // Reassigning width/height reallocates the backing store, so only resize
+    // when the box actually changed.
+    const nextWidth = Math.max(1, Math.floor(rect.width * dpr));
+    const nextHeight = Math.max(1, Math.floor(rect.height * dpr));
+
+    if (canvas.width !== nextWidth) canvas.width = nextWidth;
+    if (canvas.height !== nextHeight) canvas.height = nextHeight;
+
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
+    context.imageSmoothingEnabled = false;
+
+    const width = rect.width;
+    const height = rect.height;
+
+    // Leave the canvas clear: the black or white surface and the faint
+    // mountain photo behind it come from CSS.
+    context.clearRect(0, 0, width, height);
+    applyChartPalette(background);
+
+    const sourceCandles = candlesRef?.current ?? candles;
+
+    if (sourceCandles.length < 2) {
+      context.fillStyle = CHART_TEXT_MUTED;
+      context.font = "400 14px 'Noto Sans', Arial, sans-serif";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillText("Waiting for market data…", width / 2, height / 2);
+      return;
+    }
+
+    const normalizedIndicators = uniqueCanonicalIndicators(selectedIndicators);
+    const fullCandles = sourceCandles.slice(-MAX_HISTORY_CANDLES);
+
+    context.font = "400 11px 'Noto Sans', Arial, sans-serif";
+    const left = width < 560 ? 8 : 14;
+    const latestPriceText = fullCandles[fullCandles.length - 1].close.toFixed(asset.precision);
+    const rightSpace = clamp(context.measureText(latestPriceText).width + 22, 70, 120);
+    const right = Math.max(left + 1, width - rightSpace);
+    const chartWidth = right - left;
+
+    // Pinch zoom scales the default candle count; the cap keeps every
+    // candle at least ~3 px wide so a fully zoomed-out chart stays legible.
+    const baseVisible = getVisibleCandleCount(timeframe, chartWidth);
+    const zoomedVisible = Math.round(baseVisible / zoomRef.current);
+    const maxZoomedOut = Math.max(MIN_ZOOM_CANDLES, Math.floor(chartWidth / MIN_ZOOMED_SLOT_PX));
+    const visibleLength = Math.min(
+      zoomRef.current === 1
+        ? baseVisible
+        : clamp(zoomedVisible, MIN_ZOOM_CANDLES, maxZoomedOut),
+      fullCandles.length,
+    );
+    const visibleCandlesRaw = fullCandles.slice(-visibleLength);
+    const renderCandles =
+      chartType === "Heiken Ashi" ? heikenAshi(visibleCandlesRaw) : visibleCandlesRaw;
+
+    const latestCandleTime = fullCandles[fullCandles.length - 1]?.time ?? 0;
+    const cachedIndicators = indicatorCacheRef.current;
+    const canReuseIndicators =
+      cachedIndicators !== null &&
+      liveNowMs - cachedIndicators.computedAt < 250 &&
+      cachedIndicators.visibleLength === visibleLength &&
+      cachedIndicators.latestCandleTime === latestCandleTime;
+
+    let bottomPanels: BottomPanel[];
+    let overlaySeries: Series[];
+
+    if (canReuseIndicators) {
+      bottomPanels = cachedIndicators.bottomPanels;
+      overlaySeries = cachedIndicators.overlaySeries;
+    } else {
+      const allBottomPanels = normalizedIndicators
+        .filter((indicator) => BOTTOM_INDICATORS.has(indicator))
+        .map((indicator) =>
+          buildBottomPanel(
+            indicator,
+            indicatorSettings,
+            indicatorStyles,
+            fullCandles,
+            visibleLength,
+          ),
+        )
+        .filter((panel): panel is BottomPanel => panel !== null);
+
+      bottomPanels = allBottomPanels.slice(0, 4);
+      overlaySeries = normalizedIndicators.flatMap((indicator) =>
+        BOTTOM_INDICATORS.has(indicator)
+          ? []
+          : buildOverlaySeries(
+              indicator,
+              indicatorSettings,
+              indicatorStyles,
+              fullCandles,
+              visibleLength,
+            ),
+      );
+
+      indicatorCacheRef.current = {
+        computedAt: liveNowMs,
+        visibleLength,
+        latestCandleTime,
+        bottomPanels,
+        overlaySeries,
+      };
+    }
+
+    const top = width < 560 ? 18 : 22;
+    const footer = 24;
+    const availableHeight = Math.max(0, height - top - footer);
+    const desiredBottomArea = bottomPanels.length * 72;
+    const bottomAreaHeight = bottomPanels.length > 0 ? Math.min(desiredBottomArea, Math.max(0, availableHeight - 90)) : 0;
+    const panelHeight = bottomPanels.length > 0 ? bottomAreaHeight / bottomPanels.length : 0;
+    const chartBottom = height - footer - bottomAreaHeight;
+    const chartHeight = Math.max(1, chartBottom - top);
+    const candleGap = chartWidth / Math.max(visibleLength - 1, 1);
+    const candleWidth = clamp(Math.floor(candleGap * 0.66), 3, 10);
+
+    const overlayValues = collectFiniteValues(overlaySeries);
+
+    const markerValues = [
+      ...activeTrades.map((trade) => trade.entryPrice),
+      ...resultMarkers.map((marker) => marker.price),
+      ...overlayValues,
+    ].filter(isFiniteNumber);
+
+    const axisRange = stabilizeAxisRange(
+      axisRangeRef.current,
+      priceRangeFromCandles(renderCandles, markerValues),
+      `${asset.symbol}|${timeframe}|${chartType}|${visibleLength}`,
+    );
+    axisRangeRef.current = axisRange;
+    const { min, max } = axisRange;
+
+    const priceToY = (price: number) =>
+  Math.round(top + ((max - price) / (max - min)) * chartHeight) + 0.5;
+
+    const candleIntervalMs = timeframeToSeconds(timeframe) * 1000;
+    const newestCandleStart = renderCandles[renderCandles.length - 1]?.time ?? 0;
+    const candleProgress = clamp(
+      (liveNowMs - newestCandleStart) / Math.max(candleIntervalMs, 1),
+      0,
+      1,
+    );
+    const scrollOffset = candleProgress * candleGap;
+
+    const indexToX = (index: number) =>
+      Math.round(left + (index / Math.max(visibleLength - 1, 1)) * chartWidth) + 0.5;
+
+    drawGrid(context, left, right, top, chartBottom, 8, 6);
+
+    context.save();
+    context.beginPath();
+    context.rect(left - candleWidth, top, chartWidth + candleWidth, chartBottom - top);
+    context.clip();
+    context.translate(-scrollOffset, 0);
+
+    drawCandles(context, renderCandles, chartType, indexToX, priceToY, candleWidth);
+
+    overlaySeries.forEach((series) => {
+      if (series.visible === false) return;
+
+      if (series.mode === "dots") {
+        drawDots(context, series.values, series.color, indexToX, priceToY);
+        return;
+      }
+
+      drawLine(
+        context,
+        series.values,
+        series.color,
+        indexToX,
+        priceToY,
+        series.width ?? 1.35,
+      );
+    });
+
+    context.restore();
+
+    const liveLatest = visibleCandlesRaw[visibleCandlesRaw.length - 1];
+    const latestY = priceToY(liveLatest.close);
+
+    context.strokeStyle = liveLatest.close >= liveLatest.open ? "#22c55e" : "#ef4444";
+    context.lineWidth = 1.2;
+    context.beginPath();
+    context.moveTo(left, latestY);
+    context.lineTo(right + 6, latestY);
+    context.stroke();
+    context.setLineDash([]);
+
+    drawTextPill(
+      context,
+      liveLatest.close.toFixed(asset.precision),
+      right + 8,
+      latestY,
+      liveLatest.close >= liveLatest.open ? "#16a34a" : "#dc2626",
+    );
+
+    const remaining = Math.max(
+      0,
+      Math.ceil(
+        (newestCandleStart + candleIntervalMs - liveNowMs) / 1000,
+      ),
+    );
+
+    const expiryX = right - 8;
+
+    context.strokeStyle = CHART_EXPIRY;
+    context.lineWidth = 1.5;
+    context.beginPath();
+    context.moveTo(expiryX, top);
+    context.lineTo(expiryX, chartBottom);
+    context.stroke();
+    context.setLineDash([]);
+
+    drawTextPill(context, formatDuration(remaining), expiryX - 92, top + 16, CHART_EXPIRY, CHART_EXPIRY_TEXT);
+
+    context.fillStyle = CHART_TEXT;
+    context.font = "400 13px 'Noto Sans', Arial, sans-serif";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(timeframe, expiryX - 28, chartBottom - 44);
+
+    context.font = "400 12px 'Noto Sans', Arial, sans-serif";
+    context.fillText(formatDuration(remaining).slice(3), expiryX - 28, chartBottom - 25);
+
+    activeTrades.forEach((trade) => {
+      const y = priceToY(trade.entryPrice);
+      const color = trade.side === "BUY" ? "#16a34a" : "#dc2626";
+
+      context.strokeStyle = color;
+      context.lineWidth = 1.2;
+      context.beginPath();
+      context.moveTo(left, y);
+      context.lineTo(right, y);
+      context.stroke();
+      context.setLineDash([]);
+
+      const tradeRemaining =
+        Number.isFinite(trade.expiryTime) && trade.expiryTime
+          ? Math.max(0, Math.ceil((trade.expiryTime - liveNowMs) / 1000))
+          : null;
+      const tradeLabel =
+        tradeRemaining === null
+          ? trade.label
+          : `${trade.label} · ${formatDuration(tradeRemaining)}`;
+
+      drawTextPill(context, tradeLabel, left + 8, y, color);
+    });
+
+    resultMarkers.forEach((marker) => {
+      const y = priceToY(marker.price);
+      const color = marker.won ? "#16a34a" : "#dc2626";
+
+      context.strokeStyle = color;
+      context.lineWidth = 1;
+      context.beginPath();
+      context.moveTo(right - 60, y);
+      context.lineTo(right, y);
+      context.stroke();
+
+      drawTextPill(context, marker.label, right - 112, y, color);
+    });
+
+    let legendX = left;
+    let legendRow = 0;
+    overlaySeries.slice(0, 6).forEach((series) => {
+      context.font = "400 11px 'Noto Sans', Arial, sans-serif";
+      const labelWidth = context.measureText(series.name).width + 14;
+      if (legendX + labelWidth > right) { legendX = left; legendRow += 1; }
+      if (legendRow > 1) return;
+      context.fillStyle = series.color;
+      context.textAlign = "left";
+      context.textBaseline = "top";
+      context.fillText(series.name, legendX, top + 8 + legendRow * 14, Math.max(1, right - legendX));
+      legendX += labelWidth;
+    });
+
+    context.fillStyle = CHART_TEXT;
+    context.font = "400 11px 'Noto Sans', Arial, sans-serif";
+    context.textAlign = "right";
+    context.textBaseline = "middle";
+
+    for (let i = 0; i <= 6; i += 1) {
+      const price = max - ((max - min) / 6) * i;
+      const y = top + (chartHeight / 6) * i;
+
+      // Skip a tick that would collide with the current-price pill.
+      if (Math.abs(y - latestY) < 18) continue;
+
+      context.fillText(price.toFixed(asset.precision), width - 10, y);
+    }
+
+    bottomPanels.forEach((panel, index) => {
+      const panelTop = chartBottom + index * panelHeight;
+      const panelBottom = Math.min(panelTop + panelHeight, height - footer);
+
+      if (panelBottom - panelTop < 36) return;
+
+      drawBottomPanel(
+        context,
+        panel,
+        index,
+        visibleLength,
+        left,
+        right,
+        panelTop,
+        panelBottom,
+        candleGap,
+        scrollOffset,
+      );
+    });
+    drawKenyaTimeAxis(
+      context,
+      visibleCandlesRaw,
+      candleIntervalMs,
+      candleGap,
+      (index) => indexToX(index) - scrollOffset,
+      left,
+      right,
+      width,
+      height,
+    );
+
+    // Lightweight production diagnostics for browser QA. This stays off
+    // React state and does not affect pricing or rendering decisions.
+    const renderedAt = Date.now();
+    const marketReceivedAt = marketReceivedAtRef?.current ?? 0;
+    (
+      canvas as HTMLCanvasElement & {
+        __neuroLive?: {
+          symbol: string;
+          timeframe: string;
+          candleTime: number;
+          open: number;
+          high: number;
+          low: number;
+          close: number;
+          renderedAt: number;
+          receiveToRenderMs: number | null;
+          marketVersion: number;
+          axisMin: number;
+          axisMax: number;
+        };
+      }
+    ).__neuroLive = {
+      symbol: asset.symbol,
+      timeframe,
+      candleTime: liveLatest.time,
+      open: liveLatest.open,
+      high: liveLatest.high,
+      low: liveLatest.low,
+      close: liveLatest.close,
+      renderedAt,
+      receiveToRenderMs:
+        marketReceivedAt > 0 ? Math.max(0, renderedAt - marketReceivedAt) : null,
+      marketVersion: marketFrameVersionRef?.current ?? 0,
+      axisMin: min,
+      axisMax: max,
+    };
+
+    onFrameRendered?.();
+    };
+  }, [
+    activeTrades,
+    asset,
+    candles,
+    candlesRef,
+    chartType,
+    expirySeconds,
+    indicatorSettings,
+    indicatorStyles,
+    onFrameRendered,
+    resultMarkers,
+    resizeVersion,
+    selectedIndicators,
+    serverOffsetRef,
+    marketReceivedAtRef,
+    marketFrameVersionRef,
+    timeframe,
+    background,
+  ]);
+
+  return (
+    <div ref={containerRef} className="nt-chart-canvas-wrap" data-chart-bg={background}>
+      <canvas ref={canvasRef} className="nt-chart-canvas" role="img" aria-label={`${asset.symbol} ${chartType} chart with ${selectedIndicators.join(", ") || "price"} indicators`} />
+    </div>
+  );
+}
+
+const TradingChart = React.memo(TradingChartComponent, (previous, next) => {
+  return (
+    previous.asset.symbol === next.asset.symbol &&
+    previous.chartType === next.chartType &&
+    previous.timeframe === next.timeframe &&
+    previous.expirySeconds === next.expirySeconds &&
+    previous.candles === next.candles &&
+    previous.candlesRef === next.candlesRef &&
+    previous.marketFrameVersionRef === next.marketFrameVersionRef &&
+    previous.serverOffsetRef === next.serverOffsetRef &&
+    previous.marketReceivedAtRef === next.marketReceivedAtRef &&
+    previous.onFrameRendered === next.onFrameRendered &&
+    previous.selectedIndicators === next.selectedIndicators &&
+    previous.indicatorSettings === next.indicatorSettings &&
+    previous.indicatorStyles === next.indicatorStyles &&
+    previous.activeTrades === next.activeTrades &&
+    previous.resultMarkers === next.resultMarkers &&
+    previous.background === next.background
+  );
+});
+
+export default TradingChart;

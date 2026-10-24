@@ -1,0 +1,592 @@
+/* HeroDashboard: a self-contained trading workspace preview. A white card
+   with a dark "terminal" chart (chart tokens) so the candles read clearly.
+   Colours come only from src/styles/brand.css. Adapts to its own width via
+   container queries, so it works in the homepage hero and the sign-in page. */
+.hd:not(.au-showcase .hd) {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--border-primary);
+  border-radius: 16px;
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-lg);
+  color: var(--text-primary);
+  font-family: var(--neo-font, inherit);
+  font-size: 12px;
+  line-height: 1.3;
+  user-select: none;
+}
+
+.hd:not(.au-showcase .hd) *,
+.hd:not(.au-showcase .hd) *::before,
+.hd:not(.au-showcase .hd) *::after {
+  box-sizing: border-box;
+}
+
+.hd:not(.au-showcase .hd) svg {
+  flex-shrink: 0;
+}
+
+/* ---------- Top bar ---------- */
+.hd:not(.au-showcase .hd) .hd-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-primary);
+  background: var(--surface-primary);
+}
+
+.hd:not(.au-showcase .hd) .hd-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--brand-primary);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.hd:not(.au-showcase .hd) .hd-brand img {
+  display: block;
+  width: auto;
+  height: 26px;
+}
+
+.hd:not(.au-showcase .hd) .hd-brand span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hd:not(.au-showcase .hd) .hd-top-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hd:not(.au-showcase .hd) .hd-account {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  column-gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  background: var(--background-secondary);
+}
+
+.hd:not(.au-showcase .hd) .hd-account small {
+  grid-column: 1;
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+.hd:not(.au-showcase .hd) .hd-account strong {
+  grid-column: 1;
+  color: var(--brand-primary);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hd:not(.au-showcase .hd) .hd-account svg {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  color: var(--text-muted);
+}
+
+.hd:not(.au-showcase .hd) .hd-topup {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: var(--cta-gradient);
+  color: var(--text-on-brand);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.hd:not(.au-showcase .hd) .hd-icon {
+  color: var(--text-secondary);
+}
+
+/* ---------- Body ---------- */
+.hd:not(.au-showcase .hd) .hd-body {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr) 168px;
+  min-height: 0;
+}
+
+.hd:not(.au-showcase .hd) .hd-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 8px;
+  border-right: 1px solid var(--border-primary);
+  background: var(--background-secondary);
+}
+
+.hd:not(.au-showcase .hd) .hd-menu span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 7px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hd:not(.au-showcase .hd) .hd-menu span.is-active {
+  background: var(--brand-soft-strong);
+  color: var(--brand-primary);
+}
+
+.hd:not(.au-showcase .hd) .hd-menu span.is-active svg {
+  color: var(--brand-secondary);
+}
+
+.hd:not(.au-showcase .hd) .hd-chart-area {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--chart-bg);
+}
+
+.hd:not(.au-showcase .hd) .hd-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--chart-line);
+  background: var(--chart-panel);
+  color: var(--chart-text);
+  font-size: 11px;
+}
+
+.hd:not(.au-showcase .hd) .hd-pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--chart-bg);
+  color: var(--text-on-brand);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.hd:not(.au-showcase .hd) .hd-square {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--chart-line);
+  border-radius: 6px;
+}
+
+.hd:not(.au-showcase .hd) .hd-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.hd:not(.au-showcase .hd) .hd-tf {
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: var(--brand-accent-light);
+  color: var(--brand-primary);
+  font-weight: 800;
+}
+
+.hd:not(.au-showcase .hd) .hd-chart {
+  position: relative;
+  flex: 1;
+  min-height: 220px;
+}
+
+.hd:not(.au-showcase .hd) .hd-chart > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hd:not(.au-showcase .hd) .hd-tools {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border: 1px solid var(--chart-line);
+  border-radius: 7px;
+  background: var(--chart-panel);
+  color: var(--chart-text);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.hd:not(.au-showcase .hd) .hd-grid {
+  stroke: var(--chart-line);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.hd:not(.au-showcase .hd) .hd-expiry {
+  stroke: var(--brand-accent-light);
+  stroke-dasharray: 4 4;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Chart labels: HTML over the stretched plot, positioned in percent.
+   Left unscoped (low specificity) so every host, including the /login
+   showcase, gets the positioning; hosts may recolour them with `color`. */
+.hd-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hd-axis {
+  position: absolute;
+  color: var(--chart-text);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.hd-axis-y {
+  right: 6px;
+  transform: translateY(-50%);
+}
+
+.hd-axis-x {
+  bottom: 6px;
+  transform: translateX(-50%);
+}
+
+.hd-axis-x.is-start {
+  transform: none;
+}
+
+.hd-expiry-label {
+  position: absolute;
+  display: grid;
+  justify-items: end;
+  gap: 1px;
+  line-height: 1.1;
+  transform: translateX(-100%);
+}
+
+.hd-expiry-caption {
+  color: var(--chart-text);
+  font-size: 9px;
+}
+
+.hd-expiry-text {
+  color: var(--brand-accent-light);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Rise and fall stay green and red. */
+.hd:not(.au-showcase .hd) .hd-up line,
+.hd:not(.au-showcase .hd) .hd-down line {
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.hd:not(.au-showcase .hd) .hd-up line { stroke: var(--positive); }
+.hd:not(.au-showcase .hd) .hd-up rect { fill: var(--positive); }
+.hd:not(.au-showcase .hd) .hd-down line { stroke: var(--negative); }
+.hd:not(.au-showcase .hd) .hd-down rect { fill: var(--negative); }
+
+.hd:not(.au-showcase .hd) .hd-last {
+  stroke: var(--brand-accent-light);
+  stroke-dasharray: 3 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.hd-last-tag {
+  position: absolute;
+  right: 2px;
+  padding: 3px 4px;
+  border-radius: 3px;
+  background: var(--brand-accent-light);
+  transform: translateY(-50%);
+}
+
+.hd-last-text {
+  display: block;
+  color: var(--brand-primary);
+  font-size: 10px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.hd:not(.au-showcase .hd) .hd-quote {
+  position: absolute;
+  bottom: 34px;
+  left: 10px;
+  display: grid;
+  gap: 1px;
+  padding: 7px 10px;
+  border: 1px solid var(--chart-line);
+  border-radius: 8px;
+  background: var(--chart-panel);
+  color: var(--chart-text);
+}
+
+.hd:not(.au-showcase .hd) .hd-quote small {
+  font-size: 9px;
+}
+
+.hd:not(.au-showcase .hd) .hd-quote strong {
+  color: var(--text-on-brand);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hd:not(.au-showcase .hd) .hd-quote em {
+  color: var(--positive);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+/* ---------- Trade panel ---------- */
+.hd:not(.au-showcase .hd) .hd-trade {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border-left: 1px solid var(--border-primary);
+  background: var(--surface-primary);
+}
+
+.hd:not(.au-showcase .hd) .hd-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin-bottom: 4px;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--background-tertiary);
+}
+
+.hd:not(.au-showcase .hd) .hd-tabs span {
+  padding: 5px 0;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.hd:not(.au-showcase .hd) .hd-tabs span.is-active {
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-sm);
+  color: var(--brand-primary);
+}
+
+.hd:not(.au-showcase .hd) .hd-trade label {
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.hd:not(.au-showcase .hd) .hd-stepper {
+  display: grid;
+  grid-template-columns: 1fr 24px 24px;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 4px 4px 9px;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  background: var(--background-secondary);
+}
+
+.hd:not(.au-showcase .hd) .hd-stepper span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--brand-primary);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.hd:not(.au-showcase .hd) .hd-stepper i {
+  display: grid;
+  place-items: center;
+  height: 24px;
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  background: var(--surface-primary);
+  color: var(--text-secondary);
+}
+
+.hd:not(.au-showcase .hd) .hd-payout {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 8px 9px;
+  border-radius: 8px;
+  background: var(--positive-soft);
+}
+
+.hd:not(.au-showcase .hd) .hd-payout strong {
+  color: var(--positive-strong);
+  font-size: 17px;
+}
+
+.hd:not(.au-showcase .hd) .hd-payout span {
+  color: var(--brand-primary);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.hd:not(.au-showcase .hd) .hd-buy,
+.hd:not(.au-showcase .hd) .hd-sell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--text-on-brand);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.hd:not(.au-showcase .hd) .hd-buy {
+  margin-top: 4px;
+  background: var(--positive);
+}
+
+.hd:not(.au-showcase .hd) .hd-sell {
+  background: var(--negative);
+}
+
+/* ---------- Tickers ---------- */
+.hd:not(.au-showcase .hd) .hd-tickers {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  border-top: 1px solid var(--border-primary);
+  background: var(--surface-primary);
+}
+
+.hd:not(.au-showcase .hd) .hd-ticker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+  padding: 9px 10px;
+  border-right: 1px solid var(--border-primary);
+}
+
+.hd:not(.au-showcase .hd) .hd-ticker:last-child {
+  border-right: 0;
+}
+
+.hd:not(.au-showcase .hd) .hd-ticker > div {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.hd:not(.au-showcase .hd) .hd-ticker small {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hd:not(.au-showcase .hd) .hd-ticker strong {
+  color: var(--brand-primary);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.hd:not(.au-showcase .hd) .hd-ticker em {
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.hd:not(.au-showcase .hd) .is-up { color: var(--positive); }
+.hd:not(.au-showcase .hd) .is-down { color: var(--negative); }
+
+.hd:not(.au-showcase .hd) .hd-ticker svg {
+  width: 44px;
+  height: 22px;
+}
+
+.hd:not(.au-showcase .hd) .hd-ticker polyline {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+/* ---------- Adapting to the card's own width ---------- */
+@container (max-width: 900px) {
+  .hd:not(.au-showcase .hd) .hd-tickers { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hd:not(.au-showcase .hd) .hd-ticker:nth-child(3) { border-right: 0; }
+  .hd:not(.au-showcase .hd) .hd-ticker:nth-child(-n + 3) { border-bottom: 1px solid var(--border-primary); }
+}
+
+@container (max-width: 760px) {
+  .hd:not(.au-showcase .hd) .hd-body { grid-template-columns: 46px minmax(0, 1fr) 150px; }
+  .hd:not(.au-showcase .hd) .hd-menu { align-items: center; padding: 10px 4px; }
+  .hd:not(.au-showcase .hd) .hd-menu span { justify-content: center; width: 34px; padding: 8px 0; font-size: 0; gap: 0; }
+}
+
+/* Narrow cards: smaller price labels so they fit the right gutter. */
+@container (max-width: 640px) {
+  .hd-axis,
+  .hd-last-text { font-size: 8px; }
+  .hd-axis-y { right: 3px; }
+}
+
+@container (max-width: 560px) {
+  .hd:not(.au-showcase .hd) .hd-body { grid-template-columns: minmax(0, 1fr); }
+  .hd:not(.au-showcase .hd) .hd-menu,
+.hd:not(.au-showcase .hd) .hd-tools,
+.hd:not(.au-showcase .hd) .hd-time,
+.hd:not(.au-showcase .hd) .hd-icon,
+.hd:not(.au-showcase .hd) .hd-topup,
+.hd:not(.au-showcase .hd) .hd-quote { display: none; }
+  .hd:not(.au-showcase .hd) .hd-chart { min-height: 210px; }
+  .hd:not(.au-showcase .hd) .hd-trade {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--border-primary);
+    border-left: 0;
+  }
+  .hd:not(.au-showcase .hd) .hd-tabs,
+.hd:not(.au-showcase .hd) .hd-trade label,
+.hd:not(.au-showcase .hd) .hd-stepper,
+.hd:not(.au-showcase .hd) .hd-payout { display: none; }
+  .hd:not(.au-showcase .hd) .hd-buy { margin-top: 0; }
+  .hd:not(.au-showcase .hd) .hd-tickers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hd:not(.au-showcase .hd) .hd-ticker:nth-child(n) { border-right: 1px solid var(--border-primary); border-bottom: 1px solid var(--border-primary); }
+  .hd:not(.au-showcase .hd) .hd-ticker:nth-child(2n) { border-right: 0; }
+  .hd:not(.au-showcase .hd) .hd-ticker:nth-child(n + 5) { border-bottom: 0; }
+}

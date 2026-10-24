@@ -1,0 +1,159 @@
+/* Delete-account page: a single white card inside the app shell.
+   Colours come from src/styles/brand.css. */
+
+.auth-page {
+  box-sizing: border-box;
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  padding: 40px 16px 48px;
+  font-family: "Noto Sans", Arial, sans-serif;
+  color: var(--text-primary);
+  background: var(--background-primary);
+}
+
+.auth-page *,
+.auth-page *::before,
+.auth-page *::after {
+  box-sizing: border-box;
+}
+
+.auth-page .auth-card {
+  width: min(100%, 460px);
+  padding: 34px 32px;
+  border: 1px solid var(--border-primary);
+  border-radius: 20px;
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.auth-approved-logo {
+  display: block;
+  width: auto;
+  height: 96px;
+  margin: 0 auto 18px;
+}
+
+.auth-page .auth-card h2 {
+  margin: 0 0 8px;
+  color: var(--brand-primary);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.auth-subtitle {
+  margin: 0 0 24px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.auth-subtitle a {
+  color: var(--brand-secondary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-subtitle a:hover {
+  color: var(--brand-primary);
+  text-decoration: underline;
+}
+
+.auth-page .auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: start;
+}
+
+.auth-page .auth-form label {
+  color: var(--brand-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.auth-page .auth-form input {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px;
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  font: 500 15px "Noto Sans", Arial, sans-serif;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-page .auth-form input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.auth-page .auth-form input:hover {
+  border-color: var(--border-strong);
+}
+
+.auth-page .auth-form input:focus {
+  border-color: var(--focus-ring);
+  box-shadow: 0 0 0 4px var(--focus-ring-soft);
+}
+
+/* Deleting the account is destructive, so the button uses the fall red. */
+.auth-page .auth-form button {
+  margin-top: 12px;
+  height: 52px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--negative);
+  color: var(--text-on-brand);
+  font: 800 14px "Noto Sans", Arial, sans-serif;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.auth-page .auth-form button:hover:not(:disabled) {
+  background: var(--negative-strong);
+  transform: translateY(-1px);
+}
+
+.auth-page .auth-form button:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.auth-page .auth-form button:focus-visible,
+.auth-subtitle a:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.auth-error {
+  padding: 12px 14px;
+  border: 1px solid var(--negative);
+  border-radius: 12px;
+  background: var(--negative-soft);
+  color: var(--negative-strong);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+@media (max-width: 560px) {
+  .auth-page .auth-card {
+    padding: 26px 18px;
+  }
+
+  .auth-approved-logo {
+    height: 80px;
+  }
+
+  .auth-page .auth-card h2 {
+    font-size: 24px;
+  }
+}
