@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, BadgeCheck, BarChart3, BookOpen, CandlestickChart, ChartLine, CircleCheck, Clock3, CreditCard,
-  Fingerprint, History, Layers, LoaderCircle, Lock, Mail, Menu, MonitorSmartphone, PlayCircle, Rocket,
-  ShieldCheck, SlidersHorizontal, Smartphone, UserRound, Wallet, X,
+  AppWindow, ArrowRight, BookOpen, Camera, ChartColumn, ChartColumnIncreasing, ChartLine, ChartNoAxesColumn,
+  CircleCheck, CircleDot, Clock3, CreditCard, LoaderCircle, Lock, Mail, Menu, Monitor, Network, Play, Rocket,
+  Shield, ShieldCheck, ShieldHalf, Smartphone, SquareActivity, UserRound, Wallet, X,
 } from "lucide-react";
 
 import Logo from "../components/branding/Logo";
@@ -25,23 +25,24 @@ const NAV = [
 ];
 
 /* Figures below match the platform: 116 OTC assets in five markets, 22
-   indicators, 14 timeframes from 5 seconds to 1 day. */
+   indicators, 14 timeframes from 5 seconds to 1 day. Icons follow the
+   approved reference design. */
 const HERO_BADGES = [
-  { icon: <Layers size={18} />, label: "100+ trading assets" },
-  { icon: <CandlestickChart size={18} />, label: "Advanced charting" },
-  { icon: <PlayCircle size={18} />, label: "Free demo account" },
+  { icon: <Wallet size={18} />, label: "100+ trading assets" },
+  { icon: <ChartLine size={18} />, label: "Advanced charting" },
+  { icon: <AppWindow size={18} />, label: "Free demo account" },
   { icon: <ShieldCheck size={18} />, label: "Secure & reliable" },
 ];
 
 const WHY = [
-  { icon: <BarChart3 size={20} />, title: "Advanced charts", text: "Candlestick, line and bar charts with 22 technical indicators." },
-  { icon: <Layers size={20} />, title: "Wide asset selection", text: "Trade currencies, crypto, commodities, indices and stocks." },
-  { icon: <Clock3 size={20} />, title: "Real-time prices", text: "Live prices and instant trade execution, shown in Kenya time." },
-  { icon: <SlidersHorizontal size={20} />, title: "Customisable workspace", text: "Pick your chart type, background, timeframe and indicators." },
-  { icon: <PlayCircle size={20} />, title: "Demo trading", text: "Practise with virtual funds, risk-free." },
-  { icon: <History size={20} />, title: "Trade history", text: "Review every trade with its open price, result and payout." },
-  { icon: <MonitorSmartphone size={20} />, title: "Multi-device access", text: "The same account in the browser on desktop, tablet and phone." },
-  { icon: <Wallet size={20} />, title: "M-Pesa payments", text: "Deposit in KES with M-Pesa and withdraw back to your phone." },
+  { icon: <ChartColumn size={23} />, title: "Advanced charts", text: "Candlestick, line and bar charts with 22 technical indicators." },
+  { icon: <Network size={23} />, title: "Wide asset selection", text: "Trade currencies, crypto, commodities, indices and stocks." },
+  { icon: <CircleDot size={23} />, title: "Real-time prices", text: "Live prices and instant trade execution, shown in Kenya time." },
+  { icon: <AppWindow size={23} />, title: "Customisable workspace", text: "Pick your chart type, background, timeframe and indicators." },
+  { icon: <Camera size={23} />, title: "Demo trading", text: "Practise with virtual funds, risk-free." },
+  { icon: <SquareActivity size={23} />, title: "Trade history", text: "Review every trade with its open price, result and payout." },
+  { icon: <Monitor size={23} />, title: "Multi-device access", text: "The same account in the browser on desktop, tablet and phone." },
+  { icon: <Shield size={23} fill="currentColor" />, title: "Secure account management", text: "Email and identity verification, and full control of your account." },
 ];
 
 const PLATFORM_POINTS = [
@@ -63,28 +64,28 @@ const MARKET_TABS = [
 
 const STEPS = [
   { icon: <UserRound size={22} />, title: "Create your account", text: "Sign up in minutes and confirm your email address." },
-  { icon: <BarChart3 size={22} />, title: "Explore the demo platform", text: "Practise with virtual funds and learn the platform." },
+  { icon: <ChartNoAxesColumn size={22} />, title: "Explore the demo platform", text: "Practise with virtual funds and learn the platform." },
   { icon: <Rocket size={22} />, title: "Choose how you want to trade", text: "Stay on demo, or fund a real account with M-Pesa." },
 ];
 
 const SECURITY = [
-  { icon: <Lock size={20} />, title: "Encrypted connection", text: "Everything you send to NeuroOption travels over HTTPS." },
-  { icon: <BadgeCheck size={20} />, title: "Account verification", text: "Email confirmation and identity (KYC) checks protect your account." },
-  { icon: <Fingerprint size={20} />, title: "Protected sign-in", text: "Passwords are stored hashed, and sign-in has bot protection." },
-  { icon: <CreditCard size={20} />, title: "Secure transactions", text: "You approve deposits with your own M-Pesa PIN; withdrawals are reviewed." },
+  { icon: <Lock size={25} />, title: "Secure data encryption", text: "Your data travels over HTTPS and passwords are stored hashed." },
+  { icon: <ShieldCheck size={25} />, title: "Account verification", text: "Email and identity (KYC) checks keep your account safe.", tone: "green" },
+  { icon: <Smartphone size={25} />, title: "Approve on your phone", text: "M-Pesa deposits are confirmed with your PIN on your own phone." },
+  { icon: <CreditCard size={25} />, title: "Secure transactions", text: "Every withdrawal is reviewed before it is paid out." },
 ];
 
 const LEARN = [
-  { icon: <BookOpen size={20} />, title: "Trading basics", text: "How fixed-time trades, payouts and expiry work.", to: "/help" },
-  { icon: <ShieldCheck size={20} />, title: "Risk management", text: "Understand the risks before you trade real money.", to: "/legal/risk-disclosure" },
-  { icon: <PlayCircle size={20} />, title: "Platform guides", text: "Step-by-step help with the trading screen.", to: "/help" },
-  { icon: <ChartLine size={20} />, title: "Market overview", text: "Browse every market with live prices and payouts.", to: "/markets" },
+  { icon: <BookOpen size={25} />, title: "Trading basics", text: "How fixed-time trades, payouts and expiry work.", to: "/help" },
+  { icon: <ShieldHalf size={25} />, title: "Risk management", text: "Understand the risks before you trade real money.", to: "/legal/risk-disclosure" },
+  { icon: <Play size={25} />, title: "Platform guides", text: "Step-by-step help with the trading screen.", to: "/help" },
+  { icon: <ChartColumnIncreasing size={25} />, title: "Market overview", text: "Browse every market with live prices and payouts.", to: "/markets" },
 ];
 
 const STATS = [
-  { icon: <Layers size={22} />, value: "100+", label: "Trading assets" },
-  { icon: <Clock3 size={22} />, value: "24/7", label: "OTC markets" },
-  { icon: <Smartphone size={22} />, value: "M-Pesa", label: "Deposits & withdrawals" },
+  { icon: <Rocket size={22} />, value: "100+", label: "Trading assets" },
+  { icon: <Clock3 size={22} />, value: "24/7", label: "OTC markets", tone: "green" },
+  { icon: <Smartphone size={22} />, value: "M-Pesa", label: "Deposits & withdrawals", tone: "green" },
 ];
 
 /** A small deterministic sparkline for an asset, so it looks the same on every visit. */
@@ -102,11 +103,13 @@ function sparkPath(seed: string, up: boolean) {
   return points.map((p, i) => `${i === 0 ? "M" : "L"}${(i / 23) * 100},${p.toFixed(1)}`).join(" ");
 }
 
-function Spark({ quote }: { quote: MarketQuote }) {
+function Spark({ quote, area = false }: { quote: MarketQuote; area?: boolean }) {
   const up = quote.changePercent >= 0;
+  const line = sparkPath(quote.symbol, up);
   return (
     <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" className={`ho-spark ${up ? "is-up" : "is-down"}`}>
-      <path d={sparkPath(quote.symbol, up)} />
+      {area && <path className="ho-spark-area" d={`${line} L100,100 L0,100 Z`} />}
+      <path d={line} />
     </svg>
   );
 }
@@ -204,13 +207,11 @@ function MarketsSection() {
   const [tab, setTab] = useState("All");
   const items = useMemo(() => {
     if (tab !== "All") return quotes.filter((q) => q.category === tab).slice(0, 6);
-    // One or two from each market so "All" shows the range.
-    const seen = new Map<string, number>();
-    return quotes.filter((q) => {
-      const count = seen.get(q.category) ?? 0;
-      seen.set(q.category, count + 1);
-      return count < 2;
-    }).slice(0, 6);
+    // One from each market, then another currency pair, so "All" shows the range.
+    const wanted = ["EUR/USD OTC", "Gold OTC", "US100 OTC", "BTC/USD OTC", "Tesla OTC", "GBP/JPY OTC"];
+    const picked = wanted.map((s) => quotes.find((q) => q.symbol === s)).filter((q): q is MarketQuote => Boolean(q));
+    const rest = quotes.filter((q) => !picked.includes(q));
+    return [...picked, ...rest].slice(0, 6);
   }, [quotes, tab]);
   return (
     <section className="ho-section" id="markets">
@@ -232,12 +233,12 @@ function MarketsSection() {
           {items.map((q) => (
             <Link key={q.symbol} to={`/markets?category=${encodeURIComponent(q.category)}`} className="ho-market-card">
               <span className="ho-market-head">
-                <AssetIcon symbol={q.symbol} size={30} />
+                <AssetIcon symbol={q.symbol} size={38} />
                 <span><b>{q.symbol.replace(/\s*OTC$/i, "")}</b><small>{q.category}</small></span>
               </span>
               <span className="ho-market-foot">
                 <span><b>{formatPrice(q)}</b><em className={q.changePercent >= 0 ? "is-up" : "is-down"}>{formatChange(q.changePercent)}</em></span>
-                <Spark quote={q} />
+                <Spark quote={q} area />
               </span>
             </Link>
           ))}
@@ -460,8 +461,7 @@ export default function LandingPage() {
             <ol className="ho-steps">
               {STEPS.map((s, i) => (
                 <li key={s.title} className="ho-step">
-                  <span className="ho-step-num">{i + 1}</span>
-                  <div><h3>{s.title}</h3><p>{s.text}</p></div>
+                  <div><span className="ho-step-num">{i + 1}</span><h3>{s.title}</h3><p>{s.text}</p></div>
                   <span className="ho-step-icon" aria-hidden="true">{s.icon}</span>
                 </li>
               ))}
@@ -483,7 +483,7 @@ export default function LandingPage() {
               <div className="ho-security-grid">
                 {SECURITY.map((item) => (
                   <article key={item.title} className="ho-card ho-card-row">
-                    <span className="ho-icon" aria-hidden="true">{item.icon}</span>
+                    <span className={`ho-icon ho-icon-square ${item.tone === "green" ? "is-green" : ""}`} aria-hidden="true">{item.icon}</span>
                     <div><h3>{item.title}</h3><p>{item.text}</p></div>
                   </article>
                 ))}
@@ -503,7 +503,7 @@ export default function LandingPage() {
             <div className="ho-learn">
               {LEARN.map((item) => (
                 <Link key={item.title} to={item.to} className="ho-card ho-card-row">
-                  <span className="ho-icon" aria-hidden="true">{item.icon}</span>
+                  <span className="ho-icon ho-icon-square" aria-hidden="true">{item.icon}</span>
                   <div><h3>{item.title}</h3><p>{item.text}</p></div>
                 </Link>
               ))}
@@ -524,7 +524,7 @@ export default function LandingPage() {
           </div>
           <ul className="ho-stats">
             {STATS.map((s) => (
-              <li key={s.label}><span className="ho-icon" aria-hidden="true">{s.icon}</span><span><b>{s.value}</b>{s.label}</span></li>
+              <li key={s.label}><span className={`ho-icon ${s.tone === "green" ? "is-green" : ""}`} aria-hidden="true">{s.icon}</span><span><b>{s.value}</b>{s.label}</span></li>
             ))}
           </ul>
         </section>
