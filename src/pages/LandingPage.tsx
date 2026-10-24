@@ -9,6 +9,7 @@ import {
 
 import Logo from "../components/branding/Logo";
 import AssetIcon from "../components/markets/AssetIcon";
+import PaymentLogo, { type PaymentBrand } from "../components/finance/PaymentLogo";
 import { formatChange, formatPrice, useQuotes } from "../components/markets/useQuotes";
 import { api } from "../api/api";
 import type { MarketQuote } from "../api";
@@ -73,6 +74,18 @@ const SECURITY = [
   { icon: <ShieldCheck size={25} />, title: "Account verification", text: "Email and identity (KYC) checks keep your account safe.", tone: "green" },
   { icon: <Smartphone size={25} />, title: "Approve on your phone", text: "M-Pesa deposits are confirmed with your PIN on your own phone." },
   { icon: <CreditCard size={25} />, title: "Secure transactions", text: "Every withdrawal is reviewed before it is paid out." },
+];
+
+/* Only M-Pesa is live; card payments are not built yet. */
+const PAYMENTS: { brand: PaymentBrand; name: string; text: string; live: boolean }[] = [
+  {
+    brand: "mpesa",
+    name: "M-Pesa",
+    text: "Deposit in KES straight from your phone: enter your number, then confirm the prompt with your M-Pesa PIN. Withdrawals are paid back to your M-Pesa.",
+    live: true,
+  },
+  { brand: "visa", name: "Visa", text: "Deposits with Visa debit and credit cards are on the way.", live: false },
+  { brand: "mastercard", name: "Mastercard", text: "Deposits with Mastercard debit and credit cards are on the way.", live: false },
 ];
 
 const LEARN = [
@@ -471,9 +484,15 @@ export default function LandingPage() {
 
         <section className="ho-section">
           <div className="ho-container ho-security">
-            <div className="ho-shield" aria-hidden="true">
-              <div className="ho-shield-badge"><ShieldCheck size={96} strokeWidth={1.4} /></div>
-            </div>
+            <img
+              className="ho-shield"
+              src="/landing/security-shield.webp"
+              alt=""
+              width={600}
+              height={424}
+              loading="lazy"
+              decoding="async"
+            />
             <div>
               <SectionHead
                 center={false}
@@ -492,7 +511,22 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="ho-section ho-section-tint" id="learn">
+        <section className="ho-section ho-section-tint" id="payments">
+          <div className="ho-container">
+            <SectionHead title="Payment options" sub="Fund your account and withdraw your money with methods you already use." />
+            <div className="ho-pay">
+              {PAYMENTS.map((p) => (
+                <article key={p.brand} className="ho-card ho-pay-card">
+                  <div className="ho-pay-logo"><PaymentLogo brand={p.brand} label={p.name} /></div>
+                  <h3>{p.name} <span className={`ho-pay-status ${p.live ? "is-live" : ""}`}>{p.live ? "Available" : "Coming soon"}</span></h3>
+                  <p>{p.text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="ho-section" id="learn">
           <div className="ho-container">
             <SectionHead
               center={false}
