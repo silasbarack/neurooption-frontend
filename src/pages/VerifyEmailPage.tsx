@@ -44,7 +44,7 @@ export default function VerifyEmailPage() {
         <>
           <h1>We couldn't verify your email</h1>
           <p className="da-warn" role="alert"><CircleAlert size={16} aria-hidden="true" /> {message}</p>
-          <p>Sign in and use <strong>Resend verification email</strong> on My Account to get a new link.</p>
+          <p>Contact <strong>Support</strong> from your account to get a new link.</p>
         </>
       )}
       <div className="da-done-actions">
