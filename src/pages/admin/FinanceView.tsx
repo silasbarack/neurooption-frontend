@@ -61,7 +61,7 @@ export default function FinanceView() {
         </div>
         {data && <Pager page={data.page} pages={data.pages} total={data.total} onPage={setPage} />}
       </Panel>
-      <p className="nx-footnote"><ShieldCheck size={15} aria-hidden="true" /> Read-only. Real-money payouts stay behind the platform's launch lock; balances cannot be changed from the console.</p>
+      <p className="nx-footnote"><ShieldCheck size={15} aria-hidden="true" /> Read-only. Withdrawals are paid manually after review; balances cannot be changed from the console.</p>
     </>
   );
 }
