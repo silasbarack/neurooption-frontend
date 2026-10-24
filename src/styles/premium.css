@@ -1,0 +1,320 @@
+/* NeuroOption premium layer.
+   Loaded last from main.tsx. It refines the brand tokens (brand.css) and
+   lifts shared components and key pages to a "private bank" finish:
+   porcelain surfaces, deep midnight navy, champagne-gold detailing, soft
+   layered depth. The official logo is never recoloured and always sits on
+   a light surface. Typography stays "Noto Sans", Arial, sans-serif.
+   Rules use an `html` prefix so they win over page styles loaded later
+   without !important. No markup or behaviour depends on this file. */
+
+:root {
+  /* Neutrals: a cooler porcelain and a deeper ink. Brand hues are unchanged. */
+  --background-primary: #FFFFFF;
+  --background-secondary: #F4F7FB;
+  --background-tertiary: #E9EFF6;
+  --surface-primary: #FFFFFF;
+  --surface-secondary: #F7F9FC;
+  --surface-hover: #F0F5FA;
+  --text-primary: #0E1F38;
+  --text-secondary: #4D5F76;
+  --text-muted: #72849A;
+  --border-primary: #E1E8F0;
+  --border-strong: #C9D6E3;
+
+  /* Champagne gold: detailing only (eyebrows, hairlines, highlights). */
+  --gold: #B08D57;
+  --gold-strong: #8F6E3D;
+  --gold-soft: rgba(176, 141, 87, 0.12);
+  --gold-hairline: linear-gradient(90deg, rgba(176, 141, 87, 0), rgba(201, 169, 110, 0.9), rgba(176, 141, 87, 0));
+
+  /* Midnight surfaces for hero bands and the balance card. */
+  --midnight: #071A33;
+  --midnight-2: #0B2A52;
+  --midnight-text: #EEF3FA;
+  --midnight-muted: rgba(214, 226, 242, 0.74);
+
+  --cta-gradient: linear-gradient(135deg, #0A2A55 0%, #0B4F86 52%, #0879AD 100%);
+  --brand-gradient: linear-gradient(135deg, #0A2A55 0%, #0879AD 60%, #17ADB4 100%);
+
+  --shadow-sm: 0 1px 2px rgba(10, 31, 61, 0.05), 0 2px 6px rgba(10, 31, 61, 0.04);
+  --shadow-md: 0 1px 2px rgba(10, 31, 61, 0.04), 0 12px 32px -14px rgba(10, 31, 61, 0.20);
+  --shadow-lg: 0 2px 6px rgba(10, 31, 61, 0.05), 0 30px 64px -26px rgba(10, 31, 61, 0.34);
+  --shadow-cta: 0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 12px 26px -12px rgba(10, 42, 85, 0.62);
+
+  --neo-radius: 16px;
+  --neo-radius-sm: 12px;
+  --neo-font: "Noto Sans", Arial, sans-serif;
+  --sans: "Noto Sans", Arial, sans-serif;
+  --heading: "Noto Sans", Arial, sans-serif;
+}
+
+html body {
+  font-family: "Noto Sans", Arial, sans-serif;
+  font-feature-settings: "tnum" 1;
+  background: var(--background-secondary);
+}
+
+html ::selection { background: rgba(23, 173, 180, 0.22); }
+
+/* ---------- Shared typography ---------- */
+html :is(.neo-eyebrow, .hp-eyebrow, .ac-eyebrow, .fin-eyebrow, .pg-eyebrow) {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gold-strong);
+  letter-spacing: 0.2em;
+}
+html :is(.neo-eyebrow, .hp-eyebrow, .ac-eyebrow, .fin-eyebrow, .pg-eyebrow)::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold), rgba(176, 141, 87, 0.2));
+}
+html :is(.ac-title, .soc-head h1, .fin-title, .hp-section h2, .au-hero h1) {
+  letter-spacing: -0.035em;
+}
+
+/* ---------- Buttons ---------- */
+html .neo-btn {
+  border-radius: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+html .neo-btn-primary,
+html .au-submit {
+  background: var(--cta-gradient);
+  background-size: 100% 100%;
+  box-shadow: var(--shadow-cta);
+  color: #fff;
+}
+html .neo-btn-primary:hover:not(:disabled),
+html .au-submit:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 16px 32px -14px rgba(10, 42, 85, 0.7);
+}
+html .neo-btn-outline {
+  border-color: var(--border-strong);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--brand-primary);
+}
+html .neo-btn-outline:hover {
+  border-color: var(--brand-secondary);
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-sm);
+}
+html .hp-btn { border-radius: 12px; letter-spacing: 0.01em; }
+
+/* ---------- Cards and surfaces ---------- */
+html .neo-card {
+  border: 1px solid var(--border-primary);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FCFDFE 100%);
+  box-shadow: var(--shadow-md);
+}
+html :is(.neo-card, .ac-tile, .soc-card, .hp-category-card, .hp-exp-card, .hp-market-card) {
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+html :is(.ac-tile, .soc-card, .hp-category-card, .hp-exp-card, .hp-market-card):hover {
+  border-color: rgba(8, 121, 173, 0.35);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+}
+html :is(.ac-tile-icon, .ac-progress-icon, .au-feature-icon, .soc-empty-icon) {
+  border-color: rgba(176, 141, 87, 0.28);
+  background: linear-gradient(145deg, #FFFFFF, #F3F7FB);
+  box-shadow: 0 1px 0 #fff inset, 0 6px 14px -8px rgba(10, 31, 61, 0.35);
+  color: var(--brand-secondary);
+}
+
+/* ---------- Inputs ---------- */
+html :is(.neo-input, .au-input, .fin-input) {
+  border-radius: 12px;
+  border-color: var(--border-primary);
+  background: #FBFCFE;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+html :is(.neo-input, .au-input, .fin-input):focus,
+html :is(.neo-input, .au-input, .fin-input):focus-within {
+  border-color: var(--brand-secondary);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(8, 121, 173, 0.12);
+}
+
+/* ---------- Tabs ---------- */
+html .neo-tabs {
+  border-radius: 14px;
+  background: var(--background-tertiary);
+  border-color: transparent;
+}
+html .neo-tabs button.is-active {
+  background: #fff;
+  color: var(--brand-primary);
+  box-shadow: 0 1px 2px rgba(10, 31, 61, 0.08), 0 6px 14px -8px rgba(10, 31, 61, 0.28);
+}
+
+/* ---------- App shell (signed-in pages) ---------- */
+html .neo-shell { background: radial-gradient(1100px 520px at 100% -10%, rgba(8, 121, 173, 0.07), transparent 65%), var(--background-secondary); }
+html .neo-topbar {
+  border-bottom: 1px solid rgba(10, 31, 61, 0.06);
+  background: rgba(255, 255, 255, 0.84);
+  -webkit-backdrop-filter: saturate(1.6) blur(18px);
+  backdrop-filter: saturate(1.6) blur(18px);
+  box-shadow: 0 10px 30px -24px rgba(10, 31, 61, 0.45);
+}
+html .neo-topnav a { font-weight: 600; letter-spacing: 0.005em; }
+html .neo-topnav a.is-active { color: var(--brand-primary); }
+html .neo-topnav a.is-active::after { height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--gold), var(--brand-accent)); }
+html .neo-balance-chip {
+  border: 1px solid rgba(176, 141, 87, 0.3);
+  border-radius: 12px;
+  background: linear-gradient(145deg, #FFFFFF, #F6F8FB);
+  box-shadow: 0 1px 0 #fff inset, var(--shadow-sm);
+}
+html .neo-avatar { box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(176, 141, 87, 0.55); }
+html .neo-bottomnav {
+  border-top: 1px solid rgba(10, 31, 61, 0.06);
+  background: rgba(255, 255, 255, 0.9);
+  -webkit-backdrop-filter: saturate(1.6) blur(18px);
+  backdrop-filter: saturate(1.6) blur(18px);
+}
+html .neo-drawer-panel { box-shadow: -30px 0 60px -30px rgba(10, 31, 61, 0.45); }
+
+/* ---------- Sign in / registration ---------- */
+html .au { background: radial-gradient(900px 500px at 90% 0%, rgba(8, 121, 173, 0.08), transparent 65%), radial-gradient(700px 400px at 0% 100%, rgba(176, 141, 87, 0.08), transparent 65%), var(--background-primary); }
+html .au-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border-primary);
+  border-radius: 22px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FCFDFE 100%);
+  box-shadow: var(--shadow-lg);
+}
+html .au-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 1px;
+  background: var(--gold-hairline);
+}
+html .au-submit { border-radius: 12px; }
+html .au-hero h1 { color: var(--brand-primary); }
+
+/* ---------- My account ---------- */
+html .ac-user,
+html .ac-wallet,
+html .ac-details,
+html .ac-progress { border-radius: 18px; }
+/* The balance reads like a premium card: midnight, gold hairline, white figures. */
+html .ac-wallet { overflow: hidden; border-color: rgba(176, 141, 87, 0.3); box-shadow: var(--shadow-lg); }
+html .ac-wallet .ac-switch { background: #F3F6FA; }
+html .ac-wallet .ac-balance {
+  position: relative;
+  color: var(--midnight-text);
+  background:
+    radial-gradient(420px 220px at 100% 0%, rgba(23, 173, 180, 0.25), transparent 70%),
+    radial-gradient(360px 200px at 0% 100%, rgba(176, 141, 87, 0.22), transparent 70%),
+    linear-gradient(150deg, #061630 0%, #0B2A52 100%);
+}
+html .ac-wallet .ac-balance::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 22px;
+  right: 22px;
+  height: 1px;
+  background: var(--gold-hairline);
+}
+html .ac-wallet .ac-balance-head { color: var(--midnight-muted); }
+html .ac-wallet .ac-balance-head button { color: var(--midnight-muted); }
+html .ac-wallet .ac-balance-head button:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+html .ac-wallet .ac-balance strong { color: #FFFFFF; }
+html .ac-wallet .ac-balance small,
+html .ac-wallet .ac-balance small span,
+html .ac-wallet .ac-demo-note { color: var(--midnight-muted); }
+html .ac-wallet .ac-actions .neo-btn-primary {
+  background: linear-gradient(135deg, #17ADB4 0%, #0879AD 60%, #0B4F86 100%);
+}
+html .ac-wallet .ac-actions .neo-btn-outline {
+  border-color: rgba(220, 232, 246, 0.35);
+  background: rgba(255, 255, 255, 0.06);
+  color: #FFFFFF;
+}
+html .ac-wallet .ac-actions .neo-btn-outline:hover { border-color: rgba(227, 198, 144, 0.75); background: rgba(255, 255, 255, 0.1); }
+html .ac-title { color: var(--brand-primary); }
+html .ac-avatar-verified { border-color: #fff; }
+
+/* ---------- Trading workspace ---------- */
+html .nt-premium {
+  --nt-bg: #EEF2F8;
+  --nt-border: #DFE6EF;
+  --nt-border-soft: #E6ECF3;
+  background: radial-gradient(900px 400px at 100% -20%, rgba(8, 121, 173, 0.08), transparent 60%), #EEF2F8;
+}
+html .nt-premium .nt-header {
+  background: rgba(255, 255, 255, 0.86);
+  -webkit-backdrop-filter: saturate(1.6) blur(18px);
+  backdrop-filter: saturate(1.6) blur(18px);
+  border-bottom: 1px solid rgba(10, 31, 61, 0.06);
+  box-shadow: 0 10px 30px -24px rgba(10, 31, 61, 0.5);
+}
+html .nt-premium :is(.nt-sidebar, .nt-trade-panel, .nt-main-chart, .nt-quick-menu) {
+  border-radius: 18px;
+  border-color: var(--nt-border);
+  box-shadow: var(--shadow-md);
+}
+html .nt-premium .nt-account-bar {
+  border-color: rgba(176, 141, 87, 0.32);
+  background: linear-gradient(145deg, #FFFFFF, #F6F8FB);
+  box-shadow: 0 1px 0 #fff inset, var(--shadow-sm);
+}
+html .nt-premium .nt-buy,
+html .nt-premium .nt-sell {
+  border-radius: 14px;
+  letter-spacing: 0.06em;
+}
+html .nt-premium .nt-buy {
+  background: linear-gradient(180deg, #19B06A 0%, #0B8048 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 12px 24px -14px rgba(11, 128, 72, 0.85);
+}
+html .nt-premium .nt-sell {
+  background: linear-gradient(180deg, #E5484D 0%, #B92B2B 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.22) inset, 0 12px 24px -14px rgba(185, 43, 43, 0.85);
+}
+html .nt-premium .nt-white-payout {
+  border-color: rgba(15, 157, 88, 0.22);
+  background: linear-gradient(145deg, rgba(15, 157, 88, 0.08), rgba(15, 157, 88, 0.02));
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  html :is(.ac-tile, .soc-card, .hp-category-card, .hp-exp-card, .hp-market-card):hover { transform: none; }
+}
+
+
+
+/* ---------- Finance ---------- */
+html .fin-real {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(176, 141, 87, 0.35);
+  border-radius: 18px;
+  color: var(--midnight-text);
+  background:
+    radial-gradient(260px 140px at 100% 0%, rgba(23, 173, 180, 0.28), transparent 70%),
+    linear-gradient(150deg, #061630 0%, #0B2A52 100%);
+  box-shadow: var(--shadow-lg);
+}
+html .fin-real::before { content: ""; position: absolute; top: 0; left: 16px; right: 16px; height: 1px; background: var(--gold-hairline); }
+html .fin-real small { color: var(--midnight-muted); }
+html .fin-real strong, html .fin-real b { color: #FFFFFF; }
+html :is(.fin-card, .fin-method) { border-radius: 18px; box-shadow: var(--shadow-md); }
+html .fin-method:not(:disabled):hover { border-color: rgba(8, 121, 173, 0.35); box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+
+/* ---------- Trading workspace detail ---------- */
+html .nt-premium .nt-trade-panel { background: linear-gradient(180deg, #FFFFFF 0%, #FAFCFE 100%); }
+html .nt-premium .nt-sidebar a.is-active,
+html .nt-premium .nt-sidebar button.is-active { box-shadow: inset 0 0 0 1px rgba(8, 121, 173, 0.25); }

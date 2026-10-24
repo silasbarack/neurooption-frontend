@@ -1,0 +1,372 @@
+/* NeuroOption design system: white surfaces, navy and turquoise accents, Noto Sans.
+   Loaded once from main.tsx; every page builds on these tokens. */
+
+:root {
+  /* Mapped onto the brand tokens in brand.css. */
+  --neo-bg: var(--background-primary);
+  --neo-bg-2: var(--background-secondary);
+  --neo-panel: var(--surface-primary);
+  --neo-panel-2: var(--surface-primary);
+  --neo-panel-3: var(--background-tertiary);
+  --neo-line: var(--border-primary);
+  --neo-line-strong: var(--border-strong);
+  --neo-text: var(--text-primary);
+  --neo-muted: var(--text-secondary);
+  --neo-faint: var(--text-muted);
+  --neo-accent: var(--brand-secondary);
+  --neo-accent-2: var(--brand-accent);
+  --neo-accent-ink: var(--text-on-brand);
+  --neo-accent-soft: var(--brand-soft);
+  --neo-green: var(--positive);
+  --neo-green-soft: var(--positive-soft);
+  --neo-red: var(--negative);
+  --neo-red-soft: var(--negative-soft);
+  --neo-blue: var(--brand-secondary);
+  --neo-violet: #6D5BD0;
+  --neo-cyan: var(--brand-accent);
+  --neo-light: var(--background-secondary);
+  --neo-light-2: var(--background-tertiary);
+  --neo-ink: var(--brand-primary);
+  --neo-ink-muted: var(--text-secondary);
+  --neo-radius: 14px;
+  --neo-radius-sm: 10px;
+  --neo-shadow: var(--shadow-lg);
+  --neo-font: "Noto Sans", Arial, sans-serif;
+  --neo-bottom-nav: 64px;
+
+  color-scheme: light;
+}
+
+html,
+body {
+  background: var(--neo-bg);
+}
+
+body {
+  margin: 0;
+  color: var(--neo-text);
+  font-family: var(--neo-font);
+  font-size: 16px;
+  /* Unitless, so smaller text doesn't inherit the old root's 26px lines. */
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+
+h1,
+h2,
+h3 {
+  color: inherit;
+  letter-spacing: normal;
+}
+
+#root {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border: 0;
+  text-align: left;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* ---------- Buttons ---------- */
+.neo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: var(--neo-radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+}
+
+.neo-btn:active {
+  transform: translateY(1px);
+}
+
+.neo-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.neo-btn-primary {
+  background: var(--cta-solid);
+  background: var(--cta-gradient);
+  color: var(--text-on-brand);
+  box-shadow: 0 6px 18px rgba(8, 121, 173, 0.22);
+}
+
+.neo-btn-primary:hover {
+  box-shadow: 0 8px 24px rgba(8, 121, 173, 0.32);
+}
+
+.neo-btn-outline {
+  background: var(--surface-primary);
+  border-color: var(--neo-line-strong);
+  color: var(--neo-text);
+}
+
+.neo-btn-outline:hover {
+  border-color: var(--brand-secondary);
+  background: var(--brand-soft);
+}
+
+.neo-btn-ghost {
+  background: transparent;
+  color: var(--neo-muted);
+}
+
+.neo-btn-ghost:hover {
+  color: var(--neo-text);
+  background: var(--surface-hover);
+}
+
+.neo-btn-green {
+  background: var(--positive);
+  color: #fff;
+}
+
+.neo-btn-red {
+  background: var(--negative);
+  color: #fff;
+}
+
+.neo-btn-lg {
+  min-height: 50px;
+  padding: 0 24px;
+  font-size: 15px;
+}
+
+.neo-btn-sm {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.neo-btn-block {
+  width: 100%;
+}
+
+.neo-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--neo-line);
+  border-radius: 10px;
+  background: var(--neo-panel);
+  color: var(--neo-text);
+  cursor: pointer;
+}
+
+.neo-icon-btn:hover {
+  border-color: var(--neo-line-strong);
+}
+
+/* ---------- Surfaces ---------- */
+.neo-card {
+  background: var(--surface-primary);
+  border: 1px solid var(--neo-line);
+  border-radius: var(--neo-radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.neo-eyebrow {
+  margin: 0 0 10px;
+  color: var(--neo-accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.neo-accent-text {
+  color: var(--neo-accent);
+}
+
+.neo-up {
+  color: var(--neo-green);
+}
+
+.neo-down {
+  color: var(--neo-red);
+}
+
+/* ---------- Segmented tabs ---------- */
+.neo-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  overflow-x: auto;
+  border: 1px solid var(--neo-line);
+  border-radius: 12px;
+  background: var(--neo-panel);
+  scrollbar-width: none;
+}
+
+.neo-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.neo-tabs button {
+  flex: 1 0 auto;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--neo-muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.neo-tabs button:hover {
+  color: var(--neo-text);
+}
+
+.neo-tabs button.is-active {
+  background: var(--neo-accent-soft);
+  color: var(--neo-accent);
+  box-shadow: inset 0 0 0 1px rgba(8, 121, 173, 0.3);
+}
+
+/* ---------- Inputs ---------- */
+.neo-field {
+  display: grid;
+  gap: 7px;
+}
+
+.neo-field > span {
+  color: var(--neo-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.neo-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--neo-line-strong);
+  border-radius: var(--neo-radius-sm);
+  background: var(--surface-primary);
+  color: var(--neo-text);
+  font-size: 15px;
+  outline: none;
+}
+
+.neo-input:focus {
+  border-color: var(--neo-accent);
+  box-shadow: 0 0 0 3px var(--focus-ring-soft);
+}
+
+.neo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.neo-badge-green {
+  background: var(--neo-green-soft);
+  color: var(--neo-green);
+}
+
+.neo-badge-accent {
+  background: var(--neo-accent-soft);
+  color: var(--neo-accent);
+}
+
+.neo-badge-muted {
+  background: var(--background-tertiary);
+  color: var(--neo-muted);
+}
+
+.neo-badge-red {
+  background: var(--neo-red-soft);
+  color: var(--neo-red);
+}
+
+.neo-skeleton {
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--background-secondary), var(--background-tertiary), var(--background-secondary));
+  background-size: 200% 100%;
+  animation: neo-shimmer 1.3s linear infinite;
+}
+
+@keyframes neo-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* The official logo sits directly on white; it is sized by height and keeps
+   its own aspect ratio. */
+.neurooption-logo-picture {
+  display: contents;
+}
+
+.neurooption-logo {
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.neo-brand {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  text-decoration: none;
+  line-height: 0;
+}
+
+.neo-brand .neurooption-logo {
+  display: block;
+  width: auto;
+  height: 46px;
+}
+
+.neo-brand-sm {
+  padding: 0;
+}
+
+.neo-brand-sm .neurooption-logo {
+  height: 40px;
+}
+
+.neo-brand-lg .neurooption-logo {
+  height: 58px;
+}
+
+.neo-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neo-skeleton {
+    animation: none;
+  }
+}

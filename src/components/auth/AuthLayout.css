@@ -1,0 +1,1282 @@
+/* Auth pages (sign in, register, password recovery): white, light brand
+   theme. Every colour comes from src/styles/brand.css through the --au-*
+   aliases below. */
+
+.au {
+  --au-navy: var(--brand-primary); /* headings */
+  --au-text: var(--text-primary);
+  --au-muted: var(--text-secondary);
+  --au-faint: var(--text-muted);
+  --au-line: var(--border-primary);
+  --au-line-strong: var(--border-strong);
+  --au-field: var(--surface-primary);
+  --au-accent: var(--brand-secondary);
+  --au-teal: var(--brand-accent);
+  --au-green: var(--positive);
+  --au-red: var(--negative);
+
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  text-align: start;
+  color: var(--au-text);
+  font-family: "Noto Sans", Arial, sans-serif;
+  background:
+    radial-gradient(900px 480px at 8% -12%, var(--accent-soft), transparent 62%),
+    radial-gradient(820px 520px at 100% -6%, var(--brand-soft), transparent 60%),
+    var(--background-primary);
+}
+
+.au *,
+.au *::before,
+.au *::after {
+  box-sizing: border-box;
+}
+
+/* Header */
+.au-header {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  border-bottom: 1px solid var(--au-line);
+}
+
+.au-brand {
+  display: inline-flex;
+  flex: 0 0 auto;
+  border-radius: 10px;
+}
+
+.au-logo {
+  display: block;
+  width: auto;
+  height: 68px;
+}
+
+.au-nav {
+  display: flex;
+  gap: 28px;
+  margin-inline: auto;
+}
+
+.au-nav a {
+  color: var(--au-muted);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.au-nav a:hover {
+  color: var(--au-accent);
+}
+
+.au-language {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--au-line);
+  border-radius: 999px;
+  background: var(--surface-primary);
+  color: var(--au-muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.au-language:hover {
+  border-color: var(--au-line-strong);
+}
+
+.au-language:focus-within {
+  border-color: var(--focus-ring);
+  box-shadow: 0 0 0 3px var(--focus-ring-soft);
+}
+
+.au-language select {
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--au-navy);
+  font: 600 14px "Noto Sans", Arial, sans-serif;
+  cursor: pointer;
+}
+
+.au-language option {
+  background: var(--surface-primary);
+  color: var(--au-text);
+}
+
+.au-header-spacer {
+  width: 120px;
+}
+
+/* Layout */
+.au-main {
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 32px 48px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 460px);
+  align-items: start;
+  align-content: start;
+  gap: 56px;
+}
+
+.au-main.is-single {
+  grid-template-columns: minmax(0, 460px);
+  justify-content: center;
+  padding-top: 40px;
+}
+
+/* Hero copy */
+.au-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--au-navy);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.au-eyebrow i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--au-teal);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.au-hero h1 {
+  margin: 14px 0 12px;
+  color: var(--au-navy);
+  font-size: clamp(32px, 3.6vw, 44px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.au-hero h1 span {
+  display: block;
+  color: var(--au-accent);
+}
+
+.au-lead {
+  max-width: 520px;
+  margin: 0 0 24px;
+  color: var(--au-muted);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+/* Features and benefits */
+.au-features {
+  max-width: 560px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.au-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.au-feature-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--au-line);
+  background: var(--brand-soft);
+  color: var(--au-accent);
+}
+
+.au-features strong,
+.au-benefits strong {
+  display: block;
+  color: var(--au-navy);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.au-features small,
+.au-benefits small {
+  display: block;
+  margin-top: 2px;
+  color: var(--au-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.au-benefits {
+  max-width: 560px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.au-benefits li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--au-line);
+  border-radius: 14px;
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Form card */
+.au-card {
+  position: relative;
+  width: 100%;
+  padding: 34px 32px;
+  border: 1px solid var(--au-line);
+  border-radius: 20px;
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.au-card-head {
+  margin-bottom: 22px;
+}
+
+.au-card-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  background: var(--cta-gradient);
+  color: var(--text-on-brand);
+  box-shadow: var(--shadow-md);
+}
+
+.au-card-head h2 {
+  margin: 16px 0 6px;
+  color: var(--au-navy);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.au-card-head p {
+  margin: 0;
+  color: var(--au-muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.au-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.au-alert svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.au-alert.is-error {
+  border-color: var(--negative);
+  background: var(--negative-soft);
+  color: var(--negative-strong);
+}
+
+.au-alert.is-success {
+  border-color: var(--positive);
+  background: var(--positive-soft);
+  color: var(--positive-strong);
+}
+
+.au-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.au-field label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--au-navy);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.au-field-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.au-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.au-input > svg {
+  position: absolute;
+  inset-inline-start: 15px;
+  color: var(--au-faint);
+  pointer-events: none;
+  transition: color 0.15s ease;
+}
+
+.au-input input,
+.au-code {
+  width: 100%;
+  border: 1px solid var(--au-line);
+  border-radius: 12px;
+  background: var(--au-field);
+  color: var(--au-text);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.au-input input {
+  height: 50px;
+  padding-inline: 46px 16px;
+  font: 500 15px "Noto Sans", Arial, sans-serif;
+}
+
+.au-input input::placeholder,
+.au-code::placeholder {
+  color: var(--au-faint);
+  opacity: 1;
+}
+
+.au-input input:hover,
+.au-code:hover {
+  border-color: var(--au-line-strong);
+}
+
+.au-input input:focus,
+.au-code:focus {
+  border-color: var(--focus-ring);
+  box-shadow: 0 0 0 4px var(--focus-ring-soft);
+}
+
+.au-input:focus-within > svg {
+  color: var(--au-accent);
+}
+
+.au-input input.has-toggle {
+  padding-inline-end: 48px;
+}
+
+.au-input.is-invalid input {
+  border-color: var(--negative);
+  background: var(--negative-soft);
+}
+
+.au-input.is-invalid input:focus {
+  border-color: var(--negative);
+  box-shadow: 0 0 0 4px var(--negative-soft);
+}
+
+.au-input.is-invalid > svg {
+  color: var(--negative-strong);
+}
+
+.au-field-error {
+  margin: 6px 0 0;
+  color: var(--negative-strong);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.au-hint {
+  margin: 6px 0 0;
+  color: var(--au-muted);
+  font-size: 12px;
+}
+
+.au-eye {
+  position: absolute;
+  inset-inline-end: 6px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--au-muted);
+  cursor: pointer;
+}
+
+.au-eye:hover {
+  background: var(--surface-hover);
+  color: var(--au-navy);
+}
+
+.au-strength {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  color: var(--au-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.au-strength-bars {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  flex: 1;
+}
+
+.au-strength-bars i {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--background-tertiary);
+  transition: background 0.2s ease;
+}
+
+.au-strength.is-0 span { color: var(--negative-strong); }
+.au-strength.is-1 .au-strength-bars i:nth-child(-n + 1) { background: var(--negative); }
+.au-strength.is-1 span { color: var(--negative-strong); }
+.au-strength.is-2 .au-strength-bars i:nth-child(-n + 2) { background: var(--warning); }
+.au-strength.is-2 span { color: var(--warning); }
+.au-strength.is-3 .au-strength-bars i:nth-child(-n + 3) { background: var(--brand-secondary); }
+.au-strength.is-3 span { color: var(--brand-secondary); }
+.au-strength.is-4 .au-strength-bars i { background: var(--positive); }
+.au-strength.is-4 span { color: var(--positive-strong); }
+
+.au-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--au-text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+.au-check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--au-accent);
+  cursor: pointer;
+}
+
+.au-check-top {
+  align-items: flex-start;
+  line-height: 1.5;
+}
+
+.au-check-top input {
+  margin-top: 2px;
+  flex: 0 0 auto;
+}
+
+.au-code {
+  height: 60px;
+  padding: 0 16px;
+  font: 800 28px/1 "Noto Sans", Arial, sans-serif;
+  color: var(--au-navy);
+  letter-spacing: 0.5em;
+  text-align: center;
+  text-indent: 0.5em;
+}
+
+.au-link {
+  color: var(--au-accent);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.au-link:hover {
+  color: var(--au-navy);
+  text-decoration: underline;
+}
+
+.au-text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--au-accent);
+  font: 600 14px "Noto Sans", Arial, sans-serif;
+  cursor: pointer;
+}
+
+.au-text-button:hover:not(:disabled) {
+  color: var(--au-navy);
+  text-decoration: underline;
+}
+
+.au-text-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.au-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 52px;
+  margin-top: 4px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--cta-gradient);
+  color: var(--text-on-brand);
+  font: 700 15px "Noto Sans", Arial, sans-serif;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.au-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.au-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.au-submit:disabled {
+  opacity: 0.75;
+  cursor: wait;
+}
+
+.au-submit:focus-visible,
+.au-eye:focus-visible,
+.au-link:focus-visible,
+.au-text-button:focus-visible,
+.au-back:focus-visible,
+.au-brand:focus-visible,
+.au-nav a:focus-visible,
+.au-footer a:focus-visible,
+.au-check input:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.au-spin {
+  animation: au-spin 0.8s linear infinite;
+}
+
+@keyframes au-spin {
+  to { transform: rotate(360deg); }
+}
+
+.au-register {
+  margin: 22px 0 0;
+  color: var(--au-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.au-trust {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 12px 14px;
+  border: 1px solid var(--au-line);
+  border-radius: 12px;
+  background: var(--surface-secondary);
+  color: var(--au-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.au-trust svg {
+  flex: 0 0 auto;
+  color: var(--positive-strong);
+}
+
+.au-steps-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 12px 14px;
+  border: 1px solid var(--au-line);
+  border-radius: 12px;
+  background: var(--surface-secondary);
+  color: var(--au-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.au-steps-note svg {
+  flex: 0 0 auto;
+  color: var(--au-accent);
+}
+
+.au-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--au-line);
+}
+
+.au-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--au-navy);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.au-back:hover {
+  color: var(--au-accent);
+}
+
+/* Footer */
+.au-footer {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 20px 32px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--au-line);
+  color: var(--au-muted);
+  font-size: 13px;
+}
+
+.au-footer nav {
+  display: flex;
+  gap: 20px;
+}
+
+.au-footer a {
+  color: var(--au-muted);
+  text-decoration: none;
+}
+
+.au-footer a:hover {
+  color: var(--au-accent);
+}
+
+.au-age {
+  padding: 4px 10px;
+  border: 1px solid var(--au-line);
+  border-radius: 999px;
+  color: var(--au-navy);
+  font-weight: 700;
+}
+
+/* ---------------------------------------------------------------------------
+   Sign-in page: the live trading-workspace preview (the real HeroDashboard
+   React component) leads, large, with the headline under it and the form on
+   the right.
+   ------------------------------------------------------------------------ */
+
+.au-main.is-stacked:has(.au-showcase) {
+  max-width: 1320px;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  grid-template-areas:
+    "show card"
+    "hero card";
+  gap: 28px 40px;
+}
+
+.au-main.is-stacked:has(.au-showcase) .au-showcase { grid-area: show; }
+.au-main.is-stacked:has(.au-showcase) .au-hero { grid-area: hero; }
+.au-main.is-stacked:has(.au-showcase) .au-card { grid-area: card; }
+
+.au-showcase {
+  min-width: 0;
+  margin: 0;
+}
+
+/* The trading workspace preview, scoped to the auth page: white shell with
+   the dark chart canvas used by the real trading screen. */
+.au-showcase .hd {
+  overflow: hidden;
+  border: 1px solid var(--au-line);
+  border-radius: 18px;
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-lg);
+  color: var(--au-text);
+  font-size: 12px;
+  user-select: none;
+}
+
+.au-showcase .hd-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--au-line);
+}
+
+.au-showcase .hd-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--au-navy);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.au-showcase .hd-brand img {
+  width: auto;
+  height: 26px;
+}
+
+.au-showcase .hd-top-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.au-showcase .hd-account {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  column-gap: 8px;
+  padding: 4px 10px;
+  border: 1px solid var(--au-line);
+  border-radius: 9px;
+  background: var(--surface-secondary);
+}
+
+.au-showcase .hd-account small {
+  grid-column: 1;
+  color: var(--au-muted);
+  font-size: 10px;
+}
+
+.au-showcase .hd-account strong {
+  grid-column: 1;
+  color: var(--au-navy);
+  font-size: 13px;
+}
+
+.au-showcase .hd-account svg {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  color: var(--au-muted);
+}
+
+.au-showcase .hd-topup {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: var(--positive-strong);
+  color: var(--text-on-brand);
+  font-weight: 700;
+}
+
+.au-showcase .hd-icon {
+  color: var(--au-muted);
+}
+
+.au-showcase .hd-body {
+  display: grid;
+  grid-template-columns: 136px minmax(0, 1fr) 196px;
+}
+
+.au-showcase .hd-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 8px;
+  border-inline-end: 1px solid var(--au-line);
+  background: var(--surface-secondary);
+}
+
+.au-showcase .hd-menu span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  color: var(--au-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.au-showcase .hd-menu span.is-active {
+  background: var(--brand-soft-strong);
+  color: var(--au-navy);
+  font-weight: 700;
+}
+
+.au-showcase .hd-chart-area {
+  min-width: 0;
+  padding: 10px 12px 8px;
+  background: var(--chart-bg);
+}
+
+.au-showcase .hd-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.au-showcase .hd-pair,
+.au-showcase .hd-square,
+.au-showcase .hd-tf {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border: 1px solid var(--chart-line);
+  border-radius: 8px;
+  background: var(--chart-panel);
+  color: var(--chart-text);
+  font-weight: 700;
+}
+
+.au-showcase .hd-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-inline-start: auto;
+  color: var(--chart-text);
+  font-size: 11px;
+}
+
+.au-showcase .hd-chart {
+  position: relative;
+  display: flex;
+  gap: 8px;
+}
+
+.au-showcase .hd-tools {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding-top: 16px;
+  color: var(--chart-text);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.au-showcase .hd-chart > svg {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 300px;
+  overflow: visible;
+}
+
+.au-showcase .hd-grid { stroke: var(--chart-line); stroke-width: 1; }
+.au-showcase .hd-up line { stroke: var(--positive); stroke-width: 1; }
+.au-showcase .hd-up rect { fill: var(--positive); }
+.au-showcase .hd-down line { stroke: var(--negative); stroke-width: 1; }
+.au-showcase .hd-down rect { fill: var(--negative); }
+.au-showcase .hd-expiry { stroke: var(--chart-text); stroke-opacity: 0.45; stroke-dasharray: 3 4; }
+.au-showcase .hd-last { stroke: var(--brand-accent); stroke-opacity: 0.7; stroke-dasharray: 4 4; }
+
+.au-showcase .hd-quote {
+  position: absolute;
+  top: 18px;
+  left: 52px;
+  padding: 7px 11px;
+  border: 1px solid var(--chart-line);
+  border-radius: 10px;
+  background: var(--chart-panel);
+}
+
+.au-showcase .hd-quote small {
+  display: block;
+  color: var(--chart-text);
+  font-size: 10px;
+}
+
+.au-showcase .hd-quote strong {
+  color: var(--text-on-brand);
+  font-size: 14px;
+}
+
+.au-showcase .hd-quote em {
+  margin-inline-start: 8px;
+  color: var(--positive);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.au-showcase .hd-trade {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px;
+  border-inline-start: 1px solid var(--au-line);
+}
+
+.au-showcase .hd-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 6px;
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--background-tertiary);
+}
+
+.au-showcase .hd-tabs span {
+  padding: 5px;
+  border-radius: 7px;
+  color: var(--au-muted);
+  font-weight: 600;
+  text-align: center;
+}
+
+.au-showcase .hd-tabs span.is-active {
+  background: var(--surface-primary);
+  color: var(--au-navy);
+  box-shadow: var(--shadow-sm);
+}
+
+.au-showcase .hd-trade label {
+  margin-top: 4px;
+  color: var(--au-muted);
+  font-size: 11px;
+}
+
+.au-showcase .hd-stepper {
+  display: grid;
+  grid-template-columns: 1fr 24px 24px;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 5px 5px 10px;
+  border: 1px solid var(--au-line);
+  border-radius: 8px;
+  color: var(--au-navy);
+  font-weight: 700;
+}
+
+.au-showcase .hd-stepper span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.au-showcase .hd-stepper i {
+  display: grid;
+  place-items: center;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--surface-secondary);
+  color: var(--au-muted);
+}
+
+.au-showcase .hd-payout {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.au-showcase .hd-payout strong {
+  color: var(--positive-strong);
+  font-size: 20px;
+}
+
+.au-showcase .hd-payout span {
+  color: var(--positive-strong);
+  font-weight: 700;
+}
+
+.au-showcase .hd-buy,
+.au-showcase .hd-sell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 10px;
+  border-radius: 9px;
+  color: var(--text-on-brand);
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.au-showcase .hd-buy { background: var(--positive); }
+.au-showcase .hd-sell { background: var(--negative); }
+
+.au-showcase .hd-tickers {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  border-top: 1px solid var(--au-line);
+}
+
+.au-showcase .hd-ticker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-inline-end: 1px solid var(--au-line);
+}
+
+.au-showcase .hd-ticker:last-child { border-inline-end: 0; }
+
+.au-showcase .hd-ticker > div { min-width: 0; }
+
+.au-showcase .hd-ticker small {
+  display: block;
+  overflow: hidden;
+  color: var(--au-navy);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.au-showcase .hd-ticker strong {
+  color: var(--au-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.au-showcase .hd-ticker em {
+  display: block;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.au-showcase .hd-ticker em.is-up { color: var(--positive-strong); }
+.au-showcase .hd-ticker em.is-down { color: var(--negative-strong); }
+
+.au-showcase .hd-ticker svg {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 24px;
+}
+
+.au-showcase .hd-ticker polyline {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.au-showcase .hd-ticker svg.is-up polyline { stroke: var(--positive); }
+.au-showcase .hd-ticker svg.is-down polyline { stroke: var(--negative); }
+
+/* ---------------------------------------------------------------------------
+   Responsive
+   ------------------------------------------------------------------------ */
+
+@media (max-width: 1500px) {
+  .au-showcase .hd-menu { display: none; }
+  .au-showcase .hd-body { grid-template-columns: minmax(0, 1fr) 188px; }
+  .au-showcase .hd-tickers { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .au-showcase .hd-ticker:nth-child(3n) { border-inline-end: 0; }
+  .au-showcase .hd-ticker:nth-child(-n + 3) { border-bottom: 1px solid var(--au-line); }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+  /* Medium screens: the preview runs across the top at full width. */
+  .au-main.is-stacked:has(.au-showcase) {
+    grid-template-columns: minmax(0, 1fr) 420px;
+    grid-template-areas:
+      "show show"
+      "hero card";
+  }
+
+  /* Drop the ticker strip so the form starts higher up the screen. */
+  .au-showcase .hd-tickers { display: none; }
+}
+
+@media (max-width: 1080px) {
+  .au-main {
+    grid-template-columns: minmax(0, 1fr) 420px;
+    gap: 40px;
+  }
+
+  .au-features {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .au-nav,
+  .au-header-spacer {
+    display: none;
+  }
+
+  .au-language {
+    margin-inline-start: auto;
+  }
+
+  .au-main,
+  .au-main.is-stacked {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 560px;
+    gap: 28px;
+    padding-top: 16px;
+  }
+
+  /* The form comes before the marketing copy on narrow screens. */
+  .au-card {
+    order: -1;
+    padding: 28px 22px;
+  }
+
+  .au-features {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* Sign-in: compact preview first, then the form, then the headline. */
+  .au-main.is-stacked:has(.au-showcase) {
+    max-width: 640px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "show"
+      "card"
+      "hero";
+    row-gap: 20px;
+  }
+
+  .au-showcase .hd { border-radius: 14px; }
+  .au-showcase .hd-topup,
+  .au-showcase .hd-top-right .hd-icon,
+  .au-showcase .hd-tools,
+  .au-showcase .hd-time,
+  .au-showcase .hd-square { display: none; }
+  .au-showcase .hd-body { grid-template-columns: minmax(0, 1fr); }
+  .au-showcase .hd-chart > svg { height: 210px; }
+  .au-showcase .hd-quote { left: 8px; top: 10px; }
+
+  /* Keep just the Buy / Sell pair of the order panel. */
+  .au-showcase .hd-trade {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 10px 12px;
+    border-inline-start: 0;
+    border-top: 1px solid var(--au-line);
+  }
+
+  .au-showcase .hd-trade .hd-tabs,
+  .au-showcase .hd-trade label,
+  .au-showcase .hd-trade .hd-stepper,
+  .au-showcase .hd-trade .hd-payout { display: none; }
+  .au-showcase .hd-buy,
+  .au-showcase .hd-sell { margin-top: 0; padding: 8px; }
+}
+
+@media (max-width: 560px) {
+  .au-header {
+    padding: 10px 16px;
+    gap: 12px;
+  }
+
+  .au-logo {
+    height: 52px;
+  }
+
+  .au-main {
+    padding: 14px 16px 32px;
+  }
+
+  .au-card {
+    padding: 24px 18px;
+    border-radius: 18px;
+  }
+
+  .au-card-head h2 {
+    font-size: 24px;
+  }
+
+  .au-hero h1 {
+    font-size: 30px;
+  }
+
+  .au-features,
+  .au-benefits {
+    grid-template-columns: 1fr;
+  }
+
+  .au-footer {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 16px;
+    text-align: center;
+  }
+
+  /* Phone: a compact preview so the form starts in the first screen. */
+  .au-showcase .hd-top { padding: 8px 12px; }
+  .au-showcase .hd-brand span { display: none; }
+  .au-showcase .hd-chart-area { padding: 8px 8px 6px; }
+  .au-showcase .hd-chart > svg { height: 150px; }
+  .au-showcase .hd-axis,
+  .au-showcase .hd-last-text,
+  .au-showcase .hd-last-tag,
+  .au-showcase .hd-expiry-text,
+  .au-showcase .hd-expiry-caption,
+  .au-showcase .hd-quote,
+  .au-showcase .hd-tickers { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .au-submit,
+  .au-input input,
+  .au-code {
+    transition: none;
+  }
+
+  .au-spin {
+    animation-duration: 2s;
+  }
+}

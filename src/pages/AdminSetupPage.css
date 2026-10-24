@@ -1,0 +1,11 @@
+.ns-bg{min-height:100svh;display:grid;place-items:center;padding:18px;background:#0b1934;font-family:'Noto Sans',Arial,sans-serif}
+.ns-layout{width:min(980px,100%);background:white;border-radius:18px;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}
+.ns-brand{padding:34px;background:linear-gradient(145deg,#123765,#0a1b33);color:white;display:flex;flex-direction:column;justify-content:space-between;gap:40px}
+.ns-logo{display:flex;align-items:center;gap:12px;font-size:12px}.ns-logo .neurooption-logo-picture,.ns-logo img{display:block;width:58px;height:54px;object-fit:contain}
+.ns-brand h1{font-size:clamp(25px,3vw,38px)}.ns-brand p,.ns-brand span{font-size:12px;color:#b9cce5;line-height:1.6}.ns-brand small{color:#65c7e6}
+.ns-main{padding:32px;color:#152a46}.ns-main>a{color:#246fdc;text-decoration:none;font-size:12px}.ns-main h2{font-size:23px;margin:20px 0 7px}.ns-main p{font-size:12px;color:#698098;line-height:1.55}
+.ns-main form{display:flex;flex-direction:column;gap:11px;margin-top:18px}.ns-main label{font-weight:700;font-size:12px;display:flex;flex-direction:column;gap:5px}
+.ns-main input{height:39px;padding:8px 12px;border:1px solid #dce5f0;border-radius:8px;font:inherit}.ns-main button{background:#2476e3;border:0;color:white;border-radius:8px;padding:13px;font-weight:800;cursor:pointer}.ns-main button:disabled{opacity:.6}
+.ns-main small{font-size:11px;color:#8796a9}.ns-error{color:#b02f35!important;background:#ffeded;padding:10px;border-radius:7px}
+@media(max-width:680px) and (orientation:portrait){.ns-layout{display:block}.ns-brand{padding:15px}.ns-brand>div:nth-child(2),.ns-brand>span{display:none}.ns-main{padding:22px}}
+@media(orientation:landscape) and (max-height:530px){.ns-bg{align-items:start;padding:7px}.ns-main{padding:17px}.ns-main h2{margin:8px 0}.ns-main form{gap:6px;margin-top:10px}.ns-main input{height:32px}}

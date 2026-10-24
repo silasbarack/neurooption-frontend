@@ -1,0 +1,63 @@
+/* NeuroOption brand tokens: the single source of colour for the platform.
+   Every other token set (--neo-*, --np-*, --nt-*, --au-*, --fin-*, --hp-*)
+   points at these. White is the dominant background; navy, ocean and
+   turquoise come from the official logo. Loaded first from main.tsx. */
+
+:root {
+  /* Brand */
+  --brand-primary: #0D315E;
+  --brand-primary-dark: #082747;
+  --brand-secondary: #0879AD;
+  --brand-accent: #17ADB4;
+  --brand-accent-light: #2CC2C4;
+  --brand-gradient: linear-gradient(120deg, #0D315E, #0879AD, #17ADB4);
+
+  /* Backgrounds and surfaces */
+  --background-primary: #FFFFFF;
+  --background-secondary: #F6F9FC;
+  --background-tertiary: #EAF2F7;
+  --surface-primary: #FFFFFF;
+  --surface-secondary: #F6F9FC;
+
+  /* Text and lines */
+  --text-primary: #182B43;
+  --text-secondary: #526579;
+  --border-primary: #DCE7EF;
+
+  /* Derived tokens (all built from the palette above). */
+  --text-muted: #6B7C8F;
+  --text-on-brand: #FFFFFF;
+  --border-strong: #C5D6E3;
+  --surface-hover: #EEF5FA;
+  --brand-soft: rgba(8, 121, 173, 0.08);
+  --brand-soft-strong: rgba(8, 121, 173, 0.14);
+  --accent-soft: rgba(23, 173, 180, 0.12);
+  /* The CTA gradient keeps white text on its darker two thirds. */
+  --cta-gradient: linear-gradient(120deg, #0D315E 0%, #0879AD 55%, #17ADB4 100%);
+  --cta-solid: #0879AD;
+  --cta-solid-hover: #0D315E;
+  --focus-ring: #0879AD;
+  --focus-ring-soft: rgba(8, 121, 173, 0.22);
+  --shadow-sm: 0 1px 2px rgba(13, 49, 94, 0.06), 0 1px 3px rgba(13, 49, 94, 0.08);
+  --shadow-md: 0 6px 18px rgba(13, 49, 94, 0.08);
+  --shadow-lg: 0 18px 48px rgba(13, 49, 94, 0.14);
+  --overlay: rgba(8, 39, 71, 0.45);
+
+  /* Market semantics: rise and fall stay green and red. */
+  --positive: #0F9D58;
+  --positive-strong: #0B8048;
+  --positive-soft: rgba(15, 157, 88, 0.1);
+  --negative: #D93838;
+  --negative-strong: #B92B2B;
+  --negative-soft: rgba(217, 56, 56, 0.1);
+  --warning: #B7791F;
+  --warning-soft: rgba(183, 121, 31, 0.12);
+
+  /* The trading chart canvas stays dark so candles read clearly. */
+  --chart-bg: #0B1A2C;
+  --chart-panel: #10233A;
+  --chart-line: rgba(173, 199, 222, 0.16);
+  --chart-text: #C9D6E3;
+
+  color-scheme: light;
+}
