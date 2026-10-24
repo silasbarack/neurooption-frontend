@@ -2,93 +2,90 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, BarChart3, ChevronDown, ChevronRight, CircleCheck, CircleHelp, Clock3, GraduationCap,
-  LineChart, LoaderCircle, Mail, Menu, MonitorSmartphone, Plus, UserRound, X,
+  ArrowRight, BadgeCheck, BarChart3, BookOpen, CandlestickChart, ChartLine, CircleCheck, Clock3, CreditCard,
+  Fingerprint, History, Layers, LoaderCircle, Lock, Mail, Menu, MonitorSmartphone, PlayCircle, Rocket,
+  ShieldCheck, SlidersHorizontal, Smartphone, UserRound, Wallet, X,
 } from "lucide-react";
 
 import Logo from "../components/branding/Logo";
 import AssetIcon from "../components/markets/AssetIcon";
-import PaymentLogo from "../components/finance/PaymentLogo";
-import { formatChange, useQuotes } from "../components/markets/useQuotes";
+import { formatChange, formatPrice, useQuotes } from "../components/markets/useQuotes";
 import { api } from "../api/api";
+import type { MarketQuote } from "../api";
 import { getToken } from "../utils/storage";
 import "./Home.css";
 
-type NavLink = { label: string; to: string };
-type NavItem = { label: string; to?: string; links?: NavLink[] };
-
-const NAV: NavItem[] = [
-  {
-    label: "Platform",
-    links: [
-      { label: "Web trading platform", to: "/trading" },
-      { label: "Demo account", to: "/trading" },
-      { label: "Open trades", to: "/open-trades" },
-      { label: "Trade history", to: "/history" },
-    ],
-  },
-  {
-    label: "Markets",
-    links: [
-      { label: "All markets", to: "/markets" },
-      { label: "Currencies", to: "/markets?category=Currencies" },
-      { label: "Cryptocurrencies", to: "/markets?category=Cryptocurrencies" },
-      { label: "Commodities", to: "/markets?category=Commodities" },
-      { label: "Stocks", to: "/markets?category=Stocks" },
-    ],
-  },
-  { label: "Payments", to: "#payments" },
-  { label: "Support", to: "/help" },
+const NAV = [
+  { label: "Trading", to: "/trading" },
+  { label: "Markets", to: "/markets" },
+  { label: "Platform", to: "#platform" },
+  { label: "Education", to: "#learn" },
+  { label: "About Us", to: "/help" },
+  { label: "Help Center", to: "/help" },
 ];
 
-/** Hero highlights: only things the platform really does today. */
-const HERO_POINTS = [
-  { title: "Free demo account", text: "Practise with virtual funds on live-moving prices. No deposit needed." },
-  { title: "M-Pesa deposits and withdrawals", text: "Fund your real account in KES and withdraw back to M-Pesa." },
-  { title: "Payout locked when you trade", text: "See the payout before you open a trade; it stays fixed until it closes." },
-  { title: "Charts in Kenya time (EAT)", text: "Chart times and your trade history follow East Africa Time." },
+/* Figures below match the platform: 116 OTC assets in five markets, 22
+   indicators, 14 timeframes from 5 seconds to 1 day. */
+const HERO_BADGES = [
+  { icon: <Layers size={18} />, label: "100+ trading assets" },
+  { icon: <CandlestickChart size={18} />, label: "Advanced charting" },
+  { icon: <PlayCircle size={18} />, label: "Free demo account" },
+  { icon: <ShieldCheck size={18} />, label: "Secure & reliable" },
 ];
 
-const HERO_MARKETS = ["Currencies", "Cryptocurrencies", "Commodities", "Stocks"];
-
-const FEATURES = [
-  { icon: <BarChart3 size={26} />, title: "Clear charting", text: "Clean, interactive charts with simple controls." },
-  { icon: <GraduationCap size={26} />, title: "Demo practice", text: "Explore the markets risk-free with a demo account." },
-  { icon: <MonitorSmartphone size={26} />, title: "Across your devices", text: "A seamless experience on desktop, tablet and mobile." },
+const WHY = [
+  { icon: <BarChart3 size={20} />, title: "Advanced charts", text: "Candlestick, line and bar charts with 22 technical indicators." },
+  { icon: <Layers size={20} />, title: "Wide asset selection", text: "Trade currencies, crypto, commodities, indices and stocks." },
+  { icon: <Clock3 size={20} />, title: "Real-time prices", text: "Live prices and instant trade execution, shown in Kenya time." },
+  { icon: <SlidersHorizontal size={20} />, title: "Customisable workspace", text: "Pick your chart type, background, timeframe and indicators." },
+  { icon: <PlayCircle size={20} />, title: "Demo trading", text: "Practise with virtual funds, risk-free." },
+  { icon: <History size={20} />, title: "Trade history", text: "Review every trade with its open price, result and payout." },
+  { icon: <MonitorSmartphone size={20} />, title: "Multi-device access", text: "The same account in the browser on desktop, tablet and phone." },
+  { icon: <Wallet size={20} />, title: "M-Pesa payments", text: "Deposit in KES with M-Pesa and withdraw back to your phone." },
 ];
 
-const TOOLS = [
-  { icon: <BarChart3 size={22} />, title: "Flexible chart views", text: "Choose from candlesticks, lines and more, with multiple time frames." },
-  { icon: <LineChart size={22} />, title: "Technical indicators", text: "Apply popular indicators to support your analysis." },
-  { icon: <Clock3 size={22} />, title: "Trade history", text: "View your past trades and learn from your experience." },
+const PLATFORM_POINTS = [
+  "Interactive charts with 22 indicators",
+  "14 timeframes, from 5 seconds to 1 day",
+  "100+ assets across five markets",
+  "Payout shown and locked before you trade",
+  "Seamless desktop and mobile experience",
+];
+
+const MARKET_TABS = [
+  { key: "All", label: "All markets" },
+  { key: "Currencies", label: "Forex" },
+  { key: "Commodities", label: "Commodities" },
+  { key: "Indices", label: "Indices" },
+  { key: "Stocks", label: "Stocks" },
+  { key: "Cryptocurrencies", label: "Crypto" },
 ];
 
 const STEPS = [
-  { icon: <UserRound size={22} />, title: "Create your account", text: "Sign up in minutes and set up your demo account." },
-  { icon: <BarChart3 size={22} />, title: "Explore the demo", text: "Try out the platform with virtual funds and explore the markets." },
-  { icon: <MonitorSmartphone size={22} />, title: "Get familiar with the platform", text: "Practise placing trades, using chart tools and exploring features." },
+  { icon: <UserRound size={22} />, title: "Create your account", text: "Sign up in minutes and confirm your email address." },
+  { icon: <BarChart3 size={22} />, title: "Explore the demo platform", text: "Practise with virtual funds and learn the platform." },
+  { icon: <Rocket size={22} />, title: "Choose how you want to trade", text: "Stay on demo, or fund a real account with M-Pesa." },
 ];
 
-const FAQ = [
-  {
-    q: "What is a demo account?",
-    a: "A demo account lets you trade with virtual funds on live-moving prices. Nothing you do there uses real money, so it is the safest way to learn the platform.",
-  },
-  {
-    q: "How do I add funds?",
-    a: "Sign in, open Finance and choose a payment method. M-Pesa deposits are confirmed on your phone with your M-Pesa PIN. NeuroOption never asks for your PIN.",
-  },
-  {
-    q: "Can I trade on mobile?",
-    a: "Yes. NeuroOption works in the browser on any phone, tablet or computer, with a layout designed for each screen size. There is nothing to install.",
-  },
-  {
-    q: "What risks should I understand?",
-    a: "Trading involves significant risk and you may lose the money you invest. Prices move quickly, past results do not predict future results, and you should only trade with money you can afford to lose.",
-  },
+const SECURITY = [
+  { icon: <Lock size={20} />, title: "Encrypted connection", text: "Everything you send to NeuroOption travels over HTTPS." },
+  { icon: <BadgeCheck size={20} />, title: "Account verification", text: "Email confirmation and identity (KYC) checks protect your account." },
+  { icon: <Fingerprint size={20} />, title: "Protected sign-in", text: "Passwords are stored hashed, and sign-in has bot protection." },
+  { icon: <CreditCard size={20} />, title: "Secure transactions", text: "You approve deposits with your own M-Pesa PIN; withdrawals are reviewed." },
 ];
 
-const CHART_ASSETS = ["EUR/USD OTC", "GBP/USD OTC", "USD/JPY OTC", "Gold OTC"];
+const LEARN = [
+  { icon: <BookOpen size={20} />, title: "Trading basics", text: "How fixed-time trades, payouts and expiry work.", to: "/help" },
+  { icon: <ShieldCheck size={20} />, title: "Risk management", text: "Understand the risks before you trade real money.", to: "/legal/risk-disclosure" },
+  { icon: <PlayCircle size={20} />, title: "Platform guides", text: "Step-by-step help with the trading screen.", to: "/help" },
+  { icon: <ChartLine size={20} />, title: "Market overview", text: "Browse every market with live prices and payouts.", to: "/markets" },
+];
+
+const STATS = [
+  { icon: <Layers size={22} />, value: "100+", label: "Trading assets" },
+  { icon: <Clock3 size={22} />, value: "24/7", label: "OTC markets" },
+  { icon: <Smartphone size={22} />, value: "M-Pesa", label: "Deposits & withdrawals" },
+];
 
 /** A small deterministic sparkline for an asset, so it looks the same on every visit. */
 function sparkPath(seed: string, up: boolean) {
@@ -105,42 +102,39 @@ function sparkPath(seed: string, up: boolean) {
   return points.map((p, i) => `${i === 0 ? "M" : "L"}${(i / 23) * 100},${p.toFixed(1)}`).join(" ");
 }
 
-function NavMenu({ item }: { item: NavItem }) {
-  const [open, setOpen] = useState(false);
-  if (!item.links) {
-    return item.to?.startsWith("#")
-      ? <a href={item.to} className="ho-nav-link">{item.label}</a>
-      : <Link to={item.to ?? "/"} className="ho-nav-link">{item.label}</Link>;
-  }
+function Spark({ quote }: { quote: MarketQuote }) {
+  const up = quote.changePercent >= 0;
   return (
-    <div className="ho-nav-item" onMouseLeave={() => setOpen(false)}>
-      <button type="button" className="ho-nav-link" aria-expanded={open} onClick={() => setOpen((v) => !v)} onMouseEnter={() => setOpen(true)}>
-        {item.label} <ChevronDown size={15} aria-hidden="true" />
-      </button>
-      {open && (
-        <div className="ho-nav-menu" role="menu">
-          {item.links.map((link) => <Link key={link.label} to={link.to} role="menuitem" onClick={() => setOpen(false)}>{link.label}</Link>)}
-        </div>
-      )}
-    </div>
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" className={`ho-spark ${up ? "is-up" : "is-down"}`}>
+      <path d={sparkPath(quote.symbol, up)} />
+    </svg>
   );
 }
 
-function SectionHead({ title, sub }: { title: string; sub: string }) {
-  return (
-    <div className="ho-section-head">
-      <h2>{title}</h2>
-      <p>{sub}</p>
-    </div>
-  );
+function NavLinkItem({ to, label, className, onClick }: { to: string; label: ReactNode; className?: string; onClick?: () => void }) {
+  return to.startsWith("#")
+    ? <a href={to} className={className} onClick={onClick}>{label}</a>
+    : <Link to={to} className={className} onClick={onClick}>{label}</Link>;
 }
 
 function PrimaryLink({ to, children, className = "" }: { to: string; children: ReactNode; className?: string }) {
   return <Link to={to} className={`ho-btn ho-btn-primary ${className}`}>{children}</Link>;
 }
 
+function SectionHead({ title, sub, center = true, action }: { title: string; sub: string; center?: boolean; action?: ReactNode }) {
+  return (
+    <div className={`ho-section-head ${center ? "is-center" : ""}`}>
+      <div>
+        <h2>{title}</h2>
+        <p>{sub}</p>
+      </div>
+      {action}
+    </div>
+  );
+}
+
 /** The real NeuroOption trading screen inside a laptop and a phone. */
-function Devices() {
+function Devices({ priority = false }: { priority?: boolean }) {
   return (
     <div className="ho-devices" aria-label="The NeuroOption trading screen on a laptop and a phone">
       <figure className="ho-laptop">
@@ -154,7 +148,8 @@ function Devices() {
               alt="NeuroOption trading screen on desktop: EUR/USD OTC candlestick chart with the trade panel"
               width={1600}
               height={1000}
-              fetchPriority="high"
+              fetchPriority={priority ? "high" : undefined}
+              loading={priority ? undefined : "lazy"}
               decoding="async"
             />
           </div>
@@ -170,6 +165,7 @@ function Devices() {
               alt="NeuroOption trading screen on a phone: live chart with BUY and SELL buttons"
               width={585}
               height={1266}
+              loading={priority ? undefined : "lazy"}
               decoding="async"
             />
           </div>
@@ -179,65 +175,76 @@ function Devices() {
   );
 }
 
-/** Asset logos with live prices, gliding from right to left. */
-function AssetMarquee() {
+/** Six live quotes under the hero. */
+function TickerCards() {
   const { quotes } = useQuotes();
-  const items = useMemo(() => quotes.slice(0, 14), [quotes]);
-  if (!items.length) return null;
-  const row = (hidden: boolean) => (
-    <ul className="ho-marquee-row" aria-hidden={hidden || undefined}>
-      {items.map((q) => (
-        <li key={q.symbol}>
-          <Link to="/markets" tabIndex={hidden ? -1 : undefined} className="ho-marquee-item">
-            <AssetIcon symbol={q.symbol} category={q.category} size={34} />
-            <span className="ho-marquee-name">
-              <b>{q.symbol.replace(/\s*OTC$/i, "")}</b>
-              <small>{q.price.toLocaleString("en-US", { minimumFractionDigits: q.precision, maximumFractionDigits: q.precision })}</small>
-            </span>
-            <em className={q.changePercent >= 0 ? "is-up" : "is-down"}>{formatChange(q.changePercent)}</em>
-          </Link>
-        </li>
-      ))}
-    </ul>
-  );
+  const items = useMemo(() => {
+    const wanted = ["EUR/USD OTC", "GBP/USD OTC", "BTC/USD OTC", "ETH/USD OTC", "Gold OTC", "US100 OTC"];
+    const picked = wanted.map((s) => quotes.find((q) => q.symbol === s)).filter((q): q is MarketQuote => Boolean(q));
+    return picked.length >= 6 ? picked : quotes.slice(0, 6);
+  }, [quotes]);
   return (
-    <section className="ho-marquee" aria-label="Markets you can trade">
-      <div className="ho-marquee-track">
-        {row(false)}
-        {row(true)}
-      </div>
+    <section className="ho-container ho-ticker" aria-label="Live prices">
+      {items.map((q) => (
+        <Link key={q.symbol} to="/markets" className="ho-ticker-card">
+          <span className="ho-ticker-text">
+            <b>{q.symbol.replace(/\s*OTC$/i, "")}</b>
+            <span>{formatPrice(q)}</span>
+            <em className={q.changePercent >= 0 ? "is-up" : "is-down"}>{formatChange(q.changePercent)}</em>
+          </span>
+          <Spark quote={q} />
+        </Link>
+      ))}
     </section>
   );
 }
 
-function ChartShowcase() {
+function MarketsSection() {
   const { quotes } = useQuotes();
-  const chips = CHART_ASSETS.map((symbol) => quotes.find((q) => q.symbol === symbol) ?? { symbol, changePercent: 0 });
+  const [tab, setTab] = useState("All");
+  const items = useMemo(() => {
+    if (tab !== "All") return quotes.filter((q) => q.category === tab).slice(0, 6);
+    // One or two from each market so "All" shows the range.
+    const seen = new Map<string, number>();
+    return quotes.filter((q) => {
+      const count = seen.get(q.category) ?? 0;
+      seen.set(q.category, count + 1);
+      return count < 2;
+    }).slice(0, 6);
+  }, [quotes, tab]);
   return (
-    <div className="ho-chart-card">
-      <img
-        src="/landing/screens/trading-chart.webp"
-        alt="EUR/USD OTC one-minute candlestick chart on NeuroOption"
-        width={1200}
-        height={970}
-        loading="lazy"
-        decoding="async"
-      />
-      <div className="ho-chart-chips">
-        {chips.map((chip, index) => {
-          const up = chip.changePercent >= 0;
-          return (
-            <Link key={chip.symbol} to="/markets" className={`ho-chip ${index === 0 ? "is-active" : ""}`}>
-              <span className="ho-chip-head"><AssetIcon symbol={chip.symbol} size={18} /> {chip.symbol}</span>
-              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" className={up ? "is-up" : "is-down"}>
-                <path d={sparkPath(chip.symbol, up)} />
-              </svg>
+    <section className="ho-section" id="markets">
+      <div className="ho-container">
+        <SectionHead
+          center={false}
+          title="Trade global markets"
+          sub="Access a wide range of trading instruments from around the world."
+          action={<Link to="/markets" className="ho-link">View all markets <ArrowRight size={15} aria-hidden="true" /></Link>}
+        />
+        <div className="ho-tabs" role="tablist" aria-label="Market categories">
+          {MARKET_TABS.map((t) => (
+            <button key={t.key} type="button" role="tab" aria-selected={tab === t.key} className={tab === t.key ? "is-active" : ""} onClick={() => setTab(t.key)}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <div className="ho-market-grid">
+          {items.map((q) => (
+            <Link key={q.symbol} to={`/markets?category=${encodeURIComponent(q.category)}`} className="ho-market-card">
+              <span className="ho-market-head">
+                <AssetIcon symbol={q.symbol} size={30} />
+                <span><b>{q.symbol.replace(/\s*OTC$/i, "")}</b><small>{q.category}</small></span>
+              </span>
+              <span className="ho-market-foot">
+                <span><b>{formatPrice(q)}</b><em className={q.changePercent >= 0 ? "is-up" : "is-down"}>{formatChange(q.changePercent)}</em></span>
+                <Spark quote={q} />
+              </span>
             </Link>
-          );
-        })}
-        <Link to="/markets" className="ho-chip-more" aria-label="See all markets"><ChevronRight size={18} /></Link>
+          ))}
+          {!items.length && <p className="ho-empty">No markets in this category right now.</p>}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -341,7 +348,7 @@ export default function LandingPage() {
   const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   useEffect(() => {
-    document.title = "NeuroOption | Trade with clarity";
+    document.title = "NeuroOption | A smarter way to experience the markets";
   }, []);
 
   return (
@@ -350,14 +357,14 @@ export default function LandingPage() {
         <div className="ho-container ho-header-inner">
           <Link to="/" className="ho-logo" aria-label="NeuroOption home"><Logo /></Link>
           <nav className="ho-nav" aria-label="Main">
-            {NAV.map((item) => <NavMenu key={item.label} item={item} />)}
+            {NAV.map((item) => <NavLinkItem key={item.label} to={item.to} label={item.label} className="ho-nav-link" />)}
           </nav>
           <div className="ho-header-actions">
             {signedIn ? (
               <PrimaryLink to="/trading" className="ho-btn-sm">Open platform <ArrowRight size={15} aria-hidden="true" /></PrimaryLink>
             ) : (
               <>
-                <Link to="/login" className="ho-btn ho-btn-outline ho-btn-sm">Log in</Link>
+                <Link to="/login" className="ho-btn ho-btn-outline ho-btn-sm">Sign in</Link>
                 <PrimaryLink to="/register" className="ho-btn-sm">Create account</PrimaryLink>
               </>
             )}
@@ -375,16 +382,12 @@ export default function LandingPage() {
             <button type="button" className="ho-menu-btn ho-menu-close" aria-label="Close menu" onClick={() => setMenuOpen(false)}><X size={22} /></button>
           </div>
           <nav aria-label="Mobile">
-            {NAV.flatMap((item) => item.links ? item.links.map((l) => ({ ...l, group: item.label })) : [{ label: item.label, to: item.to ?? "/", group: "" }]).map((link) => (
-              link.to.startsWith("#")
-                ? <a key={link.group + link.label} href={link.to} onClick={() => setMenuOpen(false)}>{link.label}</a>
-                : <Link key={link.group + link.label} to={link.to} onClick={() => setMenuOpen(false)}>{link.group ? <small>{link.group}</small> : null}{link.label}</Link>
-            ))}
+            {NAV.map((item) => <NavLinkItem key={item.label} to={item.to} label={item.label} onClick={() => setMenuOpen(false)} />)}
           </nav>
           <div className="ho-mobile-actions">
             {signedIn ? <PrimaryLink to="/trading">Open platform</PrimaryLink> : <>
               <PrimaryLink to="/register">Create account</PrimaryLink>
-              <Link to="/login" className="ho-btn ho-btn-outline">Log in</Link>
+              <Link to="/login" className="ho-btn ho-btn-outline">Sign in</Link>
             </>}
           </div>
         </MobileMenu>
@@ -394,151 +397,167 @@ export default function LandingPage() {
         <section className="ho-hero">
           <div className="ho-container ho-hero-inner">
             <div className="ho-hero-copy">
-              <p className="ho-eyebrow">NeuroOption trading platform</p>
-              <h1>Trade with <span>clarity.</span></h1>
+              <p className="ho-eyebrow">The modern trading platform</p>
+              <h1>A smarter way to experience <span>the markets.</span></h1>
               <p className="ho-lead">
-                NeuroOption is a fixed-time trading platform for the global markets. Learn on a free demo account,
-                follow live charts, and move to a real account funded with <span className="ho-nowrap">M-Pesa</span> when you feel ready.
+                Explore global markets through an intuitive trading platform built for speed, clarity and control.
+                Practise on a free demo account, then fund a real account with <span className="ho-nowrap">M-Pesa</span> when you are ready.
               </p>
               <div className="ho-hero-cta">
-                <PrimaryLink to="/trading">Try free demo <ArrowRight size={17} aria-hidden="true" /></PrimaryLink>
-                <Link to="/register" className="ho-btn ho-btn-outline">Create account</Link>
+                <PrimaryLink to="/trading">Start trading <ArrowRight size={17} aria-hidden="true" /></PrimaryLink>
+                <a href="#platform" className="ho-btn ho-btn-outline">Explore the platform</a>
               </div>
-              <ul className="ho-hero-points">
-                {HERO_POINTS.map((point) => (
-                  <li key={point.title}>
-                    <CircleCheck size={19} aria-hidden="true" />
-                    <span><b>{point.title}</b>{point.text}</span>
-                  </li>
+              <ul className="ho-hero-badges">
+                {HERO_BADGES.map((b) => (
+                  <li key={b.label}><span aria-hidden="true">{b.icon}</span>{b.label}</li>
                 ))}
               </ul>
-              <div className="ho-hero-markets" aria-label="Markets available">
-                <span>Markets</span>
-                {HERO_MARKETS.map((market) => (
-                  <Link key={market} to={`/markets?category=${market}`}>{market}</Link>
-                ))}
-              </div>
-              <p className="ho-hero-note">
-                Practice first. Trading involves risk: only trade with money you can afford to lose.
-              </p>
             </div>
-            <Devices />
+            <Devices priority />
           </div>
         </section>
 
-        <AssetMarquee />
+        <TickerCards />
 
         <section className="ho-section">
           <div className="ho-container">
-            <SectionHead title="Built around your trading experience" sub="Simple. Intuitive. Designed to help you trade with confidence." />
-            <div className="ho-features">
-              {FEATURES.map((f) => (
-                <article key={f.title} className="ho-feature">
-                  <span className="ho-feature-icon" aria-hidden="true">{f.icon}</span>
-                  <div><h3>{f.title}</h3><p>{f.text}</p></div>
+            <SectionHead title="Why traders choose NeuroOption" sub="A powerful trading experience designed for traders of all levels." />
+            <div className="ho-why">
+              {WHY.map((f) => (
+                <article key={f.title} className="ho-card">
+                  <span className="ho-icon" aria-hidden="true">{f.icon}</span>
+                  <h3>{f.title}</h3>
+                  <p>{f.text}</p>
                 </article>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="ho-section ho-section-tint">
+        <section className="ho-section ho-section-tint" id="platform">
           <div className="ho-container ho-split">
-            <ChartShowcase />
+            <Devices />
             <div className="ho-split-copy">
-              <h2>A clearer view of the markets</h2>
-              <p className="ho-split-lead">Powerful tools and a clean interface to help you analyse opportunities and trade with confidence.</p>
-              <ul className="ho-tools">
-                {TOOLS.map((t) => (
-                  <li key={t.title}>
-                    <span className="ho-tool-icon" aria-hidden="true">{t.icon}</span>
-                    <div><h3>{t.title}</h3><p>{t.text}</p></div>
-                  </li>
-                ))}
+              <p className="ho-eyebrow">The NeuroOption platform</p>
+              <h2>A trading terminal built for modern traders</h2>
+              <p className="ho-split-lead">
+                A fast, intuitive trading screen with professional charting, real-time prices and easy trade execution.
+                Available on all your devices.
+              </p>
+              <ul className="ho-checks">
+                {PLATFORM_POINTS.map((point) => <li key={point}><CircleCheck size={18} aria-hidden="true" />{point}</li>)}
               </ul>
+              <PrimaryLink to="/trading">Explore the platform <ArrowRight size={17} aria-hidden="true" /></PrimaryLink>
             </div>
           </div>
         </section>
 
-        <section className="ho-section">
+        <MarketsSection />
+
+        <section className="ho-section ho-section-tint">
           <div className="ho-container">
-            <SectionHead title="Start with a demo" sub="Get familiar with the platform in just a few simple steps." />
+            <SectionHead center={false} title="Get started in minutes" sub="Start your trading journey with a simple and straightforward process." />
             <ol className="ho-steps">
               {STEPS.map((s, i) => (
                 <li key={s.title} className="ho-step">
-                  <span className="ho-step-num">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="ho-step-icon" aria-hidden="true">{s.icon}</span>
+                  <span className="ho-step-num">{i + 1}</span>
                   <div><h3>{s.title}</h3><p>{s.text}</p></div>
-                  {i < STEPS.length - 1 && <ChevronRight className="ho-step-arrow" size={20} aria-hidden="true" />}
+                  <span className="ho-step-icon" aria-hidden="true">{s.icon}</span>
                 </li>
               ))}
             </ol>
-            <div className="ho-center"><PrimaryLink to="/trading">Try free demo <ArrowRight size={17} aria-hidden="true" /></PrimaryLink></div>
-          </div>
-        </section>
-
-        <section className="ho-section ho-section-tint ho-payments" id="payments">
-          <div className="ho-container">
-            <SectionHead title="Payment options" sub="Fund your account using a range of convenient payment methods." />
-            <div className="ho-pay-logos">
-              <PaymentLogo brand="mpesa" label="M-Pesa" />
-              <span className="ho-pay-divider" aria-hidden="true" />
-              <PaymentLogo brand="visa" label="Visa" />
-              <span className="ho-pay-divider" aria-hidden="true" />
-              <PaymentLogo brand="mastercard" label="Mastercard" />
-            </div>
-            <p className="ho-pay-note">Review available methods in your account.</p>
           </div>
         </section>
 
         <section className="ho-section">
+          <div className="ho-container ho-security">
+            <div className="ho-shield" aria-hidden="true">
+              <div className="ho-shield-badge"><ShieldCheck size={96} strokeWidth={1.4} /></div>
+            </div>
+            <div>
+              <SectionHead
+                center={false}
+                title="Your security comes first"
+                sub="We take the security of your account and personal information seriously."
+              />
+              <div className="ho-security-grid">
+                {SECURITY.map((item) => (
+                  <article key={item.title} className="ho-card ho-card-row">
+                    <span className="ho-icon" aria-hidden="true">{item.icon}</span>
+                    <div><h3>{item.title}</h3><p>{item.text}</p></div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="ho-section ho-section-tint" id="learn">
           <div className="ho-container">
-            <SectionHead title="Questions before you begin?" sub="Find quick answers to common questions about NeuroOption." />
-            <div className="ho-faq">
-              {FAQ.map((item) => (
-                <details key={item.q} className="ho-faq-item">
-                  <summary><CircleHelp size={18} aria-hidden="true" /><span>{item.q}</span><Plus size={18} className="ho-faq-plus" aria-hidden="true" /></summary>
-                  <p>{item.a}</p>
-                </details>
+            <SectionHead
+              center={false}
+              title="Learn. Practise. Improve."
+              sub="Resources to build your trading knowledge and skills."
+              action={<Link to="/help" className="ho-link">Visit the Help Center <ArrowRight size={15} aria-hidden="true" /></Link>}
+            />
+            <div className="ho-learn">
+              {LEARN.map((item) => (
+                <Link key={item.title} to={item.to} className="ho-card ho-card-row">
+                  <span className="ho-icon" aria-hidden="true">{item.icon}</span>
+                  <div><h3>{item.title}</h3><p>{item.text}</p></div>
+                </Link>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="ho-container">
+        <section className="ho-container ho-cta-wrap">
           <div className="ho-cta-band">
             <div>
-              <h2>Explore Neuro<span>Option</span> at your own pace.</h2>
-              <p>Start with a demo and get to know the platform.</p>
+              <h2>Ready to experience a smarter way to trade?</h2>
+              <p>Start on a free demo account and get to know the platform at your own pace.</p>
             </div>
             <div className="ho-cta-actions">
-              <PrimaryLink to="/trading" className="ho-btn-bright">Try free demo <ArrowRight size={17} aria-hidden="true" /></PrimaryLink>
-              {!signedIn && <Link to="/login" className="ho-cta-login">Log in</Link>}
+              <PrimaryLink to="/trading">Start trading now <ArrowRight size={17} aria-hidden="true" /></PrimaryLink>
+              <a href="#platform" className="ho-cta-sub">Or explore the platform first</a>
             </div>
           </div>
+          <ul className="ho-stats">
+            {STATS.map((s) => (
+              <li key={s.label}><span className="ho-icon" aria-hidden="true">{s.icon}</span><span><b>{s.value}</b>{s.label}</span></li>
+            ))}
+          </ul>
         </section>
-
-        <div className="ho-container"><Newsletter /></div>
       </main>
 
       <footer className="ho-footer">
         <div className="ho-container">
           <div className="ho-footer-grid">
             <div className="ho-footer-brand">
-              <Link to="/" className="ho-logo" aria-label="NeuroOption home"><Logo loading="lazy" /></Link>
-              <p>A clear, connected trading experience.</p>
+              <Link to="/" className="ho-footer-logo" aria-label="NeuroOption home"><Logo loading="lazy" /></Link>
+              <p>A smarter way to experience the markets.</p>
+              <Newsletter />
             </div>
             <div className="ho-footer-col">
-              <h3>Platform</h3>
-              <Link to="/trading">Demo account</Link>
+              <h3>Trading</h3>
+              <Link to="/trading">Trading platform</Link>
               <Link to="/markets">Markets</Link>
-              <Link to="/trading">Chart tools</Link>
+              <Link to="/trading">Demo account</Link>
+              <Link to="/open-trades">Open trades</Link>
+              <Link to="/history">Trade history</Link>
             </div>
             <div className="ho-footer-col">
               <h3>Company</h3>
-              <Link to="/help">About</Link>
-              <Link to="/help">Contact</Link>
-              <Link to="/help">Support</Link>
+              <Link to="/help">About us</Link>
+              <Link to="/support">Contact</Link>
+            </div>
+            <div className="ho-footer-col">
+              <h3>Help Center</h3>
+              <Link to="/help">FAQ</Link>
+              <Link to="/finance">Deposits</Link>
+              <Link to="/finance?tab=withdraw">Withdrawals</Link>
+              <Link to="/settings#verification">Account verification</Link>
+              <Link to="/support">Contact support</Link>
             </div>
             <div className="ho-footer-col">
               <h3>Legal</h3>
@@ -550,9 +569,13 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="ho-footer-bottom">
-            <p>Trading involves risk. You may lose the amount invested.</p>
             <p>© {new Date().getFullYear()} NeuroOption. All rights reserved.</p>
           </div>
+          <p className="ho-risk">
+            <ShieldCheck size={18} aria-hidden="true" />
+            <span><b>Risk warning:</b> Fixed-time trading involves a high risk of losing the money you invest. You may lose your full stake.
+            Only trade with money you can afford to lose, and make sure you understand the risks involved.</span>
+          </p>
         </div>
       </footer>
     </div>
