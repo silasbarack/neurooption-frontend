@@ -63,26 +63,28 @@
 .ho-mobile-actions { display: grid; gap: 10px; margin-top: 22px; }
 
 /* Hero */
-.ho-hero { position: relative; overflow: hidden; background: radial-gradient(900px 480px at 85% 10%, rgba(18, 163, 194, 0.12), transparent 65%), radial-gradient(700px 420px at 0% 0%, rgba(11, 127, 180, 0.09), transparent 70%), linear-gradient(180deg, #f3f8fd 0%, #ffffff 100%); border-bottom: 1px solid var(--ho-line); }
-.ho-hero::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(11, 42, 85, 0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(11, 42, 85, 0.045) 1px, transparent 1px); background-size: 48px 48px; -webkit-mask-image: radial-gradient(ellipse 60% 70% at 75% 45%, #000 15%, transparent 75%); mask-image: radial-gradient(ellipse 60% 70% at 75% 45%, #000 15%, transparent 75%); pointer-events: none; }
+.ho-hero { position: relative; overflow: hidden; background: linear-gradient(90deg, rgba(5, 17, 37, 0.8) 0%, rgba(6, 22, 48, 0.45) 50%, rgba(7, 26, 54, 0.2) 100%), url("/landing/hero-candles-2400.webp") center / cover no-repeat, #061630; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.ho-hero::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(170, 196, 230, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(170, 196, 230, 0.05) 1px, transparent 1px); background-size: 48px 48px; -webkit-mask-image: radial-gradient(ellipse 60% 70% at 75% 45%, #000 15%, transparent 75%); mask-image: radial-gradient(ellipse 60% 70% at 75% 45%, #000 15%, transparent 75%); pointer-events: none; }
 .ho-hero-inner { position: relative; display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr); align-items: center; gap: 44px; padding: 60px 0 70px; }
-.ho-eyebrow { margin-bottom: 18px !important; color: var(--ho-blue); font-size: 12px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
-.ho-hero h1 { color: var(--ho-navy); font-size: clamp(46px, 5.2vw, 76px); font-weight: 800; line-height: 1.02; letter-spacing: -0.045em; }
-.ho-hero h1 span { display: block; background: linear-gradient(100deg, #0b7fb4 0%, #12a3c2 100%); -webkit-background-clip: text; background-clip: text; color: #0b7fb4; -webkit-text-fill-color: transparent; }
-.ho-lead { max-width: 520px; margin-top: 22px !important; color: var(--ho-text); font-size: 17.5px; line-height: 1.6; }
-.ho-hero-points { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 22px; max-width: 540px; margin: 30px 0 0; padding-top: 24px; border-top: 1px solid var(--ho-line); padding: 0; list-style: none; }
+.ho-eyebrow { margin-bottom: 18px !important; color: #5fd3e6; font-size: 12px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
+.ho-hero h1 { color: #fff; font-size: clamp(46px, 5.2vw, 76px); font-weight: 800; line-height: 1.02; letter-spacing: -0.045em; }
+.ho-hero h1 span { display: block; background: linear-gradient(100deg, #3cc4e0 0%, #5fe0d0 100%); -webkit-background-clip: text; background-clip: text; color: #3cc4e0; -webkit-text-fill-color: transparent; }
+.ho-lead { max-width: 520px; margin-top: 22px !important; color: rgba(226, 236, 248, 0.88); font-size: 17.5px; line-height: 1.6; }
+.ho-hero-points { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 22px; max-width: 540px; margin: 30px 0 0; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.14); padding: 0; list-style: none; }
 .ho-hero-points li { display: flex; align-items: flex-start; gap: 11px; }
-.ho-hero-points svg { flex: none; margin-top: 2px; color: var(--ho-teal); }
-.ho-hero-points span { display: grid; gap: 2px; color: var(--ho-text); font-size: 13.5px; line-height: 1.5; }
+.ho-hero-points svg { flex: none; margin-top: 2px; color: #3cc4e0; }
+.ho-hero-points span { display: grid; gap: 2px; color: rgba(214, 226, 242, 0.78); font-size: 13.5px; line-height: 1.5; }
 .ho-nowrap { white-space: nowrap; }
-.ho-hero-points b { color: var(--ho-ink); font-size: 14.5px; font-weight: 700; }
+.ho-hero-points b { color: #fff; font-size: 14.5px; font-weight: 700; }
 .ho-hero-markets { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 22px; }
-.ho-hero-markets span { margin-right: 4px; color: var(--ho-muted); font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
-.ho-hero-markets a { padding: 6px 12px; border: 1px solid var(--ho-line); border-radius: 999px; background: rgba(255, 255, 255, 0.8); color: var(--ho-navy); font-size: 13px; font-weight: 600; transition: border-color 0.2s ease, background-color 0.2s ease; }
-.ho-hero-markets a:hover { border-color: #9fc6de; background: #fff; }
-.ho-hero-markets a:focus-visible { outline: 2px solid var(--ho-blue); outline-offset: 2px; }
+.ho-hero-markets span { margin-right: 4px; color: rgba(214, 226, 242, 0.65); font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+.ho-hero-markets a { padding: 6px 12px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 999px; background: rgba(255, 255, 255, 0.07); color: #fff; font-size: 13px; font-weight: 600; transition: border-color 0.2s ease, background-color 0.2s ease; }
+.ho-hero-markets a:hover { border-color: rgba(255, 255, 255, 0.45); background: rgba(255, 255, 255, 0.14); }
+.ho-hero-markets a:focus-visible { outline: 2px solid #5fd3e6; outline-offset: 2px; }
 .ho-hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
-.ho-hero-note { max-width: 540px; margin-top: 16px !important; color: var(--ho-muted); font-size: 13px; line-height: 1.5; }
+.ho-hero .ho-btn-outline { border-color: rgba(255, 255, 255, 0.4); background: rgba(255, 255, 255, 0.06); color: #fff; }
+.ho-hero .ho-btn-outline:hover { border-color: #fff; background: rgba(255, 255, 255, 0.12); }
+.ho-hero-note { max-width: 540px; margin-top: 16px !important; color: rgba(214, 226, 242, 0.65); font-size: 13px; line-height: 1.5; }
 
 /* Devices: real screenshots inside realistic frames */
 .ho-devices { position: relative; padding: 0 0 30px; }
@@ -210,6 +212,7 @@
   .ho-container { width: calc(100% - 32px); }
   .ho-header-inner { height: 64px; }
   .ho-logo img { height: 42px; }
+  .ho-hero { background: linear-gradient(180deg, rgba(5, 17, 37, 0.72) 0%, rgba(6, 22, 48, 0.5) 55%, rgba(6, 22, 48, 0.85) 100%), url("/landing/hero-candles-1200.webp") 62% center / cover no-repeat, #061630; }
   .ho-hero h1 { font-size: clamp(42px, 12vw, 56px); }
   .ho-lead { font-size: 16px; }
   .ho-hero-cta { display: grid; grid-template-columns: 1fr; }
