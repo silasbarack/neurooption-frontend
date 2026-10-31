@@ -179,3 +179,25 @@ a.ho-card:hover,.ho-why .ho-card:hover{border-color:#B7DFE7;transform:translateY
 @media(prefers-reduced-motion:reduce){
  .ho-hero .ho-devices{transform:none}
 }
+/* Discoverable categories and non-price ticker, respecting reduced-motion. */
+.ho-nav-market{position:relative;display:flex;align-items:center}
+.ho-nav-market-trigger{border:0;background:transparent;font-family:inherit;cursor:pointer}
+.ho-nav-market-trigger span{margin-left:5px}
+.ho-market-menu{position:absolute;left:0;top:calc(100% - 2px);z-index:60;display:grid;min-width:190px;padding:9px;border:1px solid #e0edf3;border-radius:15px;background:#fff;box-shadow:0 23px 55px -30px rgba(11,35,70,.33);opacity:0;visibility:hidden;transform:translateY(6px);transition:opacity .16s,transform .16s,visibility .16s}
+.ho-nav-market:hover .ho-market-menu,.ho-nav-market:focus-within .ho-market-menu{opacity:1;visibility:visible;transform:translateY(0)}
+.ho-market-menu a{padding:11px 13px;color:#25405b;text-decoration:none;font-weight:650;font-size:13px;border-radius:9px}
+.ho-market-menu a:hover,.ho-market-menu a:focus-visible{background:#ecf8f9;color:#087a95}
+.ho-marquee{position:relative;overflow:hidden;padding:14px 0;border-top:1px solid #e4eef3;border-bottom:1px solid #e4eef3;background:#f6fbfd}
+.ho-marquee-track{display:flex;width:max-content;animation:ho-market-scroll 42s linear infinite}
+.ho-marquee-group{display:flex;flex:none;align-items:center;gap:13px;padding-right:13px}
+.ho-marquee-item{display:inline-flex;align-items:center;white-space:nowrap;gap:8px;padding:7px 15px;border:1px solid #e3edf3;border-radius:99px;background:#fff;color:#496b82;font-size:12px;font-weight:750}
+.ho-marquee-item::before{content:"";width:6px;height:6px;border-radius:50%;background:#13B8B6}
+.ho-marquee:hover .ho-marquee-track,.ho-marquee:focus-within .ho-marquee-track{animation-play-state:paused}
+@keyframes ho-market-scroll{to{transform:translateX(-50%)}}
+.ho-register-link{display:inline-flex;align-items:center;gap:5px;align-self:center;color:#087C9D;font-size:12px;font-weight:750;text-decoration:underline;text-underline-offset:3px}
+.ho-mobile-categories{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px;padding:14px 0}
+.ho-mobile-categories p{grid-column:1/-1;margin:0;color:#087fa0;font-size:12px;font-weight:850;text-transform:uppercase;letter-spacing:.1em}
+.ho-mobile-menu nav .ho-mobile-categories a{font-size:13px;padding:10px 2px}
+@media(max-width:640px){.ho-hero-cta{grid-template-columns:1fr 1fr}.ho-register-link{grid-column:1/-1;justify-content:center;min-height:30px}.ho-marquee{padding:10px 0}}
+@media(max-width:375px){.ho-hero-cta{grid-template-columns:1fr}.ho-register-link{grid-column:auto}}
+@media(prefers-reduced-motion:reduce){.ho-marquee-track{animation:none}.ho-marquee{overflow-x:auto}}
