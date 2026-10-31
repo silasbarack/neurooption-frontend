@@ -15,13 +15,15 @@ import { api } from "../api/api";
 import type { MarketQuote } from "../api";
 import { getToken } from "../utils/storage";
 import "./Home.css";
+import "./HomePremium.css";
 
 const NAV = [
   { label: "Trading", to: "/trading" },
   { label: "Markets", to: "/markets" },
   { label: "Platform", to: "#platform" },
+  { label: "How It Works", to: "#how-it-works" },
   { label: "Education", to: "#learn" },
-  { label: "About Us", to: "/help" },
+  { label: "About", to: "#about" },
   { label: "Help Center", to: "/help" },
 ];
 
@@ -193,15 +195,15 @@ function Devices({ priority = false }: { priority?: boolean }) {
 
 /** Six live quotes under the hero. */
 function TickerCards() {
-  const { quotes } = useQuotes();
+  const { quotes, live } = useQuotes();
   const items = useMemo(() => {
     const wanted = ["EUR/USD OTC", "GBP/USD OTC", "BTC/USD OTC", "ETH/USD OTC", "Gold OTC", "US100 OTC"];
     const picked = wanted.map((s) => quotes.find((q) => q.symbol === s)).filter((q): q is MarketQuote => Boolean(q));
     return picked.length >= 6 ? picked : quotes.slice(0, 6);
   }, [quotes]);
   return (
-    <section className="ho-container ho-ticker" aria-label="Live prices">
-      {items.map((q) => (
+    <section className="ho-container ho-ticker" aria-label={live ? "Live market quotes" : "Market feed unavailable"}>
+      {!live ? <div className="ho-feed-status" role="status"><strong>Market feed unavailable.</strong> Prices are not displayed until the market service responds. Explore the instruments and demo platform without relying on illustrative quote values.</div> : items.map((q) => (
         <Link key={q.symbol} to="/markets" className="ho-ticker-card">
           <span className="ho-ticker-text">
             <b>{q.symbol.replace(/\s*OTC$/i, "")}</b>
@@ -216,7 +218,7 @@ function TickerCards() {
 }
 
 function MarketsSection() {
-  const { quotes } = useQuotes();
+  const { quotes, live } = useQuotes();
   const [tab, setTab] = useState("All");
   const items = useMemo(() => {
     if (tab !== "All") return quotes.filter((q) => q.category === tab).slice(0, 6);
@@ -243,7 +245,8 @@ function MarketsSection() {
           ))}
         </div>
         <div className="ho-market-grid">
-          {items.map((q) => (
+          {!live && <div className="ho-feed-status" role="status"><strong>Live quotes unavailable.</strong> Market prices are temporarily hidden. Visit the markets page to check availability.</div>}
+          {live && items.map((q) => (
             <Link key={q.symbol} to={`/markets?category=${encodeURIComponent(q.category)}`} className="ho-market-card">
               <span className="ho-market-head">
                 <AssetIcon symbol={q.symbol} size={38} />
@@ -362,7 +365,7 @@ export default function LandingPage() {
   const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   useEffect(() => {
-    document.title = "NeuroOption | A smarter way to experience the markets";
+    document.title = "NeuroOption | Trade with Clarity. Navigate Every Opportunity.";
   }, []);
 
   return (
@@ -378,8 +381,8 @@ export default function LandingPage() {
               <PrimaryLink to="/trading" className="ho-btn-sm">Open platform <ArrowRight size={15} aria-hidden="true" /></PrimaryLink>
             ) : (
               <>
-                <Link to="/login" className="ho-btn ho-btn-outline ho-btn-sm">Sign in</Link>
-                <PrimaryLink to="/register" className="ho-btn-sm">Create account</PrimaryLink>
+                <Link to="/login" className="ho-btn ho-btn-outline ho-btn-sm">Login</Link>
+                <PrimaryLink to="/register" className="ho-btn-sm">Sign Up</PrimaryLink>
               </>
             )}
           </div>
@@ -411,15 +414,14 @@ export default function LandingPage() {
         <section className="ho-hero">
           <div className="ho-container ho-hero-inner">
             <div className="ho-hero-copy">
-              <p className="ho-eyebrow">The modern trading platform</p>
-              <h1>A smarter way to experience <span>the markets.</span></h1>
+              <p className="ho-eyebrow">A new perspective on the markets</p>
+              <h1>Trade with Clarity. <span>Navigate Every Opportunity.</span></h1>
               <p className="ho-lead">
-                Explore global markets through an intuitive trading platform built for speed, clarity and control.
-                Practise on a free demo account, then fund a real account with <span className="ho-nowrap">M-Pesa</span> when you are ready.
+                Explore fixed-time trading with intuitive charts, clear instrument selection and a dedicated demo environment. Understand the risks, practise with virtual funds and stay in control of your decisions.
               </p>
               <div className="ho-hero-cta">
-                <PrimaryLink to="/trading">Start trading <ArrowRight size={17} aria-hidden="true" /></PrimaryLink>
-                <a href="#platform" className="ho-btn ho-btn-outline">Explore the platform</a>
+                <a href="#platform" className="ho-btn ho-btn-primary">Explore Platform <ArrowRight size={17} aria-hidden="true" /></a>
+                <PrimaryLink to="/trading" className="ho-btn-outline">Try Demo</PrimaryLink>
               </div>
               <ul className="ho-hero-badges">
                 {HERO_BADGES.map((b) => (
@@ -427,7 +429,7 @@ export default function LandingPage() {
                 ))}
               </ul>
             </div>
-            <Devices priority />
+            <div className="ho-hero-preview"><span className="ho-demo-note">Platform interface preview</span><Devices priority /></div>
           </div>
         </section>
 
@@ -468,7 +470,7 @@ export default function LandingPage() {
 
         <MarketsSection />
 
-        <section className="ho-section ho-section-tint">
+        <section className="ho-section ho-section-tint" id="how-it-works">
           <div className="ho-container">
             <SectionHead center={false} title="Get started in minutes" sub="Start your trading journey with a simple and straightforward process." />
             <ol className="ho-steps">
@@ -482,7 +484,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="ho-section">
+        <section className="ho-section" id="about">
           <div className="ho-container ho-security">
             <img
               className="ho-shield"
@@ -556,11 +558,24 @@ export default function LandingPage() {
               <a href="#platform" className="ho-cta-sub">Or explore the platform first</a>
             </div>
           </div>
+          <p className="ho-risk-note">Fixed-time trading is speculative and can result in losing the entire amount invested. Demo performance does not predict real-money results.</p>
           <ul className="ho-stats">
             {STATS.map((s) => (
               <li key={s.label}><span className={`ho-icon ${s.tone === "green" ? "is-green" : ""}`} aria-hidden="true">{s.icon}</span><span><b>{s.value}</b>{s.label}</span></li>
             ))}
           </ul>
+        </section>
+        <section className="ho-section ho-faq" id="faq" aria-labelledby="ho-faq-heading">
+          <div className="ho-container">
+            <div className="ho-section-head is-center"><div><h2 id="ho-faq-heading">Frequently asked questions</h2><p>Useful answers before you explore NeuroOption.</p></div></div>
+            <div className="ho-faq-list">
+              <details><summary>What is NeuroOption?</summary><p>NeuroOption is a fixed-time binary options trading platform with market charts, technical analysis tools and demo and real account interfaces. Trading involves substantial risk, including the possibility of losing the full stake.</p></details>
+              <details><summary>Can I explore the platform without risking money?</summary><p>The demo account provides virtual funds to practise using the platform. Demo funds have no cash value and demonstration results cannot predict outcomes in real trading.</p></details>
+              <details><summary>Are all instruments conventional exchange-traded markets?</summary><p>No. NeuroOption includes over-the-counter (OTC) instruments. OTC price feeds may be platform-derived and should be distinctly labelled from externally sourced real-market instruments.</p></details>
+              <details><summary>How are deposits and withdrawals processed?</summary><p>M-Pesa is the payment option currently presented as available. Other methods are only accessible when their server-side integration is active. Visit the finance area for the current methods and transaction status.</p></details>
+              <details><summary>Is there a guaranteed return?</summary><p>No. Fixed-time binary options are high-risk speculative products. A potential payout shown for a trade is conditional and not a promise of a profit. Read the <a href="/legal/risk-disclosure">risk disclosure</a> before considering real-money trading.</p></details>
+            </div>
+          </div>
         </section>
       </main>
 
