@@ -30,6 +30,15 @@ const NAV = [
 /* Figures below match the platform: 116 OTC assets in five markets, 22
    indicators, 14 timeframes from 5 seconds to 1 day. Icons follow the
    approved reference design. */
+const MARKET_CATEGORIES = [
+  { label: "Forex", category: "Currencies" },
+  { label: "Crypto", category: "Cryptocurrencies" },
+  { label: "Stocks", category: "Stocks" },
+  { label: "Commodities", category: "Commodities" },
+  { label: "Indices", category: "Indices" },
+];
+const MARKET_STRIP = ["EUR/USD OTC", "GBP/USD OTC", "Gold OTC", "Bitcoin OTC", "US100 OTC", "Tesla OTC", "Forex", "Crypto", "Indices", "Commodities"];
+
 const HERO_BADGES = [
   { icon: <Wallet size={18} />, label: "100+ trading assets" },
   { icon: <ChartLine size={18} />, label: "Advanced charting" },
@@ -217,6 +226,21 @@ function TickerCards() {
   );
 }
 
+/** A moving instrument-discovery strip, not a live market-price feed. */
+function MarketDiscoveryStrip() {
+  return (
+    <section className="ho-marquee" aria-label="Examples of instruments and market categories" title="Instrument examples, not live market prices">
+      <div className="ho-marquee-track">
+        {[0, 1].map((copy) => (
+          <div className="ho-marquee-group" key={copy} aria-hidden={copy === 1}>
+            {MARKET_STRIP.map((symbol) => <span className="ho-marquee-item" key={symbol}>{symbol}</span>)}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function MarketsSection() {
   const { quotes, live } = useQuotes();
   const [tab, setTab] = useState("All");
@@ -374,7 +398,19 @@ export default function LandingPage() {
         <div className="ho-container ho-header-inner">
           <Link to="/" className="ho-logo" aria-label="NeuroOption home"><Logo /></Link>
           <nav className="ho-nav" aria-label="Main">
-            {NAV.map((item) => <NavLinkItem key={item.label} to={item.to} label={item.label} className="ho-nav-link" />)}
+            {NAV.map((item) => item.label === "Markets"
+              ? <div className="ho-nav-market" key={item.label}>
+                  <button className="ho-nav-link ho-nav-market-trigger" type="button" aria-haspopup="true">
+                    Markets <span aria-hidden="true">⌄</span>
+                  </button>
+                  <div className="ho-market-menu" role="menu" aria-label="Market categories">
+                    <Link role="menuitem" to="/markets">All markets</Link>
+                    {MARKET_CATEGORIES.map(({label,category}) =>
+                      <Link role="menuitem" key={category} to={`/markets?category=${encodeURIComponent(category)}`}>{label}</Link>
+                    )}
+                  </div>
+                </div>
+              : <NavLinkItem key={item.label} to={item.to} label={item.label} className="ho-nav-link" />)}
           </nav>
           <div className="ho-header-actions">
             {signedIn ? (
@@ -399,7 +435,13 @@ export default function LandingPage() {
             <button type="button" className="ho-menu-btn ho-menu-close" aria-label="Close menu" onClick={() => setMenuOpen(false)}><X size={22} /></button>
           </div>
           <nav aria-label="Mobile">
-            {NAV.map((item) => <NavLinkItem key={item.label} to={item.to} label={item.label} onClick={() => setMenuOpen(false)} />)}
+            {NAV.map((item) => <NavLinkItem key={item.label} to={item.to} label={item.label} onClick={closeMenu} />)}
+            <div className="ho-mobile-categories">
+              <p>Explore markets</p>
+              {MARKET_CATEGORIES.map(({label, category}) =>
+                <Link key={category} to={`/markets?category=${encodeURIComponent(category)}`} onClick={closeMenu}>{label}</Link>
+              )}
+            </div>
           </nav>
           <div className="ho-mobile-actions">
             {signedIn ? <PrimaryLink to="/trading">Open platform</PrimaryLink> : <>
@@ -422,6 +464,7 @@ export default function LandingPage() {
               <div className="ho-hero-cta">
                 <a href="#platform" className="ho-btn ho-btn-primary">Explore Platform <ArrowRight size={17} aria-hidden="true" /></a>
                 <PrimaryLink to="/trading" className="ho-btn-outline">Try Demo</PrimaryLink>
+                <Link to="/register" className="ho-register-link">Create a free account <ArrowRight size={14} aria-hidden="true" /></Link>
               </div>
               <ul className="ho-hero-badges">
                 {HERO_BADGES.map((b) => (
@@ -433,6 +476,7 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <MarketDiscoveryStrip />
         <TickerCards />
 
         <section className="ho-section">
