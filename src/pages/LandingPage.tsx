@@ -147,8 +147,8 @@ function HeroScreens() {
           <em>neurooption.com/trading</em>
         </div>
         <img
-          src="/landing/screens/trading-desktop.webp"
-          srcSet="/landing/screens/trading-desktop-960.webp 960w, /landing/screens/trading-desktop.webp 1600w"
+          src="/landing/screens/trading-desktop.webp?v=2"
+          srcSet="/landing/screens/trading-desktop-960.webp?v=2 960w, /landing/screens/trading-desktop.webp?v=2 1600w"
           sizes="(max-width: 900px) 92vw, 700px"
           alt="NeuroOption trading screen on desktop: EUR/USD OTC candlestick chart with the trade panel"
           width={1600}
@@ -159,7 +159,7 @@ function HeroScreens() {
       </figure>
       <figure className="ho-handset">
         <img
-          src="/landing/screens/trading-mobile.webp"
+          src="/landing/screens/trading-mobile.webp?v=2"
           alt="NeuroOption trading screen on a phone: live chart with BUY and SELL buttons"
           width={585}
           height={1266}
