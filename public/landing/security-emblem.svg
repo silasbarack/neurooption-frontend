@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 440" role="img" aria-label="NeuroOption security emblem">
+  <defs>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fbf9f4"/>
+      <stop offset="1" stop-color="#efe8da"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.46" r="0.5">
+      <stop offset="0" stop-color="#0d8aa8" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#0d8aa8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f3dc9c"/>
+      <stop offset="0.45" stop-color="#d8b871"/>
+      <stop offset="1" stop-color="#a77d33"/>
+    </linearGradient>
+    <linearGradient id="goldSoft" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6e4ad"/>
+      <stop offset="1" stop-color="#c49a4c"/>
+    </linearGradient>
+    <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#253656"/>
+      <stop offset="0.55" stop-color="#0d1a33"/>
+      <stop offset="1" stop-color="#081226"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="teal" cx="0.5" cy="0.38" r="0.6">
+      <stop offset="0" stop-color="#2fb3cf" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#2fb3cf" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="drop" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#0d1a33" flood-opacity="0.32"/>
+    </filter>
+    <filter id="chipShadow" x="-20%" y="-40%" width="140%" height="200%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#0d1a33" flood-opacity="0.16"/>
+    </filter>
+    <pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="#0d1a33" fill-opacity="0.07"/>
+    </pattern>
+    <clipPath id="cardClip"><rect width="600" height="440" rx="26"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#cardClip)">
+    <rect width="600" height="440" fill="url(#card)"/>
+    <rect width="600" height="440" fill="url(#dots)"/>
+
+    <!-- Faint candlesticks along the bottom -->
+    <g opacity="0.22" stroke-linecap="round">
+      <g stroke="#1f9d63" fill="#1f9d63">
+        <line x1="40" y1="350" x2="40" y2="398"/><rect x="36" y="360" width="8" height="26"/>
+        <line x1="84" y1="330" x2="84" y2="384"/><rect x="80" y="338" width="8" height="34"/>
+        <line x1="150" y1="318" x2="150" y2="372"/><rect x="146" y="326" width="8" height="30"/>
+        <line x1="438" y1="300" x2="438" y2="360"/><rect x="434" y="310" width="8" height="36"/>
+        <line x1="482" y1="282" x2="482" y2="340"/><rect x="478" y="290" width="8" height="34"/>
+        <line x1="548" y1="262" x2="548" y2="322"/><rect x="544" y="270" width="8" height="38"/>
+      </g>
+      <g stroke="#d1453b" fill="#d1453b">
+        <line x1="62" y1="340" x2="62" y2="392"/><rect x="58" y="348" width="8" height="30"/>
+        <line x1="106" y1="326" x2="106" y2="378"/><rect x="102" y="340" width="8" height="24"/>
+        <line x1="128" y1="334" x2="128" y2="380"/><rect x="124" y="342" width="8" height="22"/>
+        <line x1="460" y1="292" x2="460" y2="350"/><rect x="456" y="304" width="8" height="28"/>
+        <line x1="504" y1="276" x2="504" y2="330"/><rect x="500" y="288" width="8" height="26"/>
+        <line x1="526" y1="270" x2="526" y2="326"/><rect x="522" y="280" width="8" height="30"/>
+      </g>
+      <polyline points="20,380 70,366 120,350 170,342 430,330 480,308 530,292 590,270" fill="none" stroke="#0d8aa8" stroke-width="2"/>
+    </g>
+
+    <!-- Halo and hairline rings -->
+    <circle cx="300" cy="200" r="200" fill="url(#halo)"/>
+    <g fill="none" stroke="#0d1a33">
+      <circle cx="300" cy="200" r="168" stroke-opacity="0.08"/>
+      <circle cx="300" cy="200" r="132" stroke-opacity="0.12" stroke-dasharray="2 7"/>
+      <circle cx="300" cy="200" r="198" stroke-opacity="0.06"/>
+    </g>
+    <circle cx="300" cy="200" r="150" fill="none" stroke="url(#gold)" stroke-width="1.2" stroke-opacity="0.7"/>
+    <circle cx="150" cy="200" r="3.5" fill="url(#gold)"/>
+    <circle cx="450" cy="200" r="3.5" fill="url(#gold)"/>
+    <circle cx="300" cy="50" r="3.5" fill="url(#gold)"/>
+
+    <!-- Plinth -->
+    <ellipse cx="300" cy="350" rx="118" ry="16" fill="#0d1a33" fill-opacity="0.16"/>
+    <ellipse cx="300" cy="343" rx="102" ry="13" fill="url(#goldSoft)" fill-opacity="0.55"/>
+
+    <!-- Shield -->
+    <g filter="url(#drop)">
+      <path d="M300 74 L392 108 C392 108 396 196 380 240 C364 286 332 316 300 334 C268 316 236 286 220 240 C204 196 208 108 208 108 Z" fill="url(#gold)"/>
+      <path d="M300 88 L380 117 C380 117 383 194 369 233 C355 273 328 300 300 316 C272 300 245 273 231 233 C217 194 220 117 220 117 Z" fill="url(#navy)"/>
+      <path d="M300 88 L380 117 C380 117 383 194 369 233 C355 273 328 300 300 316 Z" fill="#ffffff" fill-opacity="0.04"/>
+      <path d="M300 88 L380 117 C380 117 383 194 369 233 C355 273 328 300 300 316 C272 300 245 273 231 233 C217 194 220 117 220 117 Z" fill="url(#teal)"/>
+      <path d="M300 88 L220 117 C220 117 217 194 231 233 C240 258 254 278 270 293 L300 88 Z" fill="url(#sheen)"/>
+      <path d="M300 100 L369 125 C369 125 371 192 359 226 C347 260 325 284 300 298 C275 284 253 260 241 226 C229 192 231 125 231 125 Z" fill="none" stroke="url(#gold)" stroke-width="1.4" stroke-opacity="0.6"/>
+    </g>
+
+    <!-- Padlock -->
+    <path d="M276 196 V178 C276 164 287 153 300 153 C313 153 324 164 324 178 V196" fill="none" stroke="url(#gold)" stroke-width="9" stroke-linecap="round"/>
+    <rect x="262" y="192" width="76" height="62" rx="12" fill="url(#gold)"/>
+    <rect x="262" y="192" width="76" height="18" rx="9" fill="#ffffff" fill-opacity="0.22"/>
+    <circle cx="300" cy="218" r="8.5" fill="#0d1a33"/>
+    <path d="M296 222 L304 222 L306 240 L294 240 Z" fill="#0d1a33"/>
+
+    <!-- Chips: the real protections -->
+    <g font-family="Noto Sans, Arial, sans-serif" font-weight="700" font-size="14" filter="url(#chipShadow)">
+      <g transform="translate(70 112)">
+        <rect width="112" height="40" rx="20" fill="#ffffff"/>
+        <circle cx="20" cy="20" r="11" fill="#dff0f3"/>
+        <path d="M15 20 l3.5 3.5 7-7" fill="none" stroke="#0d8aa8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="40" y="25" fill="#0d1a33">HTTPS</text>
+      </g>
+      <g transform="translate(430 92)">
+        <rect width="96" height="40" rx="20" fill="#ffffff"/>
+        <circle cx="20" cy="20" r="11" fill="#dff0f3"/>
+        <path d="M15 20 l3.5 3.5 7-7" fill="none" stroke="#0d8aa8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="40" y="25" fill="#0d1a33">KYC</text>
+      </g>
+      <g transform="translate(412 214)">
+        <rect width="140" height="40" rx="20" fill="#0d1a33"/>
+        <circle cx="20" cy="20" r="11" fill="url(#gold)"/>
+        <path d="M15 20 l3.5 3.5 7-7" fill="none" stroke="#0d1a33" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="40" y="25" fill="#ffffff">M-Pesa PIN</text>
+      </g>
+      <g transform="translate(56 236)">
+        <rect width="130" height="40" rx="20" fill="#ffffff"/>
+        <circle cx="20" cy="20" r="11" fill="#dff0f3"/>
+        <path d="M15 20 l3.5 3.5 7-7" fill="none" stroke="#0d8aa8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="40" y="25" fill="#0d1a33">Reviewed</text>
+      </g>
+    </g>
+  </g>
+  <rect x="0.5" y="0.5" width="599" height="439" rx="25.5" fill="none" stroke="#e3ddcf"/>
+</svg>

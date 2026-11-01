@@ -459,7 +459,7 @@ export default function LandingPage() {
 
         <section className="ho-section" id="security">
           <div className="ho-container ho-security">
-            <img className="ho-shield" src="/landing/security-shield.webp" alt="" width={600} height={424} loading="lazy" decoding="async" />
+            <img className="ho-shield" src="/landing/security-emblem.svg" alt="" width={600} height={440} loading="lazy" decoding="async" />
             <div>
               <SectionHead index="06" label="Security" title={<>Your security <em>comes first.</em></>} />
               <ul className="ho-rules">
