@@ -1,0 +1,141 @@
+/* Sign-in and create-account pages, premium finish. Loaded after
+   AuthLayout.css and scoped to main.au: warm ivory paper and navy ink to
+   match the homepage, a faint candlestick chart in the background, a serif
+   italic accent, gold hairlines and a navy primary button. Behaviour and
+   form logic are unchanged. */
+
+main.au {
+  --lx-ivory: #fffdf8;
+  --lx-paper: #faf8f3;
+  --lx-ink: #0d1a33;
+  --lx-text: #4c5872;
+  --lx-muted: #7a8398;
+  --lx-teal: #0d8aa8;
+  --lx-gold: #d8b871;
+  --lx-hairline: #e3ddcf;
+  background:
+    linear-gradient(90deg, rgba(250, 248, 243, 0.97) 0%, rgba(250, 248, 243, 0.9) 50%, rgba(250, 248, 243, 0.8) 100%),
+    url("/landing/chart-light-a.webp") center / cover no-repeat fixed,
+    var(--lx-paper);
+  color: var(--lx-ink);
+}
+
+/* Header and footer */
+main.au .au-header,
+main.au .au-footer { border-color: var(--lx-hairline); }
+main.au .au-nav a { color: var(--lx-text); }
+main.au .au-nav a:hover { color: var(--lx-ink); }
+main.au .au-language { border-color: var(--lx-hairline); background: #fff; }
+
+/* Hero copy */
+main.au .au-eyebrow {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--lx-ink);
+  letter-spacing: 0.14em;
+}
+main.au .au-eyebrow i { background: var(--lx-gold); box-shadow: 0 0 0 4px rgba(216, 184, 113, 0.22); }
+main.au .au-hero h1 { color: var(--lx-ink); letter-spacing: -0.045em; }
+main.au .au-hero h1 span {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--lx-teal);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+main.au .au-lead { color: var(--lx-text); }
+main.au .au-feature-icon {
+  border: 0;
+  background: radial-gradient(circle at 35% 30%, #253656, var(--lx-ink) 70%);
+  color: #e3c47e;
+  box-shadow: inset 0 0 0 1px rgba(216, 184, 113, 0.55), 0 8px 16px -10px rgba(13, 26, 51, 0.7);
+}
+main.au .au-features strong,
+main.au .au-benefits strong { color: var(--lx-ink); }
+main.au .au-features small,
+main.au .au-benefits small { color: var(--lx-text); }
+main.au .au-benefits li {
+  border-color: var(--lx-hairline);
+  background: rgba(255, 253, 248, 0.9);
+  box-shadow: 0 1px 2px rgba(13, 26, 51, 0.04), 0 14px 30px -22px rgba(13, 26, 51, 0.35);
+}
+
+/* Form card: ivory with a gold top hairline */
+main.au .au-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--lx-hairline);
+  border-radius: 26px;
+  background: var(--lx-ivory);
+  box-shadow: 0 2px 4px rgba(13, 26, 51, 0.05), 0 36px 70px -36px rgba(13, 26, 51, 0.5);
+}
+main.au .au-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--lx-gold), transparent);
+}
+main.au .au-card-icon {
+  background: radial-gradient(circle at 35% 30%, #253656, var(--lx-ink) 70%);
+  color: #e3c47e;
+  box-shadow: inset 0 0 0 1px rgba(216, 184, 113, 0.6), 0 12px 24px -12px rgba(13, 26, 51, 0.8);
+}
+main.au .au-card-head h2 { color: var(--lx-ink); letter-spacing: -0.03em; }
+main.au .au-card-head p { color: var(--lx-text); }
+main.au .au-field label { color: var(--lx-ink); }
+main.au .au-input { border-color: var(--lx-hairline); background: #fff; }
+main.au .au-input:focus-within { border-color: var(--lx-teal); box-shadow: 0 0 0 3px rgba(13, 138, 168, 0.15); }
+main.au .au-input svg { color: var(--lx-muted); }
+main.au .au-link { color: var(--lx-teal); }
+main.au .au-check input { accent-color: var(--lx-ink); }
+
+/* Primary button: navy with a gold edge, teal on hover */
+main.au .au-submit {
+  border-radius: 999px;
+  background: linear-gradient(160deg, #1b2a47 0%, #0d1a33 100%);
+  box-shadow: inset 0 0 0 1px rgba(216, 184, 113, 0.45), 0 16px 30px -16px rgba(13, 26, 51, 0.9);
+}
+main.au .au-submit:hover:not(:disabled) { background: linear-gradient(160deg, #0f9cbd 0%, #0d8aa8 100%); }
+main.au .au-trust {
+  border-color: var(--lx-hairline);
+  background: #f8f4ec;
+  color: var(--lx-text);
+}
+main.au .au-trust svg { color: #0f7a46; }
+main.au .au-age { border-color: var(--lx-hairline); background: #fff; }
+
+/* Showcase: the real trading screen on a laptop and a phone */
+.au-screens { position: relative; padding: 12px 0 34px; }
+.au-screens::before {
+  content: "";
+  position: absolute;
+  inset: 4% -2% 14% 8%;
+  border-radius: 28px;
+  background: radial-gradient(circle at 1px 1px, rgba(13, 26, 51, 0.12) 1px, transparent 0) 0 0 / 18px 18px, linear-gradient(150deg, #dff0f3 0%, #efe7d6 100%);
+}
+.au-screens figure { margin: 0; }
+.au-laptop { position: relative; width: 92%; filter: drop-shadow(0 30px 40px rgba(13, 26, 51, 0.28)); }
+.au-laptop-lid { position: relative; padding: 2.2% 2.2% 2.4%; border-radius: 18px 18px 8px 8px; background: linear-gradient(180deg, #23262d 0%, #121418 100%); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 0 0 2px #0a0b0d; }
+.au-laptop-cam { position: absolute; top: 0.85%; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #4a5568, #0b0c0e); }
+.au-laptop-screen { overflow: hidden; border-radius: 4px; background: #000; aspect-ratio: 16 / 10; }
+.au-laptop-screen img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.au-laptop-base { position: relative; height: 0; padding-bottom: 3.2%; margin: 0 -6%; border-radius: 0 0 22px 22px / 0 0 100% 100%; background: linear-gradient(180deg, #e9edf2 0%, #c9d0d9 55%, #a7b0bc 100%); box-shadow: inset 0 1px 0 #fff, 0 2px 4px rgba(0, 0, 0, 0.15); }
+.au-laptop-base span { position: absolute; top: 0; left: 50%; width: 15%; height: 42%; transform: translateX(-50%); border-radius: 0 0 10px 10px; background: linear-gradient(180deg, #bcc4ce, #d5dbe2); }
+.au-phone { position: absolute; right: 0; bottom: 0; width: 23%; filter: drop-shadow(-14px 26px 30px rgba(13, 26, 51, 0.38)); }
+.au-phone-body { position: relative; padding: 4.2%; border-radius: 16% / 7.6%; background: linear-gradient(145deg, #3a3f47 0%, #15171b 40%, #0b0c0e 100%); box-shadow: inset 0 0 0 1.5px #5b616b, inset 0 0 0 3px #0b0c0e; }
+.au-phone-island { position: absolute; top: 3.4%; left: 50%; z-index: 2; width: 30%; height: 2.6%; transform: translateX(-50%); border-radius: 999px; background: #000; }
+.au-phone-screen { overflow: hidden; border-radius: 12% / 5.6%; background: #fff; aspect-ratio: 585 / 1266; }
+.au-phone-screen img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+@media (max-width: 900px) {
+  main.au { background-attachment: scroll, scroll, scroll; }
+  .au-screens { padding: 4px 4% 26px 0; }
+  .au-laptop { width: 94%; }
+  .au-phone { width: 26%; }
+}
