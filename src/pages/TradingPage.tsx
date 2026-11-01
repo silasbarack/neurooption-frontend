@@ -58,6 +58,7 @@ import {
   type MarketResyncResponse,
 } from "../components/trading/marketSocket";
 import "./TradingPremium.css";
+import "./TradingLuxe.css";
 import KenyaClock from "../components/trading/KenyaClock";
 import AssetPayoutBadge from "../components/trading/AssetPayoutBadge";
 import {

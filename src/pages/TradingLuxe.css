@@ -1,0 +1,190 @@
+/* NeuroOption trading terminal, premium finish. Loaded after
+   TradingPremium.css and scoped to .nt-page.nt-premium so it only refines
+   the look: warm ivory chrome and navy ink to match the homepage, a deep
+   navy chart canvas, gold hairlines and richer trade buttons. No layout or
+   behaviour changes. */
+
+.nt-page.nt-premium {
+  --nt-ivory: #fffdf8;
+  --nt-sand: #f3efe6;
+  --nt-ink: #0d1a33;
+  --nt-ink-2: #1b2a47;
+  --nt-teal: #0d8aa8;
+  --nt-gold: #d8b871;
+  --nt-gold-deep: #b08a3e;
+  --nt-hairline: #e6dfd0;
+
+  --background-secondary: var(--nt-sand);
+  --surface-primary: var(--nt-ivory);
+  --surface-secondary: #f8f4ec;
+  --surface-hover: #f3ede1;
+  --border-primary: var(--nt-hairline);
+  --border-strong: #d6cdb9;
+  --text-primary: var(--nt-ink);
+  --text-secondary: #4c5872;
+  --text-muted: #7a8398;
+  --brand-primary: var(--nt-ink);
+  --brand-secondary: var(--nt-teal);
+  --brand-soft-strong: #dff0f3;
+  --cta-gradient: linear-gradient(135deg, #1b2a47 0%, #0d1a33 100%);
+  --shadow-sm: 0 1px 2px rgba(13, 26, 51, 0.05), 0 6px 16px -10px rgba(13, 26, 51, 0.25);
+  --shadow-md: 0 2px 4px rgba(13, 26, 51, 0.05), 0 14px 30px -18px rgba(13, 26, 51, 0.35);
+  --shadow-lg: 0 2px 6px rgba(13, 26, 51, 0.06), 0 24px 48px -26px rgba(13, 26, 51, 0.45);
+
+  background: radial-gradient(circle at 1px 1px, rgba(13, 26, 51, 0.06) 1px, transparent 0) 0 0 / 18px 18px, var(--nt-sand);
+}
+
+/* Panels: ivory cards with a fine border */
+.nt-page.nt-premium .nt-main-chart,
+.nt-page.nt-premium .nt-trade-panel,
+.nt-page.nt-premium .nt-sidebar,
+.nt-page.nt-premium .nt-quick-menu {
+  border: 1px solid var(--nt-hairline);
+  background: var(--nt-ivory);
+  box-shadow: var(--shadow-md);
+}
+
+/* Header: ivory with a gold hairline */
+.nt-page.nt-premium .nt-header {
+  border-bottom: 1px solid var(--nt-hairline);
+  background: linear-gradient(180deg, #fffefb, var(--nt-ivory));
+  box-shadow: 0 1px 0 rgba(216, 184, 113, 0.45), 0 10px 24px -20px rgba(13, 26, 51, 0.4);
+}
+.nt-page.nt-premium .nt-market-status { border-color: var(--nt-hairline); background: #fff; }
+.nt-page.nt-premium .account-balance-selector { border-color: var(--nt-hairline); background: #fff; box-shadow: var(--shadow-sm); }
+.nt-page.nt-premium .balance-top-row span:first-child { color: var(--nt-teal); letter-spacing: 0.08em; }
+.nt-page.nt-premium .balance-amount { color: var(--nt-ink); font-variant-numeric: tabular-nums; }
+.nt-page.nt-premium .deposit-shortcut-btn {
+  background: linear-gradient(135deg, #1b2a47 0%, #0d1a33 100%);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(216, 184, 113, 0.45), 0 10px 20px -12px rgba(13, 26, 51, 0.8);
+}
+.nt-page.nt-premium .deposit-shortcut-btn:hover { background: linear-gradient(135deg, #0f9cbd 0%, #0d8aa8 100%); }
+.nt-page.nt-premium .nt-avatar {
+  background: radial-gradient(circle at 35% 30%, #253656, var(--nt-ink) 70%);
+  color: #f3dc9c;
+  box-shadow: inset 0 0 0 1.5px rgba(216, 184, 113, 0.7);
+}
+.nt-page.nt-premium .nt-fullscreen { border-color: var(--nt-hairline); background: #fff; }
+
+/* Side rails: navy active item with a gold marker */
+.nt-page.nt-premium .nt-sidebar button,
+.nt-page.nt-premium .nt-quick-menu button { color: var(--text-secondary); }
+.nt-page.nt-premium .nt-sidebar button:hover:not(:disabled),
+.nt-page.nt-premium .nt-quick-menu button:hover { background: var(--surface-hover); color: var(--nt-ink); }
+.nt-page.nt-premium .nt-sidebar button.active {
+  background: linear-gradient(160deg, #1b2a47 0%, #0d1a33 100%);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(216, 184, 113, 0.35), 0 10px 20px -14px rgba(13, 26, 51, 0.9);
+}
+.nt-page.nt-premium .nt-sidebar button.active svg { color: var(--nt-gold); }
+.nt-page.nt-premium .nt-sidebar button.active::before { background: var(--nt-gold); }
+
+/* Chart toolbar */
+.nt-page.nt-premium .nt-chart-toolbar,
+.nt-page.nt-premium .nt-page-asset { background: var(--nt-ivory); }
+.nt-page.nt-premium .nt-tool-btn,
+.nt-page.nt-premium .nt-asset-trigger {
+  border-color: var(--nt-hairline);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--nt-ink);
+}
+.nt-page.nt-premium .nt-tool-btn:hover,
+.nt-page.nt-premium .nt-asset-trigger:hover { border-color: var(--nt-ink); }
+
+/* Chart canvas: deep navy with a faint world map (Nairobi marked in gold)
+   instead of the mountain photo. A veil keeps the candles in front. */
+.nt-page.nt-premium .nt-chart-canvas-wrap,
+.nt-page.nt-premium .nt-chart-wrap {
+  background:
+    linear-gradient(rgba(8, 18, 39, 0.45), rgba(8, 18, 39, 0.45)),
+    url("/trading-bg/world-map.svg") center 45% / 92% auto no-repeat,
+    radial-gradient(900px 420px at 78% 12%, rgba(13, 138, 168, 0.22), transparent 70%),
+    radial-gradient(700px 360px at 10% 100%, rgba(216, 184, 113, 0.08), transparent 70%),
+    linear-gradient(180deg, #0c1a36 0%, #081227 100%);
+}
+.nt-page.nt-premium .nt-chart-canvas-wrap[data-chart-bg="white"] {
+  background:
+    radial-gradient(900px 420px at 78% 12%, rgba(13, 138, 168, 0.08), transparent 70%),
+    linear-gradient(180deg, #fffefb 0%, #f8f4ec 100%);
+}
+.nt-page.nt-premium .nt-chart-clock-sync { background: var(--nt-ivory); border-top: 1px solid var(--nt-hairline); }
+
+/* Trade panel */
+.nt-page.nt-premium .nt-panel-ticker {
+  border: 1px solid rgba(216, 184, 113, 0.45);
+  background: radial-gradient(260px 140px at 100% 0%, rgba(13, 138, 168, 0.35), transparent 70%), linear-gradient(160deg, #1b2a47, #0d1a33);
+  color: #fff;
+  box-shadow: 0 14px 28px -18px rgba(13, 26, 51, 0.9);
+}
+.nt-page.nt-premium .nt-panel-ticker * { color: inherit; }
+.nt-page.nt-premium .nt-panel-ticker span:first-child { color: rgba(220, 230, 245, 0.75); letter-spacing: 0.06em; }
+.nt-page.nt-premium .nt-white-field,
+.nt-page.nt-premium .nt-white-input { border-color: var(--nt-hairline); background: #fff; }
+.nt-page.nt-premium .nt-white-field:focus-within { border-color: var(--nt-teal); box-shadow: 0 0 0 3px rgba(13, 138, 168, 0.15); }
+.nt-page.nt-premium .nt-white-payout {
+  border: 1px solid rgba(216, 184, 113, 0.55);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fffaf0, #fbf3e2);
+}
+.nt-page.nt-premium .nt-white-payout span { color: #8a6a2b; letter-spacing: 0.08em; }
+.nt-page.nt-premium .nt-white-payout strong,
+.nt-page.nt-premium .nt-white-payout small { color: #0f7a46; font-variant-numeric: tabular-nums; }
+
+/* BUY / SELL: rich, tactile buttons */
+.nt-page.nt-premium .nt-buy,
+.nt-page.nt-premium .nt-sell {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  letter-spacing: 0.08em;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.nt-page.nt-premium .nt-buy::after,
+.nt-page.nt-premium .nt-sell::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 50% 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+.nt-page.nt-premium .nt-buy {
+  background: linear-gradient(180deg, #22b26c 0%, #138a4a 100%);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.15), 0 14px 26px -14px rgba(19, 138, 74, 0.9);
+}
+.nt-page.nt-premium .nt-sell {
+  background: linear-gradient(180deg, #e8584e 0%, #c7352f 100%);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.15), 0 14px 26px -14px rgba(199, 53, 47, 0.9);
+}
+.nt-page.nt-premium .nt-buy:hover:not(:disabled),
+.nt-page.nt-premium .nt-sell:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
+.nt-page.nt-premium .nt-buy:hover:not(:disabled) { background: linear-gradient(180deg, #22b26c 0%, #138a4a 100%); }
+.nt-page.nt-premium .nt-sell:hover:not(:disabled) { background: linear-gradient(180deg, #e8584e 0%, #c7352f 100%); }
+.nt-page.nt-premium .nt-buy:active:not(:disabled),
+.nt-page.nt-premium .nt-sell:active:not(:disabled) { transform: translateY(1px); }
+.nt-page.nt-premium .nt-buy:disabled,
+.nt-page.nt-premium .nt-sell:disabled { opacity: 0.55; filter: saturate(0.7); box-shadow: none; }
+
+/* Sentiment and open trades */
+.nt-page.nt-premium .nt-open-trades-head { border-top: 1px solid var(--nt-hairline); }
+
+/* Phone bottom navigation */
+.nt-page.nt-premium .nt-bottom-nav {
+  border-top: 1px solid var(--nt-hairline);
+  background: rgba(255, 253, 248, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.nt-page.nt-premium .nt-bottom-nav button.active,
+.nt-page.nt-premium .nt-bottom-nav button[aria-current="page"] {
+  background: linear-gradient(160deg, #1b2a47 0%, #0d1a33 100%);
+  color: #fff;
+}
+.nt-page.nt-premium .nt-bottom-nav button.active svg,
+.nt-page.nt-premium .nt-bottom-nav button[aria-current="page"] svg { color: var(--nt-gold); }
+
+@media (prefers-reduced-motion: reduce) {
+  .nt-page.nt-premium .nt-buy,
+  .nt-page.nt-premium .nt-sell { transition: none; }
+}
