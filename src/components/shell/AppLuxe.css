@@ -163,9 +163,6 @@
 }
 .neo-shell .ac-progress-bar i { background: linear-gradient(90deg, #0d8aa8, #d8b871); }
 
-/* Payment logos: blend their white plate into the ivory cards */
-.neo-shell .pay-logo-img { background: transparent; mix-blend-mode: multiply; }
-
 /* Badges */
 .neo-shell .neo-badge-muted { background: #f1ebde; color: #6b5a33; }
 
