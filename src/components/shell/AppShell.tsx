@@ -9,6 +9,7 @@ import MenuDrawer from "./MenuDrawer";
 import { BOTTOM_NAV, TOP_NAV, isActivePath } from "./navItems";
 import { useAccount } from "./useAccount";
 import "./AppShell.css";
+import "./AppLuxe.css";
 
 type AppShellProps = {
   children: ReactNode;

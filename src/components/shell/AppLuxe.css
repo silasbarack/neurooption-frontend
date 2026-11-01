@@ -1,0 +1,180 @@
+/* Signed-in pages, premium finish. Loaded after AppShell.css and scoped to
+   .neo-shell, so it only refines the look of every page that uses the app
+   shell: warm ivory surfaces and navy ink to match the homepage and the
+   trading screen, gold hairlines and accents, navy balance cards and
+   active states. No layout or behaviour changes. */
+
+.neo-shell {
+  --lx-ivory: #fffdf8;
+  --lx-sand: #f3efe6;
+  --lx-ink: #0d1a33;
+  --lx-ink-2: #1b2a47;
+  --lx-teal: #0d8aa8;
+  --lx-gold: #d8b871;
+  --lx-gold-deep: #9c7630;
+  --lx-hairline: #e6dfd0;
+  --lx-navy-card: radial-gradient(420px 220px at 100% 0%, rgba(13, 138, 168, 0.38), transparent 70%), linear-gradient(160deg, #1b2a47 0%, #0d1a33 100%);
+
+  --background-primary: var(--lx-sand);
+  --background-secondary: var(--lx-sand);
+  --background-tertiary: #ece6d9;
+  --surface-primary: var(--lx-ivory);
+  --surface-secondary: #f8f4ec;
+  --surface-hover: #f3ede1;
+  --border-primary: var(--lx-hairline);
+  --border-strong: #d6cdb9;
+  --text-primary: var(--lx-ink);
+  --text-secondary: #4c5872;
+  --text-muted: #7a8398;
+  --brand-primary: var(--lx-ink);
+  --brand-primary-dark: #081227;
+  --brand-secondary: var(--lx-teal);
+  --brand-soft: #eef6f7;
+  --brand-soft-strong: #dff0f3;
+  --cta-gradient: linear-gradient(160deg, #1b2a47 0%, #0d1a33 100%);
+  --cta-solid: var(--lx-ink);
+  --cta-solid-hover: #1b2a47;
+  --shadow-sm: 0 1px 2px rgba(13, 26, 51, 0.05), 0 6px 16px -10px rgba(13, 26, 51, 0.22);
+  --shadow-md: 0 2px 4px rgba(13, 26, 51, 0.05), 0 16px 34px -20px rgba(13, 26, 51, 0.32);
+  --shadow-lg: 0 2px 6px rgba(13, 26, 51, 0.06), 0 26px 50px -28px rgba(13, 26, 51, 0.45);
+
+  background: radial-gradient(circle at 1px 1px, rgba(13, 26, 51, 0.055) 1px, transparent 0) 0 0 / 18px 18px, var(--lx-sand);
+}
+
+/* Top bar: ivory, gold hairline, navy active link with a gold underline */
+.neo-shell .neo-topbar {
+  border-bottom: 1px solid var(--lx-hairline);
+  background: rgba(255, 253, 248, 0.94);
+  box-shadow: 0 1px 0 rgba(216, 184, 113, 0.45), 0 10px 24px -22px rgba(13, 26, 51, 0.45);
+}
+.neo-shell .neo-topnav a { color: #4c5872; }
+.neo-shell .neo-topnav a:hover { color: var(--lx-ink); background: var(--surface-hover); }
+.neo-shell .neo-topnav a.is-active { color: var(--lx-ink); }
+.neo-shell .neo-topnav a.is-active::after { background: var(--lx-gold); height: 2px; }
+.neo-shell .neo-balance-chip { border-color: var(--lx-hairline); background: #fff; box-shadow: var(--shadow-sm); }
+.neo-shell .neo-balance-chip small,
+.neo-shell .neo-balance-chip span:first-child { color: var(--lx-teal); }
+.neo-shell .neo-topbar-avatar,
+.neo-shell .neo-avatar {
+  background: radial-gradient(circle at 35% 30%, #253656, var(--lx-ink) 70%) !important;
+  color: #f3dc9c !important;
+  box-shadow: inset 0 0 0 1.5px rgba(216, 184, 113, 0.7);
+}
+.neo-shell .neo-icon-btn { border-color: var(--lx-hairline); background: #fff; }
+
+/* Buttons */
+.neo-shell .neo-btn-primary,
+.neo-shell .np-btn-primary,
+.neo-shell .fin-btn-blue {
+  border-color: transparent;
+  background: linear-gradient(160deg, #1b2a47 0%, #0d1a33 100%);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(216, 184, 113, 0.4), 0 10px 22px -14px rgba(13, 26, 51, 0.85);
+}
+.neo-shell .neo-btn-primary:hover:not(:disabled),
+.neo-shell .np-btn-primary:hover:not(:disabled),
+.neo-shell .fin-btn-blue:hover:not(:disabled) { background: linear-gradient(160deg, #0f9cbd 0%, #0d8aa8 100%); }
+.neo-shell .neo-btn-outline { border-color: #cfc5b0; background: #fff; color: var(--lx-ink); }
+.neo-shell .neo-btn-outline:hover { border-color: var(--lx-ink); }
+.neo-shell .neo-btn-green,
+.neo-shell .fin-btn-green {
+  background: linear-gradient(180deg, #22b26c 0%, #138a4a 100%);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 12px 22px -14px rgba(19, 138, 74, 0.9);
+}
+
+/* Cards: ivory with a fine border */
+.neo-shell .neo-card,
+.neo-shell .np-card,
+.neo-shell .np-stat-card,
+.neo-shell .fin-card,
+.neo-shell .np-table-wrap {
+  border-color: var(--lx-hairline);
+  background: var(--lx-ivory);
+  box-shadow: var(--shadow-md);
+}
+.neo-shell a.neo-card:hover,
+.neo-shell .ac-tile:hover { border-color: rgba(216, 184, 113, 0.8); }
+
+/* Headings and eyebrows */
+.neo-shell h1,
+.neo-shell h2,
+.neo-shell .np-card-title { color: var(--lx-ink); letter-spacing: -0.02em; }
+.neo-shell .neo-eyebrow,
+.neo-shell .ac-eyebrow,
+.neo-shell .fin-kicker { color: var(--lx-gold-deep); }
+
+/* Stat cards: gold top accent instead of coloured side bars */
+.neo-shell .np-stat-card { border: 1px solid var(--lx-hairline); border-top: 3px solid var(--lx-gold); }
+.neo-shell .np-stat-card-label { color: #7a8398; letter-spacing: 0.1em; }
+.neo-shell .np-stat-card-value { color: var(--lx-ink); }
+
+/* Tabs and filter pills: navy active state */
+.neo-shell .neo-tabs { border-color: var(--lx-hairline); background: #efe9dd; }
+.neo-shell .np-tabs { background: transparent; }
+.neo-shell .neo-tabs button.is-active,
+.neo-shell .np-tab.active {
+  border-color: transparent;
+  background: linear-gradient(160deg, #1b2a47 0%, #0d1a33 100%);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(216, 184, 113, 0.35);
+}
+.neo-shell .np-tab { border-color: var(--lx-hairline); background: #fff; }
+
+/* Tables */
+.neo-shell .np-table th { background: #f6f1e7; color: #7a8398; letter-spacing: 0.08em; }
+.neo-shell .np-table td { border-color: #eee8dc; }
+.neo-shell .np-table tbody tr:hover { background: #fbf8f1; }
+
+/* Fields */
+.neo-shell .neo-input,
+.neo-shell .np-input,
+.neo-shell .np-select,
+.neo-shell .fin-input,
+.neo-shell input[type="text"],
+.neo-shell input[type="email"],
+.neo-shell input[type="tel"],
+.neo-shell input[type="number"],
+.neo-shell input[type="search"],
+.neo-shell select,
+.neo-shell textarea { border-color: var(--lx-hairline); background-color: #fff; }
+.neo-shell .neo-input:focus,
+.neo-shell .np-input:focus,
+.neo-shell .np-select:focus,
+.neo-shell .fin-input:focus,
+.neo-shell input:focus,
+.neo-shell select:focus,
+.neo-shell textarea:focus { border-color: var(--lx-teal); box-shadow: 0 0 0 3px rgba(13, 138, 168, 0.15); outline: none; }
+
+/* Navy balance cards (My Account, Finance) with a gold edge */
+.neo-shell .ac-wallet .ac-balance,
+.neo-shell .fin-balance {
+  background: var(--lx-navy-card);
+  box-shadow: inset 0 0 0 1px rgba(216, 184, 113, 0.4), 0 22px 44px -26px rgba(13, 26, 51, 0.9);
+}
+.neo-shell .ac-wallet { border-color: rgba(216, 184, 113, 0.5); }
+.neo-shell .ac-switch { background: #efe9dd; }
+
+/* Icon tiles on My Account */
+.neo-shell .ac-tile-icon {
+  background: radial-gradient(circle at 35% 30%, #253656, var(--lx-ink) 70%);
+  color: #e3c47e;
+  box-shadow: inset 0 0 0 1px rgba(216, 184, 113, 0.55), 0 8px 16px -10px rgba(13, 26, 51, 0.7);
+  border: 0;
+}
+.neo-shell .ac-progress-bar i { background: linear-gradient(90deg, #0d8aa8, #d8b871); }
+
+/* Badges */
+.neo-shell .neo-badge-muted { background: #f1ebde; color: #6b5a33; }
+
+/* Phone bottom navigation */
+.neo-shell .neo-bottomnav {
+  border-top: 1px solid var(--lx-hairline);
+  background: rgba(255, 253, 248, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.neo-shell .neo-bottomnav a.is-active {
+  background: linear-gradient(160deg, #1b2a47 0%, #0d1a33 100%);
+  color: #fff;
+}
+.neo-shell .neo-bottomnav a.is-active svg { color: var(--lx-gold); }
