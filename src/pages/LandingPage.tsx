@@ -442,7 +442,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="ho-section ho-section-sand">
+        <section className="ho-section ho-section-sand" id="start">
           <div className="ho-container">
             <SectionHead index="05" label="Get started" title={<>Three steps to <em>your first trade.</em></>} />
             <ol className="ho-steps">

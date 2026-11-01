@@ -237,6 +237,22 @@
 .ho-news-note.is-ok { color: #11743f; }
 .ho-news-note.is-error { color: #b42318; }
 
+/* Chart backgrounds: crisp, zoomed-out candlestick charts behind every
+   section, under a veil in the section's own colour so text stays clear. */
+.ho { --ho-veil: rgba(250, 248, 243, 0.8); --ho-veil-sand: rgba(242, 238, 229, 0.78); }
+.ho-hero { background: linear-gradient(90deg, rgba(250, 248, 243, 0.96) 0%, rgba(250, 248, 243, 0.86) 42%, rgba(250, 248, 243, 0.5) 100%), url("/landing/chart-light-a.webp") center / cover no-repeat, var(--ho-paper); }
+#markets { background: linear-gradient(var(--ho-veil), var(--ho-veil)), url("/landing/chart-light-b.webp") center / cover no-repeat, var(--ho-paper); }
+#platform { background: linear-gradient(var(--ho-veil-sand), var(--ho-veil-sand)), url("/landing/chart-light-c.webp") center / cover no-repeat, var(--ho-sand); }
+#demo { background: linear-gradient(var(--ho-veil), var(--ho-veil)), url("/landing/chart-light-a.webp") left center / cover no-repeat, var(--ho-paper); }
+#start { background: linear-gradient(var(--ho-veil-sand), var(--ho-veil-sand)), url("/landing/chart-light-b.webp") center / cover no-repeat, var(--ho-sand); }
+#security { background: linear-gradient(var(--ho-veil), var(--ho-veil)), url("/landing/chart-light-c.webp") center / cover no-repeat, var(--ho-paper); }
+#payments { background: linear-gradient(var(--ho-veil-sand), var(--ho-veil-sand)), url("/landing/chart-light-a.webp") center / cover no-repeat, var(--ho-sand); }
+#faq { background: linear-gradient(var(--ho-veil), var(--ho-veil)), url("/landing/chart-light-b.webp") center / cover no-repeat, var(--ho-paper); }
+.ho-panel-ink { background: radial-gradient(420px 260px at 100% 0%, rgba(13, 138, 168, 0.35), transparent 70%), linear-gradient(rgba(13, 26, 51, 0.78), rgba(13, 26, 51, 0.78)), url("/landing/chart-dark.webp") center / cover no-repeat, var(--ho-ink); }
+.ho-cta { background: linear-gradient(rgba(13, 138, 168, 0.86), rgba(13, 138, 168, 0.86)), url("/landing/chart-dark.webp") center / cover no-repeat, var(--ho-teal); }
+.ho-footer { background: linear-gradient(rgba(250, 248, 243, 0.9), rgba(250, 248, 243, 0.9)), url("/landing/chart-light-c.webp") center bottom / cover no-repeat, var(--ho-paper); }
+.ho-header { background: rgba(250, 248, 243, 0.94); }
+
 @media (max-width: 1180px) {
   .ho-nav, .ho-header-actions { display: none; }
   .ho-menu-btn { display: grid; }
@@ -283,6 +299,19 @@
   .ho-cta-inner { padding: 64px 0; }
   .ho-cta .ho-hero-cta { width: 100%; }
   .ho-footer-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px) {
+  /* Keep the charts zoomed out on narrow screens instead of stretching them. */
+  .ho-hero, #markets, #platform, #demo, #start, #security, #payments, #faq, .ho-cta, .ho-footer {
+    background-size: 100% 100%, 900px auto;
+    background-repeat: no-repeat, repeat;
+    background-position: center, right top;
+  }
+  .ho-panel-ink {
+    background-size: 100% 100%, 100% 100%, 900px auto;
+    background-repeat: no-repeat, no-repeat, repeat;
+    background-position: center, center, right top;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .ho { scroll-behavior: auto; }
