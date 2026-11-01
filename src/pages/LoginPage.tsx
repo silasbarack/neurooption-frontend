@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../api/auth.api";
 import { getRecaptchaToken, RecaptchaCheckbox, resetRecaptcha } from "../security/recaptcha";
 import AuthLayout from "../components/auth/AuthLayout";
-import HeroDashboard from "../components/landing/HeroDashboard";
+import AuthScreens from "../components/auth/AuthScreens";
 import { useAuthLanguage } from "../i18n/useAuthLanguage";
 import {
   ArrowRight,
@@ -73,7 +73,7 @@ export default function LoginPage() {
       contactsLabel={tt("contacts")}
     >
       <div className="au-showcase" id="markets">
-        <HeroDashboard />
+        <AuthScreens />
       </div>
       <div className="au-hero" id="platform">
         <span className="au-eyebrow">

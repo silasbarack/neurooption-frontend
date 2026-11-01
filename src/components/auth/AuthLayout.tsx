@@ -4,6 +4,7 @@ import { Globe } from "lucide-react";
 import Logo from "../branding/Logo";
 import { languages, type LanguageCode } from "../../i18n/authI18n";
 import "./AuthLayout.css";
+import "./AuthLuxe.css";
 
 type AuthLayoutProps = {
   children: ReactNode;
