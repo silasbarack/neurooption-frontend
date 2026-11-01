@@ -189,8 +189,11 @@
 /* Payments */
 .ho-pay { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--ho-ink); }
 .ho-pay li { display: grid; grid-template-columns: 180px minmax(0, 1fr) auto; align-items: center; gap: 28px; padding: 22px 0; border-bottom: 1px solid var(--ho-line); }
-.ho-pay-logo { display: flex; align-items: center; justify-content: center; height: 92px; padding: 8px; border: 1px solid var(--ho-line); border-radius: 16px; background: #fff; overflow: hidden; }
+.ho-pay-logo { display: flex; align-items: center; justify-content: center; height: 92px; padding: 8px; border: 1px solid var(--ho-line); border-radius: 16px; background: var(--ho-paper); overflow: hidden; }
 .ho-pay-logo .pay-logo { width: auto; max-width: 100%; height: 76px; max-height: 76px; object-fit: contain; }
+/* The logo files carry a white plate; multiply blends it into the ivory
+   so each logo sits on the homepage colour with its brand colours intact. */
+.ho-pay-logo .pay-logo-img { background: transparent; mix-blend-mode: multiply; }
 .ho-pay-status { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid var(--ho-line); border-radius: 999px; color: var(--ho-muted); font-size: 13px; font-weight: 700; white-space: nowrap; }
 .ho-pay-status.is-live { border-color: transparent; background: #dcf2e5; color: #11743f; }
 
