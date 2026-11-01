@@ -93,10 +93,13 @@
 .nt-page.nt-premium .nt-tool-btn:hover,
 .nt-page.nt-premium .nt-asset-trigger:hover { border-color: var(--nt-ink); }
 
-/* Chart canvas: deep navy instead of the mountain photo */
+/* Chart canvas: deep navy with a faint world map (Nairobi marked in gold)
+   instead of the mountain photo. A veil keeps the candles in front. */
 .nt-page.nt-premium .nt-chart-canvas-wrap,
 .nt-page.nt-premium .nt-chart-wrap {
   background:
+    linear-gradient(rgba(8, 18, 39, 0.45), rgba(8, 18, 39, 0.45)),
+    url("/trading-bg/world-map.svg") center 45% / 92% auto no-repeat,
     radial-gradient(900px 420px at 78% 12%, rgba(13, 138, 168, 0.22), transparent 70%),
     radial-gradient(700px 360px at 10% 100%, rgba(216, 184, 113, 0.08), transparent 70%),
     linear-gradient(180deg, #0c1a36 0%, #081227 100%);
