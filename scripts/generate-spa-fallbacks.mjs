@@ -22,6 +22,7 @@ const routes = [
   "support",
   "newsletter/unsubscribe",
   "verify-email",
+  "auth/social",
   "legal",
   "legal/terms",
   "legal/risk-disclosure",

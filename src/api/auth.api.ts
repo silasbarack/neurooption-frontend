@@ -1,4 +1,4 @@
-import { api } from "./api";
+import { API_BASE_URL, api } from "./api";
 import type {
   AuthResponse,
   ForgotPasswordPayload,
@@ -8,7 +8,33 @@ import type {
   ResetPasswordPayload,
 } from "../types/auth.types";
 
+export type SocialProvider = "google" | "x" | "facebook";
+
+export type SocialSignupPreview = {
+  provider: SocialProvider;
+  email: string | null;
+  emailVerified: boolean;
+  name: string | null;
+};
+
+/** Full-page address that starts Google, X or Facebook sign-in on the backend. */
+export function socialStartUrl(provider: SocialProvider): string {
+  return `${API_BASE_URL}/auth/oauth/${provider}/start?origin=${encodeURIComponent(window.location.origin)}`;
+}
+
 export const authApi = {
+  socialProviders(): Promise<Record<SocialProvider, boolean>> {
+    return api.get<Record<SocialProvider, boolean>>("/auth/oauth/providers", false);
+  },
+
+  socialSignupPreview(signupToken: string): Promise<SocialSignupPreview> {
+    return api.post<SocialSignupPreview>("/auth/oauth/signup/preview", { signupToken }, false);
+  },
+
+  socialSignupComplete(payload: { signupToken: string; acceptTerms: boolean; email?: string; fullName?: string }): Promise<AuthResponse> {
+    return api.post<AuthResponse>("/auth/oauth/signup/complete", payload, false);
+  },
+
   resendWelcomeEmail(): Promise<{ success: boolean; emailSent: boolean; emailHint?: string; message: string }> {
     return api.post<{ success: boolean; emailSent: boolean; emailHint?: string; message: string }>("/auth/resend-welcome", {});
   },
