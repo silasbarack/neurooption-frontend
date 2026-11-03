@@ -9,6 +9,7 @@ const AdminSetupPage = lazy(() => import("./pages/AdminSetupPage"));
 const RecaptchaTestPage = lazy(() => import("./pages/RecaptchaTestPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const SocialAuthPage = lazy(() => import("./pages/SocialAuthPage"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 const DeleteAccountPage = lazy(() => import("./pages/DeleteAccountPage"));
 const AccountDeletedPage = lazy(() => import("./pages/AccountDeletedPage"));
@@ -81,6 +82,7 @@ export default function App() {
 
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/auth/social" element={<SocialAuthPage />} />
 
           <Route
             path="/trading"

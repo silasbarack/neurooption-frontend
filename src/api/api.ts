@@ -6,7 +6,7 @@ export type ApiErrorResponse = {
   statusCode?: number;
 };
 
-const API_BASE_URL =
+export const API_BASE_URL =
   import.meta.env.VITE_API_URL?.replace(/\/$/, "") ||
   "https://neurooption-backend.onrender.com";
 

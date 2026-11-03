@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../api/auth.api";
 import { getRecaptchaToken, RecaptchaCheckbox, resetRecaptcha } from "../security/recaptcha";
 import AuthLayout from "../components/auth/AuthLayout";
+import SocialSignIn from "../components/auth/SocialSignIn";
 import AuthScreens from "../components/auth/AuthScreens";
 import { useAuthLanguage } from "../i18n/useAuthLanguage";
 import {
@@ -127,6 +128,8 @@ export default function LoginPage() {
             <span>{message}</span>
           </div>
         )}
+
+        <SocialSignIn dividerLabel="or sign in with email" />
 
         <form className="au-form" onSubmit={handleSubmit}>
           <div className="au-field">

@@ -21,6 +21,7 @@ import {
 import { authApi } from "../api/auth.api";
 import { getRecaptchaToken, RecaptchaCheckbox, resetRecaptcha } from "../security/recaptcha";
 import AuthLayout from "../components/auth/AuthLayout";
+import SocialSignIn from "../components/auth/SocialSignIn";
 import { useAuthLanguage } from "../i18n/useAuthLanguage";
 
 const BENEFITS = [
@@ -173,6 +174,8 @@ export default function RegisterPage() {
             <span>{message}</span>
           </div>
         )}
+
+        <SocialSignIn dividerLabel="or register with email" />
 
         <form className="au-form" onSubmit={handleSubmit}>
           <div className="au-field">
