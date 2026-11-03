@@ -5,7 +5,7 @@ import { API_BASE_URL } from "../../api/api";
 import { clearToken, clearUser, getToken } from "../../utils/storage";
 
 /**
- * On the sign-in and registration pages: someone who is still signed in
+ * On the sign-in page: someone who is still signed in
  * (for example after switching the browser to its desktop site) goes
  * straight back to the trading screen instead of signing in again. The
  * saved session is only dropped when the backend says it is invalid.
