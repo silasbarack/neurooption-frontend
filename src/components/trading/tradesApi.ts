@@ -97,6 +97,35 @@ export function formatMoney(value: number, currency: Currency) {
   return `${currency} ${formatted}`;
 }
 
+let checkingSession: Promise<void> | null = null;
+
+/**
+ * A data request was refused as signed out. Ask the account endpoint
+ * before ending the session, so one stray 401 (a slow wake-up, a request
+ * racing a redeploy) does not sign the person out; only a session the
+ * backend really rejects sends them back to sign in.
+ */
+function handleUnauthorized(): Promise<void> {
+  checkingSession ??= (async () => {
+    const token = getToken();
+    if (!token) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/account/me`, {
+        headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+      });
+      if (response.status === 401 && getToken() === token) {
+        clearToken();
+        window.location.assign("/login");
+      }
+    } catch {
+      // Network trouble is not proof the session ended: keep it.
+    }
+  })().finally(() => {
+    checkingSession = null;
+  });
+  return checkingSession;
+}
+
 export async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(url, {
     method: "GET",
@@ -108,9 +137,7 @@ export async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T
   });
 
   if (response.status === 401 && getToken()) {
-    // Expired or revoked session: sign in again rather than show stale data.
-    clearToken();
-    window.location.assign("/login");
+    await handleUnauthorized();
   }
 
   if (!response.ok) {

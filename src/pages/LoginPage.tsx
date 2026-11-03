@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../api/auth.api";
 import { getRecaptchaToken, RecaptchaCheckbox, resetRecaptcha } from "../security/recaptcha";
 import AuthLayout from "../components/auth/AuthLayout";
+import { useSignedInRedirect } from "../components/auth/useSignedInRedirect";
 import SocialSignIn from "../components/auth/SocialSignIn";
 import AuthScreens from "../components/auth/AuthScreens";
 import { useAuthLanguage } from "../i18n/useAuthLanguage";
@@ -24,6 +25,7 @@ import {
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  useSignedInRedirect();
 
   const { language, setLanguage, tt } = useAuthLanguage();
   const [email, setEmail] = useState("");
