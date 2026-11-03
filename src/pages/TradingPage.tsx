@@ -347,6 +347,10 @@ function toWalletBalance(value: unknown, fallback: number | null): number | null
 }
 export default function TradingPage() {
   const location = useLocation();
+
+  React.useEffect(() => {
+    document.title = "Trading | NeuroOption";
+  }, []);
   const candlesRef = React.useRef<Candle[]>(INITIAL_CANDLES);
   const expirySecondsRef = React.useRef(60);
   const fetchingTradingStateRef = React.useRef(false);

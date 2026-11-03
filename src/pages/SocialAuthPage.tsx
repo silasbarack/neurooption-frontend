@@ -41,8 +41,16 @@ export default function SocialAuthPage() {
   const [accept, setAccept] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  // Only while this page is open: put the previous title back on the way out.
   useEffect(() => {
+    const previous = document.title;
     document.title = "Signing you in | NeuroOption";
+    return () => {
+      document.title = previous;
+    };
+  }, []);
+
+  useEffect(() => {
     // The fragment holds a token; take it out of the address bar and history.
     window.history.replaceState(null, "", window.location.pathname);
     const { token, signup } = result;
