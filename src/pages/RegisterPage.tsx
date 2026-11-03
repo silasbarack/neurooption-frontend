@@ -21,6 +21,7 @@ import {
 import { authApi } from "../api/auth.api";
 import { getRecaptchaToken, RecaptchaCheckbox, resetRecaptcha } from "../security/recaptcha";
 import AuthLayout from "../components/auth/AuthLayout";
+import { useSignedInRedirect } from "../components/auth/useSignedInRedirect";
 import SocialSignIn from "../components/auth/SocialSignIn";
 import { useAuthLanguage } from "../i18n/useAuthLanguage";
 
@@ -60,6 +61,7 @@ function passwordStrength(password: string): { score: number; label: string } {
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  useSignedInRedirect();
   const { language, setLanguage, tt } = useAuthLanguage();
 
   const [fullName, setFullName] = useState("");
