@@ -90,7 +90,9 @@ export default function ResetPasswordPage() {
       setSuccess(false);
       setMessage(error instanceof Error ? error.message : "Cannot connect to backend");
     } finally {
-      resetRecaptcha("forgot_password");
+      // The resend used this page's reset_password checkbox; clear that token
+      // so the next "Reset password" submit does not reuse a spent token.
+      resetRecaptcha("reset_password");
       setResending(false);
     }
   }
